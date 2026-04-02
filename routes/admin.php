@@ -12,6 +12,7 @@ Route::prefix('admin')->middleware(['role:'.UserRole::ADMIN])->as('admin.')->gro
     Route::resource('dashboard', DashboardController::class);
     Route::resource('companies', CompanyController::class)->names('companies');
     Route::resource('stations', FillingStationController::class)->names('stations');
+    Route::get('/stations/{station}/get', [FillingStationController::class, 'getStation']);
     Route::resource('tag-officer', TagOfficerController::class);
     Route::resource('dc-officer', DcOfficerController::class);
 });
