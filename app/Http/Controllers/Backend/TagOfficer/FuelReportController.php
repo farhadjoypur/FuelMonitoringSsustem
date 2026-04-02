@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Backend\TagOfficer;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-Use App\Models\FuelReport;
+Use App\Models\Fuelreport;
 
 class FuelReportController extends Controller
 {
