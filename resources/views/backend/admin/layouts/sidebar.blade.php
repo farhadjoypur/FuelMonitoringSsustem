@@ -22,7 +22,7 @@
     </div>
 
     <div class="sidebar-footer">
-        <form method="post" action="#" id="logout-form">
+        <form method="post" action="{{ route('logout') }}" id="logout-form">
             @csrf
             <button type="submit" class="menu-link logout-link" id="logout-btn">
                 <span class="material-symbols-rounded">power_settings_new</span>
