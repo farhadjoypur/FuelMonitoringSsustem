@@ -12,18 +12,16 @@ class FillingStationController extends Controller
     public function index()
     {
         $stations = FillingStation::with('company')->latest()->paginate(10);
-    
-        // Stat cards
+
         $totalStations    = FillingStation::count();
         $activeStations   = FillingStation::where('status', 'active')->count();
         $inactiveStations = FillingStation::where('status', 'inactive')->count();
-        $govtStations     = FillingStation::where('type', 'government')->count(); // আপনার column নাম অনুযায়ী
+        $govtStations     = FillingStation::where('type', 'government')->count();
         $privateStations  = FillingStation::where('type', 'private')->count();
-    
-        // Filter dropdowns
+
         $divisions = FillingStation::whereNotNull('division')->distinct()->pluck('division');
-        $companies = \App\Models\Company::orderBy('name')->get(['id', 'name']);
-    
+        $companies = Company::orderBy('name')->get(['id', 'name']);
+
         return view('backend.admin.pages.fillingStation.index', compact(
             'stations',
             'totalStations', 'activeStations', 'inactiveStations',
@@ -41,17 +39,14 @@ class FillingStationController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'company_id' => 'required',
+            'company_id'   => 'required',
             'station_name' => 'required',
             'station_code' => 'required|unique:filling_stations',
         ]);
 
         $data = $request->all();
-
-        // fuel types array convert
         $data['fuel_types'] = $request->fuel_types ?? [];
 
-        // file upload
         if ($request->hasFile('license_file')) {
             $data['license_file'] = $request->file('license_file')
                 ->store('licenses', 'public');
@@ -59,15 +54,23 @@ class FillingStationController extends Controller
 
         FillingStation::create($data);
 
-        return redirect()->route('stations.index')
-            ->with('success', 'Station created successfully');
+        return response()->json([
+            'success' => true,
+            'message' => 'Created successfully'
+        ]);
+    }
+
+    // ── NEW: return station JSON for edit modal ──
+    public function getStation($id)
+    {
+        $station = FillingStation::findOrFail($id);
+        return response()->json($station);
     }
 
     public function edit($id)
     {
-        $station = FillingStation::findOrFail($id);
+        $station  = FillingStation::findOrFail($id);
         $companies = Company::all();
-
         return view('backend.admin.pages.fillingStation.edit', compact('station', 'companies'));
     }
 
