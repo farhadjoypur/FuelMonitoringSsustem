@@ -12,7 +12,7 @@ class RoleMiddleware
     {
         $user = Auth::user();
         if (! $user) {
-            return redirect()->route('login')->with('error', ('login to access'));
+            return redirect()->route('login')->with('error', ('login to access this page'));
         }
         if (! in_array($user->role, $roles)) {
             return redirect()->route('login')->with('error', ('Unauthorized'));
