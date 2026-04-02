@@ -16,4 +16,5 @@ Route::prefix('admin')->group(function () {
 
 Route::prefix('admin')->group(function () {
     Route::resource('stations', FillingStationController::class)->names('stations');
+    Route::get('/stations/{station}/get', [FillingStationController::class, 'getStation']);
 });
