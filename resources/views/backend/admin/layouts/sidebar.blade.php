@@ -13,17 +13,17 @@
         <ul class="menu-list list-unstyled">
             <li class="menu-item">
                 <a href="{{ route('admin.dashboard.index') }}"
-                    class="menu-link {{ request()->routeIs('user.dashboard.*') ? 'active' : '' }}">
+                    class="menu-link {{ request()->routeIs('admin.dashboard.*') ? 'active' : '' }}">
                     <span class="material-symbols-rounded">dashboard</span>
                     <span class="menu-label">Dashboard</span>
                 </a>
             </li>
 
+
             {{-- COMPANY MENU (WITH SUBMENU) --}}
             <li class="menu-item has-submenu">
 
-                <a href="javascript:void(0);"
-                   class="menu-link submenu-toggle">
+                <a href="javascript:void(0);" class="menu-link submenu-toggle">
                     <span class="material-symbols-rounded">business</span>
                     <span class="menu-label">Company</span>
                     <span class="material-symbols-rounded submenu-icon">expand_more</span>
@@ -32,15 +32,15 @@
                 <ul class="submenu list-unstyled">
 
                     <li>
-                        <a href="{{ route('companies.index') }}"
-                           class="submenu-link {{ request()->routeIs('companies.index') ? 'active' : '' }}">
+                        <a href="{{ route('admin.companies.index') }}"
+                            class="submenu-link {{ request()->routeIs('companies.index') ? 'active' : '' }}">
                             Company List
                         </a>
                     </li>
 
                     <li>
-                        <a href="{{ route('companies.create') }}"
-                           class="submenu-link {{ request()->routeIs('companies.create') ? 'active' : '' }}">
+                        <a href="{{ route('admin.companies.create') }}"
+                            class="submenu-link {{ request()->routeIs('companies.create') ? 'active' : '' }}">
                             Add Company
                         </a>
                     </li>
@@ -51,31 +51,46 @@
             {{-- FILLING STATION MENU (WITH SUBMENU) --}}
             <li class="menu-item has-submenu">
 
-                    <a href="javascript:void(0);"
-                    class="menu-link submenu-toggle">
-                        <span class="material-symbols-rounded">business</span>
-                        <span class="menu-label">Filling Station</span>
-                        <span class="material-symbols-rounded submenu-icon">expand_more</span>
-                    </a>
+                <a href="javascript:void(0);" class="menu-link submenu-toggle">
+                    <span class="material-symbols-rounded">business</span>
+                    <span class="menu-label">Filling Station</span>
+                    <span class="material-symbols-rounded submenu-icon">expand_more</span>
+                </a>
 
-                    <ul class="submenu list-unstyled">
+                <ul class="submenu list-unstyled">
 
-                        <li>
-                            <a href="{{ route('stations.index') }}"
-                            class="submenu-link {{ request()->routeIs('stations.index') ? 'active' : '' }}">
-                                Filling Station List
-                            </a>
-                        </li>
-
-                        <li>
-                            <a href="{{ route('stations.create') }}"
-                            class="submenu-link {{ request()->routeIs('stations.create') ? 'active' : '' }}">
-                                Add Filling Station
-                            </a>
-                        </li>
-
-                    </ul>
+                    <li>
+                        <a href="{{ route('admin.stations.index') }}"
+                            class="submenu-link {{ request()->routeIs('admin.stations.index') ? 'active' : '' }}">
+                            Filling Station List
+                        </a>
                     </li>
+
+                    <li>
+                        <a href="{{ route('admin.stations.create') }}"
+                            class="submenu-link {{ request()->routeIs('admin.stations.create') ? 'active' : '' }}">
+                            Add Filling Station
+                        </a>
+                    </li>
+
+                </ul>
+            </li>
+
+
+            <li class="menu-item">
+                <a href="{{ route('admin.dc-officer.index') }}"
+                    class="menu-link {{ request()->routeIs('admin.dc-officer.*') ? 'active' : '' }}">
+                    <span class="material-symbols-rounded">group</span> <span class="menu-label">DC Officer</span>
+                </a>
+            </li>
+
+            <li class="menu-item">
+                <a href="{{ route('admin.tag-officer.index') }}"
+                    class="menu-link {{ request()->routeIs('admin.tag-officer.*') ? 'active' : '' }}">
+                    <span class="material-symbols-rounded">assignment_ind</span> <span class="menu-label">Tag
+                        Officer</span>
+                </a>
+            </li>
         </ul>
     </div>
 
