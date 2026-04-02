@@ -38,14 +38,16 @@
                         </a>
                     </li>
 
-                    <li>
-                        <a href="{{ route('admin.companies.create') }}"
-                            class="submenu-link {{ request()->routeIs('companies.create') ? 'active' : '' }}">
-                            Add Company
-                        </a>
-                    </li>
+                    
 
                 </ul>
+            </li>
+
+            <li class="menu-item">
+                <a href="{{ route('admin.depots.index') }}"
+                    class="menu-link {{ request()->routeIs('admin.depots.*') ? 'active' : '' }}">
+                    <span class="material-symbols-rounded">group</span><span class="menu-label">Depot</span>
+                </a>
             </li>
 
             {{-- FILLING STATION MENU (WITH SUBMENU) --}}
@@ -63,13 +65,6 @@
                         <a href="{{ route('admin.stations.index') }}"
                             class="submenu-link {{ request()->routeIs('admin.stations.index') ? 'active' : '' }}">
                             Filling Station List
-                        </a>
-                    </li>
-
-                    <li>
-                        <a href="{{ route('admin.stations.create') }}"
-                            class="submenu-link {{ request()->routeIs('admin.stations.create') ? 'active' : '' }}">
-                            Add Filling Station
                         </a>
                     </li>
 

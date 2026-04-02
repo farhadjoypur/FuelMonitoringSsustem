@@ -327,7 +327,7 @@
                     <!-- <td>
                         <div class="actions-cell">
                             {{-- Edit --}}
-                            <a href="{{ route('companies.edit', $company->id) }}"
+                            <a href=""
                                class="action-btn action-btn-edit"
                                title="Edit">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -338,11 +338,11 @@
                             </a>
 
                             {{-- Delete --}}
-                            <form action="{{ route('companies.destroy', $company->id) }}"
+                            <form action=""
                                   method="POST"
                                   style="display:inline;">
                                 @csrf
-                                @method('DELETE')
+                                @method('DELETE')   
                                 <button type="submit"
                                         class="action-btn action-btn-delete"
                                         title="Delete"
