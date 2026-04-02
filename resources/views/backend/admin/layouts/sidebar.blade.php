@@ -5,104 +5,82 @@
         </button>
     </div>
 
-    {{-- @php
-        $bn = app()->getLocale() == 'bn';
-    @endphp --}}
-
     <div class="sidebar-content">
         <ul class="menu-list list-unstyled">
+
+            {{-- DASHBOARD --}}
             <li class="menu-item">
                 <a href="{{ route('admin.dashboard.index') }}"
-                    class="menu-link {{ request()->routeIs('admin.dashboard.*') ? 'active' : '' }}">
+                   class="menu-link {{ request()->routeIs('admin.dashboard.*') ? 'active' : '' }}">
                     <span class="material-symbols-rounded">dashboard</span>
                     <span class="menu-label">Dashboard</span>
                 </a>
             </li>
 
-
-            {{-- COMPANY MENU (WITH SUBMENU) --}}
-            <li class="menu-item has-submenu">
-
-                <a href="javascript:void(0);" class="menu-link submenu-toggle">
+            {{-- COMPANY (SIMPLE MENU) --}}
+            <li class="menu-item">
+                <a href="{{ route('admin.companies.index') }}"
+                   class="menu-link {{ request()->routeIs('admin.companies.*') ? 'active' : '' }}">
                     <span class="material-symbols-rounded">business</span>
                     <span class="menu-label">Company</span>
-                    <span class="material-symbols-rounded submenu-icon">expand_more</span>
                 </a>
-
-                <ul class="submenu list-unstyled">
-
-                    <li>
-                        <a href="{{ route('admin.companies.index') }}"
-                            class="submenu-link {{ request()->routeIs('companies.index') ? 'active' : '' }}">
-                            Company List
-                        </a>
-                    </li>
-
-                    
-
-                </ul>
             </li>
 
+            {{-- DEPOT --}}
             <li class="menu-item">
                 <a href="{{ route('admin.depots.index') }}"
-                    class="menu-link {{ request()->routeIs('admin.depots.*') ? 'active' : '' }}">
-                    <span class="material-symbols-rounded">group</span><span class="menu-label">Depot</span>
+                   class="menu-link {{ request()->routeIs('admin.depots.*') ? 'active' : '' }}">
+                    <span class="material-symbols-rounded">group</span>
+                    <span class="menu-label">Depot</span>
                 </a>
             </li>
 
-            {{-- FILLING STATION MENU (WITH SUBMENU) --}}
-            <li class="menu-item has-submenu">
-
-                <a href="javascript:void(0);" class="menu-link submenu-toggle">
-                    <span class="material-symbols-rounded">business</span>
+            {{-- FILLING STATION (SIMPLE MENU) --}}
+            <li class="menu-item">
+                <a href="{{ route('admin.stations.index') }}"
+                   class="menu-link {{ request()->routeIs('admin.stations.*') ? 'active' : '' }}">
+                    <span class="material-symbols-rounded">local_gas_station</span>
                     <span class="menu-label">Filling Station</span>
-                    <span class="material-symbols-rounded submenu-icon">expand_more</span>
                 </a>
-
-                <ul class="submenu list-unstyled">
-
-                    <li>
-                        <a href="{{ route('admin.stations.index') }}"
-                            class="submenu-link {{ request()->routeIs('admin.stations.index') ? 'active' : '' }}">
-                            Filling Station List
-                        </a>
-                    </li>
-
-                </ul>
             </li>
 
-
+            {{-- DC OFFICER --}}
             <li class="menu-item">
                 <a href="{{ route('admin.dc-officer.index') }}"
-                    class="menu-link {{ request()->routeIs('admin.dc-officer.*') ? 'active' : '' }}">
-                    <span class="material-symbols-rounded">group</span> <span class="menu-label">DC Officer</span>
+                   class="menu-link {{ request()->routeIs('admin.dc-officer.*') ? 'active' : '' }}">
+                    <span class="material-symbols-rounded">group</span>
+                    <span class="menu-label">DC Officer</span>
                 </a>
             </li>
 
+            {{-- TAG OFFICER --}}
             <li class="menu-item">
                 <a href="{{ route('admin.tag-officer.index') }}"
-                    class="menu-link {{ request()->routeIs('admin.tag-officer.*') ? 'active' : '' }}">
-                    <span class="material-symbols-rounded">assignment_ind</span> <span class="menu-label">Tag
-                        Officer</span>
+                   class="menu-link {{ request()->routeIs('admin.tag-officer.*') ? 'active' : '' }}">
+                    <span class="material-symbols-rounded">assignment_ind</span>
+                    <span class="menu-label">Tag Officer</span>
                 </a>
             </li>
 
+            {{-- ASSIGN TAG OFFICER --}}
             <li class="menu-item">
                 <a href="{{ route('admin.assign-tag-officer.index') }}"
-                    class="menu-link {{ request()->routeIs('admin.assign-tag-officer.*') ? 'active' : '' }}">
+                   class="menu-link {{ request()->routeIs('admin.assign-tag-officer.*') ? 'active' : '' }}">
                     <span class="material-symbols-rounded">assignment_turned_in</span>
                     <span class="menu-label">Assign Tag Officer</span>
                 </a>
             </li>
+
         </ul>
     </div>
 
+    {{-- LOGOUT --}}
     <div class="sidebar-footer">
         <form method="post" action="{{ route('logout') }}" id="logout-form">
             @csrf
             <button type="submit" class="menu-link logout-link" id="logout-btn">
                 <span class="material-symbols-rounded">power_settings_new</span>
-                <span class="menu-label" id="logout-text">Logout</span>
+                <span class="menu-label">Logout</span>
             </button>
         </form>
     </div>
