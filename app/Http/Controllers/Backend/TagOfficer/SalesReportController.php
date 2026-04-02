@@ -5,14 +5,14 @@ namespace App\Http\Controllers\Backend\TagOfficer;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-class DashboardController extends Controller
+class SalesReportController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return view('backend.tag-officer.pages.dashboard.index');
+        return view('backend.tag-officer.pages.salesReport.index');
     }
 
     /**

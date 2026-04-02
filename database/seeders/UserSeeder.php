@@ -33,7 +33,7 @@ class UserSeeder extends Seeder
                 'updated_at' => Carbon::now(),
             ],
             [
-                'email' => '@gmail.com',
+                'email' => 'tag-officer@gmail.com',
                 'phone' => '01711111113',
                 'password' => Hash::make('123456789'),
                 'role' => UserRole::TAG_OFFICER,

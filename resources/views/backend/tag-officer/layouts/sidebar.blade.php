@@ -18,6 +18,14 @@
                     <span class="menu-label">Dashboard</span>
                 </a>
             </li>
+
+            <li class="menu-item">
+                <a href="{{ route('tag-officer.sales-report.index') }}"
+                    class="menu-link {{ request()->routeIs('tag-officer.sales-report.*') ? 'active' : '' }}">
+                    <span class="material-symbols-rounded">analytics</span>
+                    <span class="menu-label">Sales Report</span>
+                </a>
+            </li>
         </ul>
     </div>
 
