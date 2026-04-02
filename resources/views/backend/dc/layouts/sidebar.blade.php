@@ -11,6 +11,7 @@
 
     <div class="sidebar-content">
         <ul class="menu-list list-unstyled">
+
             <li class="menu-item">
                 <a href="{{ route('dc.dashboard.index') }}"
                     class="menu-link {{ request()->routeIs('user.dashboard.*') ? 'active' : '' }}">
@@ -18,6 +19,7 @@
                     <span class="menu-label">Dashboard</span>
                 </a>
             </li>
+
         </ul>
     </div>
 
