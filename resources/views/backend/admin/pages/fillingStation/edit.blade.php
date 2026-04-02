@@ -288,7 +288,7 @@
                     @php
                         $existingFuels = old('fuel_types', json_decode($station->fuel_types ?? '[]', true) ?? []);
                     @endphp
-                    @foreach(['Petrol','Diesel','Octane','CNG','LPG'] as $fuel)
+                    @foreach(['Petrol','Diesel','Octane'] as $fuel)
                     <label class="fuel-check {{ in_array($fuel, $existingFuels) ? 'checked' : '' }}"
                            data-fuel="{{ $fuel }}">
                         <input type="checkbox" name="fuel_types[]"

@@ -276,7 +276,7 @@
                 <label class="form-label">Fuel Types</label>
                 <div class="fuel-options" id="fuelOptions">
                     @php $oldFuels = old('fuel_types', []); @endphp
-                    @foreach(['Petrol','Diesel','Octane','CNG','LPG'] as $fuel)
+                    @foreach(['Petrol','Diesel','Octane'] as $fuel)
                     <label class="fuel-check {{ in_array($fuel, $oldFuels) ? 'checked' : '' }}"
                            data-fuel="{{ $fuel }}">
                         <input type="checkbox" name="fuel_types[]"
