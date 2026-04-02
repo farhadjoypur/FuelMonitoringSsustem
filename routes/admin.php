@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\UserRole;
+use App\Http\Controllers\Backend\Admin\AssignTagOfficerController;
 use App\Http\Controllers\Backend\Admin\CompanyController;
 use App\Http\Controllers\Backend\Admin\DashboardController;
 use App\Http\Controllers\Backend\Admin\DcOfficerController;
@@ -15,4 +16,5 @@ Route::prefix('admin')->middleware(['role:'.UserRole::ADMIN])->as('admin.')->gro
     Route::get('/stations/{station}/get', [FillingStationController::class, 'getStation']);
     Route::resource('tag-officer', TagOfficerController::class);
     Route::resource('dc-officer', DcOfficerController::class);
+    Route::resource('assign-tag-officer', AssignTagOfficerController::class);
 });
