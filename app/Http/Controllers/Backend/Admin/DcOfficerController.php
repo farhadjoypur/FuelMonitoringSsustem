@@ -48,7 +48,8 @@ class DcOfficerController extends Controller
             'email' => 'nullable|email|unique:users,email',
             'division' => 'required',
             'district' => 'required',
-            'upazilla' => 'required',
+            'upazila' => 'required',
+            'password' => 'required|string|min:6',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
@@ -58,7 +59,7 @@ class DcOfficerController extends Controller
             $user = User::create([
                 'email' => $request->email,
                 'phone' => $request->phone,
-                'password' => Hash::make('123456789'),
+                'password' => Hash::make($request->password),
                 'role' => UserRole::DC,
             ]);
 
@@ -77,7 +78,7 @@ class DcOfficerController extends Controller
                 'department' => $request->department,
                 'division' => $request->division,
                 'district' => $request->district,
-                'upazila' => $request->upazilla,
+                'upazila' => $request->upazila,
                 'photo' => $photoPath,
             ]);
 
@@ -119,22 +120,39 @@ class DcOfficerController extends Controller
     {
         $user = User::findOrFail($id);
 
-        $user->update([
-            // 'email' => $request->email,
-            'phone' => $request->phone,
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,'.$user->id,
+            'phone' => 'required|string|unique:users,phone,'.$user->id,
+            'designation' => 'required|string',
+            'division' => 'required',
+            'district' => 'required',
+            'upazila' => 'required',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'password' => 'nullable|min:6',
         ]);
+
+        $userData = [
+            'email' => $request->email,
+            'phone' => $request->phone,
+        ];
+
+        if ($request->filled('password')) {
+            $userData['password'] = Hash::make($request->password);
+        }
+
+        $user->update($userData);
 
         $profileData = [
             'name' => $request->name,
             'designation' => $request->designation,
             'division' => $request->division,
             'district' => $request->district,
-            'upazilla' => $request->upazilla,
+            'upazila' => $request->upazila,
         ];
 
         if ($request->hasFile('photo')) {
-
-            if ($user->profile->photo && File::exists(public_path($user->profile->photo))) {
+            if ($user->profile && $user->profile->photo && File::exists(public_path($user->profile->photo))) {
                 File::delete(public_path($user->profile->photo));
             }
 
