@@ -258,6 +258,9 @@
     <div class="diff-pill octane">
         Octane Difference: <strong>{{ $octaneDiffPct }}%</strong>
     </div>
+    <div class="diff-pill others">
+       Others Difference: <strong>0%</strong>
+    </div>
 </div>
 
     {{-- Row 3: Difference in Litres --}}
@@ -270,6 +273,9 @@
         </div>
         <div class="diff-pill octane">
             Octane Difference: <strong>{{ number_format(abs($todayOctaneDiff)) }}L</strong>
+        </div>
+        <div class="diff-pill others">
+            Others Difference: <strong>0L</strong>
         </div>
     </div>
     
