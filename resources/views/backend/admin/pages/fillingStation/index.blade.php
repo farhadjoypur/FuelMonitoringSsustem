@@ -46,7 +46,7 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
+            background: #006796;
             color: #fff;
             border: none;
             border-radius: 12px;
