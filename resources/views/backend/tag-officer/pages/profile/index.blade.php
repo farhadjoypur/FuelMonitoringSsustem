@@ -66,7 +66,7 @@
 @endpush
 
 @section('content')
-    <div class="container-fluid py-4">
+    <div class="container-fluid p-4">
         <div class="mb-4">
             <h4 class="fw-bold mb-0">My Profile</h4>
         </div>
