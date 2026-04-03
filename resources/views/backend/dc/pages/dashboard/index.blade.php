@@ -11,9 +11,9 @@
             --border: #e8ecf0;
             --text: #1a1f2e;
             --muted: #7c8db5;
-            --petrol: #22c55e;
-            --diesel: #f97316;
-            --octane: #ef4444;
+            --petrol: #80AA57;
+            --diesel: #D19529;
+            --octane: #ED4033;
             --blue: #2563eb;
             --green: #16a34a;
             --purple: #7c3aed;
@@ -176,18 +176,18 @@
         }
 
         .fuel-card.petrol {
-            background: #f0fdf4;
-            border-color: #bbf7d0;
+            background: #E1EDDF;
+            /* border-color: #bbf7d0; */
         }
 
         .fuel-card.diesel {
-            background: #fff7ed;
-            border-color: #fed7aa;
+            background: #EDEADA;
+            /* border-color: #fed7aa; */
         }
 
         .fuel-card.octane {
-            background: #fef2f2;
-            border-color: #fecaca;
+            background: #F1DEDC;
+            /* border-color: #fecaca; */
         }
 
         .fuel-icon {
