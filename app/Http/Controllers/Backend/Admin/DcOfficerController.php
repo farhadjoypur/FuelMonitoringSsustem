@@ -160,6 +160,7 @@ class DcOfficerController extends Controller
             'division' => 'required',
             'district' => 'required',
             'upazila' => 'nullable',
+            'status' => 'required',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'password' => 'nullable|min:6',
         ]);
@@ -167,6 +168,7 @@ class DcOfficerController extends Controller
         $userData = [
             'email' => $request->email,
             'phone' => $request->phone,
+            'status' => $request->status,
         ];
 
         if ($request->filled('password')) {
