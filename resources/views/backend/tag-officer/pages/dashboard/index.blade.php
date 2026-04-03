@@ -200,18 +200,18 @@
         }
 
         .fc-petrol {
-            background: #f0fdf4;
-            border-color: #bbf7d0;
+            background: #E1EDDF;
+            /* border-color: #bbf7d0; */
         }
 
         .fc-diesel {
-            background: #fff7ed;
-            border-color: #fed7aa;
+            background: #EDEADA;
+            /* border-color: #fed7aa; */
         }
 
         .fc-octane {
-            background: #fef2f2;
-            border-color: #fecaca;
+            background: #F1DEDC;
+            /* border-color: #fecaca; */
         }
 
         .fuel-icon {
@@ -227,15 +227,15 @@
         }
 
         .fi-p {
-            background: #22c55e;
+            background: #80AA57;
         }
 
         .fi-d {
-            background: #f97316;
+            background: #D19529;
         }
 
         .fi-o {
-            background: #ef4444;
+            background: #ED4033;
         }
 
         .fuel-val {
@@ -253,17 +253,17 @@
 
         .fc-petrol .fuel-val,
         .fc-petrol .fuel-name {
-            color: #16a34a;
+            color: #80AA57;
         }
 
         .fc-diesel .fuel-val,
         .fc-diesel .fuel-name {
-            color: #ea580c;
+            color: #D19529;
         }
 
         .fc-octane .fuel-val,
         .fc-octane .fuel-name {
-            color: #ef4444;
+            color: #ED4033;
         }
 
         /* ================================================
