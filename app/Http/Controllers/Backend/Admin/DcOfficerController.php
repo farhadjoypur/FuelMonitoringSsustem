@@ -4,13 +4,11 @@ namespace App\Http\Controllers\Backend\Admin;
 
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
-use App\Models\Profile;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 
 class DcOfficerController extends Controller
 {
@@ -30,19 +28,11 @@ class DcOfficerController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
+        $division = $request->input('division');
+        $district = $request->input('district');
+        $upazila = $request->input('upazila');
 
-        $baseQuery = User::where('role', UserRole::DC);
-
-        $stats = [
-            'total' => (clone $baseQuery)->count(),
-            'active' => (clone $baseQuery)->where('status', 'active')->count(),
-            'divisions' => Profile::whereIn('user_id', (clone $baseQuery)->pluck('id'))
-                ->distinct('division')->count('division'),
-            'districts' => Profile::whereIn('user_id', (clone $baseQuery)->pluck('id'))
-                ->distinct('district')->count('district'),
-        ];
-
-        $dcOfficers = User::where('role', UserRole::DC)
+        $query = User::where('role', UserRole::DC)
             ->with('profile')
             ->when($search, function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
@@ -50,20 +40,32 @@ class DcOfficerController extends Controller
                         ->orWhere('email', 'LIKE', "%{$search}%")
                         ->orWhereHas('profile', function ($pq) use ($search) {
                             $pq->where('name', 'LIKE', "%{$search}%")
-                                ->orWhere('district', 'LIKE', "%{$search}%")
-                                ->orWhere('division', 'LIKE', "%{$search}%")
                                 ->orWhere('department', 'LIKE', "%{$search}%")
                                 ->orWhere('designation', 'LIKE', "%{$search}%");
                         });
                 });
             })
-            ->latest()
-            ->paginate(10)
-            ->withQueryString();
+            ->when($division, function ($query) use ($division) {
+                $query->whereHas('profile', function ($q) use ($division) {
+                    $q->where('division', $division);
+                });
+            })
+            ->when($district, function ($query) use ($district) {
+                $query->whereHas('profile', function ($q) use ($district) {
+                    $q->where('district', $district);
+                });
+            })
+            ->when($upazila, function ($query) use ($upazila) {
+                $query->whereHas('profile', function ($q) use ($upazila) {
+                    $q->where('upazila', $upazila);
+                });
+            });
+
+        $dcOfficers = $query->latest()->paginate(10)->withQueryString();
 
         $locationData = $this->getLocationData();
 
-        return view('backend.admin.pages.dcOfficer.index', compact('dcOfficers', 'locationData', 'search', 'stats'));
+        return view('backend.admin.pages.dcOfficer.index', compact('dcOfficers', 'locationData', 'search'));
     }
 
     public function store(Request $request)

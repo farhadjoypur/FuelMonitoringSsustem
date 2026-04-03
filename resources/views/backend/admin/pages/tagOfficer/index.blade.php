@@ -88,19 +88,20 @@
 @endpush
 
 @section('content')
-    <div class="container-fluid py-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="container-fluid p-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
             <div>
-                <h4 class="fw-bold mb-0">Tag Officer Management</h4>
-                <p class="text-muted small mb-0">Manage Tag Officers Information and Assignments</p>
+                <h4 class="fw-bold">Tag Officer Management</h4>
+                <p class="text-muted small">Manage Tag Officers Information and Assignments</p>
             </div>
-            <button class="btn btn-primary px-4 py-2" data-bs-toggle="modal" data-bs-target="#addOfficerModal"
-                style="background-color: #006699; border-radius: 8px;">
+
+            <button class="btn btn-primary px-4 py-2 w-sm-100 w-auto" data-bs-toggle="modal" data-bs-target="#addOfficerModal"
+                style="background-color: #006699; border-radius: 8px; border: none;">
                 <i class="bi bi-plus-lg me-2"></i> Add Tag Officer
             </button>
         </div>
 
-        <div class="row g-4 mb-4">
+        {{-- <div class="row g-4 mb-4">
             <div class="col-md-3">
                 <div class="card card-stats bg-cyan">
                     <i class="bi bi-shield-check fs-4 mb-2"></i>
@@ -129,14 +130,72 @@
                     <h2 class="fw-bold mb-0">{{ $stats['districts'] }}</h2>
                 </div>
             </div>
-        </div>
+        </div> --}}
 
-        <form action="{{ route('admin.tag-officer.index') }}" method="GET">
-            <div class="position-relative mb-4">
-                <i class="bi bi-search search-icon"
-                    style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%);"></i>
-                <input type="text" name="search" id="searchInput" class="form-control search-box"
-                    style="padding-left: 40px;" value="{{ request('search') }}" placeholder="Search tag officer...">
+        <form action="{{ route('admin.tag-officer.index') }}" method="GET"
+            class="bg-white p-3 rounded shadow-sm border mb-4">
+            <div class="row g-2 align-items-end">
+
+                {{-- Search Field with Button --}}
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold text-muted">Search</label>
+                    <div class="input-group">
+                        <input type="text" name="search" class="form-control border-0 bg-light"
+                            style="border-radius: 0; font-size: 0.9rem;" value="{{ request('search') }}"
+                            placeholder="Name, Email or Phone...">
+                        <button class="btn btn-dark border-0 px-3" type="submit"
+                            style="border-radius: 0 8px 8px 0; background-color: #006699;">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </div>
+
+                {{-- Division Field --}}
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold text-muted">Division</label>
+                    <select name="division" id="division" class="form-select border-0 bg-light"
+                        style="border-radius: 8px;">
+                        <option value="">All Division</option>
+                        @foreach ($locationData['divisions'] as $division)
+                            <option value="{{ $division['name_en'] }}"
+                                {{ request('division') == $division['name_en'] ? 'selected' : '' }}>
+                                {{ $division['name_en'] }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- District Field --}}
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold text-muted">District</label>
+                    <select name="district" id="district" class="form-select border-0 bg-light"
+                        style="border-radius: 8px;">
+                        <option value="">All District</option>
+                    </select>
+                </div>
+
+                {{-- Thana Field --}}
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold text-muted">Upazila</label>
+                    <select name="upazila" id="upazila" class="form-select border-0 bg-light" style="border-radius: 8px;">
+                        <option value="">All Upazila</option>
+                    </select>
+                </div>
+
+                {{-- Action Buttons --}}
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-grow-1 shadow-sm"
+                        style="background-color: #006699; border: none; border-radius: 8px; height: 38px;">
+                        <i class="bi bi-funnel-fill me-1"></i> Filter
+                    </button>
+
+                    <a href="{{ route('admin.tag-officer.index') }}"
+                        class="btn btn-outline-secondary shadow-sm d-flex align-items-center justify-content-center"
+                        style="border-radius: 8px; height: 38px; border-color: #dee2e6; min-width: 45px;">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </a>
+                </div>
+
             </div>
         </form>
 
@@ -145,7 +204,8 @@
                 <table class="table align-middle">
                     <thead class="text-muted">
                         <tr style="font-size: 0.85rem; text-transform: uppercase;">
-                            <th>Officer</th>
+                            <th>SL</th>
+                            <th>Name</th>
                             <th>Designation</th>
                             <th>Department</th>
                             <th>Division</th>
@@ -159,30 +219,43 @@
                     <tbody id="dcTableBody">
                         @forelse($tagOfficers as $officer)
                             <tr>
+                                <td class="fw-bold text-muted" style="font-size: 0.85rem;">
+                                    {{ $loop->iteration }}
+                                </td>
                                 <td>
-                                    {{ $officer->profile->name ?? 'N/A' }}
+                                    {{ $officer->profile->name ?? '-' }}
                                 </td>
 
                                 <td>
                                     <span class="text-muted small">
-                                        {{ $officer->profile->designation ?? 'N/A' }}
+                                        {{ $officer->profile->designation ?? '-' }}
                                     </span>
                                 </td>
                                 <td>
                                     <span class="text-muted small">
-                                        {{ $officer->profile->department ?? 'N/A' }}
+                                        {{ $officer->profile->department ?? '-' }}
                                     </span>
                                 </td>
 
-                                <td>{{ $officer->profile->division ?? 'N/A' }}</td>
+                                <td>{{ $officer->profile->division ?? '-' }}</td>
 
-                                <td>{{ $officer->profile->district ?? 'N/A' }}</td>
-                                <td>{{ $officer->profile->upazila ?? 'N/A' }}</td>
+                                <td>{{ $officer->profile->district ?? '-' }}</td>
+                                <td>{{ $officer->profile->upazila ?? '-' }}</td>
 
-                                <td>{{ $officer->phone ?? 'N/A' }}</td>
+                                <td>{{ $officer->phone ?? '-' }}</td>
 
                                 <td>
-                                    <span class="status-active">Active</span>
+                                    @if (strtolower($officer->status) == 'active')
+                                        <span
+                                            style="background-color: #e6fffa; color: #38a169; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-block;">
+                                            Active
+                                        </span>
+                                    @else
+                                        <span
+                                            style="background-color: #fff5f5; color: #e53e3e; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-block;">
+                                            Inactive
+                                        </span>
+                                    @endif
                                 </td>
 
                                 <td class="text-center">
@@ -192,6 +265,7 @@
                                             data-designation="{{ $officer->profile->designation ?? '' }}"
                                             data-department="{{ $officer->profile->department ?? '' }}"
                                             data-phone="{{ $officer->phone }}" data-email="{{ $officer->email }}"
+                                            data-status="{{ $officer->status }}"
                                             data-division="{{ $officer->profile->division ?? '' }}"
                                             data-district="{{ $officer->profile->district ?? '' }}"
                                             data-upazila="{{ $officer->profile->upazila ?? '' }}"
@@ -214,7 +288,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="text-center py-4 text-muted">No Tag Officers found.</td>
+                                <td colspan="12" class="text-center py-4 text-muted">No Tag Officers found.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -482,6 +556,19 @@
                             @enderror
                         </div>
 
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Status *</label>
+                            <select name="status" id="edit_status"
+                                class="form-select bg-light border-0 py-2 @error('status') is-invalid @enderror">
+                                <option value="active" {{ old('status') == 'active' ? 'selected' : '' }}>Active</option>
+                                <option value="inactive" {{ old('status') == 'inactive' ? 'selected' : '' }}>Inactive
+                                </option>
+                            </select>
+                            @error('status')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
                         <div class="mb-4 text-center">
                             <label class="form-label d-block text-start small fw-bold">Change Photo (Optional)</label>
                             <div
@@ -509,75 +596,32 @@
 
 @push('scripts')
     <script>
-        $(document).on('click', '.delete-confirm', function(e) {
-            let form = $(this).closest('form');
-
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "You won't be able to revert this!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Yes, delete it!',
-                cancelButtonText: 'Cancel',
-                reverseButtons: true
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    form.submit();
-                }
-            });
-        });
-    </script>
-
-    <script>
-        let timer;
-        $('#searchInput').on('keyup', function() {
-            clearTimeout(timer);
-            timer = setTimeout(function() {
-                $(this).closest('form').submit();
-            }.bind(this), 500);
-        });
-    </script>
-
-    <script>
-        $(document).ready(function() {
-
-            function togglePasswordVisibility(inputSelector, iconSelector) {
-                const passInput = $(inputSelector);
-                const icon = $(iconSelector);
-
-                if (passInput.attr('type') === 'password') {
-                    passInput.attr('type', 'text');
-                    icon.removeClass('bi-eye-slash').addClass('bi-eye');
-                } else {
-                    passInput.attr('type', 'password');
-                    icon.removeClass('bi-eye').addClass('bi-eye-slash');
-                }
-            }
-
-            $(document).on('click', '#togglePassword', function() {
-                togglePasswordVisibility('#password', '#eyeIcon');
-            });
-
-            $(document).on('click', '#toggleEditPassword', function() {
-                togglePasswordVisibility('#edit_password', '#editEyeIcon');
-            });
-        });
-    </script>
-
-    <script>
         const locationData = @json($locationData);
         const divisions = locationData.divisions || [];
 
         $(document).ready(function() {
+
+            // ===============================
+            // 🔹 COMMON FUNCTIONS
+            // ===============================
+
+            function populateDivisions(selectedDiv, target) {
+                let options = '<option value="">Select Division</option>';
+                divisions.forEach(div => {
+                    const selected = div.name_en === selectedDiv ? 'selected' : '';
+                    options += `<option value="${div.name_en}" ${selected}>${div.name_en}</option>`;
+                });
+                $(target).html(options);
+            }
+
             function loadDistricts(divName, selectedDist, target) {
                 const div = divisions.find(d => d.name_en === divName);
                 let options = '<option value="">Select District</option>';
-                if (div && div.districts) {
+
+                if (div?.districts) {
                     div.districts.forEach(dist => {
-                        const sel = (dist.name_en === selectedDist) ? 'selected' : '';
-                        options += `<option value="${dist.name_en}" ${sel}>${dist.name_en}</option>`;
+                        const selected = dist.name_en === selectedDist ? 'selected' : '';
+                        options += `<option value="${dist.name_en}" ${selected}>${dist.name_en}</option>`;
                     });
                     $(target).html(options).prop('disabled', false);
                 } else {
@@ -585,15 +629,16 @@
                 }
             }
 
-            function loadupazilas(divName, distName, selectedUpz, target) {
+            function loadUpazilas(divName, distName, selectedUpz, target) {
                 const div = divisions.find(d => d.name_en === divName);
                 const dist = div?.districts?.find(d => d.name_en === distName);
-                let options = '<option value="">Select upazila</option>';
-                if (dist && dist.police_stations) {
+
+                let options = '<option value="">Select Upazila</option>';
+
+                if (dist?.police_stations) {
                     dist.police_stations.forEach(ps => {
-                        const isSelected = (String(ps.name_en).trim() === String(selectedUpz).trim()) ?
-                            'selected' : '';
-                        options += `<option value="${ps.name_en}" ${isSelected}>${ps.name_en}</option>`;
+                        const selected = ps.name_en === selectedUpz ? 'selected' : '';
+                        options += `<option value="${ps.name_en}" ${selected}>${ps.name_en}</option>`;
                     });
                     $(target).html(options).prop('disabled', false);
                 } else {
@@ -601,28 +646,41 @@
                 }
             }
 
-            function populateDivisions(selectedDiv, target) {
-                let divOptions = '<option value="">Select Division</option>';
-                divisions.forEach(div => {
-                    const isSelected = (div.name_en === selectedDiv) ? 'selected' : '';
-                    divOptions += `<option value="${div.name_en}" ${isSelected}>${div.name_en}</option>`;
-                });
-                $(target).html(divOptions);
-            }
+            // ===============================
+            // 🔹 FILTER (TOP SEARCH AREA)
+            // ===============================
+
+            $('#division').on('change', function() {
+                loadDistricts($(this).val(), '', '#district');
+                $('#upazila').html('<option value="">Select Upazila</option>').prop('disabled', true);
+            });
+
+            $('#district').on('change', function() {
+                loadUpazilas($('#division').val(), $(this).val(), '', '#upazila');
+            });
+
+            // ===============================
+            // 🔹 ADD MODAL
+            // ===============================
 
             populateDivisions('', '#add_division');
 
             $('#add_division').on('change', function() {
                 loadDistricts($(this).val(), '', '#add_district');
-                $('#add_upazila').html('<option value="">Select upazila</option>').prop('disabled', true);
+                $('#add_upazila').html('<option value="">Select Upazila</option>').prop('disabled', true);
             });
 
             $('#add_district').on('change', function() {
-                loadupazilas($('#add_division').val(), $(this).val(), '', '#add_upazila');
+                loadUpazilas($('#add_division').val(), $(this).val(), '', '#add_upazila');
             });
+
+            // ===============================
+            // 🔹 EDIT MODAL
+            // ===============================
 
             $(document).on('click', '.edit-btn', function() {
                 const data = $(this).data();
+
                 $('#editOfficerForm').attr('action', data.url);
                 $('#edit_url_handler').val(data.url);
                 $('#edit_name').val(data.name);
@@ -630,50 +688,106 @@
                 $('#edit_department').val(data.department);
                 $('#edit_phone').val(data.phone);
                 $('#edit_email').val(data.email);
+                $('#edit_status').val(data.status.toLowerCase());
 
                 populateDivisions(data.division, '#edit_division');
                 loadDistricts(data.division, data.district, '#edit_district');
-                loadupazilas(data.division, data.district, data.upazila, '#edit_upazila');
+                loadUpazilas(data.division, data.district, data.upazila, '#edit_upazila');
 
                 $('#editOfficerModal').modal('show');
             });
 
             $('#edit_division').on('change', function() {
                 loadDistricts($(this).val(), '', '#edit_district');
-                $('#edit_upazila').html('<option value="">Select upazila</option>').prop('disabled', true);
+                $('#edit_upazila').html('<option value="">Select Upazila</option>').prop('disabled', true);
             });
 
             $('#edit_district').on('change', function() {
-                loadupazilas($('#edit_division').val(), $(this).val(), '', '#edit_upazila');
+                loadUpazilas($('#edit_division').val(), $(this).val(), '', '#edit_upazila');
             });
 
+            // ===============================
+            // 🔹 DELETE CONFIRM
+            // ===============================
+
+            $(document).on('click', '.delete-confirm', function() {
+                let form = $(this).closest('form');
+
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, delete it!',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) form.submit();
+                });
+            });
+
+            // ===============================
+            // 🔹 PASSWORD TOGGLE
+            // ===============================
+
+            function togglePassword(input, icon) {
+                const field = $(input);
+                const ic = $(icon);
+
+                if (field.attr('type') === 'password') {
+                    field.attr('type', 'text');
+                    ic.removeClass('bi-eye-slash').addClass('bi-eye');
+                } else {
+                    field.attr('type', 'password');
+                    ic.removeClass('bi-eye').addClass('bi-eye-slash');
+                }
+            }
+
+            $(document).on('click', '#togglePassword', function() {
+                togglePassword('#password', '#eyeIcon');
+            });
+
+            $(document).on('click', '#toggleEditPassword', function() {
+                togglePassword('#edit_password', '#editEyeIcon');
+            });
+
+            // ===============================
+            // 🔹 VALIDATION ERROR HANDLE
+            // ===============================
+
             @if ($errors->any())
-                var oldAction = "{{ old('edit_url_handler') }}";
-                const oldDiv = "{{ old('division') }}";
-                const oldDist = "{{ old('district') }}";
-                const oldUpz = "{{ old('upazila') }}";
+                let oldAction = "{{ old('edit_url_handler') }}";
+                let oldDiv = "{{ old('division') }}";
+                let oldDist = "{{ old('district') }}";
+                let oldUpz = "{{ old('upazila') }}";
 
                 if (oldAction) {
                     $('#editOfficerForm').attr('action', oldAction);
                     populateDivisions(oldDiv, '#edit_division');
+
                     if (oldDiv) {
                         loadDistricts(oldDiv, oldDist, '#edit_district');
                         if (oldDist) {
-                            loadupazilas(oldDiv, oldDist, oldUpz, '#edit_upazila');
+                            loadUpazilas(oldDiv, oldDist, oldUpz, '#edit_upazila');
                         }
                     }
+
                     $('#editOfficerModal').modal('show');
                 } else {
                     populateDivisions(oldDiv, '#add_division');
+
                     if (oldDiv) {
                         loadDistricts(oldDiv, oldDist, '#add_district');
                         if (oldDist) {
-                            loadupazilas(oldDiv, oldDist, oldUpz, '#add_upazila');
+                            loadUpazilas(oldDiv, oldDist, oldUpz, '#add_upazila');
                         }
                     }
+
                     $('#addOfficerModal').modal('show');
                 }
             @endif
+
         });
     </script>
 @endpush

@@ -171,78 +171,113 @@
         </div>
     </div>
 </div>
-
-<!-- ===================== CREATE MODAL ===================== -->
-<div class="modal fade" id="createDepotModal" tabindex="-1">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title"><i class="fas fa-plus"></i> Add New Depot</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+<!-- ===================== CREATE DEPOT MODAL (Modern) ===================== -->
+<div class="modal fade" id="createDepotModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            
+            <!-- Header -->
+            <div class="modal-header border-0 bg-white text-dark px-4 py-3 border-bottom">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-warehouse fa-lg me-3"></i>
+                    <h5 class="modal-title fw-bold mb-0">Add New Depot</h5>
+                </div>
+                <button type="button" class="btn-close btn-close-dark" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
+
+            <!-- Body -->
+            <div class="modal-body p-4">
                 <form id="createDepotForm">
                     @csrf
-                    <div class="row g-3">
+                    
+                    <div class="row g-4">
 
+                        <!-- Row 1 -->
                         <div class="col-md-6">
-                            <label class="form-label">Depot Name <span class="text-danger">*</span></label>
-                            <input type="text" name="depot_name" class="form-control" required>
+                            <label class="form-label fw-semibold">Depot Name <span class="text-danger">*</span></label>
+                            <input type="text" name="depot_name" class="form-control form-control-lg" placeholder="Enter depot name" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Depot Code <span class="text-danger">*</span></label>
-                            <input type="text" name="depot_code" class="form-control" required>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label">District <span class="text-danger">*</span></label>
-                            <input type="text" name="district" class="form-control" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Contact Number <span class="text-danger">*</span></label>
-                            <input type="text" name="contact_number" class="form-control" required>
+                            <label class="form-label fw-semibold">Depot Code <span class="text-danger">*</span></label>
+                            <input type="text" name="depot_code" class="form-control form-control-lg" placeholder="e.g. DEP-001" required>
                         </div>
 
+                        <!-- Row 2 -->
                         <div class="col-md-6">
-                            <label class="form-label">Email</label>
-                            <input type="email" name="email" class="form-control">
+                            <label class="form-label fw-semibold">
+                                District <span class="text-danger">*</span>
+                            </label>
+
+                            <select name="district" class="form-select form-select-lg" required>
+                                <option value="">-- Select District --</option>
+
+                                @foreach($locations['divisions'] as $division)
+                                    @foreach($division['districts'] as $district)
+                                        <option value="{{ $district['name_en'] }}">
+                                            {{ $district['name_en'] }} ({{ $district['name_bn'] }})
+                                        </option>
+                                    @endforeach
+                                @endforeach
+
+                            </select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Capacity (Litres) <span class="text-danger">*</span></label>
-                            <input type="number" step="0.01" name="capacity" class="form-control" required>
+                            <label class="form-label fw-semibold">Contact Number <span class="text-danger">*</span></label>
+                            <input type="text" name="contact_number" class="form-control form-control-lg" placeholder="+8801XXXXXXXXX" required>
                         </div>
 
+                        <!-- Row 3 -->
                         <div class="col-md-6">
-                            <label class="form-label">Number of Tanks</label>
-                            <input type="number" name="number_of_tanks" class="form-control">
+                            <label class="form-label fw-semibold">Email Address</label>
+                            <input type="email" name="email" class="form-control form-control-lg" placeholder="depot@example.com">
                         </div>
-
-                        <div class="col-12">
-                            <label class="form-label">Full Address</label>
-                            <textarea name="full_address" class="form-control" rows="2"></textarea>
-                        </div>
-
-                        <!-- Status as Checkbox -->
                         <div class="col-md-6">
-                            <label class="form-label">Status</label>
-                            <div class="form-check form-switch mt-2">
-                                <input class="form-check-input" type="checkbox" name="status" id="createStatus" value="active" checked>
-                                <label class="form-check-label fw-bold" for="createStatus">Active</label>
+                            <label class="form-label fw-semibold">Capacity (Litres) <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input type="number" step="0.01" name="capacity" class="form-control form-control-lg" placeholder="50000" required>
+                                <span class="input-group-text">L</span>
                             </div>
                         </div>
 
+                        <!-- Row 4 -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Number of Tanks</label>
+                            <input type="number" name="number_of_tanks" class="form-control form-control-lg" placeholder="e.g. 8">
+                        </div>
+
+                        <!-- Full Address -->
                         <div class="col-12">
-                            <label class="form-label">Remarks</label>
-                            <textarea name="remarks" class="form-control" rows="3"></textarea>
+                            <label class="form-label fw-semibold">Full Address</label>
+                            <textarea name="full_address" class="form-control" rows="3" placeholder="Full address of the depot..."></textarea>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Status</label>
+                            <div class="form-check form-switch mt-3">
+                                <input class="form-check-input" type="checkbox" name="status" id="createStatus" value="active" checked style="width: 3rem; height: 1.6rem;">
+                                <label class="form-check-label fw-bold fs-5 ms-2" for="createStatus">Active</label>
+                            </div>
+                        </div>
+
+                        <!-- Remarks -->
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Remarks / Notes</label>
+                            <textarea name="remarks" class="form-control" rows="3" placeholder="Any additional notes..."></textarea>
                         </div>
 
                     </div>
                 </form>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="submitCreateForm()">Save Depot</button>
+
+            <!-- Footer -->
+            <div class="modal-footer border-0 px-4 py-3 bg-light">
+                <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary px-5 fw-semibold" onclick="submitCreateForm()">
+                    <i class="fas fa-save me-2"></i> Save Depot
+                </button>
             </div>
+
         </div>
     </div>
 </div>
@@ -251,9 +286,9 @@
 <div class="modal fade" id="editDepotModal" tabindex="-1">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
+            <div class="modal-header bg-white text-dark border-bottom">
                 <h5 class="modal-title"><i class="fas fa-edit"></i> Edit Depot</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close btn-close-dark" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body" id="editModalBody">
                 <!-- AJAX loaded -->
@@ -334,7 +369,14 @@
 
                         <div class="col-md-6">
                             <label class="form-label">District <span class="text-danger">*</span></label>
-                            <input type="text" name="district" class="form-control" value="${d.district}" required>
+                            <select name="district" class="form-select" required>
+                                <option value="">-- Select District --</option>
+                                @foreach($locations['divisions'] as $dist)
+                                    <option value="{{ $dist['name_en'] }}" ${d.district === '{{ $dist['name_en'] }}' ? 'selected' : ''}>
+                                        {{ $dist['name_en'] }} ({{ $dist['name_bn'] }})
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Contact Number <span class="text-danger">*</span></label>

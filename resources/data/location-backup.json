@@ -11,43 +11,6 @@
                     "name_bn": "ঢাকা",
                     "police_stations": [
                         {
-                            "id": 14,
-                            "name_en": "Dhamrai",
-                            "name_bn": "ধামরাই"
-                        },
-                        {
-                            "id": 16,
-                            "name_en": "Dohar",
-                            "name_bn": "দোহার"
-                        },
-                        {
-                            "id": 26,
-                            "name_en": "Keraniganj",
-                            "name_bn": "কেরানীগঞ্জ"
-                        },
-                        {
-                            "id": 27,
-                            "name_en": "Keraniganj (South)",
-                            "name_bn": "কেরানীগঞ্জ (দক্ষিণ)"
-                        },
-                        {
-                            "id": 36,
-                            "name_en": "Nawabganj",
-                            "name_bn": "নবাবগঞ্জ"
-                        },
-                        {
-                            "id": 44,
-                            "name_en": "Savar",
-                            "name_bn": "সাভার"
-                        }
-                    ]
-                },
-                {
-                    "id": 101,
-                    "name_en": "Dhaka City Corporation",
-                    "name_bn": "ঢাকা সিটি কর্পোরেশন",
-                    "police_stations": [
-                        {
                             "id": 1,
                             "name_en": "Adabor",
                             "name_bn": "আদাবর"
@@ -113,9 +76,19 @@
                             "name_bn": "ডেমরা"
                         },
                         {
+                            "id": 14,
+                            "name_en": "Dhamrai",
+                            "name_bn": "ধামরাই"
+                        },
+                        {
                             "id": 15,
                             "name_en": "Dhanmondi",
                             "name_bn": "ধানমণ্ডি"
+                        },
+                        {
+                            "id": 16,
+                            "name_en": "Dohar",
+                            "name_bn": "দোহার"
                         },
                         {
                             "id": 17,
@@ -163,6 +136,16 @@
                             "name_bn": "কামরাঙ্গীর চর"
                         },
                         {
+                            "id": 26,
+                            "name_en": "Keraniganj",
+                            "name_bn": "কেরানীগঞ্জ"
+                        },
+                        {
+                            "id": 27,
+                            "name_en": "Keraniganj (South)",
+                            "name_bn": "কেরানীগঞ্জ (দক্ষিণ)"
+                        },
+                        {
                             "id": 28,
                             "name_en": "Khilgaon",
                             "name_bn": "খিলগাঁও"
@@ -203,6 +186,11 @@
                             "name_bn": "মুগদাপাড়া"
                         },
                         {
+                            "id": 36,
+                            "name_en": "Nawabganj",
+                            "name_bn": "নবাবগঞ্জ"
+                        },
+                        {
                             "id": 37,
                             "name_en": "New Market",
                             "name_bn": "নিউ মার্কেট"
@@ -236,6 +224,11 @@
                             "id": 43,
                             "name_en": "Sabujbagh",
                             "name_bn": "সবুজবাগ"
+                        },
+                        {
+                            "id": 44,
+                            "name_en": "Savar",
+                            "name_bn": "সাভার"
                         },
                         {
                             "id": 45,
@@ -876,96 +869,14 @@
                     "name_bn": "চট্টগ্রাম",
                     "police_stations": [
                         {
-                            "id": 59,
-                            "name_en": "Anowara",
-                            "name_bn": "আনোয়ারা"
-                        },
-                        {
-                            "id": 62,
-                            "name_en": "Banshkhali",
-                            "name_bn": "বাঁশখালী"
-                        },
-                        {
-                            "id": 64,
-                            "name_en": "Boalkhali",
-                            "name_bn": "বোয়ালখালী"
-                        },
-                        {
-                            "id": 65,
-                            "name_en": "Chandanaish",
-                            "name_bn": "চন্দনাইশ"
-                        },
-                        {
-                            "id": 71,
-                            "name_en": "Fatikchhari",
-                            "name_bn": "ফটিকছড়ি"
-                        },
-                        {
-                            "id": 73,
-                            "name_en": "Hathazari",
-                            "name_bn": "হাটহাজারী"
-                        },
-                        {
-                            "id": 74,
-                            "name_en": "Jorarganj",
-                            "name_bn": "জোরারগঞ্জ"
-                        },
-                        {
-                            "id": 77,
-                            "name_en": "Lohagara",
-                            "name_bn": "লোহাগড়া"
-                        },
-                        {
-                            "id": 78,
-                            "name_en": "Mirsharai",
-                            "name_bn": "মীরসরাই"
-                        },
-                        {
-                            "id": 82,
-                            "name_en": "Patiya",
-                            "name_bn": "পটিয়া"
-                        },
-                        {
-                            "id": 83,
-                            "name_en": "Rangunia",
-                            "name_bn": "রাঙ্গুনিয়া"
-                        },
-                        {
-                            "id": 84,
-                            "name_en": "Raozan",
-                            "name_bn": "রাউজান"
-                        },
-                        {
-                            "id": 86,
-                            "name_en": "Sandwip",
-                            "name_bn": "সন্দ্বীপ"
-                        },
-                        {
-                            "id": 87,
-                            "name_en": "Satkania",
-                            "name_bn": "সাতকানিয়া"
-                        },
-                        {
-                            "id": 88,
-                            "name_en": "Sitakunda",
-                            "name_bn": "সীতাকুণ্ড"
-                        },
-                        {
-                            "id": 89,
-                            "name_en": "Vujpur",
-                            "name_bn": "ভুজপুর"
-                        }
-                    ]
-                },
-                {
-                    "id": 102,
-                    "name_en": "Chattogram City Corporation",
-                    "name_bn": "চট্টগ্রাম সিটি কর্পোরেশন",
-                    "police_stations": [
-                        {
                             "id": 58,
                             "name_en": "Akbar Shah",
                             "name_bn": "আকবর শাহ"
+                        },
+                        {
+                            "id": 59,
+                            "name_en": "Anowara",
+                            "name_bn": "আনোয়ারা"
                         },
                         {
                             "id": 60,
@@ -978,9 +889,24 @@
                             "name_bn": "বন্দর"
                         },
                         {
+                            "id": 62,
+                            "name_en": "Banshkhali",
+                            "name_bn": "বাঁশখালী"
+                        },
+                        {
                             "id": 63,
                             "name_en": "Bayejid Bostami",
                             "name_bn": "বায়েজিদ বোস্তামী"
+                        },
+                        {
+                            "id": 64,
+                            "name_en": "Boalkhali",
+                            "name_bn": "বোয়ালখালী"
+                        },
+                        {
+                            "id": 65,
+                            "name_en": "Chandanaish",
+                            "name_bn": "চন্দনাইশ"
                         },
                         {
                             "id": 66,
@@ -1008,9 +934,24 @@
                             "name_bn": "ইপিজেড"
                         },
                         {
+                            "id": 71,
+                            "name_en": "Fatikchhari",
+                            "name_bn": "ফটিকছড়ি"
+                        },
+                        {
                             "id": 72,
                             "name_en": "Halishahar",
                             "name_bn": "হালিশহর"
+                        },
+                        {
+                            "id": 73,
+                            "name_en": "Hathazari",
+                            "name_bn": "হাটহাজারী"
+                        },
+                        {
+                            "id": 74,
+                            "name_en": "Jorarganj",
+                            "name_bn": "জোরারগঞ্জ"
                         },
                         {
                             "id": 75,
@@ -1021,6 +962,16 @@
                             "id": 76,
                             "name_en": "Khulshi",
                             "name_bn": "খুলশী"
+                        },
+                        {
+                            "id": 77,
+                            "name_en": "Lohagara",
+                            "name_bn": "লোহাগড়া"
+                        },
+                        {
+                            "id": 78,
+                            "name_en": "Mirsharai",
+                            "name_bn": "মীরসরাই"
                         },
                         {
                             "id": 79,
@@ -1038,9 +989,44 @@
                             "name_bn": "পতেঙ্গা"
                         },
                         {
+                            "id": 82,
+                            "name_en": "Patiya",
+                            "name_bn": "পটিয়া"
+                        },
+                        {
+                            "id": 83,
+                            "name_en": "Rangunia",
+                            "name_bn": "রাঙ্গুনিয়া"
+                        },
+                        {
+                            "id": 84,
+                            "name_en": "Raozan",
+                            "name_bn": "রাউজান"
+                        },
+                        {
                             "id": 85,
                             "name_en": "Sadarghat",
                             "name_bn": "সদরঘাট"
+                        },
+                        {
+                            "id": 86,
+                            "name_en": "Sandwip",
+                            "name_bn": "সন্দ্বীপ"
+                        },
+                        {
+                            "id": 87,
+                            "name_en": "Satkania",
+                            "name_bn": "সাতকানিয়া"
+                        },
+                        {
+                            "id": 88,
+                            "name_en": "Sitakunda",
+                            "name_bn": "সীতাকুণ্ড"
+                        },
+                        {
+                            "id": 89,
+                            "name_en": "Vujpur",
+                            "name_bn": "ভুজপুর"
                         }
                     ]
                 },
