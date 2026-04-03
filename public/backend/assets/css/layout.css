@@ -272,14 +272,14 @@ body.dark-theme .theme-toggle-indicator {
 }
 
 .main-content .card-custom {
-  padding: 20px;
+  padding: 20px 0;
   background-color: #f4f7fa;
   min-height: 100vh;
 }
 
 .main {
   background-color: #ebf3fe;
-  padding: 20px;
+  padding: 20px 0;
 }
 
 @media (max-width: 768px) {
