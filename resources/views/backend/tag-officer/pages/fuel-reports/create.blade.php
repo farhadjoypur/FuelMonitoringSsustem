@@ -87,54 +87,85 @@
 
         {{-- Station Info --}}
         <div class="custom-card">
-            <div class="report-header">
-                <h5><i class="fa-solid fa-file-lines"></i> Fuel Oil Receipt and Distribution Summary Daily Report</h5>
+    <div class="report-header">
+        <h5>
+            <i class="fa-solid fa-file-lines"></i>
+            Fuel Oil Receipt and Distribution Summary Daily Report
+        </h5>
+    </div>
+
+    <div class="station-form">
+        <div class="row g-3">
+
+            {{-- Station Name --}}
+            <div class="col-md-4">
+                <label class="form-label-custom">
+                    <i class="fa-solid fa-building-columns fa-xs"></i>
+                    Filling Station Name
+                </label>
+
+                <input type="text"
+                       name="station_name"
+                       class="form-control-custom"
+                       value="{{ $stationName }}"
+                       readonly>
             </div>
-            <div class="station-form">
-                <div class="row g-3">
-                    <div class="col-md-4">
-                        <label class="form-label-custom"><i class="fa-solid fa-building-columns fa-xs"></i> Filling Station Name</label>
-                        <input type="text" name="station_name" id="station_name"
-                               class="form-control-custom @error('station_name') is-invalid @enderror"
-                               value="{{ old('station_name') }}"
-                               placeholder="e.g. Uttara Filling Station"
-                               list="station_list" autocomplete="off" required>
-                        <datalist id="station_list">
-                            @foreach($stations as $s)
-                                <option value="{{ $s->station_name }}">{{ $s->thana_upazila }}, {{ $s->district }}</option>
-                            @endforeach
-                        </datalist>
-                        @error('station_name')<span class="invalid-feedback">{{ $message }}</span>@enderror
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label-custom"><i class="fa-solid fa-map-pin fa-xs"></i> Thana / Upazila</label>
-                        <input type="text" name="thana_upazila" id="thana_upazila"
-                               class="form-control-custom @error('thana_upazila') is-invalid @enderror"
-                               value="{{ old('thana_upazila') }}" placeholder="e.g. Raypura" required>
-                        @error('thana_upazila')<span class="invalid-feedback">{{ $message }}</span>@enderror
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label-custom"><i class="fa-solid fa-location-dot fa-xs"></i> District</label>
-                        <input type="text" name="district" id="district"
-                               class="form-control-custom @error('district') is-invalid @enderror"
-                               value="{{ old('district') }}" placeholder="e.g. Mymensingh" required>
-                        @error('district')<span class="invalid-feedback">{{ $message }}</span>@enderror
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label-custom"><i class="fa-regular fa-calendar fa-xs"></i> Report Date</label>
-                        <input type="date" name="report_date" id="report_date"
-                               class="form-control-custom @error('report_date') is-invalid @enderror"
-                               value="{{ old('report_date', date('Y-m-d')) }}" required>
-                        @error('report_date')<span class="invalid-feedback">{{ $message }}</span>@enderror
-                    </div>
-                </div>
-                <p class="hint-text">
-                    <i class="fa-solid fa-circle-info"></i>
-                    Station Name লেখার পর Previous Stock স্বয়ংক্রিয়ভাবে গতকালের Closing Stock থেকে পূরণ হবে।
-                </p>
+
+            {{-- Thana / Upazila --}}
+            <div class="col-md-3">
+                <label class="form-label-custom">
+                    <i class="fa-solid fa-map-pin fa-xs"></i>
+                    Thana / Upazila
+                </label>
+
+                <input type="text"
+                       name="thana_upazila"
+                       class="form-control-custom"
+                       value="{{ $stationInfo->thana_upazila ?? '' }}"
+                       readonly>
             </div>
+
+            {{-- District --}}
+            <div class="col-md-3">
+                <label class="form-label-custom">
+                    <i class="fa-solid fa-location-dot fa-xs"></i>
+                    District
+                </label>
+
+                <input type="text"
+                       name="district"
+                       class="form-control-custom"
+                       value="{{ $stationInfo->district ?? '' }}"
+                       readonly>
+            </div>
+
+            {{-- Date --}}
+            <div class="col-md-2">
+                <label class="form-label-custom">
+                    <i class="fa-regular fa-calendar fa-xs"></i>
+                    Report Date
+                </label>
+
+                <input type="date"
+                       name="report_date"
+                       class="form-control-custom @error('report_date') is-invalid @enderror"
+                       value="{{ old('report_date', $defaultDate) }}"
+                       required>
+
+                @error('report_date')
+                    <span class="invalid-feedback">{{ $message }}</span>
+                @enderror
+            </div>
+
         </div>
 
+        {{-- Clean hint --}}
+        <p class="hint-text">
+            <i class="fa-solid fa-circle-info"></i>
+            Previous stock স্বয়ংক্রিয়ভাবে আপনার assigned station অনুযায়ী load হয়েছে।
+        </p>
+    </div>
+</div>
         {{-- PETROL --}}
         <div class="custom-card">
             <div class="category-bar">
@@ -297,14 +328,16 @@
     </form>
 </div>
 @endsection
-
 @push('scripts')
 <script>
+/**
+ * Calculate row values (Petrol / Diesel / Octane)
+ */
 function calcRow(fuel) {
-    const prev     = parseFloat(document.getElementById(fuel + '_prev_stock').value)  || 0;
-    const supply   = parseFloat(document.getElementById(fuel + '_supply').value)      || 0;
-    const received = parseFloat(document.getElementById(fuel + '_received').value)    || 0;
-    const sales    = parseFloat(document.getElementById(fuel + '_sales').value)       || 0;
+    const prev     = parseFloat(document.getElementById(fuel + '_prev_stock')?.value)  || 0;
+    const supply   = parseFloat(document.getElementById(fuel + '_supply')?.value)      || 0;
+    const received = parseFloat(document.getElementById(fuel + '_received')?.value)    || 0;
+    const sales    = parseFloat(document.getElementById(fuel + '_sales')?.value)       || 0;
 
     const diff    = supply - received;
     const closing = prev + received - sales;
@@ -312,51 +345,39 @@ function calcRow(fuel) {
     const diffEl    = document.getElementById(fuel + '_difference_display');
     const closingEl = document.getElementById(fuel + '_closing_display');
 
-    diffEl.textContent = diff.toFixed(2);
-    diffEl.style.color = diff < 0 ? '#dc2626' : diff > 0 ? '#16a34a' : '#94a3b8';
+    if (diffEl) {
+        diffEl.textContent = diff.toFixed(2);
+        diffEl.style.color = diff < 0 ? '#dc2626' : diff > 0 ? '#16a34a' : '#94a3b8';
+    }
 
-    closingEl.textContent    = closing.toFixed(2);
-    closingEl.style.color    = closing < 0 ? '#dc2626' : 'var(--primary)';
+    if (closingEl) {
+        closingEl.textContent = closing.toFixed(2);
+        closingEl.style.color = closing < 0 ? '#dc2626' : 'var(--primary)';
+    }
 }
 
-let ajaxTimer;
-document.getElementById('station_name').addEventListener('input', function () {
-    clearTimeout(ajaxTimer);
-    const name = this.value.trim();
-
-    // thana & district auto-fill from blade data
-    @foreach($stations as $s)
-    if (name.toLowerCase() === "{{ strtolower($s->station_name) }}") {
-        document.getElementById('thana_upazila').value = "{{ $s->thana_upazila }}";
-        document.getElementById('district').value      = "{{ $s->district }}";
-    }
-    @endforeach
-
-    if (name.length < 3) return;
-
-    ajaxTimer = setTimeout(() => {
-        fetch("{{ route('fuel-reports.previous-stocks') }}", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            },
-            body: JSON.stringify({ station_name: name })
-        })
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) {
-                document.getElementById('petrol_prev_stock').value = data.stocks.petrol;
-                document.getElementById('diesel_prev_stock').value = data.stocks.diesel;
-                document.getElementById('octane_prev_stock').value = data.stocks.octane;
-                calcRow('petrol'); calcRow('diesel'); calcRow('octane');
-            }
-        }).catch(() => {});
-    }, 500);
-});
-
+/**
+ * Initialize calculations on page load
+ */
 document.addEventListener('DOMContentLoaded', () => {
-    calcRow('petrol'); calcRow('diesel'); calcRow('octane');
+
+    // Initial calculation (previous stock already loaded from backend)
+    calcRow('petrol');
+    calcRow('diesel');
+    calcRow('octane');
+
+    /**
+     * Optional: Auto recalc when input changes
+     */
+    ['petrol', 'diesel', 'octane'].forEach(fuel => {
+        ['prev_stock', 'supply', 'received', 'sales'].forEach(field => {
+            const el = document.getElementById(`${fuel}_${field}`);
+            if (el) {
+                el.addEventListener('input', () => calcRow(fuel));
+            }
+        });
+    });
+
 });
 </script>
 @endpush
