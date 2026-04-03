@@ -137,7 +137,7 @@ class AdminUserController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,'.$id,
+            'email' => 'nullable|email|unique:users,email,'.$id,
             'phone' => 'required|string|unique:users,phone,'.$id,
             'designation' => 'required|string',
             'department' => 'required|string',
