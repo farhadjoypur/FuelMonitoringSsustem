@@ -10,17 +10,12 @@
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        {{-- <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
             <div class="navbar-nav ms-auto gap-3">
-
-
-
-
-                {{-- settings --}}
                 <a class="top-navbar-icon-btn text-decoration-none text-reset" href="#">
                     <span class="material-symbols-rounded">settings</span>
                 </a>
             </div>
-        </div>
+        </div> --}}
     </div>
 </nav>

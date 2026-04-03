@@ -14,14 +14,12 @@
             <div class="navbar-nav ms-auto gap-3">
 
 
-                <div class="dropdown">
+                {{-- <div class="dropdown">
                     <button class="top-navbar-icon-btn position-relative dropdown-toggle" type="button" </div>
-
-                        {{-- settings --}}
                         <a class="top-navbar-icon-btn text-decoration-none text-reset" href="#">
                             <span class="material-symbols-rounded">settings</span>
                         </a>
-                </div>
+                </div> --}}
             </div>
         </div>
 </nav>
