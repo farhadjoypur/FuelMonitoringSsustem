@@ -646,52 +646,95 @@
     <script>
         /**
          * Calculate row values (Petrol / Diesel / Octane)
+         * Restriction: Sales cannot exceed available stock (prev + received)
          */
         function calcRow(fuel) {
-            const prev = parseFloat(document.getElementById(fuel + '_prev_stock')?.value) || 0;
-            const supply = parseFloat(document.getElementById(fuel + '_supply')?.value) || 0;
-            const received = parseFloat(document.getElementById(fuel + '_received')?.value) || 0;
-            const sales = parseFloat(document.getElementById(fuel + '_sales')?.value) || 0;
+            const prev     = parseFloat(document.getElementById(fuel + '_prev_stock')?.value)  || 0;
+            const supply   = parseFloat(document.getElementById(fuel + '_supply')?.value)       || 0;
+            const received = parseFloat(document.getElementById(fuel + '_received')?.value)     || 0;
+            const salesEl  = document.getElementById(fuel + '_sales');
+            let   sales    = parseFloat(salesEl?.value) || 0;
 
-            const diff = supply - received;
-            const closing = prev + received - sales;
+            // ─── MAX SELLABLE = prev_stock + received ───────────────────────
+            const maxSellable = prev + received;
 
-            const diffEl = document.getElementById(fuel + '_difference_display');
-            const closingEl = document.getElementById(fuel + '_closing_display');
-
-           if (diffEl) {
-                diffEl.textContent = diff.toFixed(2);
-                diffEl.style.color = '#dc2626'; 
+            // Clamp & warn if sales > maxSellable
+            const salesWarnEl = document.getElementById(fuel + '_sales_warn');
+            if (sales > maxSellable) {
+                if (salesWarnEl) {
+                    salesWarnEl.textContent =
+                        `⚠ Sales cannot exceed available stock (${maxSellable.toFixed(2)} L). Adjusted automatically.`;
+                    salesWarnEl.style.display = 'block';
+                }
+                sales = maxSellable;          // clamp
+                if (salesEl) salesEl.value = sales.toFixed(2);
+                if (salesEl) salesEl.classList.add('is-invalid');
+            } else {
+                if (salesWarnEl) salesWarnEl.style.display = 'none';
+                if (salesEl)     salesEl.classList.remove('is-invalid');
             }
 
+            const diff    = supply - received;              // supply – received
+            const closing = prev + received - sales;        // prev + received – sales
+
+            // ─── Difference display ──────────────────────────────────────────
+            const diffEl = document.getElementById(fuel + '_difference_display');
+            if (diffEl) {
+                diffEl.textContent  = diff.toFixed(2);
+                diffEl.style.color  = diff !== 0 ? '#dc2626' : '#16a34a';
+            }
+
+            // ─── Closing stock display ───────────────────────────────────────
+            const closingEl = document.getElementById(fuel + '_closing_display');
             if (closingEl) {
                 closingEl.textContent = closing.toFixed(2);
                 closingEl.style.color = closing < 0 ? '#dc2626' : 'var(--primary)';
             }
         }
 
-        /**
-         * Initialize calculations on page load
-         */
+        // ─── Block form submit if any sales field is still invalid ───────────
         document.addEventListener('DOMContentLoaded', () => {
 
-            // Initial calculation (previous stock already loaded from backend)
+            // Initial calculation
             calcRow('petrol');
             calcRow('diesel');
             calcRow('octane');
 
-            /**
-             * Optional: Auto recalc when input changes
-             */
+            // Live recalc on every input change
             ['petrol', 'diesel', 'octane'].forEach(fuel => {
                 ['prev_stock', 'supply', 'received', 'sales'].forEach(field => {
                     const el = document.getElementById(`${fuel}_${field}`);
-                    if (el) {
-                        el.addEventListener('input', () => calcRow(fuel));
-                    }
+                    if (el) el.addEventListener('input', () => calcRow(fuel));
                 });
             });
 
+            // Final guard on submit
+            document.querySelector('form').addEventListener('submit', function (e) {
+                let blocked = false;
+
+                ['petrol', 'diesel', 'octane'].forEach(fuel => {
+                    const prev      = parseFloat(document.getElementById(fuel + '_prev_stock')?.value)  || 0;
+                    const received  = parseFloat(document.getElementById(fuel + '_received')?.value)    || 0;
+                    const sales     = parseFloat(document.getElementById(fuel + '_sales')?.value)       || 0;
+                    const maxSell   = prev + received;
+
+                    if (sales > maxSell) {
+                        blocked = true;
+                        const warnEl = document.getElementById(fuel + '_sales_warn');
+                        if (warnEl) {
+                            warnEl.textContent  = `⚠ ${fuel.charAt(0).toUpperCase() + fuel.slice(1)} sales (${sales.toFixed(2)} L) exceeds available stock (${maxSell.toFixed(2)} L).`;
+                            warnEl.style.display = 'block';
+                        }
+                        document.getElementById(fuel + '_sales')?.classList.add('is-invalid');
+                    }
+                });
+
+                if (blocked) {
+                    e.preventDefault();
+                    // Scroll to first error
+                    document.querySelector('.is-invalid')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            });
         });
     </script>
 @endpush

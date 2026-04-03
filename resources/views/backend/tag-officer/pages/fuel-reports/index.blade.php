@@ -155,16 +155,16 @@
         }
 
         .fuel-dot {
-            width: 7px;
+            /* width: 7px;
             height: 7px;
             border-radius: 50%;
             background: var(--primary);
             display: inline-block;
-            flex-shrink: 0;
+            flex-shrink: 0; */
         }
 
         .fuel-dot.muted {
-            background: #cbd5e1;
+            /* background: #cbd5e1; */
         }
 
         .station-name {
@@ -478,9 +478,7 @@
                             <div class="empty-state">
                                 <i class="fa-regular fa-folder-open"></i>
                                 <p>No reports found.</p>
-                                <a href="{{ route('fuel-reports.create') }}" class="btn-add">
-                                    <i class="fa-solid fa-plus"></i> Add First Report
-                                </a>
+                                
                             </div>
                         </td>
                     </tr>
