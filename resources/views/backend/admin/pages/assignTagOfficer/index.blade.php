@@ -95,16 +95,15 @@
             </button>
         </div>
 
-
-        @if ($errors->any())
-            <div class="alert alert-danger border-0 shadow-sm mb-4" style="border-radius: 10px; background-color: #fdeeee;">
-                <ul class="mb-0 px-3">
-                    @foreach ($errors->all() as $error)
-                        <li class="small fw-bold" style="color: #f25961;">{{ $error }}</li>
-                    @endforeach
-                </ul>
+        <form action="{{ route('admin.assign-tag-officer.index') }}" method="GET">
+            <div class="position-relative mb-4">
+                <i class="bi bi-search search-icon"
+                    style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%);"></i>
+                <input type="text" name="search" id="searchInput" class="form-control search-box"
+                    style="padding-left: 40px;" value="{{ request('search') }}" placeholder="Search...">
             </div>
-        @endif
+        </form>
+
 
         <div class="card card-assignment">
             <div class="card-body p-0">
@@ -182,6 +181,10 @@
                 </div>
             </div>
         </div>
+
+        <div class="my-4">
+            {{ $assignments->links('pagination::bootstrap-5') }}
+        </div>
     </div>
 
     <div class="modal fade" id="assignOfficerModal" tabindex="-1" aria-hidden="true">
@@ -192,13 +195,14 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body px-4">
-
                     <form action="{{ route('admin.assign-tag-officer.store') }}" method="POST">
                         @csrf
+                        <input type="hidden" name="form_type" value="create">
 
                         <div class="mb-3">
                             <label class="form-label small fw-bold text-muted">Select Officer *</label>
-                            <select name="officer_id" class="form-select bg-light border-0 py-2" required>
+                            <select name="officer_id"
+                                class="form-select bg-light border-0 py-2 @error('officer_id') is-invalid @enderror">
                                 <option value="">Select Officer</option>
                                 @foreach ($officers as $officer)
                                     <option value="{{ $officer->id }}"
@@ -207,11 +211,15 @@
                                     </option>
                                 @endforeach
                             </select>
+                            @error('officer_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label small fw-bold text-muted">Select Filling Station*</label>
-                            <select name="filling_station_id" class="form-select bg-light border-0 py-2" required>
+                            <select name="filling_station_id"
+                                class="form-select bg-light border-0 py-2 @error('filling_station_id') is-invalid @enderror">
                                 <option value="">Select Station</option>
                                 @foreach ($stations as $station)
                                     <option value="{{ $station->id }}"
@@ -220,28 +228,42 @@
                                     </option>
                                 @endforeach
                             </select>
+                            @error('filling_station_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label small fw-bold text-muted">Assign Date *</label>
-                            <input type="date" name="assign_date" class="form-control bg-light border-0 py-2"
-                                value="{{ old('assign_date', date('Y-m-d')) }}" required>
+                            <input type="date" name="assign_date"
+                                class="form-control bg-light border-0 py-2 @error('assign_date') is-invalid @enderror"
+                                value="{{ old('assign_date', date('Y-m-d')) }}">
+                            @error('assign_date')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
-                        {{-- Status Field Added --}}
                         <div class="mb-3">
                             <label class="form-label small fw-bold text-muted">Status *</label>
-                            <select name="status" class="form-select bg-light border-0 py-2" required>
+                            <select name="status"
+                                class="form-select bg-light border-0 py-2 @error('status') is-invalid @enderror">
                                 <option value="active" {{ old('status') == 'active' ? 'selected' : '' }}>Active</option>
                                 <option value="inactive" {{ old('status') == 'inactive' ? 'selected' : '' }}>Inactive
                                 </option>
                             </select>
+                            @error('status')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="mb-4">
                             <label class="form-label small fw-bold text-muted">Remarks</label>
-                            <input type="text" name="remarks" class="form-control bg-light border-0 py-2"
+                            <input type="text" name="remarks"
+                                class="form-control bg-light border-0 py-2 @error('remarks') is-invalid @enderror"
                                 value="{{ old('remarks') }}" placeholder="Enter any notes">
+                            @error('remarks')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="d-flex gap-2 mb-3">
@@ -270,38 +292,63 @@
                         @csrf
                         @method('PUT')
 
+                        <input type="hidden" name="form_type" value="edit">
+                        <input type="hidden" name="edit_url_handler" id="edit_url_handler"
+                            value="{{ old('edit_url_handler') }}">
+
                         <div class="mb-3">
                             <label class="form-label small fw-bold text-muted">Select Officer *</label>
-                            <select name="officer_id" id="edit_officer_id" class="form-select bg-light border-0 py-2"
-                                required>
+                            <select name="officer_id" id="edit_officer_id"
+                                class="form-select bg-light border-0 py-2 @error('officer_id') is-invalid @enderror">
                                 @foreach ($officers as $officer)
-                                    <option value="{{ $officer->id }}">{{ $officer->profile->name ?? '-' }}</option>
+                                    <option value="{{ $officer->id }}"
+                                        {{ old('officer_id') == $officer->id ? 'selected' : '' }}>
+                                        {{ $officer->profile->name ?? '-' }}
+                                    </option>
                                 @endforeach
                             </select>
+                            @error('officer_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label small fw-bold text-muted">Select Filling Station*</label>
                             <select name="filling_station_id" id="edit_station_id"
-                                class="form-select bg-light border-0 py-2" required>
+                                class="form-select bg-light border-0 py-2 @error('filling_station_id') is-invalid @enderror">
                                 @foreach ($stations as $station)
-                                    <option value="{{ $station->id }}">{{ $station->station_name }}</option>
+                                    <option value="{{ $station->id }}"
+                                        {{ old('filling_station_id') == $station->id ? 'selected' : '' }}>
+                                        {{ $station->station_name }}
+                                    </option>
                                 @endforeach
                             </select>
+                            @error('filling_station_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label small fw-bold text-muted">Assign Date *</label>
                             <input type="date" name="assign_date" id="edit_assign_date"
-                                class="form-control bg-light border-0 py-2" required>
+                                class="form-control bg-light border-0 py-2 @error('assign_date') is-invalid @enderror"
+                                value="{{ old('assign_date') }}">
+                            @error('assign_date')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label small fw-bold text-muted">Status *</label>
-                            <select name="status" id="edit_status" class="form-select bg-light border-0 py-2" required>
-                                <option value="active">Active</option>
-                                <option value="inactive">Inactive</option>
+                            <select name="status" id="edit_status"
+                                class="form-select bg-light border-0 py-2 @error('status') is-invalid @enderror">
+                                <option value="active" {{ old('status') == 'active' ? 'selected' : '' }}>Active</option>
+                                <option value="inactive" {{ old('status') == 'inactive' ? 'selected' : '' }}>Inactive
+                                </option>
                             </select>
+                            @error('status')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="d-flex gap-2 mb-4 mt-2">
@@ -321,21 +368,52 @@
 
 @push('scripts')
     <script>
-        $(document).on('click', '.edit-btn', function() {
+        let timer;
+        $('#searchInput').on('keyup', function() {
+            clearTimeout(timer);
+            timer = setTimeout(function() {
+                $(this).closest('form').submit();
+            }.bind(this), 500);
+        });
+    </script>
 
-            var id = $(this).data('id');
-            var officer_id = $(this).data('officer_id');
-            var station_id = $(this).data('station_id');
-            var date = $(this).data('date');
-            var status = $(this).data('status');
-            var url = $(this).data('url');
+    <script>
+        $(document).ready(function() {
 
-            $('#editAssignForm').attr('action', url);
-            $('#edit_officer_id').val(officer_id);
-            $('#edit_station_id').val(station_id);
-            $('#edit_assign_date').val(date);
-            $('#edit_status').val(status);
-            $('#editAssignOfficerModal').modal('show');
+            $(document).on('click', '.edit-btn', function() {
+                var id = $(this).data('id');
+                var officer_id = $(this).data('officer_id');
+                var station_id = $(this).data('station_id');
+                var date = $(this).data('date');
+                var status = $(this).data('status');
+                var url = $(this).data('url');
+
+                $('#editAssignForm').attr('action', url);
+                $('#edit_officer_id').val(officer_id);
+                $('#edit_station_id').val(station_id);
+                $('#edit_assign_date').val(date);
+                $('#edit_status').val(status);
+
+
+                $('#edit_url_handler').val(url);
+
+                $('#editAssignOfficerModal').modal('show');
+            });
+
+
+            @if ($errors->any())
+                @if (old('form_type') == 'edit')
+
+                    var oldUrl = "{{ old('edit_url_handler') }}";
+                    if (oldUrl) {
+                        $('#editAssignForm').attr('action', oldUrl);
+                    }
+                    $('#editAssignOfficerModal').modal('show');
+                @else
+
+                    $('#assignOfficerModal').modal('show');
+                @endif
+            @endif
         });
     </script>
 @endpush
