@@ -149,10 +149,10 @@ class AssignTagOfficerController extends Controller
             $assignment = AssignTagOfficer::findOrFail($id);
             $assignment->update($request->all());
 
-            return redirect()->back()->with('success', 'অ্যাসাইনমেন্ট সফলভাবে আপডেট করা হয়েছে।');
+            return redirect()->back()->with('success', 'Assignment update successfully');
 
         } catch (\Exception $e) {
-            return back()->with('error', 'আপডেট করতে সমস্যা হয়েছে: '.$e->getMessage());
+            return back()->with('error', 'Something went wrong: '.$e->getMessage());
         }
     }
 
@@ -165,9 +165,9 @@ class AssignTagOfficerController extends Controller
             $assignment = AssignTagOfficer::findOrFail($id);
             $assignment->delete();
 
-            return redirect()->back()->with('success', 'অ্যাসাইনমেন্টটি সফলভাবে মুছে ফেলা হয়েছে।');
+            return redirect()->back()->with('success', 'Assignment deleted successfully');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'মুছে ফেলার সময় কোনো সমস্যা হয়েছে: '.$e->getMessage());
+            return redirect()->back()->with('error', 'Something went wrong '.$e->getMessage());
         }
     }
 }

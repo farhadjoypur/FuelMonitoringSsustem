@@ -3,42 +3,48 @@
 namespace App\Http\Controllers\Backend\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Depot;
+use Illuminate\Http\Request;
 
 class DepotController extends Controller
 {
     public function getDepot($id)
     {
         $depot = Depot::findOrFail($id);
+
         return response()->json($depot);
     }
-    
-    public function index()
+
+    public function index(Request $request)
     {
         $path = resource_path('data/location.json');
 
-        if (!file_exists($path)) {
-            dd("Location file not found at: " . $path);
+        if (! file_exists($path)) {
+            dd('Location file not found at: '.$path);
         }
 
         $locations = json_decode(file_get_contents($path), true);
-        $depots = Depot::latest()->paginate(15);
-    
+        $query = Depot::query();
+
+        if ($request->filled('district')) {
+            $query->where('district', $request->district);
+        }
+        $depots = $query->latest()->paginate(15)->withQueryString();
+
         // Only these 3 counts as requested
-        $totalDepots   = Depot::count();
-        $activeDepots  = Depot::where('status', 'active')->count();
-        $inactiveDepots = Depot::where('status', 'inactive')->count();
-    
+        // $totalDepots   = Depot::count();
+        // $activeDepots  = Depot::where('status', 'active')->count();
+        // $inactiveDepots = Depot::where('status', 'inactive')->count();
+
         $divisions = Depot::whereNotNull('district')
-                          ->distinct()
-                          ->pluck('district');
-    
+            ->distinct()
+            ->pluck('district');
+
         return view('backend.admin.pages.depots.index', compact(
             'depots',
-            'totalDepots',
-            'activeDepots',
-            'inactiveDepots',
+            // 'totalDepots',
+            // 'activeDepots',
+            // 'inactiveDepots',
             'divisions',
             'locations'
         ));
@@ -73,7 +79,7 @@ class DepotController extends Controller
     {
         $request->validate([
             'depot_name' => 'required',
-            'depot_code' => 'required|unique:depots,depot_code,' . $depot->id,
+            'depot_code' => 'required|unique:depots,depot_code,'.$depot->id,
             'district' => 'required',
             'contact_number' => 'required',
             'capacity' => 'required|numeric',
