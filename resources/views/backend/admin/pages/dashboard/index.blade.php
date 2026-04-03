@@ -323,13 +323,13 @@
     {{-- ============================================================
          DIVISION-WISE FUEL SALES (Today's)
     ============================================================ --}}
-    <div class="card chart-card">
+    {{-- <div class="card chart-card">
         <div class="cc-head">
             <i class="fa-solid fa-building"></i>
             <span class="cc-title">Division-wise Fuel Sales (Today's)</span>
         </div>
         <canvas id="divisionSalesChart" height="120"></canvas>
-    </div>
+    </div> --}}
 
     {{-- ============================================================
          RECENT ACTIVITIES
@@ -354,7 +354,7 @@
                 </div>
             </div>
         @empty
-            <div class="no-data">কোনো Activity নেই।</div>
+            <div class="no-data">No activity found।</div>
         @endforelse
     </div>
 

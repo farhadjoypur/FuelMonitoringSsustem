@@ -89,68 +89,95 @@ class DashboardController extends Controller
                 'total_fuel_liters' => round($item->total_fuel_liters / 1000, 1), // convert to metric ton / ×1000L
             ]);
 
-        // =============================================
-        // RECENT ACTIVITIES
-        // =============================================
         $recentActivities = collect();
 
-        // নতুন depot
-        Depot::latest()->take(3)->get()->each(function ($d) use (&$recentActivities) {
-            $recentActivities->push([
-                'title' => 'New Depot Added',
-                'sub'   => $d->district . ' — ' . $d->depot_name,
-                'time'  => $d->created_at,
-                'color' => 'green',
-                'icon'  => 'fa-circle-info',
-            ]);
-        });
-
-        // নতুন officer assignment
-        AssignTagOfficer::with(['fillingStation:id,station_name,district'])
-            ->latest()->take(3)->get()
-            ->each(function ($a) use (&$recentActivities) {
-                $recentActivities->push([
-                    'title' => 'Officer Assigned',
-                    'sub'   => ($a->fillingStation->district ?? '') . ' — ' . ($a->fillingStation->station_name ?? ''),
-                    'time'  => $a->created_at,
-                    'color' => 'blue',
-                    'icon'  => 'fa-circle-info',
-                ]);
-            });
-
-        // Stock alert — difference > 50L
-        Fuelreport::whereRaw('ABS(petrol_difference) + ABS(diesel_difference) + ABS(octane_difference) > 50')
-            ->latest('report_date')->take(2)->get()
-            ->each(function ($r) use (&$recentActivities) {
-                $recentActivities->push([
-                    'title' => 'Stock Alert',
-                    'sub'   => $r->district . ' — ' . $r->station_name,
-                    'time'  => $r->updated_at,
-                    'color' => 'yellow',
-                    'icon'  => 'fa-circle-exclamation',
-                ]);
-            });
-
-        // Operational loss — negative closing stock
+        /* =========================
+   1. ZERO STOCK ALERT
+========================= */
         Fuelreport::where(function ($q) {
-            $q->where('petrol_closing_stock', '<', 0)
-                ->orWhere('diesel_closing_stock', '<', 0)
-                ->orWhere('octane_closing_stock', '<', 0);
+            $q->where('petrol_closing_stock', 0)
+                ->orWhere('diesel_closing_stock', 0)
+                ->orWhere('octane_closing_stock', 0);
         })
-            ->latest('report_date')->take(2)->get()
+            ->latest('report_date')
+            ->take(3)
+            ->get()
             ->each(function ($r) use (&$recentActivities) {
                 $recentActivities->push([
-                    'title' => 'Operational Loss Detected',
+                    'title' => 'Zero Stock Alert',
                     'sub'   => $r->district . ' — ' . $r->station_name,
                     'time'  => $r->updated_at,
                     'color' => 'red',
-                    'icon'  => 'fa-circle-xmark',
+                    'icon'  => 'fa-battery-empty',
                 ]);
             });
 
+        /* =========================
+   2. LOW STOCK ALERT
+   (example: below 100L)
+========================= */
+        Fuelreport::where(function ($q) {
+            $q->where('petrol_closing_stock', '<', 100)
+                ->orWhere('diesel_closing_stock', '<', 100)
+                ->orWhere('octane_closing_stock', '<', 100);
+        })
+            ->latest('report_date')
+            ->take(3)
+            ->get()
+            ->each(function ($r) use (&$recentActivities) {
+                $recentActivities->push([
+                    'title' => 'Low Stock Alert',
+                    'sub'   => $r->district . ' — ' . $r->station_name,
+                    'time'  => $r->updated_at,
+                    'color' => 'yellow',
+                    'icon'  => 'fa-triangle-exclamation',
+                ]);
+            });
+
+        /* =========================
+   3. DIFFERENCE (L) ALERT
+========================= */
+        Fuelreport::whereRaw('ABS(petrol_difference) + ABS(diesel_difference) + ABS(octane_difference) > 50')
+            ->latest('report_date')
+            ->take(3)
+            ->get()
+            ->each(function ($r) use (&$recentActivities) {
+                $recentActivities->push([
+                    'title' => 'Difference (L) Alert',
+                    'sub'   => $r->district . ' — ' . $r->station_name,
+                    'time'  => $r->updated_at,
+                    'color' => 'orange',
+                    'icon'  => 'fa-scale-balanced',
+                ]);
+            });
+
+        /* =========================
+   4. DIFFERENCE (%) ALERT
+========================= */
+        Fuelreport::whereRaw('
+    (ABS(petrol_difference) / NULLIF(petrol_closing_stock,1)) * 100 > 10
+    OR (ABS(diesel_difference) / NULLIF(diesel_closing_stock,1)) * 100 > 10
+    OR (ABS(octane_difference) / NULLIF(octane_closing_stock,1)) * 100 > 10
+')
+            ->latest('report_date')
+            ->take(3)
+            ->get()
+            ->each(function ($r) use (&$recentActivities) {
+                $recentActivities->push([
+                    'title' => 'Difference (%) Alert',
+                    'sub'   => $r->district . ' — ' . $r->station_name,
+                    'time'  => $r->updated_at,
+                    'color' => 'blue',
+                    'icon'  => 'fa-percent',
+                ]);
+            });
+
+        /* =========================
+   FINAL SORT (IMPORTANT)
+========================= */
         $recentActivities = $recentActivities
             ->sortByDesc('time')
-            ->take(5)
+            ->take(4)
             ->values();
 
         return view('backend.admin.pages.dashboard.index', compact(
