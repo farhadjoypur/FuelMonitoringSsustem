@@ -11,9 +11,9 @@
             --border: #e8ecf0;
             --text: #1a1f2e;
             --muted: #7c8db5;
-            --petrol-color: #2d9748;
-            --diesel-color: #c8860a;
-            --octane-color: #ef4444;
+            --petrol-color: #80AA57;
+            --diesel-color: #D19529;
+            --octane-color: #ED4033;
             --blue: #2563eb;
             --green: #16a34a;
             --purple: #7c3aed;
@@ -53,9 +53,9 @@
             align-items: center;
             gap: 14px;
         }
-        .fuel-main-card.petrol { background: #f0fdf4; border-color: #bbf7d0; }
-        .fuel-main-card.diesel { background: #fffbeb; border-color: #fde68a; }
-        .fuel-main-card.octane { background: #fef2f2; border-color: #fecaca; }
+        .fuel-main-card.petrol { background: #E1EDDF; }
+        .fuel-main-card.diesel { background: #EDEADA; }
+        .fuel-main-card.octane { background: #F1DEDC; }
 
         .fuel-icon-circle {
             width: 46px; height: 46px; border-radius: 50%;
@@ -86,9 +86,9 @@
             font-size: 13px; font-weight: 600;
             text-align: center;
         }
-        .diff-pill.petrol { background: #f0fdf4; color: var(--petrol-color); border: 1px solid #bbf7d0; }
-        .diff-pill.diesel { background: #fffbeb; color: var(--diesel-color); border: 1px solid #fde68a; }
-        .diff-pill.octane { background: #fef2f2; color: var(--octane-color); border: 1px solid #fecaca; }
+        .diff-pill.petrol { background: #F0FDF4; color: var(--petrol-color); border: 1px solid #bbf7d0; }
+        .diff-pill.diesel { background: #FFF7ED; color: var(--diesel-color); border: 1px solid #fde68a; }
+        .diff-pill.octane { background: #FEF2F2; color: var(--octane-color); border: 1px solid #fecaca; }
 
         .section-gap { margin-bottom: 28px; }
 
