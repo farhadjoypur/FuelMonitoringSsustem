@@ -854,113 +854,116 @@
 
         {{-- TABLE --}}
         <div class="fs-table-card">
-            <table class="fs-table" id="stationTable">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Station Name</th>
-                        <th>Code</th>
-                        <th>Division</th>
-                        <th>District</th>
-                        <th>Owner</th>
-                        <th>Company</th>
-                        <th>Capacity</th>
-                        <th>Fuel Types</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody">
-                    @forelse($stations as $station)
-                        <tr data-division="{{ strtolower($station->division ?? '') }}"
-                            data-status="{{ strtolower($station->status ?? 'active') }}"
-                            data-company="{{ strtolower($station->company->name ?? '') }}">
-                            <td><span class="row-index">{{ $loop->iteration }}</span></td>
-
-                            <td>
-                                <span class="station-name">{{ $station->station_name }}</span>
-                                <span class="station-sub">{{ $station->linked_depot ?? '—' }}</span>
-                            </td>
-
-                            <td><span class="badge-code">{{ $station->station_code }}</span></td>
-                            <td>{{ $station->division ?? '—' }}</td>
-
-                            <td>
-                                {{ $station->district ?? '—' }}
-                                @if ($station->upazila)
-                                    <br><span class="station-sub">{{ $station->upazila }}</span>
-                                @endif
-                            </td>
-
-                            <td>
-                                <span class="station-name"
-                                    style="font-size:.85rem;">{{ $station->owner_name ?? '—' }}</span>
-                                <span class="station-sub">{{ $station->owner_phone ?? '' }}</span>
-                            </td>
-
-                            <td>{{ $station->company->name ?? '—' }}</td>
-                            <td>{{ $station->tank_capacity ? number_format($station->tank_capacity) . ' L' : '—' }}</td>
-
-                            <td>
-                                @if ($station->fuel_types)
-                                    @foreach ($station->fuel_types as $fuel)
-                                        <span class="badge-fuel">{{ $fuel }}</span>
-                                    @endforeach
-                                @else
-                                    <span class="station-sub">—</span>
-                                @endif
-                            </td>
-
-                            <td>
-                                @php $st = strtolower($station->status ?? 'active'); @endphp
-                                <span class="badge-status {{ $st === 'active' ? 'badge-active' : 'badge-inactive' }}">
-                                    {{ ucfirst($st) }}
-                                </span>
-                            </td>
-
-                            <td>
-                                <div class="actions-cell">
-                                    {{-- View --}}
-                                    <!-- <a href="{{ route('admin.stations.show', $station->id) }}" class="action-btn action-btn-view" title="View">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                            <circle cx="12" cy="12" r="3"/>
-                                        </svg>
-                                    </a> -->
-
-                                    {{-- Edit → opens modal --}}
-                                    <button type="button" class="action-btn action-btn-edit" title="Edit"
-                                        onclick="openEditModal({{ $station->id }})">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke="currentColor" stroke-width="1.8">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M16.862 4.487a2.1 2.1 0 1 1 2.97 2.97L7.5 19.79l-4 1 1-4 12.362-12.303z" />
-                                        </svg>
-                                    </button>
-
-                                    {{-- Delete --}}
-                                    <!-- Delete Button - AJAX Version -->
-                                    <button type="button" class="action-btn action-btn-delete" title="Delete"
-                                        onclick="deleteStation({{ $station->id }})">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke="currentColor" stroke-width="1.8">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </td>
+            <div class="table-responsive">
+                <table class="fs-table" id="stationTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Station Name</th>
+                            <th>Code</th>
+                            <th>Division</th>
+                            <th>District</th>
+                            <th>Owner</th>
+                            <th>Company</th>
+                            <th>Capacity</th>
+                            <th>Fuel Types</th>
+                            <th>Status</th>
+                            <th>Action</th>
                         </tr>
-                    @empty
-                        <tr class="empty-row">
-                            <td colspan="11">
-                                <span class="empty-icon">⛽</span>
-                                No filling stations found.
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody id="tableBody">
+                        @forelse($stations as $station)
+                            <tr data-division="{{ strtolower($station->division ?? '') }}"
+                                data-status="{{ strtolower($station->status ?? 'active') }}"
+                                data-company="{{ strtolower($station->company->name ?? '') }}">
+                                <td><span class="row-index">{{ $loop->iteration }}</span></td>
+
+                                <td>
+                                    <span class="station-name">{{ $station->station_name }}</span>
+                                    <span class="station-sub">{{ $station->linked_depot ?? '—' }}</span>
+                                </td>
+
+                                <td><span class="badge-code">{{ $station->station_code }}</span></td>
+                                <td>{{ $station->division ?? '—' }}</td>
+
+                                <td>
+                                    {{ $station->district ?? '—' }}
+                                    @if ($station->upazila)
+                                        <br><span class="station-sub">{{ $station->upazila }}</span>
+                                    @endif
+                                </td>
+
+                                <td>
+                                    <span class="station-name"
+                                        style="font-size:.85rem;">{{ $station->owner_name ?? '—' }}</span>
+                                    <span class="station-sub">{{ $station->owner_phone ?? '' }}</span>
+                                </td>
+
+                                <td>{{ $station->company->name ?? '—' }}</td>
+                                <td>{{ $station->tank_capacity ? number_format($station->tank_capacity) . ' L' : '—' }}
+                                </td>
+
+                                <td>
+                                    @if ($station->fuel_types)
+                                        @foreach ($station->fuel_types as $fuel)
+                                            <span class="badge-fuel">{{ $fuel }}</span>
+                                        @endforeach
+                                    @else
+                                        <span class="station-sub">—</span>
+                                    @endif
+                                </td>
+
+                                <td>
+                                    @php $st = strtolower($station->status ?? 'active'); @endphp
+                                    <span class="badge-status {{ $st === 'active' ? 'badge-active' : 'badge-inactive' }}">
+                                        {{ ucfirst($st) }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <div class="actions-cell">
+                                        {{-- View --}}
+                                        <!-- <a href="{{ route('admin.stations.show', $station->id) }}" class="action-btn action-btn-view" title="View">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                                        <circle cx="12" cy="12" r="3"/>
+                                                    </svg>
+                                                </a> -->
+
+                                        {{-- Edit → opens modal --}}
+                                        <button type="button" class="action-btn action-btn-edit" title="Edit"
+                                            onclick="openEditModal({{ $station->id }})">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                stroke="currentColor" stroke-width="1.8">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M16.862 4.487a2.1 2.1 0 1 1 2.97 2.97L7.5 19.79l-4 1 1-4 12.362-12.303z" />
+                                            </svg>
+                                        </button>
+
+                                        {{-- Delete --}}
+                                        <!-- Delete Button - AJAX Version -->
+                                        <button type="button" class="action-btn action-btn-delete" title="Delete"
+                                            onclick="deleteStation({{ $station->id }})">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                stroke="currentColor" stroke-width="1.8">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr class="empty-row">
+                                <td colspan="11">
+                                    <span class="empty-icon">⛽</span>
+                                    No filling stations found.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
 
             <div id="noResultsRow"
                 style="display:none;text-align:center;padding:48px 20px;color:#94a3b8;font-size:0.875rem;">
@@ -1178,195 +1181,203 @@
 
 @endsection
 @push('scripts')
-<script>
-// ═══════════════════════════════════════════════════════════
-//  LOCATIONS DATA (একবারই declare)
-// ═══════════════════════════════════════════════════════════
-const locations = @json($locations['divisions']);
- 
-// ═══════════════════════════════════════════════════════════
-//  HELPER — Division → Districts populate
-// ═══════════════════════════════════════════════════════════
-function populateDistricts(divisionName, districtEl, selectedDistrict = null) {
-    districtEl.innerHTML = '<option value="">— Select District —</option>';
- 
-    const division = locations.find(d => d.name_en === divisionName);
-    if (!division) return;
- 
-    division.districts.forEach(dist => {
-        const opt = document.createElement('option');
-        opt.value       = dist.name_en;
-        opt.textContent = dist.name_en;
-        if (selectedDistrict === dist.name_en) opt.selected = true;
-        districtEl.appendChild(opt);
-    });
-}
- 
-// ═══════════════════════════════════════════════════════════
-//  HELPER — District → Upazilas populate
-// ═══════════════════════════════════════════════════════════
-function populateUpazilas(divisionName, districtName, upazilaEl, selectedUpazila = null) {
-    upazilaEl.innerHTML = '<option value="">— Select Upazila —</option>';
- 
-    const division = locations.find(d => d.name_en === divisionName);
-    if (!division) return;
- 
-    const district = division.districts.find(d => d.name_en === districtName);
-    if (!district) return;
- 
-    district.police_stations.forEach(up => {
-        const opt = document.createElement('option');
-        opt.value       = up.name_en;
-        opt.textContent = up.name_en;
-        if (selectedUpazila === up.name_en) opt.selected = true;
-        upazilaEl.appendChild(opt);
-    });
-}
- 
-// ═══════════════════════════════════════════════════════════
-//  CREATE MODAL — Dropdown chain
-// ═══════════════════════════════════════════════════════════
-const createDivision = document.getElementById('division');
-const createDistrict = document.getElementById('district');
-const createUpazila  = document.getElementById('upazila');
- 
-createDivision?.addEventListener('change', function () {
-    populateDistricts(this.value, createDistrict);
-    createUpazila.innerHTML = '<option value="">— Select Upazila —</option>';
-});
- 
-createDistrict?.addEventListener('change', function () {
-    populateUpazilas(createDivision.value, this.value, createUpazila);
-});
- 
-// ═══════════════════════════════════════════════════════════
-//  TABLE FILTER
-// ═══════════════════════════════════════════════════════════
-const searchInput    = document.getElementById('searchInput');
-const divisionFilter = document.getElementById('divisionFilter');
-const statusFilter   = document.getElementById('statusFilter');
-const companyFilter  = document.getElementById('companyFilter');
-const tableBody      = document.getElementById('tableBody');
-const noResults      = document.getElementById('noResultsRow');
- 
-function applyFilters() {
-    const q        = searchInput.value.toLowerCase().trim();
-    const division = divisionFilter.value.toLowerCase();
-    const status   = statusFilter.value.toLowerCase();
-    const company  = companyFilter.value.toLowerCase();
-    let visible    = 0;
- 
-    tableBody.querySelectorAll('tr').forEach(row => {
-        if (row.classList.contains('empty-row')) return;
-        const matchQ = !q        || row.innerText.toLowerCase().includes(q);
-        const matchD = !division || (row.dataset.division || '').toLowerCase().includes(division);
-        const matchS = !status   || (row.dataset.status   || '').toLowerCase() === status;
-        const matchC = !company  || (row.dataset.company  || '').toLowerCase().includes(company);
-        const show   = matchQ && matchD && matchS && matchC;
-        row.style.display = show ? '' : 'none';
-        if (show) visible++;
-    });
- 
-    noResults.style.display = visible === 0 ? 'block' : 'none';
-}
- 
-function clearFilters() {
-    searchInput.value = divisionFilter.value = statusFilter.value = companyFilter.value = '';
-    applyFilters();
-}
- 
-searchInput?.addEventListener('input', applyFilters);
-divisionFilter?.addEventListener('change', applyFilters);
-statusFilter?.addEventListener('change', applyFilters);
-companyFilter?.addEventListener('change', applyFilters);
- 
-// ═══════════════════════════════════════════════════════════
-//  CREATE MODAL — Open
-// ═══════════════════════════════════════════════════════════
-function openCreateModal() {
-    const modal = new bootstrap.Modal(document.getElementById('createStationModal'));
-    modal.show();
-}
- 
-// ═══════════════════════════════════════════════════════════
-//  CREATE MODAL — Submit
-// ═══════════════════════════════════════════════════════════
-function submitCreateForm() {
-    const form    = document.getElementById('createStationForm');
-    const formData = new FormData(form);
-    const btn     = document.querySelector('#createStationModal .btn-save');
- 
-    if (btn) { btn.disabled = true; btn.innerHTML = 'Saving...'; }
- 
-    fetch(`/admin/stations`, {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            'Accept': 'application/json',
-        },
-        body: formData,
-    })
-    .then(async res => {
-        const data = await res.json().catch(() => null);
-        if (!res.ok) throw data || { message: 'Server Error' };
-        return data;
-    })
-    .then(data => {
-        if (data.success) location.reload();
-        else alert(data.message || 'Failed');
-    })
-    .catch(err => alert(err?.message || 'Something went wrong'))
-    .finally(() => {
-        if (btn) { btn.disabled = false; btn.innerHTML = 'Save Station'; }
-    });
-}
- 
-// ═══════════════════════════════════════════════════════════
-//  EDIT MODAL — Open (AJAX দিয়ে data load, তারপর dropdown chain)
-// ═══════════════════════════════════════════════════════════
-let currentEditId = null;
- 
-function openEditModal(id) {
-    currentEditId = id;
- 
-    const body   = document.getElementById('editModalBody');
-    const footer = document.getElementById('editModalFooter');
- 
-    // Loading state
-    body.innerHTML = `
+    <script>
+        // ═══════════════════════════════════════════════════════════
+        //  LOCATIONS DATA (একবারই declare)
+        // ═══════════════════════════════════════════════════════════
+        const locations = @json($locations['divisions']);
+
+        // ═══════════════════════════════════════════════════════════
+        //  HELPER — Division → Districts populate
+        // ═══════════════════════════════════════════════════════════
+        function populateDistricts(divisionName, districtEl, selectedDistrict = null) {
+            districtEl.innerHTML = '<option value="">— Select District —</option>';
+
+            const division = locations.find(d => d.name_en === divisionName);
+            if (!division) return;
+
+            division.districts.forEach(dist => {
+                const opt = document.createElement('option');
+                opt.value = dist.name_en;
+                opt.textContent = dist.name_en;
+                if (selectedDistrict === dist.name_en) opt.selected = true;
+                districtEl.appendChild(opt);
+            });
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        //  HELPER — District → Upazilas populate
+        // ═══════════════════════════════════════════════════════════
+        function populateUpazilas(divisionName, districtName, upazilaEl, selectedUpazila = null) {
+            upazilaEl.innerHTML = '<option value="">— Select Upazila —</option>';
+
+            const division = locations.find(d => d.name_en === divisionName);
+            if (!division) return;
+
+            const district = division.districts.find(d => d.name_en === districtName);
+            if (!district) return;
+
+            district.police_stations.forEach(up => {
+                const opt = document.createElement('option');
+                opt.value = up.name_en;
+                opt.textContent = up.name_en;
+                if (selectedUpazila === up.name_en) opt.selected = true;
+                upazilaEl.appendChild(opt);
+            });
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        //  CREATE MODAL — Dropdown chain
+        // ═══════════════════════════════════════════════════════════
+        const createDivision = document.getElementById('division');
+        const createDistrict = document.getElementById('district');
+        const createUpazila = document.getElementById('upazila');
+
+        createDivision?.addEventListener('change', function() {
+            populateDistricts(this.value, createDistrict);
+            createUpazila.innerHTML = '<option value="">— Select Upazila —</option>';
+        });
+
+        createDistrict?.addEventListener('change', function() {
+            populateUpazilas(createDivision.value, this.value, createUpazila);
+        });
+
+        // ═══════════════════════════════════════════════════════════
+        //  TABLE FILTER
+        // ═══════════════════════════════════════════════════════════
+        const searchInput = document.getElementById('searchInput');
+        const divisionFilter = document.getElementById('divisionFilter');
+        const statusFilter = document.getElementById('statusFilter');
+        const companyFilter = document.getElementById('companyFilter');
+        const tableBody = document.getElementById('tableBody');
+        const noResults = document.getElementById('noResultsRow');
+
+        function applyFilters() {
+            const q = searchInput.value.toLowerCase().trim();
+            const division = divisionFilter.value.toLowerCase();
+            const status = statusFilter.value.toLowerCase();
+            const company = companyFilter.value.toLowerCase();
+            let visible = 0;
+
+            tableBody.querySelectorAll('tr').forEach(row => {
+                if (row.classList.contains('empty-row')) return;
+                const matchQ = !q || row.innerText.toLowerCase().includes(q);
+                const matchD = !division || (row.dataset.division || '').toLowerCase().includes(division);
+                const matchS = !status || (row.dataset.status || '').toLowerCase() === status;
+                const matchC = !company || (row.dataset.company || '').toLowerCase().includes(company);
+                const show = matchQ && matchD && matchS && matchC;
+                row.style.display = show ? '' : 'none';
+                if (show) visible++;
+            });
+
+            noResults.style.display = visible === 0 ? 'block' : 'none';
+        }
+
+        function clearFilters() {
+            searchInput.value = divisionFilter.value = statusFilter.value = companyFilter.value = '';
+            applyFilters();
+        }
+
+        searchInput?.addEventListener('input', applyFilters);
+        divisionFilter?.addEventListener('change', applyFilters);
+        statusFilter?.addEventListener('change', applyFilters);
+        companyFilter?.addEventListener('change', applyFilters);
+
+        // ═══════════════════════════════════════════════════════════
+        //  CREATE MODAL — Open
+        // ═══════════════════════════════════════════════════════════
+        function openCreateModal() {
+            const modal = new bootstrap.Modal(document.getElementById('createStationModal'));
+            modal.show();
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        //  CREATE MODAL — Submit
+        // ═══════════════════════════════════════════════════════════
+        function submitCreateForm() {
+            const form = document.getElementById('createStationForm');
+            const formData = new FormData(form);
+            const btn = document.querySelector('#createStationModal .btn-save');
+
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = 'Saving...';
+            }
+
+            fetch(`/admin/stations`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                    body: formData,
+                })
+                .then(async res => {
+                    const data = await res.json().catch(() => null);
+                    if (!res.ok) throw data || {
+                        message: 'Server Error'
+                    };
+                    return data;
+                })
+                .then(data => {
+                    if (data.success) location.reload();
+                    else alert(data.message || 'Failed');
+                })
+                .catch(err => alert(err?.message || 'Something went wrong'))
+                .finally(() => {
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = 'Save Station';
+                    }
+                });
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        //  EDIT MODAL — Open (AJAX দিয়ে data load, তারপর dropdown chain)
+        // ═══════════════════════════════════════════════════════════
+        let currentEditId = null;
+
+        function openEditModal(id) {
+            currentEditId = id;
+
+            const body = document.getElementById('editModalBody');
+            const footer = document.getElementById('editModalFooter');
+
+            // Loading state
+            body.innerHTML = `
         <div class="modal-loading">
             <div class="spinner-border text-primary mb-3" role="status" style="width:2rem;height:2rem;"></div>
             <div>Loading station data...</div>
         </div>`;
-    footer.style.display = 'none';
- 
-    const modal = new bootstrap.Modal(document.getElementById('editStationModal'));
-    modal.show();
- 
-    // Fetch station data
-    fetch(`/admin/stations/${id}/get`)
-        .then(r => r.json())
-        .then(s => {
-            const fuels    = s.fuel_types || [];
-            const companies = @json($companies);
- 
-            const companyOptions = companies.map(c =>
-                `<option value="${c.id}" ${s.company_id == c.id ? 'selected' : ''}>${c.name}</option>`
-            ).join('');
- 
-            const fuelHtml = ['Petrol', 'Diesel', 'Octane'].map(f => `
+            footer.style.display = 'none';
+
+            const modal = new bootstrap.Modal(document.getElementById('editStationModal'));
+            modal.show();
+
+            // Fetch station data
+            fetch(`/admin/stations/${id}/get`)
+                .then(r => r.json())
+                .then(s => {
+                    const fuels = s.fuel_types || [];
+                    const companies = @json($companies);
+
+                    const companyOptions = companies.map(c =>
+                        `<option value="${c.id}" ${s.company_id == c.id ? 'selected' : ''}>${c.name}</option>`
+                    ).join('');
+
+                    const fuelHtml = ['Petrol', 'Diesel', 'Octane'].map(f => `
                 <label class="fuel-check ${fuels.includes(f) ? 'checked' : ''}" data-fuel="${f}">
                     <input type="checkbox" name="fuel_types[]" value="${f}" ${fuels.includes(f) ? 'checked' : ''}>
                     ${f}
                 </label>`).join('');
- 
-            // Division options build — সব division option add করি
-            const divisionOptions = locations.map(d =>
-                `<option value="${d.name_en}" ${s.division === d.name_en ? 'selected' : ''}>${d.name_en}</option>`
-            ).join('');
- 
-            // Form HTML inject
-            body.innerHTML = `
+
+                    // Division options build — সব division option add করি
+                    const divisionOptions = locations.map(d =>
+                        `<option value="${d.name_en}" ${s.division === d.name_en ? 'selected' : ''}>${d.name_en}</option>`
+                    ).join('');
+
+                    // Form HTML inject
+                    body.innerHTML = `
                 <form id="editStationForm" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
@@ -1477,130 +1488,132 @@ function openEditModal(id) {
                         </div>
                     </div>
                 </form>`;
- 
-            // ── এখানে DOM তৈরি হয়েছে, এখন dropdown chain setup করি ──
-            const editDivisionEl = document.getElementById('edit_division');
-            const editDistrictEl = document.getElementById('edit_district');
-            const editUpazilaEl  = document.getElementById('edit_upazila');
- 
-            // ১. আগের data দিয়ে district ও upazila populate করি
-            if (s.division) {
-                populateDistricts(s.division, editDistrictEl, s.district);
-            }
-            if (s.division && s.district) {
-                populateUpazilas(s.division, s.district, editUpazilaEl, s.upazila);
-            }
- 
-            // ২. Division change → district reload
-            editDivisionEl.addEventListener('change', function () {
-                populateDistricts(this.value, editDistrictEl);
-                editUpazilaEl.innerHTML = '<option value="">— Select Upazila —</option>';
-            });
- 
-            // ৩. District change → upazila reload
-            editDistrictEl.addEventListener('change', function () {
-                populateUpazilas(editDivisionEl.value, this.value, editUpazilaEl);
-            });
- 
-            // ── Fuel type toggle ──
-            document.querySelectorAll('#editFuelOptions .fuel-check').forEach(label => {
-                label.addEventListener('click', function () {
-                    const cb = this.querySelector('input');
-                    cb.checked = !cb.checked;
-                    this.classList.toggle('checked', cb.checked);
-                });
-            });
- 
-            footer.style.display = 'flex';
-        })
-        .catch(() => {
-            body.innerHTML = `
+
+                    // ── এখানে DOM তৈরি হয়েছে, এখন dropdown chain setup করি ──
+                    const editDivisionEl = document.getElementById('edit_division');
+                    const editDistrictEl = document.getElementById('edit_district');
+                    const editUpazilaEl = document.getElementById('edit_upazila');
+
+                    // ১. আগের data দিয়ে district ও upazila populate করি
+                    if (s.division) {
+                        populateDistricts(s.division, editDistrictEl, s.district);
+                    }
+                    if (s.division && s.district) {
+                        populateUpazilas(s.division, s.district, editUpazilaEl, s.upazila);
+                    }
+
+                    // ২. Division change → district reload
+                    editDivisionEl.addEventListener('change', function() {
+                        populateDistricts(this.value, editDistrictEl);
+                        editUpazilaEl.innerHTML = '<option value="">— Select Upazila —</option>';
+                    });
+
+                    // ৩. District change → upazila reload
+                    editDistrictEl.addEventListener('change', function() {
+                        populateUpazilas(editDivisionEl.value, this.value, editUpazilaEl);
+                    });
+
+                    // ── Fuel type toggle ──
+                    document.querySelectorAll('#editFuelOptions .fuel-check').forEach(label => {
+                        label.addEventListener('click', function() {
+                            const cb = this.querySelector('input');
+                            cb.checked = !cb.checked;
+                            this.classList.toggle('checked', cb.checked);
+                        });
+                    });
+
+                    footer.style.display = 'flex';
+                })
+                .catch(() => {
+                    body.innerHTML = `
                 <div class="text-center text-danger py-4">
                     Failed to load station data. Please try again.
                 </div>`;
-        });
-}
- 
-// ═══════════════════════════════════════════════════════════
-//  EDIT MODAL — Submit
-// ═══════════════════════════════════════════════════════════
-function submitEditForm() {
-    const form = document.getElementById('editStationForm');
-    if (!form) return;
- 
-    const formData = new FormData(form);
-    formData.append('_method', 'PUT');
- 
-    const saveBtn = document.querySelector('#editModalFooter .btn-save');
-    saveBtn.disabled = true;
-    saveBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Saving...`;
- 
-    fetch(`/admin/stations/${currentEditId}`, {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-        },
-        body: formData,
-    })
-    .then(r => {
-        if (r.redirected) { window.location.href = r.url; return; }
-        return r.json().then(data => {
-            if (data.success) window.location.reload();
-            else alert(data.message || 'Update failed.');
-        });
-    })
-    .catch(() => alert('Something went wrong. Please try again.'))
-    .finally(() => {
-        saveBtn.disabled = false;
-        saveBtn.innerHTML = `
+                });
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        //  EDIT MODAL — Submit
+        // ═══════════════════════════════════════════════════════════
+        function submitEditForm() {
+            const form = document.getElementById('editStationForm');
+            if (!form) return;
+
+            const formData = new FormData(form);
+            formData.append('_method', 'PUT');
+
+            const saveBtn = document.querySelector('#editModalFooter .btn-save');
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Saving...`;
+
+            fetch(`/admin/stations/${currentEditId}`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    },
+                    body: formData,
+                })
+                .then(r => {
+                    if (r.redirected) {
+                        window.location.href = r.url;
+                        return;
+                    }
+                    return r.json().then(data => {
+                        if (data.success) window.location.reload();
+                        else alert(data.message || 'Update failed.');
+                    });
+                })
+                .catch(() => alert('Something went wrong. Please try again.'))
+                .finally(() => {
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = `
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor" stroke-width="2.2" style="width:15px;height:15px;">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
             </svg> Save Changes`;
-    });
-}
- 
-// ═══════════════════════════════════════════════════════════
-//  DELETE — AJAX
-// ═══════════════════════════════════════════════════════════
-function deleteStation(id) {
-    if (!confirm('Are you sure you want to delete this station?')) return;
- 
-    const btn = event.currentTarget;
-    const originalHTML = btn.innerHTML;
-    btn.disabled = true;
-    btn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status"></span>`;
- 
-    fetch(`/admin/stations/${id}`, {
-        method: 'DELETE',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            'Accept': 'application/json',
-        },
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.success) {
-            const row = btn.closest('tr');
-            if (row) {
-                row.style.transition = 'opacity 0.3s';
-                row.style.opacity    = '0';
-                setTimeout(() => location.reload(), 300);
-            } else {
-                location.reload();
-            }
-        } else {
-            alert(data.message || 'Delete failed.');
-            btn.disabled  = false;
-            btn.innerHTML = originalHTML;
+                });
         }
-    })
-    .catch(() => {
-        alert('Something went wrong. Please try again.');
-        btn.disabled  = false;
-        btn.innerHTML = originalHTML;
-    });
-}
-</script>
+
+        // ═══════════════════════════════════════════════════════════
+        //  DELETE — AJAX
+        // ═══════════════════════════════════════════════════════════
+        function deleteStation(id) {
+            if (!confirm('Are you sure you want to delete this station?')) return;
+
+            const btn = event.currentTarget;
+            const originalHTML = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status"></span>`;
+
+            fetch(`/admin/stations/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        const row = btn.closest('tr');
+                        if (row) {
+                            row.style.transition = 'opacity 0.3s';
+                            row.style.opacity = '0';
+                            setTimeout(() => location.reload(), 300);
+                        } else {
+                            location.reload();
+                        }
+                    } else {
+                        alert(data.message || 'Delete failed.');
+                        btn.disabled = false;
+                        btn.innerHTML = originalHTML;
+                    }
+                })
+                .catch(() => {
+                    alert('Something went wrong. Please try again.');
+                    btn.disabled = false;
+                    btn.innerHTML = originalHTML;
+                });
+        }
+    </script>
 @endpush
- 
