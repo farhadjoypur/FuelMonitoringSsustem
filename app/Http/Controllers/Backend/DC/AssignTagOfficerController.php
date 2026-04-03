@@ -8,6 +8,7 @@ use App\Models\AssignTagOfficer;
 use App\Models\FillingStation;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class AssignTagOfficerController extends Controller
@@ -35,8 +36,12 @@ class AssignTagOfficerController extends Controller
 
         $assignments = $query->latest()->paginate(10)->withQueryString();
 
-        $officers = User::with('profile')->where('role', UserRole::TAG_OFFICER)->get();
-        $stations = FillingStation::all();
+        $officers = User::select('id')
+            ->with('profile:id,user_id,name')
+            ->where('role', UserRole::TAG_OFFICER)
+            ->get();
+
+        $stations = FillingStation::select('id', 'station_name')->get();
 
         return view('backend.dc.pages.assignTagOfficer.index', compact('assignments', 'officers', 'stations'));
     }
@@ -92,7 +97,7 @@ class AssignTagOfficerController extends Controller
             }
 
             AssignTagOfficer::create([
-                'dc_id'              => auth()->id(),
+                'dc_id' => Auth::id(),
                 'officer_id' => $request->officer_id,
                 'filling_station_id' => $request->filling_station_id,
                 'assign_date' => $request->assign_date,

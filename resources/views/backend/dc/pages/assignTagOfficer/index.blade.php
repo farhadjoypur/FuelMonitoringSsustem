@@ -3,7 +3,16 @@
 @section('title', 'Assign Tag Officer')
 
 @push('styles')
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
+        .select2-container--default .select2-selection--single {
+            height: 40px;
+            background-color: #f8f9fa;
+            border: none;
+            border-radius: 5px;
+            padding: 5px;
+        }
+
         .card-assignment {
             border-radius: 12px;
             border: none;
@@ -187,7 +196,7 @@
         </div>
     </div>
 
-    <div class="modal fade" id="assignOfficerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="assignOfficerModal" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content" style="border-radius: 15px; border: none;">
                 <div class="modal-header border-0 pt-4 px-4">
@@ -202,7 +211,7 @@
                         <div class="mb-3">
                             <label class="form-label small fw-bold text-muted">Select Officer *</label>
                             <select name="officer_id"
-                                class="form-select bg-light border-0 py-2 @error('officer_id') is-invalid @enderror">
+                                class="form-select searchable-select @error('officer_id') is-invalid @enderror">
                                 <option value="">Select Officer</option>
                                 @foreach ($officers as $officer)
                                     <option value="{{ $officer->id }}"
@@ -212,14 +221,14 @@
                                 @endforeach
                             </select>
                             @error('officer_id')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                <span class="text-danger small">{{ $message }}</span>
                             @enderror
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label small fw-bold text-muted">Select Filling Station*</label>
                             <select name="filling_station_id"
-                                class="form-select bg-light border-0 py-2 @error('filling_station_id') is-invalid @enderror">
+                                class="form-select searchable-select @error('filling_station_id') is-invalid @enderror">
                                 <option value="">Select Station</option>
                                 @foreach ($stations as $station)
                                     <option value="{{ $station->id }}"
@@ -229,7 +238,7 @@
                                 @endforeach
                             </select>
                             @error('filling_station_id')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                <span class="text-danger small">{{ $message }}</span>
                             @enderror
                         </div>
 
@@ -239,7 +248,7 @@
                                 class="form-control bg-light border-0 py-2 @error('assign_date') is-invalid @enderror"
                                 value="{{ old('assign_date', date('Y-m-d')) }}">
                             @error('assign_date')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
 
@@ -252,7 +261,7 @@
                                 </option>
                             </select>
                             @error('status')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
 
@@ -262,7 +271,7 @@
                                 class="form-control bg-light border-0 py-2 @error('remarks') is-invalid @enderror"
                                 value="{{ old('remarks') }}" placeholder="Enter any notes">
                             @error('remarks')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
 
@@ -280,7 +289,7 @@
         </div>
     </div>
 
-    <div class="modal fade" id="editAssignOfficerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="editAssignOfficerModal" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content" style="border-radius: 15px; border: none;">
                 <div class="modal-header border-0 pt-4 px-4">
@@ -299,7 +308,7 @@
                         <div class="mb-3">
                             <label class="form-label small fw-bold text-muted">Select Officer *</label>
                             <select name="officer_id" id="edit_officer_id"
-                                class="form-select bg-light border-0 py-2 @error('officer_id') is-invalid @enderror">
+                                class="form-select searchable-select @error('officer_id') is-invalid @enderror">
                                 @foreach ($officers as $officer)
                                     <option value="{{ $officer->id }}"
                                         {{ old('officer_id') == $officer->id ? 'selected' : '' }}>
@@ -308,14 +317,14 @@
                                 @endforeach
                             </select>
                             @error('officer_id')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                <span class="text-danger small">{{ $message }}</span>
                             @enderror
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label small fw-bold text-muted">Select Filling Station*</label>
                             <select name="filling_station_id" id="edit_station_id"
-                                class="form-select bg-light border-0 py-2 @error('filling_station_id') is-invalid @enderror">
+                                class="form-select searchable-select @error('filling_station_id') is-invalid @enderror">
                                 @foreach ($stations as $station)
                                     <option value="{{ $station->id }}"
                                         {{ old('filling_station_id') == $station->id ? 'selected' : '' }}>
@@ -324,7 +333,7 @@
                                 @endforeach
                             </select>
                             @error('filling_station_id')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                <span class="text-danger small">{{ $message }}</span>
                             @enderror
                         </div>
 
@@ -334,7 +343,7 @@
                                 class="form-control bg-light border-0 py-2 @error('assign_date') is-invalid @enderror"
                                 value="{{ old('assign_date') }}">
                             @error('assign_date')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
 
@@ -347,7 +356,7 @@
                                 </option>
                             </select>
                             @error('status')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
 
@@ -364,9 +373,27 @@
             </div>
         </div>
     </div>
+
 @endsection
 
 @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#assignOfficerModal .searchable-select').select2({
+                dropdownParent: $('#assignOfficerModal'),
+                width: '100%',
+                placeholder: "Select an option"
+            });
+
+            $('#editAssignOfficerModal .searchable-select').select2({
+                dropdownParent: $('#editAssignOfficerModal'),
+                width: '100%',
+                allowClear: true,
+                placeholder: "Select an option"
+            });
+        });
+    </script>
     <script>
         let timer;
         $('#searchInput').on('keyup', function() {
@@ -389,17 +416,16 @@
                 var url = $(this).data('url');
 
                 $('#editAssignForm').attr('action', url);
-                $('#edit_officer_id').val(officer_id);
-                $('#edit_station_id').val(station_id);
+                $('#edit_url_handler').val(url);
+
+                $('#edit_officer_id').val(officer_id).trigger('change');
+                $('#edit_station_id').val(station_id).trigger('change');
+
                 $('#edit_assign_date').val(date);
                 $('#edit_status').val(status);
 
-
-                $('#edit_url_handler').val(url);
-
                 $('#editAssignOfficerModal').modal('show');
             });
-
 
             @if ($errors->any())
                 @if (old('form_type') == 'edit')
