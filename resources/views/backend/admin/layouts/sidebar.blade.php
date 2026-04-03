@@ -17,6 +17,14 @@
                 </a>
             </li>
 
+            <li class="menu-item">
+                <a href="{{ route('admin.profile.index') }}"
+                    class="menu-link {{ request()->routeIs('admin.profile.*') ? 'active' : '' }}">
+                    <span class="material-symbols-rounded">person</span>
+                    <span class="menu-label">Profile</span>
+                </a>
+            </li>
+
             {{-- COMPANY (SIMPLE MENU) --}}
             <li class="menu-item">
                 <a href="{{ route('admin.companies.index') }}"

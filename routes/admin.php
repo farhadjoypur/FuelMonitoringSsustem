@@ -8,11 +8,13 @@ use App\Http\Controllers\Backend\Admin\DashboardController;
 use App\Http\Controllers\Backend\Admin\DcOfficerController;
 use App\Http\Controllers\Backend\Admin\DepotController;
 use App\Http\Controllers\Backend\Admin\FillingStationController;
+use App\Http\Controllers\Backend\Admin\ProfileController;
 use App\Http\Controllers\Backend\Admin\TagOfficerController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')->middleware(['role:'.UserRole::ADMIN])->as('admin.')->group(function () {
     Route::resource('dashboard', DashboardController::class);
+    Route::resource('profile', ProfileController::class);
     Route::resource('companies', CompanyController::class)->names('companies');
     Route::resource('stations', FillingStationController::class)->names('stations');
     Route::get('/stations/{station}/get', [FillingStationController::class, 'getStation']);

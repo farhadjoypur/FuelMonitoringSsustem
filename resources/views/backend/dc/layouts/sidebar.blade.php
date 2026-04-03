@@ -21,6 +21,14 @@
             </li>
 
             <li class="menu-item">
+                <a href="{{ route('dc.profile.index') }}"
+                    class="menu-link {{ request()->routeIs('dc.profile.*') ? 'active' : '' }}">
+                    <span class="material-symbols-rounded">person</span>
+                    <span class="menu-label">Profile</span>
+                </a>
+            </li>
+
+            <li class="menu-item">
                 <a href="{{ route('dc.assign-tag-officer.index') }}"
                     class="menu-link {{ request()->routeIs('dc.assign-tag-officer.*') ? 'active' : '' }}">
                     <span class="material-symbols-rounded">assignment_turned_in</span>
@@ -28,11 +36,13 @@
                 </a>
             </li>
 
+
+
         </ul>
     </div>
 
     <div class="sidebar-footer">
-        <form method="post" action="#" id="logout-form">
+        <form method="post" action="{{ route('logout') }}" id="logout-form">
             @csrf
             <button type="submit" class="menu-link logout-link" id="logout-btn">
                 <span class="material-symbols-rounded">power_settings_new</span>

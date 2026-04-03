@@ -13,9 +13,9 @@ class UserRole
     public static function list(): array
     {
         return [
-            self::ADMIN => 'admin',
-            self::DC => 'user',
-            self::TAG_OFFICER => 'tag officer',
+            self::ADMIN => 'Admin',
+            self::DC => 'DC',
+            self::TAG_OFFICER => 'Tag Officer',
         ];
     }
 }

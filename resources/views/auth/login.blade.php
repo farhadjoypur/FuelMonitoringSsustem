@@ -178,7 +178,7 @@
                     <div class="login-card">
                         <div class="avatar-circle">FM</div>
                         <h2 class="card-title">Fuel Monitoring System</h2>
-                        <p class="card-subtitle">Tag Officer Login</p>
+                        <p class="card-subtitle my-3">Login Here</p>
 
                         <form action="{{ route('login') }}" method="POST">
                             @csrf
