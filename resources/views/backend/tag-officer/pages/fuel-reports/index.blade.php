@@ -478,9 +478,7 @@
                             <div class="empty-state">
                                 <i class="fa-regular fa-folder-open"></i>
                                 <p>No reports found.</p>
-                                <a href="{{ route('fuel-reports.create') }}" class="btn-add">
-                                    <i class="fa-solid fa-plus"></i> Add First Report
-                                </a>
+                                
                             </div>
                         </td>
                     </tr>

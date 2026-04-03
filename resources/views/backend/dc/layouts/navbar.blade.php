@@ -1,25 +1,11 @@
 <nav class="navbar navbar-expand-lg navbar-top">
-    <div class="container">
-        <a href="{{ route('dc.dashboard.index') }}" class="navbar-brand">
-            <img src="{{ asset('backend/assets/images/logo.png') }}" alt="logo" class="navbar-logo">
-            <span class="fw-bold text-white"></span>
-        </a>
+    <div class="container-fluid px-5 d-flex justify-content-between align-items-center">
 
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
-            aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-            <div class="navbar-nav ms-auto gap-3">
-
-
-                {{-- <div class="dropdown">
-                    <button class="top-navbar-icon-btn position-relative dropdown-toggle" type="button" </div>
-                        <a class="top-navbar-icon-btn text-decoration-none text-reset" href="#">
-                            <span class="material-symbols-rounded">settings</span>
-                        </a>
-                </div> --}}
-            </div>
+        <div class="d-flex align-items-center">
+            <h2 class="navbar-brand text-white fw-bold mb-0 me-3" style="font-size: 24px; padding: 10px 0">DC Officer</h2>
+            <p class="text-stat text-white mb-0 d-none d-md-block" style=" padding-left: 80px;">
+                Bangladesh Government - Fuel Management System
+            </p>
         </div>
+    </div>
 </nav>

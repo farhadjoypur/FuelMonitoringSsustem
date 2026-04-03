@@ -118,8 +118,10 @@ class FillingStationController extends Controller
 
         $station->update($data);
 
-        return redirect()->route('stations.index')
-            ->with('success', 'Station updated successfully');
+        return response()->json([
+            'success' => true,
+            'message' => 'Updated successfully',    
+        ]);
     }
 
     public function destroy($id)
