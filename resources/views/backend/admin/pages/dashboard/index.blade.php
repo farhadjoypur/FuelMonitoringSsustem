@@ -295,28 +295,28 @@
             <div class="sm-icon"><i class="fa-solid fa-building"></i></div>
             <div class="sm-val">{{ $totalDepots }}</div>
             <div class="sm-name">Total Depots</div>
-            <div class="sm-trend">
+            {{-- <div class="sm-trend">
                 <i class="fa-solid fa-arrow-trend-{{ $newDepots >= 0 ? 'up' : 'down' }}"></i>
                 {{ $newDepots >= 0 ? '+' : '' }}{{ $newDepots }} this month
-            </div>
+            </div> --}}
         </div>
         <div class="sum-card green-c">
             <div class="sm-icon"><i class="fa-solid fa-gas-pump"></i></div>
             <div class="sm-val">{{ $totalStations }}</div>
             <div class="sm-name">Total Filling Stations</div>
-            <div class="sm-trend">
+            {{-- <div class="sm-trend">
                 <i class="fa-solid fa-arrow-trend-{{ $newStations >= 0 ? 'up' : 'down' }}"></i>
                 {{ $newStations >= 0 ? '+' : '' }}{{ $newStations }} this month
-            </div>
+            </div> --}}
         </div>
         <div class="sum-card purple-c">
             <div class="sm-icon"><i class="fa-solid fa-user-group"></i></div>
             <div class="sm-val">{{ $totalOfficers }}</div>
             <div class="sm-name">Total Tag Officers</div>
-            <div class="sm-trend">
+            {{-- <div class="sm-trend">
                 <i class="fa-solid fa-arrow-trend-{{ $newOfficers >= 0 ? 'up' : 'down' }}"></i>
                 {{ $newOfficers >= 0 ? '+' : '' }}{{ $newOfficers }} this month
-            </div>
+            </div> --}}
         </div>
     </div>
 
