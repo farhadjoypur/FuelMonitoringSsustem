@@ -150,7 +150,7 @@
                             <th>Department</th>
                             <th>Division</th>
                             <th>District</th>
-                            <th>Thana</th>
+                            {{-- <th>Thana</th> --}}
                             <th>Phone</th>
                             <th>Status</th>
                             <th class="text-center">Actions</th>
@@ -177,7 +177,7 @@
                                 <td>{{ $officer->profile->division ?? 'N/A' }}</td>
 
                                 <td>{{ $officer->profile->district ?? 'N/A' }}</td>
-                                <td>{{ $officer->profile->upazila ?? 'N/A' }}</td>
+                                {{-- <td>{{ $officer->profile->upazila ?? 'N/A' }}</td> --}}
 
                                 <td>{{ $officer->phone ?? 'N/A' }}</td>
 
@@ -328,7 +328,7 @@
                             @enderror
                         </div>
 
-                        <div class="mb-3">
+                        {{-- <div class="mb-3">
                             <label class="form-label small fw-bold">upazila *</label>
                             <select name="upazila" id="add_upazila"
                                 class="form-select bg-light border-0 py-2 @error('upazila') is-invalid @enderror" disabled>
@@ -337,7 +337,7 @@
                             @error('upazila')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
-                        </div>
+                        </div> --}}
 
                         <div class="mb-4 text-center">
                             <label class="form-label d-block text-start small fw-bold">Upload Photo</label>
@@ -472,14 +472,14 @@
                             @enderror
                         </div>
 
-                        <div class="mb-3">
+                        {{-- <div class="mb-3">
                             <label class="form-label small fw-bold">Upazila *</label>
                             <select name="upazila" id="edit_upazila"
                                 class="form-select bg-light border-0 py-2 @error('upazila') is-invalid @enderror"></select>
                             @error('upazila')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
-                        </div>
+                        </div> --}}
 
                         <div class="mb-4 text-center">
                             <label class="form-label d-block text-start small fw-bold">Change Photo (Optional)</label>
