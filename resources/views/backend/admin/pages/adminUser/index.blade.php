@@ -400,7 +400,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label small fw-bold">Email Address *</label>
+                            <label class="form-label small fw-bold">Email Address</label>
                             <input type="email" name="email" id="edit_email"
                                 class="form-control bg-light border-0 py-2 @error('email') is-invalid @enderror"
                                 value="{{ old('email') }}">
