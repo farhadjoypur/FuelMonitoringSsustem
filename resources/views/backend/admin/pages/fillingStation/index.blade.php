@@ -922,11 +922,11 @@
                                 <div class="actions-cell">
                                     {{-- View --}}
                                     <!-- <a href="{{ route('admin.stations.show', $station->id) }}" class="action-btn action-btn-view" title="View">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                        <circle cx="12" cy="12" r="3"/>
-                                    </svg>
-                                </a> -->
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                            <circle cx="12" cy="12" r="3"/>
+                                        </svg>
+                                    </a> -->
 
                                     {{-- Edit → opens modal --}}
                                     <button type="button" class="action-btn action-btn-edit" title="Edit"
@@ -939,18 +939,15 @@
                                     </button>
 
                                     {{-- Delete --}}
-                                    <form action="{{ route('admin.stations.destroy', $station->id) }}" method="POST"
-                                        style="display:inline;">
-                                        @csrf @method('DELETE')
-                                        <button type="submit" class="action-btn action-btn-delete" title="Delete"
-                                            onclick="return confirm('Are you sure you want to delete this station?')">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                                stroke="currentColor" stroke-width="1.8">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" />
-                                            </svg>
-                                        </button>
-                                    </form>
+                                    <!-- Delete Button - AJAX Version -->
+                                    <button type="button" class="action-btn action-btn-delete" title="Delete"
+                                        onclick="deleteStation({{ $station->id }})">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke="currentColor" stroke-width="1.8">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" />
+                                        </svg>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -1054,27 +1051,28 @@
 
                             <div class="col-md-4">
                                 <label class="form-label">Division <span class="req">*</span></label>
-                                <select name="division" class="form-select" required>
-                                    <option value="">— Select —</option>
-                                    <option value="Dhaka">Dhaka</option>
-                                    <option value="Chittagong">Chittagong</option>
-                                    <option value="Rajshahi">Rajshahi</option>
-                                    <option value="Khulna">Khulna</option>
-                                    <option value="Barishal">Barishal</option>
-                                    <option value="Sylhet">Sylhet</option>
-                                    <option value="Rangpur">Rangpur</option>
-                                    <option value="Mymensingh">Mymensingh</option>
+                                <select id="division" name="division" class="form-select" required>
+                                    <option value="">— Select Division —</option>
+                                    @foreach ($locations['divisions'] as $division)
+                                        <option value="{{ $division['name_en'] }}">
+                                            {{ $division['name_en'] }}
+                                        </option>
+                                    @endforeach
                                 </select>
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label">District</label>
-                                <input type="text" name="district" class="form-control">
+                                <select id="district" name="district" class="form-select">
+                                    <option value="">— Select District —</option>
+                                </select>
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label">Upazila</label>
-                                <input type="text" name="upazila" class="form-control">
+                                <select id="upazila" name="upazila" class="form-select">
+                                    <option value="">— Select Upazila —</option>
+                                </select>
                             </div>
 
                             <div class="col-12">
@@ -1313,28 +1311,45 @@
                     {{-- Location --}}
                     <div class="section-title">Location</div>
                     <div class="row g-3 mb-4">
-                        <div class="col-md-4">
-                            <label class="form-label">Division <span class="req">*</span></label>
-                            <select name="division" class="form-select" required>
-                                <option value="">— Select —</option>
-                                ${['Dhaka','Chittagong','Rajshahi','Khulna','Barishal','Sylhet','Rangpur','Mymensingh']
-                                    .map(d => `<option value="${d}" ${s.division === d ? 'selected' : ''}>${d}</option>`)
-                                    .join('')}
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">District</label>
-                            <input type="text" name="district" class="form-control" value="${s.district ?? ''}">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Upazila</label>
-                            <input type="text" name="upazila" class="form-control" value="${s.upazila ?? ''}">
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label">Full Address</label>
-                            <textarea name="address" class="form-control" rows="2">${s.address ?? ''}</textarea>
-                        </div>
+
+                    {{-- Division --}}
+                    <div class="col-md-4">
+                        <label class="form-label">Division <span class="req">*</span></label>
+                        <select id="edit_division" name="division" class="form-select" required>
+                            <option value="">— Select Division —</option>
+
+                            @foreach ($locations['divisions'] as $division)
+                                <option value="{{ $division['name_en'] }}">
+                                    {{ $division['name_en'] }}
+                                </option>
+                            @endforeach
+
+                        </select>
                     </div>
+
+                    {{-- District --}}
+                    <div class="col-md-4">
+                        <label class="form-label">District <span class="req">*</span></label>
+                        <select id="edit_district" name="district" class="form-select" required>
+                            <option value="">— Select District —</option>
+                        </select>
+                    </div>
+
+                    {{-- Upazila --}}
+                    <div class="col-md-4">
+                        <label class="form-label">Upazila <span class="req">*</span></label>
+                        <select id="edit_upazila" name="upazila" class="form-select" required>
+                            <option value="">— Select Upazila —</option>
+                        </select>
+                    </div>
+
+                    {{-- Address --}}
+                    <div class="col-md-12">
+                        <label class="form-label">Address <span class="req">*</span></label>
+                        <input type="text" name="address" id="edit_address" class="form-control">
+                    </div>
+
+                </div>
 
                     {{-- Technical --}}
                     <div class="section-title">Technical Details</div>
@@ -1469,5 +1484,235 @@
                         `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Save Changes`;
                 });
         }
+
+        // Delete Station with AJAX
+        function deleteStation(id) {
+            if (!confirm('Are you sure you want to delete this station?')) {
+                return;
+            }
+
+            const btn = event.currentTarget; // clicked button
+            const originalHTML = btn.innerHTML;
+
+            // Disable button and show loading
+            btn.disabled = true;
+            btn.innerHTML = `
+        <span class="spinner-border spinner-border-sm" role="status"></span>
+    `;
+
+            fetch(`/admin/stations/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Optional: nice animation before reload
+                        const row = btn.closest('tr');
+                        if (row) {
+                            row.style.transition = 'all 0.3s';
+                            row.style.opacity = '0';
+                            setTimeout(() => {
+                                location.reload();
+                            }, 300);
+                        } else {
+                            location.reload();
+                        }
+                    } else {
+                        alert(data.message || 'Delete failed.');
+                        btn.disabled = false;
+                        btn.innerHTML = originalHTML;
+                    }
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert('Something went wrong. Please try again.');
+                    btn.disabled = false;
+                    btn.innerHTML = originalHTML;
+                });
+        }
     </script>
+
+    <script>
+        const locations = @json($locations['divisions']);
+
+        const divisionEl = document.getElementById('division');
+        const districtEl = document.getElementById('district');
+        const upazilaEl = document.getElementById('upazila');
+
+        // ======================
+        // Division change
+        // ======================
+        divisionEl.addEventListener('change', function() {
+
+            districtEl.innerHTML = '<option value="">— Select District —</option>';
+            upazilaEl.innerHTML = '<option value="">— Select Upazila —</option>';
+
+            const division = locations.find(d => d.name_en === this.value);
+
+            if (!division) return;
+
+            division.districts.forEach(dist => {
+                const opt = document.createElement('option');
+                opt.value = dist.name_en;
+                opt.textContent = dist.name_en;
+                districtEl.appendChild(opt);
+            });
+        });
+
+        // ======================
+        // District change
+        // ======================
+        districtEl.addEventListener('change', function() {
+
+            upazilaEl.innerHTML = '<option value="">— Select Upazila —</option>';
+
+            const division = locations.find(d => d.name_en === divisionEl.value);
+            if (!division) return;
+
+            const district = division.districts.find(d => d.name_en === this.value);
+            if (!district) return;
+
+            district.police_stations.forEach(up => {
+                const opt = document.createElement('option');
+                opt.value = up.name_en;
+                opt.textContent = up.name_en;
+                upazilaEl.appendChild(opt);
+            });
+        });
+    </script>
+<script>
+const locations = @json($locations['divisions']);
+
+// =========================
+// CREATE DROPDOWN
+// =========================
+const divisionEl = document.getElementById('division');
+const districtEl = document.getElementById('district');
+const upazilaEl = document.getElementById('upazila');
+
+// =========================
+// EDIT DROPDOWN
+// =========================
+const editDivision = document.getElementById('edit_division');
+const editDistrict = document.getElementById('edit_district');
+const editUpazila  = document.getElementById('edit_upazila');
+
+
+// =====================================================
+// CREATE: Division Change
+// =====================================================
+divisionEl?.addEventListener('change', function () {
+
+    districtEl.innerHTML = '<option value="">— Select District —</option>';
+    upazilaEl.innerHTML = '<option value="">— Select Upazila —</option>';
+
+    const division = locations.find(d => d.name_en === this.value);
+    if (!division) return;
+
+    division.districts.forEach(dist => {
+        districtEl.innerHTML += `<option value="${dist.name_en}">${dist.name_en}</option>`;
+    });
+});
+
+
+// =====================================================
+// CREATE: District Change
+// =====================================================
+districtEl?.addEventListener('change', function () {
+
+    upazilaEl.innerHTML = '<option value="">— Select Upazila —</option>';
+
+    const division = locations.find(d => d.name_en === divisionEl.value);
+    if (!division) return;
+
+    const district = division.districts.find(d => d.name_en === this.value);
+    if (!district) return;
+
+    district.police_stations.forEach(up => {
+        upazilaEl.innerHTML += `<option value="${up.name_en}">${up.name_en}</option>`;
+    });
+});
+
+
+// =====================================================
+// EDIT: Open Modal
+// =====================================================
+function openEditModal(s) {
+
+    editDivision.value = s.division || '';
+
+    loadEditDistricts(s.division, s.district);
+    loadEditUpazilas(s.division, s.district, s.upazila);
+
+    document.getElementById('edit_address').value = s.address || '';
+}
+
+
+// =====================================================
+// EDIT: Division Change
+// =====================================================
+editDivision?.addEventListener('change', function () {
+
+    editDistrict.innerHTML = '<option value="">— Select District —</option>';
+    editUpazila.innerHTML = '<option value="">— Select Upazila —</option>';
+
+    loadEditDistricts(this.value);
+});
+
+
+// =====================================================
+// EDIT: District Change
+// =====================================================
+editDistrict?.addEventListener('change', function () {
+
+    editUpazila.innerHTML = '<option value="">— Select Upazila —</option>';
+
+    loadEditUpazilas(editDivision.value, this.value);
+});
+
+
+// =====================================================
+// EDIT: Load Districts
+// =====================================================
+function loadEditDistricts(divisionName, selectedDistrict = null) {
+
+    const division = locations.find(d => d.name_en === divisionName);
+    if (!division) return;
+
+    division.districts.forEach(dist => {
+
+        editDistrict.innerHTML += `
+            <option value="${dist.name_en}" ${selectedDistrict === dist.name_en ? 'selected' : ''}>
+                ${dist.name_en}
+            </option>
+        `;
+    });
+}
+
+
+// =====================================================
+// EDIT: Load Upazila
+// =====================================================
+function loadEditUpazilas(divisionName, districtName, selectedUpazila = null) {
+
+    const division = locations.find(d => d.name_en === divisionName);
+    if (!division) return;
+
+    const district = division.districts.find(d => d.name_en === districtName);
+    if (!district) return;
+
+    district.police_stations.forEach(up => {
+
+        editUpazila.innerHTML += `
+            <option value="${up.name_en}" ${selectedUpazila === up.name_en ? 'selected' : ''}>
+                ${up.name_en}
+            </option>
+        `;
+    });
+}
+</script>
 @endpush

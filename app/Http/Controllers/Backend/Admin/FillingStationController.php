@@ -25,6 +25,13 @@ class FillingStationController extends Controller
 
     public function index()
     {
+        $path = resource_path('data/location.json');
+
+        if (!file_exists($path)) {
+            dd("Location file not found at: " . $path);
+        }
+
+        $locations = json_decode(file_get_contents($path), true);
         $stations = FillingStation::with('company')->latest()->paginate(10);
 
         $totalStations = FillingStation::count();
@@ -40,7 +47,8 @@ class FillingStationController extends Controller
             'stations',
             'totalStations', 'activeStations', 'inactiveStations',
             'govtStations', 'privateStations',
-            'divisions', 'companies'
+            'divisions', 'companies',
+            'locations'
         ));
     }
 
@@ -118,7 +126,9 @@ class FillingStationController extends Controller
     {
         FillingStation::findOrFail($id)->delete();
 
-        return redirect()->route('stations.index')
-            ->with('success', 'Deleted successfully');
+        return response()->json([
+            'success' => true,
+            'message' => 'Deleted successfully',
+        ]);
     }
 }

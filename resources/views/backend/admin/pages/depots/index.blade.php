@@ -214,7 +214,7 @@
                                 @foreach($locations['divisions'] as $division)
                                     @foreach($division['districts'] as $district)
                                         <option value="{{ $district['name_en'] }}">
-                                            {{ $district['name_en'] }} ({{ $district['name_bn'] }})
+                                            {{ $district['name_en'] }}
                                         </option>
                                     @endforeach
                                 @endforeach
@@ -373,7 +373,7 @@
                                 <option value="">-- Select District --</option>
                                 @foreach($locations['divisions'] as $dist)
                                     <option value="{{ $dist['name_en'] }}" ${d.district === '{{ $dist['name_en'] }}' ? 'selected' : ''}>
-                                        {{ $dist['name_en'] }} ({{ $dist['name_bn'] }})
+                                        {{ $dist['name_en'] }}
                                     </option>
                                 @endforeach
                             </select>
