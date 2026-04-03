@@ -9,7 +9,7 @@
         @endif
     </title>
 
-    <link rel="icon" href="" type="image/x-icon">
+    <link rel="icon" href="{{ asset('backend/assets/images/logo.png') }}" type="image/x-icon">
 
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
@@ -23,6 +23,16 @@
 </head>
 
 <body>
+
+    <script>
+        (function() {
+            const sidebarState = localStorage.getItem("sidebar-state");
+            if (sidebarState === "collapsed") {
+                document.documentElement.classList.add('sidebar-is-collapsed');
+            }
+        })();
+    </script>
+
     @include('backend.dc.layouts.navbar')
     <div class="main-wrapper">
         <nav class="site-nav">

@@ -277,7 +277,7 @@ body.dark-theme .theme-toggle-indicator {
   min-height: 100vh;
 }
 
-.main{
+.main {
   background-color: #ebf3fe;
   padding: 20px;
 }
@@ -598,26 +598,26 @@ body.dark-theme .theme-toggle-indicator {
   border: 1px solid #fadbd8;
 }
 
-.status-hold{
-   background-color: #f3d4d0;
-    color: #c62828;
+.status-hold {
+  background-color: #f3d4d0;
+  color: #c62828;
 }
 
 .btn-apply {
-    background: linear-gradient(90deg, #0d6efd 0%, #198754 100%);
-    color: white;
-    border: none;
-    padding: 10px 16px;
-    border-radius: 8px;
-    /* font-size: 14px; */
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: opacity 0.3s;
-    white-space: nowrap;
+  background: linear-gradient(90deg, #0d6efd 0%, #198754 100%);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  /* font-size: 14px; */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: opacity 0.3s;
+  white-space: nowrap;
 }
 
 .btn-apply:hover {
-    color: white;
-    opacity: 0.9;
+  color: white;
+  opacity: 0.9;
 }

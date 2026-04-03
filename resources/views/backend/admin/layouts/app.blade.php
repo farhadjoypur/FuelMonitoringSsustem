@@ -9,7 +9,7 @@
         @endif
     </title>
 
-    <link rel="icon" href="" type="image/x-icon">
+    <link rel="icon" href="{{ asset('backend/assets/images/logo.png') }}" type="image/x-icon">
 
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
@@ -19,11 +19,22 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-lite.min.css">
     <link rel="stylesheet" href="{{ asset('backend/assets/css/layout.css') }}">
+
     @stack('styles')
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 
 <body>
+
+    <script>
+        (function() {
+            const sidebarState = localStorage.getItem("sidebar-state");
+            if (sidebarState === "collapsed") {
+                document.documentElement.classList.add('sidebar-is-collapsed');
+            }
+        })();
+    </script>
+
     @include('backend.admin.layouts.navbar')
     <div class="main-wrapper">
         <nav class="site-nav">
