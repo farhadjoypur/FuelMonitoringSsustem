@@ -77,6 +77,15 @@ class LoginController extends Controller
             if (Auth::attempt($credentials)) {
                 $request->session()->regenerate();
                 $user = Auth::user();
+
+                if ($user->status == 'inactive') {
+                    Auth::logout();
+
+                    return redirect()->route('login')
+                        ->with('error', 'Your account is not active. Please contact admin.')
+                        ->withInput();
+                }
+
                 if ($user->role == UserRole::ADMIN) {
                     return redirect()->route('admin.dashboard.index')
                         ->with('success', 'Login successfully');

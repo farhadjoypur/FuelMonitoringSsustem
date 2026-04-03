@@ -88,19 +88,20 @@
 @endpush
 
 @section('content')
-    <div class="container-fluid py-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="container-fluid p-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
             <div>
                 <h4 class="fw-bold mb-0">Admin User Management</h4>
                 <p class="text-muted small mb-0">Manage Admin User Information</p>
             </div>
-            <button class="btn btn-primary px-4 py-2" data-bs-toggle="modal" data-bs-target="#addOfficerModal"
-                style="background-color: #006699; border-radius: 8px;">
+
+            <button class="btn btn-primary px-4 py-2 w-sm-100 w-auto" data-bs-toggle="modal" data-bs-target="#addOfficerModal"
+                style="background-color: #006699; border-radius: 8px; border: none;">
                 <i class="bi bi-plus-lg me-2"></i> Add Admin User
             </button>
         </div>
 
-        <div class="row g-4 mb-4">
+        {{-- <div class="row g-4 mb-4">
             <div class="col-md-3">
                 <div class="card card-stats bg-cyan">
                     <i class="bi bi-shield-check fs-4 mb-2"></i>
@@ -129,22 +130,23 @@
                     <h2 class="fw-bold mb-0">{{ $stats['districts'] }}</h2>
                 </div>
             </div>
-        </div>
+        </div> --}}
 
-        <form action="{{ route('admin.admin-user.index') }}" method="GET">
+        {{-- <form action="{{ route('admin.admin-user.index') }}" method="GET">
             <div class="position-relative mb-4">
                 <i class="bi bi-search search-icon"
                     style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%);"></i>
                 <input type="text" name="search" id="searchInput" class="form-control search-box"
                     style="padding-left: 40px;" value="{{ request('search') }}" placeholder="Search dc officer...">
             </div>
-        </form>
+        </form> --}}
 
         <div class="table-container">
             <div class="table-responsive">
                 <table class="table align-middle">
                     <thead class="text-muted">
                         <tr style="font-size: 0.85rem; text-transform: uppercase;">
+                            <th>SL</th>
                             <th>Name</th>
                             <th>Designation</th>
                             <th>Department</th>
@@ -157,27 +159,40 @@
                     <tbody id="dcTableBody">
                         @forelse($admins as $officer)
                             <tr>
+                                <td class="fw-bold text-muted" style="font-size: 0.85rem;">
+                                    {{ $loop->iteration }}
+                                </td>
                                 <td>
-                                    {{ $officer->profile->name ?? 'N/A' }}
+                                    {{ $officer->profile->name ?? '-' }}
                                 </td>
 
                                 <td>
                                     <span class="text-muted small">
-                                        {{ $officer->profile->designation ?? 'N/A' }}
+                                        {{ $officer->profile->designation ?? '-' }}
                                     </span>
                                 </td>
                                 <td>
                                     <span class="text-muted small">
-                                        {{ $officer->profile->department ?? 'N/A' }}
+                                        {{ $officer->profile->department ?? '-' }}
                                     </span>
                                 </td>
 
 
-                                <td>{{ $officer->email ?? 'N/A' }}</td>
-                                <td>{{ $officer->phone ?? 'N/A' }}</td>
+                                <td>{{ $officer->email ?? '-' }}</td>
+                                <td>{{ $officer->phone ?? '-' }}</td>
 
                                 <td>
-                                    <span class="status-active">Active</span>
+                                    @if (strtolower($officer->status) == 'active')
+                                        <span
+                                            style="background-color: #e6fffa; color: #38a169; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-block;">
+                                            Active
+                                        </span>
+                                    @else
+                                        <span
+                                            style="background-color: #fff5f5; color: #e53e3e; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-block;">
+                                            Inactive
+                                        </span>
+                                    @endif
                                 </td>
 
                                 <td class="text-center">
@@ -190,17 +205,6 @@
                                             data-url="{{ route('admin.admin-user.update', $officer->id) }}" title="Edit">
                                             <i class="bi bi-pencil-square"></i>
                                         </button>
-
-                                        {{-- <form action="{{ route('admin.admin-user.destroy', $officer->id) }}" method="POST"
-                                            class="d-inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn-action btn-delete"
-                                                onclick="return confirm('Are you sure you want to delete this officer?')"
-                                                title="Delete">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </form> --}}
 
                                         <form action="{{ route('admin.admin-user.destroy', $officer->id) }}" method="POST"
                                             class="d-inline delete-form">
@@ -251,7 +255,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label small fw-bold">Designation *</label>
+                            <label class="form-label small fw-bold">Designation</label>
                             <input type="text" name="designation"
                                 class="form-control bg-light border-0 py-2 @error('designation') is-invalid @enderror"
                                 placeholder="Enter Designation" value="{{ old('designation') }}">
@@ -261,7 +265,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label small fw-bold">Department *</label>
+                            <label class="form-label small fw-bold">Department</label>
                             <input type="text" name="department"
                                 class="form-control bg-light border-0 py-2 @error('department') is-invalid @enderror"
                                 placeholder="Enter department" value="{{ old('department') }}">
@@ -364,8 +368,9 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label small fw-bold">Designation *</label>
+                            <label class="form-label small fw-bold">Designation</label>
                             <input type="text" name="designation" id="edit_designation"
+                                placeholder="Enter Designation"
                                 class="form-control bg-light border-0 py-2 @error('designation') is-invalid @enderror"
                                 value="{{ old('designation') }}">
                             @error('designation')
@@ -374,8 +379,8 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label small fw-bold">Department *</label>
-                            <input type="text" name="department" id="edit_department"
+                            <label class="form-label small fw-bold">Department</label>
+                            <input type="text" name="department" id="edit_department" placeholder="Enter Department"
                                 class="form-control bg-light border-0 py-2 @error('department') is-invalid @enderror"
                                 value="{{ old('department') }}">
                             @error('department')
@@ -416,6 +421,19 @@
                             </div>
                             @error('password')
                                 <div class="text-danger small mt-1">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Status *</label>
+                            <select name="status" id="edit_status"
+                                class="form-select bg-light border-0 py-2 @error('status') is-invalid @enderror">
+                                <option value="active" {{ old('status') == 'active' ? 'selected' : '' }}>Active</option>
+                                <option value="inactive" {{ old('status') == 'inactive' ? 'selected' : '' }}>Inactive
+                                </option>
+                            </select>
+                            @error('status')
+                                <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
 
