@@ -242,7 +242,7 @@ class DashboardController extends Controller
             ->take(5)
             ->values();
  
-        return view('backend.admin.pages.dashboard.index', compact(
+        return view('backend.dc.pages.dashboard.index', compact(
             // stat cards
             'totalStockToday', 'totalReceivedToday', 'totalSoldToday',
             'totalDiffToday',  'totalDiffPct', 'receivedChangePct',
