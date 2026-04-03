@@ -1,14 +1,15 @@
 <?php
 
 use App\Enums\UserRole;
+use App\Http\Controllers\Backend\Admin\AdminUserController;
 use App\Http\Controllers\Backend\Admin\AssignTagOfficerController;
 use App\Http\Controllers\Backend\Admin\CompanyController;
 use App\Http\Controllers\Backend\Admin\DashboardController;
 use App\Http\Controllers\Backend\Admin\DcOfficerController;
+use App\Http\Controllers\Backend\Admin\DepotController;
 use App\Http\Controllers\Backend\Admin\FillingStationController;
 use App\Http\Controllers\Backend\Admin\TagOfficerController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Backend\Admin\DepotController;
 
 Route::prefix('admin')->middleware(['role:'.UserRole::ADMIN])->as('admin.')->group(function () {
     Route::resource('dashboard', DashboardController::class);
@@ -20,4 +21,5 @@ Route::prefix('admin')->middleware(['role:'.UserRole::ADMIN])->as('admin.')->gro
     Route::resource('tag-officer', TagOfficerController::class);
     Route::resource('dc-officer', DcOfficerController::class);
     Route::resource('assign-tag-officer', AssignTagOfficerController::class);
+    Route::resource('admin-user', AdminUserController::class);
 });
