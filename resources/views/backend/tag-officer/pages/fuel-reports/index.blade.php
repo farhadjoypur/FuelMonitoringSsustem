@@ -315,8 +315,7 @@
             class="page-header d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 mb-4">
             <h4 class="mb-0"><i class="fa-solid fa-gas-pump me-2"></i> Fuel Report List</h4>
 
-            <a href="{{ route('fuel-reports.create') }}"
-                class="btn-add d-block d-sm-inline-block w-100 w-sm-auto text-center">
+            <a href="{{ route('fuel-reports.create') }}" class="btn-add text-nowrap">
                 <i class="fa-solid fa-plus me-1"></i> New Report
             </a>
         </div>
