@@ -234,17 +234,17 @@
         $octaneDiffPct = $todayOctaneReceived > 0
             ? round(($todayOctaneDiff / $todayOctaneReceived) * 100, 1) : 0;
     @endphp
-    <div class="fuel-diff-grid">
-        <div class="diff-pill petrol">
-            Petrol Difference: <strong>{{ $petrolDiffPct >= 0 ? '+' : '' }}{{ $petrolDiffPct }}%</strong>
-        </div>
-        <div class="diff-pill diesel">
-            Diesel Difference: <strong>{{ $dieselDiffPct >= 0 ? '+' : '' }}{{ $dieselDiffPct }}%</strong>
-        </div>
-        <div class="diff-pill octane">
-            Octane Difference: <strong>{{ $octaneDiffPct >= 0 ? '+' : '' }}{{ $octaneDiffPct }}%</strong>
-        </div>
+<div class="fuel-diff-grid">
+    <div class="diff-pill petrol">
+        Petrol Difference: <strong>{{ $petrolDiffPct }}%</strong>
     </div>
+    <div class="diff-pill diesel">
+        Diesel Difference: <strong>{{ $dieselDiffPct }}%</strong>
+    </div>
+    <div class="diff-pill octane">
+        Octane Difference: <strong>{{ $octaneDiffPct }}%</strong>
+    </div>
+</div>
 
     {{-- Row 3: Difference in Litres --}}
     <div class="fuel-diff-grid section-gap">
