@@ -105,37 +105,40 @@
                 <div class="card card-stats bg-cyan">
                     <i class="bi bi-shield-check fs-4 mb-2"></i>
                     <div class="small">Total Tag Officers</div>
-                    <h2 class="fw-bold mb-0">{{ $tagOfficers->count() }}</h2>
+                    <h2 class="fw-bold mb-0">{{ $stats['total'] }}</h2>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="card card-stats bg-green">
                     <i class="bi bi-shield-check fs-4 mb-2"></i>
                     <div class="small">Active Officers</div>
-                    <h2 class="fw-bold mb-0">{{ $tagOfficers->count() }}</h2>
+                    <h2 class="fw-bold mb-0">{{ $stats['active'] }}</h2>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="card card-stats bg-magenta">
                     <i class="bi bi-shield-check fs-4 mb-2"></i>
                     <div class="small">Total Divisions</div>
-                    <h2 class="fw-bold mb-0">{{ $tagOfficers->pluck('profile.division')->unique()->count() }}</h2>
+                    <h2 class="fw-bold mb-0">{{ $stats['divisions'] }}</h2>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="card card-stats bg-orange">
                     <i class="bi bi-shield-check fs-4 mb-2"></i>
                     <div class="small">Total Districts</div>
-                    <h2 class="fw-bold mb-0">{{ $tagOfficers->pluck('profile.district')->unique()->count() }}</h2>
+                    <h2 class="fw-bold mb-0">{{ $stats['districts'] }}</h2>
                 </div>
             </div>
         </div>
 
-        {{-- <div class="position-relative mb-4">
-            <i class="bi bi-search search-icon"></i>
-            <input type="text" id="searchInput" class="form-control search-box"
-                placeholder="Search by name, DC code, district, or division...">
-        </div> --}}
+        <form action="{{ route('admin.tag-officer.index') }}" method="GET">
+            <div class="position-relative mb-4">
+                <i class="bi bi-search search-icon"
+                    style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%);"></i>
+                <input type="text" name="search" id="searchInput" class="form-control search-box"
+                    style="padding-left: 40px;" value="{{ request('search') }}" placeholder="Search tag officer...">
+            </div>
+        </form>
 
         <div class="table-container">
             <div class="table-responsive">
@@ -144,8 +147,10 @@
                         <tr style="font-size: 0.85rem; text-transform: uppercase;">
                             <th>Officer</th>
                             <th>Designation</th>
+                            <th>Department</th>
                             <th>Division</th>
                             <th>District</th>
+                            <th>Thana</th>
                             <th>Phone</th>
                             <th>Status</th>
                             <th class="text-center">Actions</th>
@@ -163,10 +168,16 @@
                                         {{ $officer->profile->designation ?? 'N/A' }}
                                     </span>
                                 </td>
+                                <td>
+                                    <span class="text-muted small">
+                                        {{ $officer->profile->department ?? 'N/A' }}
+                                    </span>
+                                </td>
 
                                 <td>{{ $officer->profile->division ?? 'N/A' }}</td>
 
-                                <td class="fw-bold">{{ $officer->profile->district ?? 'N/A' }}</td>
+                                <td>{{ $officer->profile->district ?? 'N/A' }}</td>
+                                <td>{{ $officer->profile->upazila ?? 'N/A' }}</td>
 
                                 <td>{{ $officer->phone ?? 'N/A' }}</td>
 
@@ -179,10 +190,11 @@
                                         <button class="btn-action btn-edit me-2 edit-btn" data-id="{{ $officer->id }}"
                                             data-name="{{ $officer->profile->name ?? 'N/A' }}"
                                             data-designation="{{ $officer->profile->designation ?? '' }}"
-                                            data-phone="{{ $officer->phone }}"
+                                            data-department="{{ $officer->profile->department ?? '' }}"
+                                            data-phone="{{ $officer->phone }}" data-email="{{ $officer->email }}"
                                             data-division="{{ $officer->profile->division ?? '' }}"
                                             data-district="{{ $officer->profile->district ?? '' }}"
-                                            data-upazilla="{{ $officer->profile->upazilla ?? '' }}"
+                                            data-upazila="{{ $officer->profile->upazila ?? '' }}"
                                             data-url="{{ route('admin.tag-officer.update', $officer->id) }}"
                                             title="Edit">
                                             <i class="bi bi-pencil-square"></i>
@@ -210,6 +222,10 @@
                 </table>
             </div>
         </div>
+
+        <div class="my-4">
+            {{ $tagOfficers->links('pagination::bootstrap-5') }}
+        </div>
     </div>
 
     <div class="modal fade" id="addOfficerModal" tabindex="-1" aria-labelledby="addOfficerModalLabel" aria-hidden="true">
@@ -225,72 +241,126 @@
 
                         <div class="mb-3">
                             <label class="form-label small fw-bold">Officer Name *</label>
-                            <input type="text" name="name" class="form-control bg-light border-0 py-2"
-                                placeholder="Enter name" required>
+                            <input type="text" name="name"
+                                class="form-control bg-light border-0 py-2 @error('name') is-invalid @enderror"
+                                placeholder="Enter name" value="{{ old('name') }}">
+                            @error('name')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label small fw-bold">Designation *</label>
-                            <input type="text" name="designation" class="form-control bg-light border-0 py-2"
-                                placeholder="e.g., TO-001" required>
+                            <input type="text" name="designation"
+                                class="form-control bg-light border-0 py-2 @error('designation') is-invalid @enderror"
+                                placeholder="Enter Designation" value="{{ old('designation') }}">
+                            @error('designation')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label small fw-bold">Department/ Agency*</label>
-                            <input type="text" name="department" class="form-control bg-light border-0 py-2"
-                                placeholder="Enter department" required>
+                            <input type="text" name="department"
+                                class="form-control bg-light border-0 py-2 @error('department') is-invalid @enderror"
+                                placeholder="Enter department" value="{{ old('department') }}">
+                            @error('department')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label small fw-bold">Phone Number *</label>
-                            <input type="text" name="phone" class="form-control bg-light border-0 py-2"
-                                placeholder="e.g., 01712345678" required>
+                            <input type="text" name="phone"
+                                class="form-control bg-light border-0 py-2 @error('phone') is-invalid @enderror"
+                                placeholder="Enter Phone Number" value="{{ old('phone') }}">
+                            @error('phone')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label small fw-bold">Email</label>
-                            <input type="email" name="email" class="form-control bg-light border-0 py-2"
-                                placeholder="Enter email">
+                            <input type="email" name="email"
+                                class="form-control bg-light border-0 py-2 @error('email') is-invalid @enderror"
+                                placeholder="Enter email" value="{{ old('email') }}">
+                            @error('email')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Password *</label>
+                            <div class="input-group">
+                                <input type="password" name="password" id="password" value="123456"
+                                    class="form-control bg-light border-0 py-2 @error('password') is-invalid @enderror"
+                                    placeholder="Enter password"
+                                    style="border-top-right-radius: 0; border-bottom-right-radius: 0;">
+
+                                <span class="input-group-text bg-light border-0" id="togglePassword"
+                                    style="cursor: pointer; border-top-left-radius: 0; border-bottom-left-radius: 0; border: 1px solid transparent;">
+                                    <i class="bi bi-eye-slash text-muted" id="eyeIcon"></i>
+                                </span>
+                                @error('password')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @enderror
+                            </div>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label small fw-bold">Division *</label>
-                            <select name="division" class="form-select bg-light border-0 py-2">
+                            <select name="division" id="add_division"
+                                class="form-select bg-light border-0 py-2 @error('division') is-invalid @enderror">
                                 <option value="">Select Division</option>
                             </select>
+                            @error('division')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label small fw-bold">District *</label>
-                            <select name="district" class="form-select bg-light border-0 py-2" disabled>
+                            <select name="district" id="add_district"
+                                class="form-select bg-light border-0 py-2 @error('district') is-invalid @enderror"
+                                disabled>
                                 <option value="">Select District</option>
                             </select>
+                            @error('district')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label small fw-bold">Upazilla *</label>
-                            <select name="upazilla" class="form-select bg-light border-0 py-2" disabled>
-                                <option value="">Select Upazilla</option>
+                            <label class="form-label small fw-bold">upazila *</label>
+                            <select name="upazila" id="add_upazila"
+                                class="form-select bg-light border-0 py-2 @error('upazila') is-invalid @enderror" disabled>
+                                <option value="">Select upazila</option>
                             </select>
+                            @error('upazila')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="mb-4 text-center">
                             <label class="form-label d-block text-start small fw-bold">Upload Photo</label>
-                            <div class="upload-area border border-2 border-dashed rounded p-4 bg-light"
-                                style="border-style: dashed !important; cursor: pointer;">
+                            <div class="upload-area border border-2 border-dashed rounded p-4 bg-light @error('photo') border-danger @enderror"
+                                style="cursor: pointer;">
                                 <input type="file" name="photo" class="d-none" id="photoInput">
                                 <label for="photoInput" class="mb-0" style="cursor: pointer;">
                                     <i class="bi bi-cloud-arrow-up fs-2 text-muted"></i>
                                     <p class="mb-0 text-muted small">Upload</p>
                                 </label>
                             </div>
+                            @error('photo')
+                                <div class="text-danger small mt-1">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="modal-footer border-0 px-0 pb-4">
-                            <button type="button" class="btn btn-outline-secondary px-4 py-2" data-bs-dismiss="modal"
-                                style="border-radius: 8px;">Cancel</button>
+                            <button type="button" class="btn btn-outline-secondary px-4 py-2"
+                                data-bs-dismiss="modal">Cancel</button>
                             <button type="submit" class="btn btn-primary px-5 py-2"
-                                style="background-color: #006699; border-radius: 8px; border: none;">Save</button>
+                                style="background-color: #006699; border: none;">Save</button>
                         </div>
                     </form>
                 </div>
@@ -306,52 +376,122 @@
                     <h5 class="modal-title fw-bold">Edit Tag Officer</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
+
                 <div class="modal-body px-4">
-                    <form id="editOfficerForm" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" id="old_division" value="{{ old('division') }}">
+                    <input type="hidden" id="old_district" value="{{ old('district') }}">
+                    <input type="hidden" id="old_upazila" value="{{ old('upazila') }}">
+
+                    <form id="editOfficerForm" method="POST" action="{{ old('edit_url_handler') }}"
+                        enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
+
+                        <input type="hidden" name="edit_url_handler" id="edit_url_handler"
+                            value="{{ old('edit_url_handler') }}">
 
                         <div class="mb-3">
                             <label class="form-label small fw-bold">Officer Name *</label>
                             <input type="text" name="name" id="edit_name"
-                                class="form-control bg-light border-0 py-2" required>
+                                class="form-control bg-light border-0 py-2 @error('name') is-invalid @enderror"
+                                value="{{ old('name') }}">
+                            @error('name')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label small fw-bold">Designation *</label>
                             <input type="text" name="designation" id="edit_designation"
-                                class="form-control bg-light border-0 py-2" required>
+                                class="form-control bg-light border-0 py-2 @error('designation') is-invalid @enderror"
+                                value="{{ old('designation') }}">
+                            @error('designation')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Department *</label>
+                            <input type="text" name="department" id="edit_department"
+                                class="form-control bg-light border-0 py-2 @error('department') is-invalid @enderror"
+                                value="{{ old('department') }}">
+                            @error('department')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label small fw-bold">Phone Number *</label>
                             <input type="text" name="phone" id="edit_phone"
-                                class="form-control bg-light border-0 py-2" required>
+                                class="form-control bg-light border-0 py-2 @error('phone') is-invalid @enderror"
+                                value="{{ old('phone') }}">
+                            @error('phone')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Email Address *</label>
+                            <input type="email" name="email" id="edit_email"
+                                class="form-control bg-light border-0 py-2 @error('email') is-invalid @enderror"
+                                value="{{ old('email') }}">
+                            @error('email')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Password (Leave blank to keep current)</label>
+                            <div class="input-group">
+                                <input type="password" name="password" id="edit_password"
+                                    class="form-control bg-light border-0 py-2 @error('password') is-invalid @enderror"
+                                    placeholder="Enter new password">
+                                <span class="input-group-text bg-light border-0" id="toggleEditPassword"
+                                    style="cursor: pointer;">
+                                    <i class="bi bi-eye-slash text-muted" id="editEyeIcon"></i>
+                                </span>
+                            </div>
+                            @error('password')
+                                <div class="text-danger small mt-1">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label small fw-bold">Division *</label>
-                            <select name="division" id="edit_division" class="form-select bg-light border-0 py-2"
-                                required></select>
+                            <select name="division" id="edit_division"
+                                class="form-select bg-light border-0 py-2 @error('division') is-invalid @enderror"></select>
+                            @error('division')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label small fw-bold">District *</label>
-                            <select name="district" id="edit_district" class="form-select bg-light border-0 py-2"
-                                required></select>
+                            <select name="district" id="edit_district"
+                                class="form-select bg-light border-0 py-2 @error('district') is-invalid @enderror"></select>
+                            @error('district')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label small fw-bold">Upazilla *</label>
-                            <select name="upazilla" id="edit_upazilla" class="form-select bg-light border-0 py-2"
-                                required></select>
+                            <label class="form-label small fw-bold">Upazila *</label>
+                            <select name="upazila" id="edit_upazila"
+                                class="form-select bg-light border-0 py-2 @error('upazila') is-invalid @enderror"></select>
+                            @error('upazila')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="mb-4 text-center">
                             <label class="form-label d-block text-start small fw-bold">Change Photo (Optional)</label>
-                            <div class="upload-area border border-2 border-dashed rounded p-3 bg-light">
+                            <div
+                                class="upload-area border border-2 border-dashed rounded p-3 bg-light @error('photo') border-danger @enderror">
                                 <input type="file" name="photo" class="form-control form-control-sm">
                             </div>
+                            @error('photo')
+                                <div class="text-danger small mt-1">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="modal-footer border-0 px-0 pb-4">
@@ -365,107 +505,81 @@
             </div>
         </div>
     </div>
+
 @endsection
 
-@push('scripts')
+{{-- @push('scripts')
+    <script>
+        $(document).ready(function() {
+
+            @if ($errors->any())
+                // ১. চেক করা হচ্ছে এটা কি Edit Modal এর এরর?
+                var oldAction = "{{ old('edit_url_handler') }}";
+
+                if (oldAction) {
+                    // --- Edit Modal এর লজিক ---
+                    var editModalElement = document.getElementById('editOfficerModal');
+                    if (editModalElement) {
+                        var editModal = new bootstrap.Modal(editModalElement);
+                        $('#editOfficerForm').attr('action', oldAction);
+
+                        const oldDiv = "{{ old('division') }}";
+                        const oldDist = "{{ old('district') }}";
+                        const oldUpz = "{{ old('upazila') }}";
+
+                        if (oldDiv) {
+                            populateDivisions(oldDiv, '#edit_division'); // ডিভিশন সিলেক্ট করা
+                            loadDistricts(oldDiv, oldDist, '#edit_district');
+                            if (oldDist) {
+                                loadupazilas(oldDiv, oldDist, oldUpz, '#edit_upazila');
+                            }
+                        }
+                        editModal.show();
+                    }
+                } else {
+                    // --- ২. Add Modal এর লজিক (যেহেতু কোন Edit Action নেই) ---
+                    var addModalElement = document.getElementById('addOfficerModal');
+                    if (addModalElement) {
+                        var addModal = new bootstrap.Modal(addModalElement);
+
+                        const oldDiv = "{{ old('division') }}";
+                        const oldDist = "{{ old('district') }}";
+                        const oldUpz = "{{ old('upazila') }}";
+
+                        if (oldDiv) {
+                            populateDivisions(oldDiv, '#add_division'); // অ্যাড মোডালের ডিভিশন সেট
+                            loadDistricts(oldDiv, oldDist, '#add_district');
+                            if (oldDist) {
+                                loadupazilas(oldDiv, oldDist, oldUpz, '#add_upazila');
+                            }
+                        }
+                        addModal.show();
+                    }
+                }
+            @else
+                // যদি কোন এরর না থাকে, তবে নরমালি অ্যাড মোডালের জন্য ডিভিশন লোড করে রাখা
+                populateDivisions('', '#add_division');
+            @endif
+
+            // --- ড্রপডাউন চেঞ্জ ইভেন্ট (Add Modal) ---
+            $('#add_division').on('change', function() {
+                loadDistricts($(this).val(), '', '#add_district');
+                $('#add_upazila').html('<option value="">Select upazila</option>').prop('disabled', true);
+            });
+
+            $('#add_district').on('change', function() {
+                loadupazilas($('#add_division').val(), $(this).val(), '', '#add_upazila');
+            });
+
+        });
+    </script>
+
     <script>
         const locationData = @json($locationData);
         const divisions = locationData.divisions || [];
 
         $(document).ready(function() {
-            const $divSelect = $('select[name="division"]');
-            const $distSelect = $('select[name="district"]');
-            const $upazillaSelect = $('select[name="upazilla"]');
-
-
-            divisions.forEach(div => {
-                $divSelect.append(`<option value="${div.name_en}">${div.name_en}</option>`);
-            });
-
-            $divSelect.on('change', function() {
-                const selectedDivName = $(this).val();
-
-                $distSelect.html('<option value="">Select District</option>').prop('disabled', !
-                    selectedDivName);
-                $upazillaSelect.html('<option value="">Select Upazilla</option>').prop('disabled', true);
-
-                if (selectedDivName) {
-                    const selectedDiv = divisions.find(d => d.name_en === selectedDivName);
-                    if (selectedDiv && selectedDiv.districts) {
-                        selectedDiv.districts.forEach(dist => {
-                            $distSelect.append(
-                                `<option value="${dist.name_en}">${dist.name_en}</option>`);
-                        });
-                        $distSelect.prop('disabled', false);
-                    }
-                }
-            });
-
-            $distSelect.on('change', function() {
-                const selectedDivName = $divSelect.val();
-                const selectedDistName = $(this).val();
-
-                $upazillaSelect.html('<option value="">Select Upazilla</option>').prop('disabled', !
-                    selectedDistName);
-
-                if (selectedDistName) {
-                    const selectedDiv = divisions.find(d => d.name_en === selectedDivName);
-                    const selectedDist = selectedDiv.districts.find(d => d.name_en === selectedDistName);
-
-                    if (selectedDist && selectedDist.police_stations) {
-                        selectedDist.police_stations.forEach(ps => {
-                            $upazillaSelect.append(
-                                `<option value="${ps.name_en}">${ps.name_en}</option>`);
-                        });
-                        $upazillaSelect.prop('disabled', false);
-                    }
-                }
-            });
-        });
-    </script>
-
-    <script>
-        $(document).ready(function() {
-
-            $(document).on('click', '.edit-btn', function() {
-                const data = $(this).data();
-                const $modal = $('#editOfficerModal');
-
-
-                $('#editOfficerForm').attr('action', data.url);
-                $('#edit_name').val(data.name);
-                $('#edit_designation').val(data.designation);
-                $('#edit_phone').val(data.phone);
-
-                let divOptions = '<option value="">Select Division</option>';
-                if (typeof divisions !== 'undefined') {
-                    divisions.forEach(div => {
-                        const isSelected = (div.name_en === data.division) ? 'selected' : '';
-                        divOptions +=
-                            `<option value="${div.name_en}" ${isSelected}>${div.name_en}</option>`;
-                    });
-                }
-                $('#edit_division').html(divOptions);
-
-                loadDistricts(data.division, data.district, '#edit_district');
-                loadUpazillas(data.division, data.district, data.upazilla, '#edit_upazilla');
-
-                $modal.modal('show');
-            });
-
-            $('#edit_division').on('change', function() {
-                const selectedDiv = $(this).val();
-                loadDistricts(selectedDiv, '', '#edit_district');
-                $('#edit_upazilla').html('<option value="">Select Upazilla</option>').prop('disabled',
-                    true);
-            });
-
-            $('#edit_district').on('change', function() {
-                const selectedDiv = $('#edit_division').val();
-                const selectedDist = $(this).val();
-                loadUpazillas(selectedDiv, selectedDist, '', '#edit_upazilla');
-            });
-
+            // --- কমন ফাংশনসমূহ ---
             function loadDistricts(divName, selectedDist, target) {
                 const div = divisions.find(d => d.name_en === divName);
                 let options = '<option value="">Select District</option>';
@@ -474,18 +588,18 @@
                         const sel = (dist.name_en === selectedDist) ? 'selected' : '';
                         options += `<option value="${dist.name_en}" ${sel}>${dist.name_en}</option>`;
                     });
+                    $(target).html(options).prop('disabled', false);
+                } else {
+                    $(target).html(options).prop('disabled', true);
                 }
-                $(target).html(options).prop('disabled', !div);
             }
 
-            function loadUpazillas(divName, distName, selectedUpz, target) {
+            function loadupazilas(divName, distName, selectedUpz, target) {
                 const div = divisions.find(d => d.name_en === divName);
                 const dist = div?.districts?.find(d => d.name_en === distName);
-                let options = '<option value="">Select Upazilla</option>';
-
+                let options = '<option value="">Select upazila</option>';
                 if (dist && dist.police_stations) {
                     dist.police_stations.forEach(ps => {
-                        // trim() ব্যবহার করা হয়েছে যাতে কোনো স্পেস থাকলে সমস্যা না হয়
                         const isSelected = (String(ps.name_en).trim() === String(selectedUpz).trim()) ?
                             'selected' : '';
                         options += `<option value="${ps.name_en}" ${isSelected}>${ps.name_en}</option>`;
@@ -495,6 +609,231 @@
                     $(target).html(options).prop('disabled', true);
                 }
             }
+
+            function populateDivisions(selectedDiv, target) {
+                let divOptions = '<option value="">Select Division</option>';
+                divisions.forEach(div => {
+                    const isSelected = (div.name_en === selectedDiv) ? 'selected' : '';
+                    divOptions += `<option value="${div.name_en}" ${isSelected}>${div.name_en}</option>`;
+                });
+                $(target).html(divOptions);
+            }
+
+            // --- Add Modal এর জন্য ইনিশিয়াল ডিভিশন লোড ---
+            populateDivisions('', '#add_division');
+
+            // Add Modal ড্রপডাউন চেঞ্জ
+            $('#add_division').on('change', function() {
+                loadDistricts($(this).val(), '', '#add_district');
+                $('#add_upazila').html('<option value="">Select upazila</option>').prop('disabled', true);
+            });
+
+            $('#add_district').on('change', function() {
+                loadupazilas($('#add_division').val(), $(this).val(), '', '#add_upazila');
+            });
+
+            // --- Edit Modal বাটন ক্লিক ---
+            $(document).on('click', '.edit-btn', function() {
+                const data = $(this).data();
+                $('#editOfficerForm').attr('action', data.url);
+                $('#edit_url_handler').val(data.url);
+                $('#edit_name').val(data.name);
+                $('#edit_designation').val(data.designation);
+                $('#edit_department').val(data.department);
+                $('#edit_phone').val(data.phone);
+                $('#edit_email').val(data.email);
+
+                populateDivisions(data.division, '#edit_division');
+                loadDistricts(data.division, data.district, '#edit_district');
+                loadupazilas(data.division, data.district, data.upazila, '#edit_upazila');
+
+                $('#editOfficerModal').modal('show');
+            });
+
+            // Edit Modal ড্রপডাউন চেঞ্জ
+            $('#edit_division').on('change', function() {
+                loadDistricts($(this).val(), '', '#edit_district');
+                $('#edit_upazila').html('<option value="">Select upazila</option>').prop('disabled', true);
+            });
+
+            $('#edit_district').on('change', function() {
+                loadupazilas($('#edit_division').val(), $(this).val(), '', '#edit_upazila');
+            });
+
+            // --- ভ্যালিডেশন এরর হ্যান্ডেলিং (Old Values Restore) ---
+            // যদি Edit মোডালের এরর হয়
+            const oldEditUrl = $('#edit_url_handler').val();
+            if (oldEditUrl) {
+                const oldDiv = $('#old_division').val();
+                populateDivisions(oldDiv, '#edit_division');
+                loadDistricts(oldDiv, $('#old_district').val(), '#edit_district');
+                loadupazilas(oldDiv, $('#old_district').val(), $('#old_upazila').val(), '#edit_upazila');
+                $('#editOfficerModal').modal('show');
+            }
+            // যদি Add মোডালের এরর হয়
+            else if ("{{ $errors->any() }}" && !"{{ old('edit_url_handler') }}") {
+                const oldAddDiv = "{{ old('division') }}";
+                const oldAddDist = "{{ old('district') }}";
+                const oldAddUpz = "{{ old('upazila') }}";
+
+                populateDivisions(oldAddDiv, '#add_division');
+                if (oldAddDiv) {
+                    loadDistricts(oldAddDiv, oldAddDist, '#add_district');
+                    if (oldAddDist) {
+                        loadupazilas(oldAddDiv, oldAddDist, oldAddUpz, '#add_upazila');
+                    }
+                }
+                $('#addOfficerModal').modal('show');
+            }
+        });
+    </script>
+@endpush --}}
+
+@push('scripts')
+    <script>
+        let timer;
+        $('#searchInput').on('keyup', function() {
+            clearTimeout(timer);
+            timer = setTimeout(function() {
+                $(this).closest('form').submit();
+            }.bind(this), 500);
+        });
+    </script>
+
+    <script>
+        $(document).ready(function() {
+
+            function togglePasswordVisibility(inputSelector, iconSelector) {
+                const passInput = $(inputSelector);
+                const icon = $(iconSelector);
+
+                if (passInput.attr('type') === 'password') {
+                    passInput.attr('type', 'text');
+                    icon.removeClass('bi-eye-slash').addClass('bi-eye');
+                } else {
+                    passInput.attr('type', 'password');
+                    icon.removeClass('bi-eye').addClass('bi-eye-slash');
+                }
+            }
+
+            $(document).on('click', '#togglePassword', function() {
+                togglePasswordVisibility('#password', '#eyeIcon');
+            });
+
+            $(document).on('click', '#toggleEditPassword', function() {
+                togglePasswordVisibility('#edit_password', '#editEyeIcon');
+            });
+        });
+    </script>
+
+    <script>
+        const locationData = @json($locationData);
+        const divisions = locationData.divisions || [];
+
+        $(document).ready(function() {
+            function loadDistricts(divName, selectedDist, target) {
+                const div = divisions.find(d => d.name_en === divName);
+                let options = '<option value="">Select District</option>';
+                if (div && div.districts) {
+                    div.districts.forEach(dist => {
+                        const sel = (dist.name_en === selectedDist) ? 'selected' : '';
+                        options += `<option value="${dist.name_en}" ${sel}>${dist.name_en}</option>`;
+                    });
+                    $(target).html(options).prop('disabled', false);
+                } else {
+                    $(target).html(options).prop('disabled', true);
+                }
+            }
+
+            function loadupazilas(divName, distName, selectedUpz, target) {
+                const div = divisions.find(d => d.name_en === divName);
+                const dist = div?.districts?.find(d => d.name_en === distName);
+                let options = '<option value="">Select upazila</option>';
+                if (dist && dist.police_stations) {
+                    dist.police_stations.forEach(ps => {
+                        const isSelected = (String(ps.name_en).trim() === String(selectedUpz).trim()) ?
+                            'selected' : '';
+                        options += `<option value="${ps.name_en}" ${isSelected}>${ps.name_en}</option>`;
+                    });
+                    $(target).html(options).prop('disabled', false);
+                } else {
+                    $(target).html(options).prop('disabled', true);
+                }
+            }
+
+            function populateDivisions(selectedDiv, target) {
+                let divOptions = '<option value="">Select Division</option>';
+                divisions.forEach(div => {
+                    const isSelected = (div.name_en === selectedDiv) ? 'selected' : '';
+                    divOptions += `<option value="${div.name_en}" ${isSelected}>${div.name_en}</option>`;
+                });
+                $(target).html(divOptions);
+            }
+
+            populateDivisions('', '#add_division');
+
+            $('#add_division').on('change', function() {
+                loadDistricts($(this).val(), '', '#add_district');
+                $('#add_upazila').html('<option value="">Select upazila</option>').prop('disabled', true);
+            });
+
+            $('#add_district').on('change', function() {
+                loadupazilas($('#add_division').val(), $(this).val(), '', '#add_upazila');
+            });
+
+            $(document).on('click', '.edit-btn', function() {
+                const data = $(this).data();
+                $('#editOfficerForm').attr('action', data.url);
+                $('#edit_url_handler').val(data.url);
+                $('#edit_name').val(data.name);
+                $('#edit_designation').val(data.designation);
+                $('#edit_department').val(data.department);
+                $('#edit_phone').val(data.phone);
+                $('#edit_email').val(data.email);
+
+                populateDivisions(data.division, '#edit_division');
+                loadDistricts(data.division, data.district, '#edit_district');
+                loadupazilas(data.division, data.district, data.upazila, '#edit_upazila');
+
+                $('#editOfficerModal').modal('show');
+            });
+
+            $('#edit_division').on('change', function() {
+                loadDistricts($(this).val(), '', '#edit_district');
+                $('#edit_upazila').html('<option value="">Select upazila</option>').prop('disabled', true);
+            });
+
+            $('#edit_district').on('change', function() {
+                loadupazilas($('#edit_division').val(), $(this).val(), '', '#edit_upazila');
+            });
+
+            @if ($errors->any())
+                var oldAction = "{{ old('edit_url_handler') }}";
+                const oldDiv = "{{ old('division') }}";
+                const oldDist = "{{ old('district') }}";
+                const oldUpz = "{{ old('upazila') }}";
+
+                if (oldAction) {
+                    $('#editOfficerForm').attr('action', oldAction);
+                    populateDivisions(oldDiv, '#edit_division');
+                    if (oldDiv) {
+                        loadDistricts(oldDiv, oldDist, '#edit_district');
+                        if (oldDist) {
+                            loadupazilas(oldDiv, oldDist, oldUpz, '#edit_upazila');
+                        }
+                    }
+                    $('#editOfficerModal').modal('show');
+                } else {
+                    populateDivisions(oldDiv, '#add_division');
+                    if (oldDiv) {
+                        loadDistricts(oldDiv, oldDist, '#add_district');
+                        if (oldDist) {
+                            loadupazilas(oldDiv, oldDist, oldUpz, '#add_upazila');
+                        }
+                    }
+                    $('#addOfficerModal').modal('show');
+                }
+            @endif
         });
     </script>
 @endpush

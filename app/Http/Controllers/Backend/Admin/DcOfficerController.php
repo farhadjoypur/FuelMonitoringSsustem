@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Backend\Admin;
 
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
+use App\Models\Profile;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -26,16 +27,43 @@ class DcOfficerController extends Controller
         return json_decode($json, true);
     }
 
-    public function index()
+    public function index(Request $request)
     {
+        $search = $request->input('search');
+
+        $baseQuery = User::where('role', UserRole::DC);
+
+        $stats = [
+            'total' => (clone $baseQuery)->count(),
+            'active' => (clone $baseQuery)->where('status', 'active')->count(),
+            'divisions' => Profile::whereIn('user_id', (clone $baseQuery)->pluck('id'))
+                ->distinct('division')->count('division'),
+            'districts' => Profile::whereIn('user_id', (clone $baseQuery)->pluck('id'))
+                ->distinct('district')->count('district'),
+        ];
+
         $dcOfficers = User::where('role', UserRole::DC)
             ->with('profile')
+            ->when($search, function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('phone', 'LIKE', "%{$search}%")
+                        ->orWhere('email', 'LIKE', "%{$search}%")
+                        ->orWhereHas('profile', function ($pq) use ($search) {
+                            $pq->where('name', 'LIKE', "%{$search}%")
+                                ->orWhere('district', 'LIKE', "%{$search}%")
+                                ->orWhere('division', 'LIKE', "%{$search}%")
+                                ->orWhere('department', 'LIKE', "%{$search}%")
+                                ->orWhere('designation', 'LIKE', "%{$search}%");
+                        });
+                });
+            })
             ->latest()
-            ->get();
+            ->paginate(10)
+            ->withQueryString();
 
         $locationData = $this->getLocationData();
 
-        return view('backend.admin.pages.dcOfficer.index', compact('dcOfficers', 'locationData'));
+        return view('backend.admin.pages.dcOfficer.index', compact('dcOfficers', 'locationData', 'search', 'stats'));
     }
 
     public function store(Request $request)
@@ -49,7 +77,7 @@ class DcOfficerController extends Controller
             'division' => 'required',
             'district' => 'required',
             'upazila' => 'required',
-            'password' => 'required|string|min:6',
+            'password' => 'required',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
@@ -59,6 +87,7 @@ class DcOfficerController extends Controller
             $user = User::create([
                 'email' => $request->email,
                 'phone' => $request->phone,
+                'status' => 'active',
                 'password' => Hash::make($request->password),
                 'role' => UserRole::DC,
             ]);
@@ -84,7 +113,7 @@ class DcOfficerController extends Controller
 
             DB::commit();
 
-            return redirect()->back()->with('success', 'DC Officer added successfully!');
+            return redirect()->back()->with('success', 'DC added successfully!');
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -122,13 +151,14 @@ class DcOfficerController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,'.$user->id,
-            'phone' => 'required|string|unique:users,phone,'.$user->id,
+            'email' => 'required|email|unique:users,email,'.$id,
+            'phone' => 'required|string|unique:users,phone,'.$id,
             'designation' => 'required|string',
+            'department' => 'required|string',
             'division' => 'required',
             'district' => 'required',
             'upazila' => 'required',
-            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'password' => 'nullable|min:6',
         ]);
 
@@ -146,6 +176,7 @@ class DcOfficerController extends Controller
         $profileData = [
             'name' => $request->name,
             'designation' => $request->designation,
+            'department' => $request->department,
             'division' => $request->division,
             'district' => $request->district,
             'upazila' => $request->upazila,
@@ -161,7 +192,11 @@ class DcOfficerController extends Controller
             $profileData['photo'] = 'uploads/officers/'.$fileName;
         }
 
-        $user->profile()->update($profileData);
+        if ($user->profile) {
+            $user->profile->update($profileData);
+        } else {
+            $user->profile()->create($profileData);
+        }
 
         return redirect()->back()->with('success', 'Officer updated successfully!');
     }
