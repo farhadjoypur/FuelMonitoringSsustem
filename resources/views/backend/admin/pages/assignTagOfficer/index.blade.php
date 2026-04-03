@@ -163,10 +163,10 @@
                                             data-date="{{ $assignment->assign_date }}"
                                             data-status="{{ $assignment->status }}"
                                             data-url="{{ route('admin.assign-tag-officer.update', $assignment->id) }}">
-                                            <i class="bi bi-pencil text-primary"></i>
+                                            <i class="bi bi-pencil-square text-primary"></i>
                                         </button>
 
-                                        <form action="{{ route('admin.assign-tag-officer.destroy', $assignment->id) }}"
+                                        {{-- <form action="{{ route('admin.assign-tag-officer.destroy', $assignment->id) }}"
                                             method="POST" class="d-inline"
                                             onsubmit="return confirm('Are you sure you want to delete this assignment?')">
                                             @csrf
@@ -174,7 +174,19 @@
                                             <button type="submit" class="btn-action border-0 bg-transparent">
                                                 <i class="bi bi-trash text-muted"></i>
                                             </button>
+                                        </form> --}}
+
+                                        <form action="{{ route('admin.assign-tag-officer.destroy', $assignment->id) }}"
+                                            method="POST" class="d-inline delete-form">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="button"
+                                                class="btn-action border-0 bg-transparent text-danger delete-confirm"
+                                                title="Delete">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
                                         </form>
+
                                     </td>
                                 </tr>
                             @empty
@@ -401,6 +413,28 @@
             timer = setTimeout(function() {
                 $(this).closest('form').submit();
             }.bind(this), 500);
+        });
+    </script>
+
+    <script>
+        $(document).on('click', '.delete-confirm', function(e) {
+            let form = $(this).closest('form');
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
         });
     </script>
 

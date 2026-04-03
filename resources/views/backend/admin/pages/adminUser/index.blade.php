@@ -191,12 +191,22 @@
                                             <i class="bi bi-pencil-square"></i>
                                         </button>
 
-                                        <form action="{{ route('admin.admin-user.destroy', $officer->id) }}" method="POST"
+                                        {{-- <form action="{{ route('admin.admin-user.destroy', $officer->id) }}" method="POST"
                                             class="d-inline">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn-action btn-delete"
                                                 onclick="return confirm('Are you sure you want to delete this officer?')"
+                                                title="Delete">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form> --}}
+
+                                        <form action="{{ route('admin.admin-user.destroy', $officer->id) }}" method="POST"
+                                            class="d-inline delete-form">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="button" class="btn-action btn-delete delete-confirm"
                                                 title="Delete">
                                                 <i class="bi bi-trash"></i>
                                             </button>
@@ -435,6 +445,28 @@
 @endsection
 
 @push('scripts')
+    <script>
+        $(document).on('click', '.delete-confirm', function(e) {
+            let form = $(this).closest('form');
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+    </script>
+
     <script>
         let timer;
         $('#searchInput').on('keyup', function() {
