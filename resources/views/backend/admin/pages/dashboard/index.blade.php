@@ -11,998 +11,354 @@
             --border: #e8ecf0;
             --text: #1a1f2e;
             --muted: #7c8db5;
-            --petrol: #22c55e;
-            --diesel: #f97316;
-            --octane: #ef4444;
+            --petrol-color: #2d9748;
+            --diesel-color: #c8860a;
+            --octane-color: #ef4444;
             --blue: #2563eb;
             --green: #16a34a;
             --purple: #7c3aed;
             --orange: #ea580c;
-            --shadow: 0 1px 3px rgba(0, 0, 0, .07), 0 4px 16px rgba(0, 0, 0, .04);
+            --shadow: 0 1px 3px rgba(0,0,0,.07), 0 4px 16px rgba(0,0,0,.04);
             --radius: 14px;
         }
 
-        .db-wrap {
-            /* background: var(--bg); */
-            min-height: 100vh;
-            padding: 28px;
-        }
+        .db-wrap { min-height: 100vh; padding: 28px; }
 
         .db-title {
-            font-size: 22px;
-            font-weight: 800;
-            color: var(--text);
-            margin: 0 0 3px;
-            letter-spacing: -.3px;
+            font-size: 22px; font-weight: 800; color: var(--text);
+            margin: 0 0 3px; letter-spacing: -.3px;
+        }
+        .db-sub { font-size: 13px; color: var(--muted); margin-bottom: 26px; }
+
+        .section-title {
+            font-size: 15px; font-weight: 700; color: var(--text);
+            margin: 0 0 14px; text-align: center;
         }
 
-        .db-sub {
-            font-size: 13px;
-            color: var(--muted);
-            margin-bottom: 26px;
-        }
-
-        /* grids */
-        .g-5 {
+        /* ===== FUEL GRIDS (3 col) ===== */
+        .fuel-grid,
+        .fuel-diff-grid {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 16px;
-            margin-bottom: 24px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-bottom: 10px;
         }
 
-        .g-3 {
+        /* Main fuel card */
+        .fuel-main-card {
+            border-radius: var(--radius);
+            border: 1px solid transparent;
+            padding: 18px 16px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .fuel-main-card.petrol { background: #f0fdf4; border-color: #bbf7d0; }
+        .fuel-main-card.diesel { background: #fffbeb; border-color: #fde68a; }
+        .fuel-main-card.octane { background: #fef2f2; border-color: #fecaca; }
+
+        .fuel-icon-circle {
+            width: 46px; height: 46px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; color: #fff; flex-shrink: 0;
+        }
+        .fuel-icon-circle.p { background: var(--petrol-color); }
+        .fuel-icon-circle.d { background: var(--diesel-color); }
+        .fuel-icon-circle.o { background: var(--octane-color); }
+
+        .fuel-main-info .fmi-val {
+            font-size: 22px; font-weight: 800;
+            letter-spacing: -.5px; line-height: 1;
+        }
+        .fuel-main-info .fmi-name { font-size: 12px; font-weight: 500; margin-top: 3px; }
+
+        .fuel-main-card.petrol .fmi-val,
+        .fuel-main-card.petrol .fmi-name { color: var(--petrol-color); }
+        .fuel-main-card.diesel .fmi-val,
+        .fuel-main-card.diesel .fmi-name { color: var(--diesel-color); }
+        .fuel-main-card.octane .fmi-val,
+        .fuel-main-card.octane .fmi-name { color: var(--octane-color); }
+
+        /* Difference pill cards */
+        .diff-pill {
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 13px; font-weight: 600;
+            text-align: center;
+        }
+        .diff-pill.petrol { background: #f0fdf4; color: var(--petrol-color); border: 1px solid #bbf7d0; }
+        .diff-pill.diesel { background: #fffbeb; color: var(--diesel-color); border: 1px solid #fde68a; }
+        .diff-pill.octane { background: #fef2f2; color: var(--octane-color); border: 1px solid #fecaca; }
+
+        .section-gap { margin-bottom: 28px; }
+
+        /* ===== SUMMARY 3 CARDS ===== */
+        .sum-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 16px;
             margin-bottom: 24px;
         }
-
-        .g-4 {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-
-        .g-22 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-
-        .section-title {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--text);
-            margin: 0 0 14px;
-            text-align: center;
-        }
-
-        /* stat card */
-        .stat-card {
-            background: var(--white);
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
-            padding: 20px 18px;
-            position: relative;
-        }
-
-        .stat-card .sc-label {
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: .5px;
-        }
-
-        .stat-card .sc-value {
-            font-size: 26px;
-            font-weight: 800;
-            color: var(--text);
-            letter-spacing: -.5px;
-            line-height: 1.1;
-            margin: 6px 0;
-        }
-
-        .stat-card .sc-footer {
-            font-size: 12px;
-            color: var(--muted);
-        }
-
-        .stat-card .sc-footer .up {
-            color: var(--green);
-            font-weight: 600;
-        }
-
-        .stat-card .sc-footer .down {
-            color: var(--octane);
-            font-weight: 600;
-        }
-
-        .sc-alert {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--octane);
-            margin: 4px 0;
-        }
-
-        .sc-icon {
-            position: absolute;
-            top: 18px;
-            right: 18px;
-            width: 44px;
-            height: 44px;
-            border-radius: 11px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            color: #fff;
-        }
-
-        .sc-icon.blue {
-            background: var(--blue);
-        }
-
-        .sc-icon.green {
-            background: var(--green);
-        }
-
-        .sc-icon.purple {
-            background: var(--purple);
-        }
-
-        .sc-icon.orange {
-            background: var(--orange);
-        }
-
-        .sc-icon.red {
-            background: var(--octane);
-        }
-
-        /* fuel cards */
-        .fuel-card {
-            border-radius: var(--radius);
-            border: 1px solid transparent;
-            padding: 20px 22px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .fuel-card.petrol {
-            background: #f0fdf4;
-            border-color: #bbf7d0;
-        }
-
-        .fuel-card.diesel {
-            background: #fff7ed;
-            border-color: #fed7aa;
-        }
-
-        .fuel-card.octane {
-            background: #fef2f2;
-            border-color: #fecaca;
-        }
-
-        .fuel-icon {
-            width: 52px;
-            height: 52px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-            color: #fff;
-            flex-shrink: 0;
-        }
-
-        .fuel-icon.p {
-            background: var(--petrol);
-        }
-
-        .fuel-icon.d {
-            background: var(--diesel);
-        }
-
-        .fuel-icon.o {
-            background: var(--octane);
-        }
-
-        .fuel-info .fi-val {
-            font-size: 26px;
-            font-weight: 800;
-            letter-spacing: -.5px;
-            line-height: 1;
-        }
-
-        .fuel-info .fi-name {
-            font-size: 13px;
-            font-weight: 500;
-            margin-top: 3px;
-        }
-
-        .fuel-card.petrol .fi-val,
-        .fuel-card.petrol .fi-name {
-            color: var(--petrol);
-        }
-
-        .fuel-card.diesel .fi-val,
-        .fuel-card.diesel .fi-name {
-            color: var(--diesel);
-        }
-
-        .fuel-card.octane .fi-val,
-        .fuel-card.octane .fi-name {
-            color: var(--octane);
-        }
-
-        /* summary cards */
         .sum-card {
             border-radius: var(--radius);
-            padding: 24px 22px;
+            padding: 26px 24px;
             color: #fff;
             position: relative;
             overflow: hidden;
         }
-
         .sum-card::before {
-            content: '';
-            position: absolute;
-            top: -20px;
-            right: -20px;
-            width: 90px;
-            height: 90px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, .1);
+            content: ''; position: absolute;
+            top: -24px; right: -24px;
+            width: 100px; height: 100px;
+            border-radius: 50%; background: rgba(255,255,255,.12);
         }
-
-        .sum-card.blue-c {
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        .sum-card::after {
+            content: ''; position: absolute;
+            bottom: -30px; left: -10px;
+            width: 80px; height: 80px;
+            border-radius: 50%; background: rgba(255,255,255,.07);
         }
+        .sum-card.blue-c   { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+        .sum-card.green-c  { background: linear-gradient(135deg, #16a34a, #15803d); }
+        .sum-card.purple-c { background: linear-gradient(135deg, #7c3aed, #6d28d9); }
 
-        .sum-card.green-c {
-            background: linear-gradient(135deg, #16a34a, #15803d);
-        }
-
-        .sum-card.purple-c {
-            background: linear-gradient(135deg, #7c3aed, #6d28d9);
-        }
-
-        .sum-card.orange-c {
-            background: linear-gradient(135deg, #ea580c, #c2410c);
-        }
-
-        .sum-card .sm-icon {
-            font-size: 24px;
-            margin-bottom: 12px;
-            opacity: .9;
-        }
-
-        .sum-card .sm-val {
-            font-size: 36px;
-            font-weight: 800;
-            letter-spacing: -1px;
-            line-height: 1;
-        }
-
-        .sum-card .sm-name {
-            font-size: 13px;
-            opacity: .85;
-            margin-top: 4px;
-            font-weight: 500;
-        }
-
+        .sum-card .sm-icon { font-size: 26px; margin-bottom: 12px; opacity: .9; }
+        .sum-card .sm-val  { font-size: 40px; font-weight: 800; letter-spacing: -1px; line-height: 1; }
+        .sum-card .sm-name { font-size: 13px; opacity: .85; margin-top: 4px; font-weight: 500; }
         .sum-card .sm-trend {
-            font-size: 12px;
-            opacity: .8;
-            margin-top: 10px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
+            font-size: 12px; opacity: .8; margin-top: 12px;
+            display: flex; align-items: center; gap: 4px;
         }
 
-        /* chart cards */
+        /* ===== CHART / ACTIVITY CARD ===== */
         .card {
             background: var(--white);
             border-radius: var(--radius);
             border: 1px solid var(--border);
             box-shadow: var(--shadow);
             overflow: hidden;
+            margin-bottom: 24px;
         }
+        .chart-card { padding: 22px; }
 
-        .chart-card {
-            padding: 22px;
-        }
+        .cc-head { display: flex; align-items: center; gap: 9px; margin-bottom: 20px; }
+        .cc-head i { color: var(--orange); font-size: 15px; }
+        .cc-title  { font-size: 14px; font-weight: 700; color: var(--text); }
 
-        .cc-head {
-            display: flex;
-            align-items: center;
-            gap: 9px;
-            margin-bottom: 20px;
-        }
-
-        .cc-head i {
-            color: var(--blue);
-            font-size: 15px;
-        }
-
-        .cc-title {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--text);
-        }
-
-        .cc-select {
-            margin-left: auto;
-            border: 1px solid var(--border);
-            border-radius: 7px;
-            padding: 5px 10px;
-            font-size: 12px;
-            color: var(--text);
-            background: var(--bg);
-        }
-
-        .chart-legend {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 14px;
-            margin-top: 16px;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text);
-        }
-
-        .legend-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
-
-        /* depot table */
-        .depot-table-card {
-            padding: 0;
-        }
-
-        .dt-head {
-            padding: 18px 22px 14px;
-            display: flex;
-            align-items: center;
-            gap: 9px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .dt-head i {
-            color: var(--blue);
-        }
-
-        .dt-title {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--text);
-        }
-
-        .dep-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .dep-table thead th {
-            padding: 10px 18px;
-            font-size: 10px;
-            font-weight: 700;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: .5px;
-            background: #fafbfc;
-            border-bottom: 1px solid var(--border);
-            text-align: left;
-        }
-
-        .dep-table tbody td {
-            padding: 13px 18px;
-            font-size: 13px;
-            color: var(--text);
-            border-bottom: 1px solid #f5f6fa;
-        }
-
-        .dep-table tbody tr:last-child td {
-            border-bottom: none;
-        }
-
-        .dep-table tbody tr:hover td {
-            background: #fafbfc;
-        }
-
-        .depot-name {
-            font-weight: 700;
-        }
-
-        .util-wrap {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .util-bar {
-            flex: 1;
-            height: 6px;
-            background: #e8ecf0;
-            border-radius: 3px;
-            overflow: hidden;
-            min-width: 80px;
-        }
-
-        .util-fill {
-            height: 100%;
-            border-radius: 3px;
-            transition: width .3s;
-        }
-
-        .util-fill.high {
-            background: #ef4444;
-        }
-
-        .util-fill.medium {
-            background: #f59e0b;
-        }
-
-        .util-fill.low {
-            background: #22c55e;
-        }
-
-        .util-fill.zero {
-            background: #e2e8f0;
-        }
-
-        .util-pct {
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--text);
-            min-width: 34px;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 700;
-        }
-
-        .badge.active {
-            background: #dcfce7;
-            color: var(--green);
-        }
-
-        .badge.inactive {
-            background: #fee2e2;
-            color: var(--octane);
-        }
-
-        /* activities */
-        .activity-card {
-            padding: 0;
-        }
-
+        /* ===== ACTIVITIES ===== */
         .ac-head {
             padding: 18px 22px 14px;
-            display: flex;
-            align-items: center;
-            gap: 9px;
+            display: flex; align-items: center; gap: 9px;
             border-bottom: 1px solid var(--border);
+            background: #fafbff;
         }
-
-        .ac-head i {
-            color: var(--purple);
-        }
-
-        .ac-title {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--text);
-        }
+        .ac-head i { color: var(--purple); }
+        .ac-title  { font-size: 14px; font-weight: 700; color: var(--text); }
 
         .act-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 14px;
+            display: flex; align-items: flex-start; gap: 14px;
             padding: 14px 22px;
             border-bottom: 1px solid #f5f6fa;
         }
-
-        .act-item:last-child {
-            border-bottom: none;
-        }
+        .act-item:last-child { border-bottom: none; }
 
         .act-dot {
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 13px;
-            flex-shrink: 0;
+            width: 34px; height: 34px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; flex-shrink: 0;
         }
+        .act-dot.green  { background: #dcfce7; color: var(--green); }
+        .act-dot.yellow { background: #fef9c3; color: #d97706; }
+        .act-dot.blue   { background: #dbeafe; color: var(--blue); }
+        .act-dot.red    { background: #fee2e2; color: var(--octane-color); }
 
-        .act-dot.green {
-            background: #dcfce7;
-            color: var(--green);
-        }
+        .ai-title { font-size: 13px; font-weight: 700; color: var(--text); }
+        .ai-sub   { font-size: 12px; color: var(--muted); margin-top: 1px; }
+        .ai-time  { font-size: 11px; color: var(--muted); margin-top: 3px; }
 
-        .act-dot.yellow {
-            background: #fef9c3;
-            color: #d97706;
-        }
+        .no-data { text-align: center; padding: 30px; color: var(--muted); font-size: 13px; }
 
-        .act-dot.blue {
-            background: #dbeafe;
-            color: var(--blue);
-        }
-
-        .act-dot.red {
-            background: #fee2e2;
-            color: var(--octane);
-        }
-
-        .ai-title {
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--text);
-        }
-
-        .ai-sub {
-            font-size: 12px;
-            color: var(--muted);
-            margin-top: 1px;
-        }
-
-        .ai-time {
-            font-size: 11px;
-            color: var(--muted);
-            margin-top: 3px;
-        }
-
-        /* no-data */
-        .no-data {
-            text-align: center;
-            padding: 30px;
-            color: var(--muted);
-            font-size: 13px;
-        }
-
-        /* ================= Mobile Responsive Styles ================= */
-
-        @media (max-width: 1200px) {
-            .g-5 {
-                grid-template-columns: repeat(3, 1fr);
-            }
-
-            .g-4 {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 992px) {
-            .db-wrap {
-                padding: 0px;
-            }
-
-            .g-5 {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .g-22 {
-                grid-template-columns: 1fr;
-            }
-
-            /* চার্টগুলো একে অপরের নিচে আসবে */
-        }
-
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 992px) { .db-wrap { padding: 16px; } }
         @media (max-width: 768px) {
-
-            .g-5,
-            .g-4,
-            .g-3,
-            .g-22 {
-                grid-template-columns: 1fr;
-                /* সব গ্রিড ১ কলাম হয়ে যাবে */
-                gap: 12px;
-            }
-
-            .db-title {
-                font-size: 18px;
-            }
-
-            .stat-card .sc-value {
-                font-size: 20px;
-            }
-
-            /* টেবিল রেসপন্সিভ করার জন্য */
-            .depot-table-card {
-                overflow-x: auto;
-            }
-
-            .dep-table {
-                min-width: 600px;
-                /* টেবিল যেন একদম ছোট হয়ে না যায়, স্ক্রল হবে */
-            }
-
-            /* চার্টের উচ্চতা মোবাইলে কিছুটা কমানো */
-            canvas {
-                max-height: 250px;
-            }
-
-            /* ফিউয়েল কার্ডের টেক্সট সাইজ ছোট করা */
-            .fuel-info .fi-val {
-                font-size: 20px;
-            }
-
-            .sum-card .sm-val {
-                font-size: 28px;
-            }
+            .fuel-grid, .fuel-diff-grid, .sum-grid { grid-template-columns: 1fr 1fr; }
         }
-
         @media (max-width: 480px) {
-            .g-5 {
-                grid-template-columns: 1fr;
-            }
-
-            .stat-card {
-                padding: 15px;
-            }
-
-            .sc-icon {
-                width: 35px;
-                height: 35px;
-                top: 12px;
-                right: 12px;
-                font-size: 14px;
-            }
+            .fuel-grid, .fuel-diff-grid, .sum-grid { grid-template-columns: 1fr; }
         }
     </style>
 @endpush
 
 @section('content')
-    <div class="db-wrap">
+<div class="db-wrap">
 
-        <div class="db-title">Dashboard Overview</div>
-        <p class="db-sub">Bangladesh Fuel Management System &mdash; Real-time Monitoring</p>
+    <div class="db-title">Dashboard Overview</div>
+    <p class="db-sub">Bangladesh Fuel Management System &mdash; Real-time Monitoring</p>
 
-        {{-- ============================================================
-         ROW 1: TOP STAT CARDS
-         ============================================================ --}}
-        <div class="g-5">
+    {{-- ============================================================
+         TODAY'S STOCK
+    ============================================================ --}}
+    <p class="section-title">Today's Stock</p>
 
-            {{-- Total Stock --}}
-            <div class="stat-card">
-                <div class="sc-icon blue"><i class="fa-solid fa-cube"></i></div>
-                <div class="sc-label">Total Stock</div>
-                <div class="sc-value">{{ number_format($totalStockToday) }} L</div>
-                <div class="sc-footer">Todays</div>
-            </div>
-
-            {{-- Received --}}
-            <div class="stat-card">
-                <div class="sc-icon green"><i class="fa-solid fa-arrow-trend-up"></i></div>
-                <div class="sc-label">Received</div>
-                <div class="sc-value">{{ number_format($totalReceivedToday) }} L</div>
-                <div class="sc-footer">
-                    @if ($receivedChangePct >= 0)
-                        <span class="up"><i class="fa-solid fa-arrow-trend-up fa-xs"></i>
-                            +{{ $receivedChangePct }}%</span>
-                    @else
-                        <span class="down"><i class="fa-solid fa-arrow-trend-down fa-xs"></i>
-                            {{ $receivedChangePct }}%</span>
-                    @endif
-                    &nbsp;vs last month
-                </div>
-            </div>
-
-            {{-- Sold --}}
-            <div class="stat-card">
-                <div class="sc-icon purple"><i class="fa-solid fa-arrow-trend-down"></i></div>
-                <div class="sc-label">Sold</div>
-                <div class="sc-value">{{ number_format($totalSoldToday) }} L</div>
-                <div class="sc-footer">Todays</div>
-            </div>
-
-            {{-- Stock Difference (L) --}}
-            <div class="stat-card">
-                <div class="sc-icon orange"><i class="fa-solid fa-droplet"></i></div>
-                <div class="sc-label">Stock Difference</div>
-                <div class="sc-value">{{ number_format(abs($totalDiffToday)) }} L</div>
-                @if (abs($totalDiffToday) > 0)
-                    <div class="sc-alert"><i class="fa-solid fa-triangle-exclamation"></i> Alert</div>
-                @endif
-                <div class="sc-footer">Todays</div>
-            </div>
-
-            {{-- Stock Difference (%) --}}
-            <div class="stat-card">
-                <div class="sc-icon red"><i class="fa-solid fa-percent"></i></div>
-                <div class="sc-label">Stock Difference</div>
-                <div class="sc-value">{{ $totalDiffPct }}%</div>
-                @if ($totalDiffPct > 2)
-                    <div class="sc-alert"><i class="fa-solid fa-triangle-exclamation"></i> Alert</div>
-                @endif
-                <div class="sc-footer">Todays</div>
+    {{-- Row 1: Stock values --}}
+    <div class="fuel-grid">
+        <div class="fuel-main-card petrol">
+            <div class="fuel-icon-circle p"><i class="fa-solid fa-gas-pump"></i></div>
+            <div class="fuel-main-info">
+                <div class="fmi-val">{{ number_format($todayPetrolStock) }} L</div>
+                <div class="fmi-name">Petrol</div>
             </div>
         </div>
-
-        {{-- ============================================================
-         ROW 2: TODAY'S STOCK
-         ============================================================ --}}
-        <p class="section-title">Today's Stock</p>
-        <div class="g-3">
-            <div class="fuel-card petrol">
-                <div class="fuel-icon p"><i class="fa-solid fa-gas-pump"></i></div>
-                <div class="fuel-info">
-                    <div class="fi-val">{{ number_format($todayPetrolStock) }} L</div>
-                    <div class="fi-name">Petrol</div>
-                </div>
-            </div>
-            <div class="fuel-card diesel">
-                <div class="fuel-icon d"><i class="fa-solid fa-cube"></i></div>
-                <div class="fuel-info">
-                    <div class="fi-val">{{ number_format($todayDieselStock) }} L</div>
-                    <div class="fi-name">Diesel</div>
-                </div>
-            </div>
-            <div class="fuel-card octane">
-                <div class="fuel-icon o"><i class="fa-solid fa-droplet"></i></div>
-                <div class="fuel-info">
-                    <div class="fi-val">{{ number_format($todayOctaneStock) }} L</div>
-                    <div class="fi-name">Octane</div>
-                </div>
+        <div class="fuel-main-card diesel">
+            <div class="fuel-icon-circle d"><i class="fa-solid fa-cube"></i></div>
+            <div class="fuel-main-info">
+                <div class="fmi-val">{{ number_format($todayDieselStock) }} L</div>
+                <div class="fmi-name">Diesel</div>
             </div>
         </div>
-
-        {{-- ============================================================
-         ROW 3: TODAY'S SOLD
-         ============================================================ --}}
-        <p class="section-title">Today's Sold</p>
-        <div class="g-3">
-            <div class="fuel-card petrol">
-                <div class="fuel-icon p"><i class="fa-solid fa-gas-pump"></i></div>
-                <div class="fuel-info">
-                    <div class="fi-val">{{ number_format($todayPetrolSold) }} L</div>
-                    <div class="fi-name">Petrol</div>
-                </div>
+        <div class="fuel-main-card octane">
+            <div class="fuel-icon-circle o"><i class="fa-solid fa-droplet"></i></div>
+            <div class="fuel-main-info">
+                <div class="fmi-val">{{ number_format($todayOctaneStock) }} L</div>
+                <div class="fmi-name">Octane</div>
             </div>
-            <div class="fuel-card diesel">
-                <div class="fuel-icon d"><i class="fa-solid fa-cube"></i></div>
-                <div class="fuel-info">
-                    <div class="fi-val">{{ number_format($todayDieselSold) }} L</div>
-                    <div class="fi-name">Diesel</div>
-                </div>
-            </div>
-            <div class="fuel-card octane">
-                <div class="fuel-icon o"><i class="fa-solid fa-droplet"></i></div>
-                <div class="fuel-info">
-                    <div class="fi-val">{{ number_format($todayOctaneSold) }} L</div>
-                    <div class="fi-name">Octane</div>
-                </div>
-            </div>
-        </div>
-
-        {{-- ============================================================
-         ROW 4: SUMMARY 4 CARDS
-         ============================================================ --}}
-        <div class="g-4">
-            <div class="sum-card blue-c">
-                <div class="sm-icon"><i class="fa-solid fa-warehouse"></i></div>
-                <div class="sm-val">{{ $totalDepots }}</div>
-                <div class="sm-name">Total Depots</div>
-                <div class="sm-trend">
-                    <i class="fa-solid fa-arrow-trend-{{ $newDepots >= 0 ? 'up' : 'down' }}"></i>
-                    {{ $newDepots >= 0 ? '+' : '' }}{{ $newDepots }} this month
-                </div>
-            </div>
-            <div class="sum-card green-c">
-                <div class="sm-icon"><i class="fa-solid fa-gas-pump"></i></div>
-                <div class="sm-val">{{ $totalStations }}</div>
-                <div class="sm-name">Total Filling Stations</div>
-                <div class="sm-trend">
-                    <i class="fa-solid fa-arrow-trend-{{ $newStations >= 0 ? 'up' : 'down' }}"></i>
-                    {{ $newStations >= 0 ? '+' : '' }}{{ $newStations }} this month
-                </div>
-            </div>
-            <div class="sum-card purple-c">
-                <div class="sm-icon"><i class="fa-solid fa-user-group"></i></div>
-                <div class="sm-val">{{ $totalOfficers }}</div>
-                <div class="sm-name">Total Tag Officers</div>
-                <div class="sm-trend">
-                    <i class="fa-solid fa-arrow-trend-{{ $newOfficers >= 0 ? 'up' : 'down' }}"></i>
-                    {{ $newOfficers >= 0 ? '+' : '' }}{{ $newOfficers }} this month
-                </div>
-            </div>
-            <div class="sum-card orange-c">
-                <div class="sm-icon"><i class="fa-solid fa-user-check"></i></div>
-                <div class="sm-val">{{ $activeAssignments }}</div>
-                <div class="sm-name">Active Assignments</div>
-                <div class="sm-trend">
-                    <i class="fa-solid fa-arrow-trend-{{ $assignChange >= 0 ? 'up' : 'down' }}"></i>
-                    {{ $assignChange >= 0 ? '+' : '' }}{{ $assignChange }} this month
-                </div>
-            </div>
-        </div>
-
-        {{-- ============================================================
-         ROW 5: CHARTS
-         ============================================================ --}}
-        <div class="g-22">
-
-            {{-- Fuel Type Distribution Pie --}}
-            <div class="card chart-card">
-                <div class="cc-head">
-                    <i class="fa-solid fa-wave-square"></i>
-                    <span class="cc-title">Fuel Type Distribution (Stock in Liters)</span>
-                </div>
-                @php
-                    $grandTotal = $totalPetrol + $totalDiesel + $totalOctane + $totalOthers;
-                    $pPct = $grandTotal > 0 ? round(($totalPetrol / $grandTotal) * 100) : 0;
-                    $dPct = $grandTotal > 0 ? round(($totalDiesel / $grandTotal) * 100) : 0;
-                    $oPct = $grandTotal > 0 ? round(($totalOctane / $grandTotal) * 100) : 0;
-                    $otPct = $grandTotal > 0 ? 100 - $pPct - $dPct - $oPct : 0;
-                @endphp
-                <canvas id="fuelPieChart" height="220"></canvas>
-                <div class="chart-legend" style="margin-top:18px">
-                    <div class="legend-item"><span class="legend-dot" style="background:#1e6fa8"></span>Diesel:
-                        {{ number_format($totalDiesel) }} L</div>
-                    <div class="legend-item"><span class="legend-dot" style="background:#2d9748"></span>Petrol:
-                        {{ number_format($totalPetrol) }} L</div>
-                    <div class="legend-item"><span class="legend-dot" style="background:#f97316"></span>Octane:
-                        {{ number_format($totalOctane) }} L</div>
-                    @if ($totalOthers > 0)
-                        <div class="legend-item"><span class="legend-dot" style="background:#c0392b"></span>Others:
-                            {{ number_format($totalOthers) }} L</div>
-                    @endif
-                </div>
-            </div>
-
-            {{-- Company Type Distribution Pie --}}
-            <div class="card chart-card">
-                <div class="cc-head">
-                    <i class="fa-solid fa-gas-pump"></i>
-                    <span class="cc-title">Company Type Distribution</span>
-                </div>
-                <canvas id="companyPieChart" height="220"></canvas>
-                <div class="chart-legend" style="margin-top:18px">
-                    @php $pieColors = ['#1e6fa8','#2d9748','#f97316','#c0392b','#7c3aed']; @endphp
-                    @foreach ($companyDistribution as $i => $co)
-                        <div class="legend-item">
-                            <span class="legend-dot" style="background:{{ $pieColors[$i] ?? '#aaa' }}"></span>
-                            {{ $co['name'] }}: {{ $co['total'] }} Stations
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-
-        <div class="g-22">
-
-            {{-- Division-wise Distribution Bar --}}
-            <div class="card chart-card">
-                <div class="cc-head">
-                    <i class="fa-solid fa-warehouse"></i>
-                    <span class="cc-title">Division-wise Distribution</span>
-                </div>
-                <canvas id="divisionBarChart" height="220"></canvas>
-            </div>
-
-            {{-- Fuel Sales Trend Line --}}
-            <div class="card chart-card">
-                <div class="cc-head">
-                    <i class="fa-solid fa-arrow-trend-up" style="color:#f97316"></i>
-                    <span class="cc-title">Fuel Sales Trend (in Liters)</span>
-                    <select class="cc-select">
-                        <option>Month</option>
-                    </select>
-                </div>
-                <canvas id="salesLineChart" height="220"></canvas>
-            </div>
-        </div>
-
-        {{-- ============================================================
-         ROW 6: DEPOT TABLE + ACTIVITIES
-         ============================================================ --}}
-        <div class="g-22">
-
-            {{-- Recent Depot Entries --}}
-            <div class="card depot-table-card">
-                <div class="dt-head">
-                    <i class="fa-solid fa-warehouse"></i>
-                    <span class="dt-title">Recent Depot Entries</span>
-                </div>
-                <table class="dep-table">
-                    <thead>
-                        <tr>
-                            <th>Depot Name</th>
-                            <th>District</th>
-                            <th>Capacity</th>
-                            <th>Utilization</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($recentDepots as $depot)
-                            @php
-                                $u = $depot['utilization'];
-                                $fillClass = $u >= 85 ? 'high' : ($u >= 50 ? 'medium' : ($u > 0 ? 'low' : 'zero'));
-                            @endphp
-                            <tr>
-                                <td>
-                                    <div class="depot-name">{{ $depot['name'] }}</div>
-                                </td>
-                                <td><span style="font-size:12px;color:var(--muted)">{{ $depot['district'] }}</span></td>
-                                <td>{{ $depot['capacity'] }}</td>
-                                <td>
-                                    <div class="util-wrap">
-                                        <div class="util-bar">
-                                            <div class="util-fill {{ $fillClass }}"
-                                                style="width:{{ $u }}%"></div>
-                                        </div>
-                                        <span class="util-pct">{{ $u }}%</span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="badge {{ $depot['status'] === 'active' ? 'active' : 'inactive' }}">
-                                        {{ ucfirst($depot['status']) }}
-                                    </span>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="5">
-                                    <div class="no-data">কোনো Depot পাওয়া যায়নি।</div>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-
-            {{-- Recent Activities --}}
-            <div class="card activity-card">
-                <div class="ac-head">
-                    <i class="fa-solid fa-wave-square"></i>
-                    <span class="ac-title">Recent Activities</span>
-                </div>
-                @forelse($recentActivities as $act)
-                    <div class="act-item">
-                        <div class="act-dot {{ $act['color'] }}">
-                            <i class="fa-solid {{ $act['icon'] }} fa-xs"></i>
-                        </div>
-                        <div>
-                            <div class="ai-title">{{ $act['title'] }}</div>
-                            <div class="ai-sub">{{ $act['sub'] }}</div>
-                            <div class="ai-time">
-                                <i class="fa-regular fa-clock fa-xs"></i>
-                                {{ \Carbon\Carbon::parse($act['time'])->diffForHumans() }}
-                            </div>
-                        </div>
-                    </div>
-                @empty
-                    <div class="no-data">কোনো Activity নেই।</div>
-                @endforelse
-            </div>
-
         </div>
     </div>
+
+    {{-- Row 2: Difference % --}}
+    @php
+        $petrolDiffPct = $todayPetrolReceived > 0
+            ? round(($todayPetrolDiff / $todayPetrolReceived) * 100, 1) : 0;
+        $dieselDiffPct = $todayDieselReceived > 0
+            ? round(($todayDieselDiff / $todayDieselReceived) * 100, 1) : 0;
+        $octaneDiffPct = $todayOctaneReceived > 0
+            ? round(($todayOctaneDiff / $todayOctaneReceived) * 100, 1) : 0;
+    @endphp
+    <div class="fuel-diff-grid">
+        <div class="diff-pill petrol">
+            Petrol Difference: <strong>{{ $petrolDiffPct >= 0 ? '+' : '' }}{{ $petrolDiffPct }}%</strong>
+        </div>
+        <div class="diff-pill diesel">
+            Diesel Difference: <strong>{{ $dieselDiffPct >= 0 ? '+' : '' }}{{ $dieselDiffPct }}%</strong>
+        </div>
+        <div class="diff-pill octane">
+            Octane Difference: <strong>{{ $octaneDiffPct >= 0 ? '+' : '' }}{{ $octaneDiffPct }}%</strong>
+        </div>
+    </div>
+
+    {{-- Row 3: Difference in Litres --}}
+    <div class="fuel-diff-grid section-gap">
+        <div class="diff-pill petrol">
+            Petrol Difference: <strong>{{ number_format(abs($todayPetrolDiff)) }}L</strong>
+        </div>
+        <div class="diff-pill diesel">
+            Diesel Difference: <strong>{{ number_format(abs($todayDieselDiff)) }}L</strong>
+        </div>
+        <div class="diff-pill octane">
+            Octane Difference: <strong>{{ number_format(abs($todayOctaneDiff)) }}L</strong>
+        </div>
+    </div>
+
+    {{-- ============================================================
+         TODAY'S SOLD
+    ============================================================ --}}
+    <p class="section-title">Today's Sold</p>
+    <div class="fuel-grid section-gap">
+        <div class="fuel-main-card petrol">
+            <div class="fuel-icon-circle p"><i class="fa-solid fa-gas-pump"></i></div>
+            <div class="fuel-main-info">
+                <div class="fmi-val">{{ number_format($todayPetrolSold) }} L</div>
+                <div class="fmi-name">Petrol</div>
+            </div>
+        </div>
+        <div class="fuel-main-card diesel">
+            <div class="fuel-icon-circle d"><i class="fa-solid fa-cube"></i></div>
+            <div class="fuel-main-info">
+                <div class="fmi-val">{{ number_format($todayDieselSold) }} L</div>
+                <div class="fmi-name">Diesel</div>
+            </div>
+        </div>
+        <div class="fuel-main-card octane">
+            <div class="fuel-icon-circle o"><i class="fa-solid fa-droplet"></i></div>
+            <div class="fuel-main-info">
+                <div class="fmi-val">{{ number_format($todayOctaneSold) }} L</div>
+                <div class="fmi-name">Octane</div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ============================================================
+         SUMMARY 3 CARDS
+    ============================================================ --}}
+    <div class="sum-grid">
+        <div class="sum-card blue-c">
+            <div class="sm-icon"><i class="fa-solid fa-building"></i></div>
+            <div class="sm-val">{{ $totalDepots }}</div>
+            <div class="sm-name">Total Depots</div>
+            {{-- <div class="sm-trend">
+                <i class="fa-solid fa-arrow-trend-{{ $newDepots >= 0 ? 'up' : 'down' }}"></i>
+                {{ $newDepots >= 0 ? '+' : '' }}{{ $newDepots }} this month
+            </div> --}}
+        </div>
+        <div class="sum-card green-c">
+            <div class="sm-icon"><i class="fa-solid fa-gas-pump"></i></div>
+            <div class="sm-val">{{ $totalStations }}</div>
+            <div class="sm-name">Total Filling Stations</div>
+            {{-- <div class="sm-trend">
+                <i class="fa-solid fa-arrow-trend-{{ $newStations >= 0 ? 'up' : 'down' }}"></i>
+                {{ $newStations >= 0 ? '+' : '' }}{{ $newStations }} this month
+            </div> --}}
+        </div>
+        <div class="sum-card purple-c">
+            <div class="sm-icon"><i class="fa-solid fa-user-group"></i></div>
+            <div class="sm-val">{{ $totalOfficers }}</div>
+            <div class="sm-name">Total Tag Officers</div>
+            {{-- <div class="sm-trend">
+                <i class="fa-solid fa-arrow-trend-{{ $newOfficers >= 0 ? 'up' : 'down' }}"></i>
+                {{ $newOfficers >= 0 ? '+' : '' }}{{ $newOfficers }} this month
+            </div> --}}
+        </div>
+    </div>
+
+    {{-- ============================================================
+         DIVISION-WISE FUEL SALES (Today's)
+    ============================================================ --}}
+    {{-- <div class="card chart-card">
+        <div class="cc-head">
+            <i class="fa-solid fa-building"></i>
+            <span class="cc-title">Division-wise Fuel Sales (Today's)</span>
+        </div>
+        <canvas id="divisionSalesChart" height="120"></canvas>
+    </div> --}}
+
+    {{-- ============================================================
+         RECENT ACTIVITIES
+    ============================================================ --}}
+    <div class="card" style="padding:0">
+        <div class="ac-head">
+            <i class="fa-solid fa-wave-square"></i>
+            <span class="ac-title">Recent Activities</span>
+        </div>
+        @forelse($recentActivities as $act)
+            <div class="act-item">
+                <div class="act-dot {{ $act['color'] }}">
+                    <i class="fa-solid {{ $act['icon'] }} fa-xs"></i>
+                </div>
+                <div>
+                    <div class="ai-title">{{ $act['title'] }}</div>
+                    <div class="ai-sub">{{ $act['sub'] }}</div>
+                    <div class="ai-time">
+                        <i class="fa-regular fa-clock fa-xs"></i>
+                        {{ \Carbon\Carbon::parse($act['time'])->diffForHumans() }}
+                    </div>
+                </div>
+            </div>
+        @empty
+            <div class="no-data">No activity found।</div>
+        @endforelse
+    </div>
+
+</div>
 @endsection
 
 @push('scripts')
@@ -1011,172 +367,47 @@
         Chart.defaults.font.family = "'Segoe UI', sans-serif";
         Chart.defaults.color = '#7c8db5';
 
-        /* ========== Fuel Type Pie ========== */
-        new Chart(document.getElementById('fuelPieChart'), {
-            type: 'pie',
-            data: {
-                labels: ['Diesel', 'Petrol', 'Octane'
-                    @if ($totalOthers > 0)
-                        , 'Others'
-                    @endif
-                ],
-                datasets: [{
-                    data: [
-                        {{ $totalDiesel }},
-                        {{ $totalPetrol }},
-                        {{ $totalOctane }}
-                        @if ($totalOthers > 0)
-                            , {{ $totalOthers }}
-                        @endif
-                    ],
-                    backgroundColor: ['#1e6fa8', '#2d9748', '#f97316', '#c0392b'],
-                    borderWidth: 2,
-                    borderColor: '#fff',
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: ctx => ` ${ctx.label}: ${ctx.parsed.toLocaleString()} L`
-                        }
-                    }
-                }
-            }
-        });
-
-        /* ========== Company Pie ========== */
+        /* ========== Division-wise Fuel Sales (Today's) ========== */
         @php
-            $coLabels = $companyDistribution->pluck('name')->toJson();
-            $coData = $companyDistribution->pluck('total')->toJson();
+            $divLabels   = $divisionSalesToday->pluck('division')->toJson();
+            $divStations = $divisionSalesToday->pluck('total_stations')->toJson();
+            $divFuel     = $divisionSalesToday->pluck('total_fuel_liters')->toJson();
         @endphp
-        new Chart(document.getElementById('companyPieChart'), {
-            type: 'pie',
-            data: {
-                labels: {!! $coLabels !!},
-                datasets: [{
-                    data: {!! $coData !!},
-                    backgroundColor: ['#1e6fa8', '#2d9748', '#f97316', '#c0392b', '#7c3aed'],
-                    borderWidth: 2,
-                    borderColor: '#fff',
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: ctx => ` ${ctx.label}: ${ctx.parsed} Stations`
-                        }
-                    }
-                }
-            }
-        });
 
-        /* ========== Division Bar ========== */
-        @php
-            $divLabels = $divisionDistribution->pluck('division')->toJson();
-            $divData = $divisionDistribution->pluck('total')->toJson();
-        @endphp
-        new Chart(document.getElementById('divisionBarChart'), {
+        new Chart(document.getElementById('divisionSalesChart'), {
             type: 'bar',
             data: {
                 labels: {!! $divLabels !!},
-                datasets: [{
-                    data: {!! $divData !!},
-                    backgroundColor: '#2d9748',
-                    borderRadius: 5,
-                    borderSkipped: false,
-                }]
+                datasets: [
+                    {
+                        label: 'Division',
+                        data: {!! $divStations !!},
+                        backgroundColor: '#1e6fa8',
+                        borderRadius: 5,
+                        borderSkipped: false,
+                    },
+                    {
+                        label: 'Fuel',
+                        data: {!! $divFuel !!},
+                        backgroundColor: '#2d9748',
+                        borderRadius: 5,
+                        borderSkipped: false,
+                    }
+                ]
             },
             options: {
                 responsive: true,
                 plugins: {
-                    legend: {
-                        display: false
-                    }
+                    legend: { display: true, position: 'bottom' }
                 },
                 scales: {
                     x: {
-                        grid: {
-                            display: false
-                        },
-                        ticks: {
-                            font: {
-                                size: 11
-                            }
-                        }
+                        grid: { display: false },
+                        ticks: { font: { size: 11 } }
                     },
                     y: {
-                        grid: {
-                            color: '#f0f2f5'
-                        },
-                        ticks: {
-                            font: {
-                                size: 11
-                            }
-                        }
-                    }
-                }
-            }
-        });
-
-        /* ========== Sales Trend Line ========== */
-        @php
-            $trendLabels = $salesTrend->pluck('month_label')->toJson();
-            $trendData = $salesTrend->pluck('total_sales')->toJson();
-        @endphp
-        new Chart(document.getElementById('salesLineChart'), {
-            type: 'line',
-            data: {
-                labels: {!! $trendLabels !!},
-                datasets: [{
-                    data: {!! $trendData !!},
-                    borderColor: '#f97316',
-                    backgroundColor: 'rgba(249,115,22,.08)',
-                    pointBackgroundColor: '#f97316',
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
-                    fill: true,
-                    tension: 0.4,
-                    borderWidth: 2.5,
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
-                scales: {
-                    x: {
-                        grid: {
-                            display: false
-                        },
-                        ticks: {
-                            font: {
-                                size: 11
-                            }
-                        }
-                    },
-                    y: {
-                        grid: {
-                            color: '#f0f2f5'
-                        },
-                        ticks: {
-                            font: {
-                                size: 11
-                            },
-                            callback: v => v.toLocaleString()
-                        }
+                        grid: { color: '#f0f2f5' },
+                        ticks: { font: { size: 11 } }
                     }
                 }
             }

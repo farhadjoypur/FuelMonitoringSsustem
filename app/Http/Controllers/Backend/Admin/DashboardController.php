@@ -22,245 +22,198 @@ class DashboardController extends Controller
     {
         $today     = Carbon::today();
         $thisMonth = Carbon::now()->startOfMonth();
- 
+
         // =============================================
-        // TOP STAT CARDS
+        // TODAY'S REPORTS
         // =============================================
- 
-        // আজকের সব রিপোর্ট থেকে মোট stock, received, sold, difference
         $todayReports = Fuelreport::whereDate('report_date', $today)->get();
- 
-        $totalStockToday = $todayReports->sum(fn($r) =>
-            $r->petrol_closing_stock + $r->diesel_closing_stock + $r->octane_closing_stock
-        );
-        $totalReceivedToday = $todayReports->sum(fn($r) =>
-            $r->petrol_received + $r->diesel_received + $r->octane_received
-        );
-        $totalSoldToday = $todayReports->sum(fn($r) =>
-            $r->petrol_sales + $r->diesel_sales + $r->octane_sales
-        );
-        $totalDiffToday = $todayReports->sum(fn($r) =>
-            $r->petrol_difference + $r->diesel_difference + $r->octane_difference
-        );
-        $totalDiffPct = $totalReceivedToday > 0
-            ? round(abs($totalDiffToday) / $totalReceivedToday * 100, 1)
-            : 0;
- 
-        // গত মাসের তুলনায় received % change
-        $lastMonthReceived = Fuelreport::whereMonth('report_date', Carbon::now()->subMonth()->month)
-            ->sum(DB::raw('petrol_received + diesel_received + octane_received'));
-        $thisMonthReceived = Fuelreport::whereMonth('report_date', Carbon::now()->month)
-            ->sum(DB::raw('petrol_received + diesel_received + octane_received'));
-        $receivedChangePct = $lastMonthReceived > 0
-            ? round((($thisMonthReceived - $lastMonthReceived) / $lastMonthReceived) * 100, 1)
-            : 0;
- 
+
         // =============================================
-        // TODAY'S STOCK (per fuel type)
+        // TODAY'S CLOSING STOCK (per fuel type)
         // =============================================
-        $todayPetrolStock  = $todayReports->sum('petrol_closing_stock');
-        $todayDieselStock  = $todayReports->sum('diesel_closing_stock');
-        $todayOctaneStock  = $todayReports->sum('octane_closing_stock');
- 
+        $todayPetrolStock = $todayReports->sum('petrol_closing_stock');
+        $todayDieselStock = $todayReports->sum('diesel_closing_stock');
+        $todayOctaneStock = $todayReports->sum('octane_closing_stock');
+
         // =============================================
-        // TODAY'S SOLD (per fuel type)
+        // TODAY'S RECEIVED (needed for difference %)
         // =============================================
-        $todayPetrolSold  = $todayReports->sum('petrol_sales');
-        $todayDieselSold  = $todayReports->sum('diesel_sales');
-        $todayOctaneSold  = $todayReports->sum('octane_sales');
- 
+        $todayPetrolReceived = $todayReports->sum('petrol_received');
+        $todayDieselReceived = $todayReports->sum('diesel_received');
+        $todayOctaneReceived = $todayReports->sum('octane_received');
+
+        // =============================================
+        // TODAY'S DIFFERENCE (supply - received per migration)
+        // =============================================
+        $todayPetrolDiff = $todayReports->sum('petrol_difference');
+        $todayDieselDiff = $todayReports->sum('diesel_difference');
+        $todayOctaneDiff = $todayReports->sum('octane_difference');
+
+        // =============================================
+        // TODAY'S SALES (per fuel type)
+        // =============================================
+        $todayPetrolSold = $todayReports->sum('petrol_sales');
+        $todayDieselSold = $todayReports->sum('diesel_sales');
+        $todayOctaneSold = $todayReports->sum('octane_sales');
+
         // =============================================
         // SUMMARY CARDS
         // =============================================
-        $totalDepots    = Depot::count();
-        $totalStations  = FillingStation::count();
+        $totalDepots   = Depot::count();
+        $totalStations = FillingStation::count();
         $totalOfficers = User::where('role', 'tag_officer')->count();
-        // যদি Spatie না থাকে:
-        // $totalOfficers = User::where('role', 'tag_officer')->count();
- 
-        $activeAssignments = AssignTagOfficer::where('status', 'active')->count();
- 
-        // this month new counts
-        $newDepots    = Depot::where('created_at', '>=', $thisMonth)->count();
-        $newStations  = FillingStation::where('created_at', '>=', $thisMonth)->count();
-        $newOfficers  = User::where('created_at', '>=', $thisMonth)->count();
-        $assignChange = AssignTagOfficer::where('created_at', '>=', $thisMonth)->count()
-                      - AssignTagOfficer::where('status', 'inactive')
-                            ->where('updated_at', '>=', $thisMonth)->count();
- 
+
+        $newDepots   = Depot::where('created_at', '>=', $thisMonth)->count();
+        $newStations = FillingStation::where('created_at', '>=', $thisMonth)->count();
+        $newOfficers = User::where('created_at', '>=', $thisMonth)->count();
+
         // =============================================
-        // FUEL TYPE DISTRIBUTION PIE (from all reports - latest per station)
+        // DIVISION-WISE FUEL SALES TODAY — Bar Chart
+        // fuelreports has a 'district' column but not 'division'
+        // If FillingStation has division, join via station_name.
+        // Otherwise group by district as fallback.
         // =============================================
-        $latestReports = Fuelreport::select(
-                'station_name',
-                DB::raw('MAX(report_date) as max_date')
+        $divisionSalesToday = Fuelreport::whereDate('report_date', $today)
+            ->select(
+                'district as division',
+                DB::raw('COUNT(DISTINCT station_name) as total_stations'),
+                DB::raw('SUM(petrol_sales + diesel_sales + octane_sales) as total_fuel_liters')
             )
-            ->groupBy('station_name');
- 
-        $fuelDistribution = Fuelreport::joinSub($latestReports, 'latest', function ($join) {
-            $join->on('fuelreports.station_name', '=', 'latest.station_name')
-                 ->on('fuelreports.report_date', '=', 'latest.max_date');
-        })
-        ->selectRaw('
-            SUM(petrol_closing_stock) as total_petrol,
-            SUM(diesel_closing_stock) as total_diesel,
-            SUM(octane_closing_stock) as total_octane
-        ')
-        ->first();
- 
-        $totalPetrol = $fuelDistribution->total_petrol ?? 0;
-        $totalDiesel = $fuelDistribution->total_diesel ?? 0;
-        $totalOctane = $fuelDistribution->total_octane ?? 0;
-        $totalOthers = 0; // প্রয়োজনে অন্য fuel type থাকলে যোগ করুন
- 
-        // =============================================
-        // COMPANY TYPE DISTRIBUTION PIE
-        // =============================================
-        $companyDistribution = FillingStation::select('company_id', DB::raw('count(*) as total'))
-            ->with('company:id,name')
-            ->whereNotNull('company_id')
-            ->groupBy('company_id')
-            ->orderByDesc('total')
-            ->take(5)
+            ->whereNotNull('district')
+            ->groupBy('district')
+            ->orderByDesc('total_fuel_liters')
             ->get()
             ->map(fn($item) => [
-                'name'  => $item->company->name ?? 'Unknown',
-                'total' => $item->total,
+                'division'          => $item->division,
+                'total_stations'    => (int) $item->total_stations,
+                'total_fuel_liters' => round($item->total_fuel_liters / 1000, 1), // convert to metric ton / ×1000L
             ]);
- 
-        // =============================================
-        // DIVISION-WISE DISTRIBUTION BAR
-        // =============================================
-        $divisionDistribution = FillingStation::select('division', DB::raw('count(*) as total'))
-            ->whereNotNull('division')
-            ->groupBy('division')
-            ->orderByDesc('total')
-            ->get()
-            ->map(fn($item) => [
-                'division' => $item->division,
-                'total'    => $item->total,
-            ]);
- 
-        // =============================================
-        // FUEL SALES TREND (last 12 months)
-        // =============================================
-        $salesTrend = Fuelreport::select(
-                DB::raw("DATE_FORMAT(report_date, '%b') as month_label"),
-                DB::raw("DATE_FORMAT(report_date, '%Y-%m') as month_key"),
-                DB::raw('SUM(petrol_sales + diesel_sales + octane_sales) as total_sales')
-            )
-            ->where('report_date', '>=', Carbon::now()->subMonths(11)->startOfMonth())
-            ->groupBy('month_key', 'month_label')
-            ->orderBy('month_key')
-            ->get();
- 
-        // =============================================
-        // RECENT DEPOT ENTRIES
-        // =============================================
-        $recentDepots = Depot::latest()->take(5)->get()->map(function ($depot) {
-            // utilization: linked stations এর received vs capacity
-            $stationCount = FillingStation::where('linked_depot', $depot->id)->count();
-            $utilization  = $depot->capacity > 0
-                ? min(100, round(($stationCount * 5000 / $depot->capacity) * 100))
-                : 0; // placeholder logic; real data থাকলে replace করুন
- 
-            return [
-                'name'        => $depot->depot_name,
-                'district'    => $depot->district,
-                'capacity'    => number_format($depot->capacity) . ' L',
-                'utilization' => $utilization,
-                'status'      => $depot->status,
-            ];
-        });
- 
-        // =============================================
-        // RECENT ACTIVITIES (mixed from multiple models)
-        // =============================================
+
         $recentActivities = collect();
- 
-        // নতুন depot add
-        Depot::latest()->take(3)->get()->each(function ($d) use (&$recentActivities) {
-            $recentActivities->push([
-                'type'  => 'depot',
-                'title' => 'New Depot Added',
-                'sub'   => $d->district . ' — ' . $d->depot_name,
-                'time'  => $d->created_at,
-                'color' => 'green',
-                'icon'  => 'fa-circle-info',
-            ]);
-        });
- 
-        // নতুন assignment
-        AssignTagOfficer::with(['fillingStation:id,station_name,district'])
-            ->latest()->take(3)->get()
-            ->each(function ($a) use (&$recentActivities) {
-                $recentActivities->push([
-                    'type'  => 'assign',
-                    'title' => 'Officer Assigned',
-                    'sub'   => ($a->fillingStation->district ?? '') . ' — ' . ($a->fillingStation->station_name ?? ''),
-                    'time'  => $a->created_at,
-                    'color' => 'blue',
-                    'icon'  => 'fa-circle-info',
-                ]);
-            });
- 
-        // Stock alert — difference > 0 reports
-        Fuelreport::whereRaw('ABS(petrol_difference) + ABS(diesel_difference) + ABS(octane_difference) > 50')
-            ->latest('report_date')->take(2)->get()
-            ->each(function ($r) use (&$recentActivities) {
-                $recentActivities->push([
-                    'type'  => 'alert',
-                    'title' => 'Stock Alert',
-                    'sub'   => $r->district . ' — ' . $r->station_name,
-                    'time'  => $r->updated_at,
-                    'color' => 'yellow',
-                    'icon'  => 'fa-circle-exclamation',
-                ]);
-            });
- 
-        // Operational loss — negative closing
+
+        /* =========================
+   1. ZERO STOCK ALERT
+========================= */
         Fuelreport::where(function ($q) {
-                $q->where('petrol_closing_stock', '<', 0)
-                  ->orWhere('diesel_closing_stock', '<', 0)
-                  ->orWhere('octane_closing_stock', '<', 0);
-            })
-            ->latest('report_date')->take(2)->get()
+            $q->where('petrol_closing_stock', 0)
+                ->orWhere('diesel_closing_stock', 0)
+                ->orWhere('octane_closing_stock', 0);
+        })
+            ->latest('report_date')
+            ->take(3)
+            ->get()
             ->each(function ($r) use (&$recentActivities) {
                 $recentActivities->push([
-                    'type'  => 'loss',
-                    'title' => 'Operational Loss Detected',
+                    'title' => 'Zero Stock Alert',
                     'sub'   => $r->district . ' — ' . $r->station_name,
                     'time'  => $r->updated_at,
                     'color' => 'red',
-                    'icon'  => 'fa-circle-xmark',
+                    'icon'  => 'fa-battery-empty',
                 ]);
             });
- 
-        // সময় অনুযায়ী sort করে সর্বশেষ ৫টা দেখাও
+
+        /* =========================
+   2. LOW STOCK ALERT
+   (example: below 100L)
+========================= */
+        Fuelreport::where(function ($q) {
+            $q->where('petrol_closing_stock', '<', 100)
+                ->orWhere('diesel_closing_stock', '<', 100)
+                ->orWhere('octane_closing_stock', '<', 100);
+        })
+            ->latest('report_date')
+            ->take(3)
+            ->get()
+            ->each(function ($r) use (&$recentActivities) {
+                $recentActivities->push([
+                    'title' => 'Low Stock Alert',
+                    'sub'   => $r->district . ' — ' . $r->station_name,
+                    'time'  => $r->updated_at,
+                    'color' => 'yellow',
+                    'icon'  => 'fa-triangle-exclamation',
+                ]);
+            });
+
+        /* =========================
+   3. DIFFERENCE (L) ALERT
+========================= */
+        Fuelreport::whereRaw('ABS(petrol_difference) + ABS(diesel_difference) + ABS(octane_difference) > 50')
+            ->latest('report_date')
+            ->take(3)
+            ->get()
+            ->each(function ($r) use (&$recentActivities) {
+                $recentActivities->push([
+                    'title' => 'Difference (L) Alert',
+                    'sub'   => $r->district . ' — ' . $r->station_name,
+                    'time'  => $r->updated_at,
+                    'color' => 'orange',
+                    'icon'  => 'fa-scale-balanced',
+                ]);
+            });
+
+        /* =========================
+   4. DIFFERENCE (%) ALERT
+========================= */
+        Fuelreport::whereRaw('
+    (ABS(petrol_difference) / NULLIF(petrol_closing_stock,1)) * 100 > 10
+    OR (ABS(diesel_difference) / NULLIF(diesel_closing_stock,1)) * 100 > 10
+    OR (ABS(octane_difference) / NULLIF(octane_closing_stock,1)) * 100 > 10
+')
+            ->latest('report_date')
+            ->take(3)
+            ->get()
+            ->each(function ($r) use (&$recentActivities) {
+                $recentActivities->push([
+                    'title' => 'Difference (%) Alert',
+                    'sub'   => $r->district . ' — ' . $r->station_name,
+                    'time'  => $r->updated_at,
+                    'color' => 'blue',
+                    'icon'  => 'fa-percent',
+                ]);
+            });
+
+        /* =========================
+   FINAL SORT (IMPORTANT)
+========================= */
         $recentActivities = $recentActivities
             ->sortByDesc('time')
-            ->take(5)
+            ->take(4)
             ->values();
- 
+
         return view('backend.admin.pages.dashboard.index', compact(
-            // stat cards
-            'totalStockToday', 'totalReceivedToday', 'totalSoldToday',
-            'totalDiffToday',  'totalDiffPct', 'receivedChangePct',
- 
-            // fuel type stocks & sold
-            'todayPetrolStock', 'todayDieselStock', 'todayOctaneStock',
-            'todayPetrolSold',  'todayDieselSold',  'todayOctaneSold',
- 
+            // today stock
+            'todayPetrolStock',
+            'todayDieselStock',
+            'todayOctaneStock',
+
+            // today received (for diff % calc in blade)
+            'todayPetrolReceived',
+            'todayDieselReceived',
+            'todayOctaneReceived',
+
+            // today difference
+            'todayPetrolDiff',
+            'todayDieselDiff',
+            'todayOctaneDiff',
+
+            // today sold
+            'todayPetrolSold',
+            'todayDieselSold',
+            'todayOctaneSold',
+
             // summary
-            'totalDepots', 'totalStations', 'totalOfficers', 'activeAssignments',
-            'newDepots', 'newStations', 'newOfficers', 'assignChange',
- 
-            // charts
-            'totalPetrol', 'totalDiesel', 'totalOctane', 'totalOthers',
-            'companyDistribution', 'divisionDistribution', 'salesTrend',
- 
-            // table & activities
-            'recentDepots', 'recentActivities'
+            'totalDepots',
+            'totalStations',
+            'totalOfficers',
+            'newDepots',
+            'newStations',
+            'newOfficers',
+
+            // chart
+            'divisionSalesToday',
+
+            // activities
+            'recentActivities'
         ));
     }
     /**

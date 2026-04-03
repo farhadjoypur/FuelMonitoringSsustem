@@ -169,7 +169,7 @@
         }
 
         .grid-cell-auto {
-            background: #f8fafc;
+            background: #FEF2F2;
             padding: 12px;
             border-bottom: 1px solid #f1f5f9;
             border-right: 1px solid #f1f5f9;
@@ -287,8 +287,8 @@
 
 
         /* ================================================
-                                                                                                   RESPONSIVE DESIGN (Mobile Friendly)
-                                                                                                   ================================================ */
+                                                                                                                           RESPONSIVE DESIGN (Mobile Friendly)
+                                                                                                                           ================================================ */
 
         /* ১০২৪ পিক্সেলের নিচে (ট্যাবলেট ও ল্যাপটপ) */
         @media (max-width: 1024px) {
@@ -398,9 +398,10 @@
                                 <i class="fa-solid fa-building-columns fa-xs"></i>
                                 Filling Station Name
                             </label>
-
-                            <input type="text" name="station_name" class="form-control-custom"
-                                value="{{ $stationName }}" readonly>
+                            {{-- stationList --}}
+                            <select name="station_name" class="form-control-custom" readonly>
+                                <option value="{{ $stationName }}">{{ $stationName }}</option>
+                            </select>
                         </div>
 
                         {{-- Thana / Upazila --}}
@@ -409,9 +410,8 @@
                                 <i class="fa-solid fa-map-pin fa-xs"></i>
                                 Thana / Upazila
                             </label>
-
                             <input type="text" name="thana_upazila" class="form-control-custom"
-                                value="{{ $stationInfo->thana_upazila ?? '' }}" readonly>
+                                value="{{ $stationInfo->upazila ?? '' }}" readonly>
                         </div>
 
                         {{-- District --}}
@@ -446,7 +446,7 @@
                     {{-- Clean hint --}}
                     <p class="hint-text">
                         <i class="fa-solid fa-circle-info"></i>
-                        Previous stock স্বয়ংক্রিয়ভাবে আপনার assigned station অনুযায়ী load হয়েছে।
+                        Previous stock has been automatically loaded based on your assigned station.
                     </p>
                 </div>
             </div>
@@ -655,9 +655,9 @@
             const diffEl = document.getElementById(fuel + '_difference_display');
             const closingEl = document.getElementById(fuel + '_closing_display');
 
-            if (diffEl) {
+           if (diffEl) {
                 diffEl.textContent = diff.toFixed(2);
-                diffEl.style.color = diff < 0 ? '#dc2626' : diff > 0 ? '#16a34a' : '#94a3b8';
+                diffEl.style.color = '#dc2626'; 
             }
 
             if (closingEl) {
