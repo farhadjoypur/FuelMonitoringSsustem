@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Backend\Admin;
 
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
-use App\Models\Profile;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -29,19 +28,11 @@ class TagOfficerController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
+        $division = $request->input('division');
+        $district = $request->input('district');
+        $upazila = $request->input('upazila');
 
-        $baseQuery = User::where('role', UserRole::TAG_OFFICER);
-
-        $stats = [
-            'total' => (clone $baseQuery)->count(),
-            'active' => (clone $baseQuery)->where('status', 'active')->count(),
-            'divisions' => Profile::whereIn('user_id', (clone $baseQuery)->pluck('id'))
-                ->distinct('division')->count('division'),
-            'districts' => Profile::whereIn('user_id', (clone $baseQuery)->pluck('id'))
-                ->distinct('district')->count('district'),
-        ];
-
-        $tagOfficers = User::where('role', UserRole::TAG_OFFICER)
+        $query = User::where('role', UserRole::TAG_OFFICER)
             ->with('profile')
             ->when($search, function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
@@ -49,20 +40,32 @@ class TagOfficerController extends Controller
                         ->orWhere('email', 'LIKE', "%{$search}%")
                         ->orWhereHas('profile', function ($pq) use ($search) {
                             $pq->where('name', 'LIKE', "%{$search}%")
-                                ->orWhere('district', 'LIKE', "%{$search}%")
-                                ->orWhere('division', 'LIKE', "%{$search}%")
                                 ->orWhere('department', 'LIKE', "%{$search}%")
                                 ->orWhere('designation', 'LIKE', "%{$search}%");
                         });
                 });
             })
-            ->latest()
-            ->paginate(10)
-            ->withQueryString();
+            ->when($division, function ($query) use ($division) {
+                $query->whereHas('profile', function ($q) use ($division) {
+                    $q->where('division', $division);
+                });
+            })
+            ->when($district, function ($query) use ($district) {
+                $query->whereHas('profile', function ($q) use ($district) {
+                    $q->where('district', $district);
+                });
+            })
+            ->when($upazila, function ($query) use ($upazila) {
+                $query->whereHas('profile', function ($q) use ($upazila) {
+                    $q->where('upazila', $upazila);
+                });
+            });
+
+        $tagOfficers = $query->latest()->paginate(10)->withQueryString();
 
         $locationData = $this->getLocationData();
 
-        return view('backend.admin.pages.tagOfficer.index', compact('tagOfficers', 'locationData', 'search', 'stats'));
+        return view('backend.admin.pages.tagOfficer.index', compact('tagOfficers', 'locationData', 'search'));
     }
 
     /**
@@ -80,8 +83,8 @@ class TagOfficerController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:150',
-            'designation' => 'required|string|max:150',
-            'department' => 'required|string|max:150',
+            'designation' => 'nullable|string|max:150',
+            'department' => 'nullable|string|max:150',
             'phone' => 'required|unique:users,phone',
             'email' => 'nullable|email|unique:users,email',
             'division' => 'required',
@@ -132,9 +135,6 @@ class TagOfficerController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
         //
@@ -156,11 +156,12 @@ class TagOfficerController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'nullable|email|unique:users,email,'.$id,
             'phone' => 'required|string|unique:users,phone,'.$id,
-            'designation' => 'required|string',
-            'department' => 'required|string',
+            'designation' => 'nullable|string',
+            'department' => 'nullable|string',
             'division' => 'required',
             'district' => 'required',
             'upazila' => 'required',
+            'status' => 'required',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'password' => 'nullable|min:6',
         ]);
@@ -168,6 +169,7 @@ class TagOfficerController extends Controller
         $userData = [
             'email' => $request->email,
             'phone' => $request->phone,
+            'status' => $request->status,
         ];
 
         if ($request->filled('password')) {

@@ -89,54 +89,75 @@
 
 @section('content')
     <div class="container-fluid py-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
             <div>
-                <h4 class="fw-bold mb-0">DC Officer Management</h4>
-                <p class="text-muted small mb-0">Manage DC Officers Information and Assignments</p>
+                <h4 class="fw-bold">DC Officer Management</h4>
+                <p class="text-muted small">Manage DC Officers Information and Assignments</p>
             </div>
-            <button class="btn btn-primary px-4 py-2" data-bs-toggle="modal" data-bs-target="#addOfficerModal"
-                style="background-color: #006699; border-radius: 8px;">
+
+            <button class="btn btn-primary px-4 py-2 w-sm-100 w-auto" data-bs-toggle="modal" data-bs-target="#addOfficerModal"
+                style="background-color: #006699; border-radius: 8px; border: none;">
                 <i class="bi bi-plus-lg me-2"></i> Add DC Officer
             </button>
         </div>
 
-        <div class="row g-4 mb-4">
-            <div class="col-md-3">
-                <div class="card card-stats bg-cyan">
-                    <i class="bi bi-shield-check fs-4 mb-2"></i>
-                    <div class="small">Total DC Officers</div>
-                    <h2 class="fw-bold mb-0">{{ $stats['total'] }}</h2>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card card-stats bg-green">
-                    <i class="bi bi-shield-check fs-4 mb-2"></i>
-                    <div class="small">Active Officers</div>
-                    <h2 class="fw-bold mb-0">{{ $stats['active'] }}</h2>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card card-stats bg-magenta">
-                    <i class="bi bi-shield-check fs-4 mb-2"></i>
-                    <div class="small">Total Divisions</div>
-                    <h2 class="fw-bold mb-0">{{ $stats['divisions'] }}</h2>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card card-stats bg-orange">
-                    <i class="bi bi-shield-check fs-4 mb-2"></i>
-                    <div class="small">Total Districts</div>
-                    <h2 class="fw-bold mb-0">{{ $stats['districts'] }}</h2>
-                </div>
-            </div>
-        </div>
+        <form action="{{ route('admin.dc-officer.index') }}" method="GET"
+            class="bg-white p-3 rounded shadow-sm border mb-4">
+            <div class="row g-2 align-items-end">
 
-        <form action="{{ route('admin.dc-officer.index') }}" method="GET">
-            <div class="position-relative mb-4">
-                <i class="bi bi-search search-icon"
-                    style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%);"></i>
-                <input type="text" name="search" id="searchInput" class="form-control search-box"
-                    style="padding-left: 40px;" value="{{ request('search') }}" placeholder="Search dc officer...">
+                {{-- Search Field with Button --}}
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold text-muted">Search</label>
+                    <div class="input-group">
+                        <input type="text" name="search" class="form-control border-0 bg-light"
+                            style="border-radius: 0; font-size: 0.9rem;" value="{{ request('search') }}"
+                            placeholder="Name, Email or Phone...">
+                        <button class="btn btn-dark border-0 px-3" type="submit"
+                            style="border-radius: 0 8px 8px 0; background-color: #006699;">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </div>
+
+                {{-- Division Field --}}
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold text-muted">Division</label>
+                    <select name="division" id="division" class="form-select border-0 bg-light"
+                        style="border-radius: 8px;">
+                        <option value="">All Division</option>
+                        @foreach ($locationData['divisions'] as $division)
+                            <option value="{{ $division['name_en'] }}"
+                                {{ request('division') == $division['name_en'] ? 'selected' : '' }}>
+                                {{ $division['name_en'] }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- District Field --}}
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold text-muted">District</label>
+                    <select name="district" id="district" class="form-select border-0 bg-light"
+                        style="border-radius: 8px;">
+                        <option value="">All District</option>
+                    </select>
+                </div>
+
+                {{-- Action Buttons --}}
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-grow-1 shadow-sm"
+                        style="background-color: #006699; border: none; border-radius: 8px; height: 38px;">
+                        <i class="bi bi-funnel-fill me-1"></i> Filter
+                    </button>
+
+                    <a href="{{ route('admin.dc-officer.index') }}"
+                        class="btn btn-outline-secondary shadow-sm d-flex align-items-center justify-content-center"
+                        style="border-radius: 8px; height: 38px; border-color: #dee2e6; min-width: 45px;">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </a>
+                </div>
+
             </div>
         </form>
 
@@ -145,12 +166,12 @@
                 <table class="table align-middle">
                     <thead class="text-muted">
                         <tr style="font-size: 0.85rem; text-transform: uppercase;">
-                            <th>Officer</th>
+                            <th>SL</th>
+                            <th>Name</th>
                             <th>Designation</th>
                             <th>Department</th>
                             <th>Division</th>
                             <th>District</th>
-                            {{-- <th>Thana</th> --}}
                             <th>Phone</th>
                             <th>Status</th>
                             <th class="text-center">Actions</th>
@@ -159,6 +180,9 @@
                     <tbody id="dcTableBody">
                         @forelse($dcOfficers as $officer)
                             <tr>
+                                <td class="fw-bold text-muted" style="font-size: 0.85rem;">
+                                    {{ $loop->iteration }}
+                                </td>
                                 <td>
                                     {{ $officer->profile->name ?? 'N/A' }}
                                 </td>
@@ -506,7 +530,7 @@
 
 @endsection
 
-@push('scripts')
+{{-- @push('scripts')
     <script>
         $(document).on('click', '.delete-confirm', function(e) {
             let form = $(this).closest('form');
@@ -673,6 +697,204 @@
                     $('#addOfficerModal').modal('show');
                 }
             @endif
+        });
+    </script>
+@endpush --}}
+
+@push('scripts')
+    <script>
+        const locationData = @json($locationData);
+        const divisions = locationData.divisions || [];
+
+        $(document).ready(function() {
+
+            // ===============================
+            // 🔹 COMMON FUNCTIONS
+            // ===============================
+
+            function populateDivisions(selectedDiv, target) {
+                let options = '<option value="">Select Division</option>';
+                divisions.forEach(div => {
+                    const selected = div.name_en === selectedDiv ? 'selected' : '';
+                    options += `<option value="${div.name_en}" ${selected}>${div.name_en}</option>`;
+                });
+                $(target).html(options);
+            }
+
+            function loadDistricts(divName, selectedDist, target) {
+                const div = divisions.find(d => d.name_en === divName);
+                let options = '<option value="">Select District</option>';
+
+                if (div?.districts) {
+                    div.districts.forEach(dist => {
+                        const selected = dist.name_en === selectedDist ? 'selected' : '';
+                        options += `<option value="${dist.name_en}" ${selected}>${dist.name_en}</option>`;
+                    });
+                    $(target).html(options).prop('disabled', false);
+                } else {
+                    $(target).html(options).prop('disabled', true);
+                }
+            }
+
+            function loadUpazilas(divName, distName, selectedUpz, target) {
+                const div = divisions.find(d => d.name_en === divName);
+                const dist = div?.districts?.find(d => d.name_en === distName);
+
+                let options = '<option value="">Select Upazila</option>';
+
+                if (dist?.police_stations) {
+                    dist.police_stations.forEach(ps => {
+                        const selected = ps.name_en === selectedUpz ? 'selected' : '';
+                        options += `<option value="${ps.name_en}" ${selected}>${ps.name_en}</option>`;
+                    });
+                    $(target).html(options).prop('disabled', false);
+                } else {
+                    $(target).html(options).prop('disabled', true);
+                }
+            }
+
+            // ===============================
+            // 🔹 FILTER (TOP SEARCH AREA)
+            // ===============================
+
+            $('#division').on('change', function() {
+                loadDistricts($(this).val(), '', '#district');
+                $('#upazila').html('<option value="">Select Upazila</option>').prop('disabled', true);
+            });
+
+            $('#district').on('change', function() {
+                loadUpazilas($('#division').val(), $(this).val(), '', '#upazila');
+            });
+
+            // ===============================
+            // 🔹 ADD MODAL
+            // ===============================
+
+            populateDivisions('', '#add_division');
+
+            $('#add_division').on('change', function() {
+                loadDistricts($(this).val(), '', '#add_district');
+                $('#add_upazila').html('<option value="">Select Upazila</option>').prop('disabled', true);
+            });
+
+            $('#add_district').on('change', function() {
+                loadUpazilas($('#add_division').val(), $(this).val(), '', '#add_upazila');
+            });
+
+            // ===============================
+            // 🔹 EDIT MODAL
+            // ===============================
+
+            $(document).on('click', '.edit-btn', function() {
+                const data = $(this).data();
+
+                $('#editOfficerForm').attr('action', data.url);
+                $('#edit_url_handler').val(data.url);
+                $('#edit_name').val(data.name);
+                $('#edit_designation').val(data.designation);
+                $('#edit_department').val(data.department);
+                $('#edit_phone').val(data.phone);
+                $('#edit_email').val(data.email);
+                $('#edit_status').val(data.status.toLowerCase());
+
+                populateDivisions(data.division, '#edit_division');
+                loadDistricts(data.division, data.district, '#edit_district');
+                loadUpazilas(data.division, data.district, data.upazila, '#edit_upazila');
+
+                $('#editOfficerModal').modal('show');
+            });
+
+            $('#edit_division').on('change', function() {
+                loadDistricts($(this).val(), '', '#edit_district');
+                $('#edit_upazila').html('<option value="">Select Upazila</option>').prop('disabled', true);
+            });
+
+            $('#edit_district').on('change', function() {
+                loadUpazilas($('#edit_division').val(), $(this).val(), '', '#edit_upazila');
+            });
+
+            // ===============================
+            // 🔹 DELETE CONFIRM
+            // ===============================
+
+            $(document).on('click', '.delete-confirm', function() {
+                let form = $(this).closest('form');
+
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, delete it!',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) form.submit();
+                });
+            });
+
+            // ===============================
+            // 🔹 PASSWORD TOGGLE
+            // ===============================
+
+            function togglePassword(input, icon) {
+                const field = $(input);
+                const ic = $(icon);
+
+                if (field.attr('type') === 'password') {
+                    field.attr('type', 'text');
+                    ic.removeClass('bi-eye-slash').addClass('bi-eye');
+                } else {
+                    field.attr('type', 'password');
+                    ic.removeClass('bi-eye').addClass('bi-eye-slash');
+                }
+            }
+
+            $(document).on('click', '#togglePassword', function() {
+                togglePassword('#password', '#eyeIcon');
+            });
+
+            $(document).on('click', '#toggleEditPassword', function() {
+                togglePassword('#edit_password', '#editEyeIcon');
+            });
+
+            // ===============================
+            // 🔹 VALIDATION ERROR HANDLE
+            // ===============================
+
+            @if ($errors->any())
+                let oldAction = "{{ old('edit_url_handler') }}";
+                let oldDiv = "{{ old('division') }}";
+                let oldDist = "{{ old('district') }}";
+                let oldUpz = "{{ old('upazila') }}";
+
+                if (oldAction) {
+                    $('#editOfficerForm').attr('action', oldAction);
+                    populateDivisions(oldDiv, '#edit_division');
+
+                    if (oldDiv) {
+                        loadDistricts(oldDiv, oldDist, '#edit_district');
+                        if (oldDist) {
+                            loadUpazilas(oldDiv, oldDist, oldUpz, '#edit_upazila');
+                        }
+                    }
+
+                    $('#editOfficerModal').modal('show');
+                } else {
+                    populateDivisions(oldDiv, '#add_division');
+
+                    if (oldDiv) {
+                        loadDistricts(oldDiv, oldDist, '#add_district');
+                        if (oldDist) {
+                            loadUpazilas(oldDiv, oldDist, oldUpz, '#add_upazila');
+                        }
+                    }
+
+                    $('#addOfficerModal').modal('show');
+                }
+            @endif
+
         });
     </script>
 @endpush

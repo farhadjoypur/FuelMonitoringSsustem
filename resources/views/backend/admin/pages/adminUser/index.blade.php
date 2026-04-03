@@ -91,8 +91,8 @@
     <div class="container-fluid p-4">
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
             <div>
-                <h4 class="fw-bold mb-0">Admin User Management</h4>
-                <p class="text-muted small mb-0">Manage Admin User Information</p>
+                <h4 class="fw-bold">Admin User Management</h4>
+                <p class="text-muted small">Manage Admin User Information</p>
             </div>
 
             <button class="btn btn-primary px-4 py-2 w-sm-100 w-auto" data-bs-toggle="modal" data-bs-target="#addOfficerModal"
@@ -202,6 +202,7 @@
                                             data-designation="{{ $officer->profile->designation ?? '' }}"
                                             data-department="{{ $officer->profile->department ?? '' }}"
                                             data-phone="{{ $officer->phone }}" data-email="{{ $officer->email }}"
+                                            data-status="{{ $officer->status }}"
                                             data-url="{{ route('admin.admin-user.update', $officer->id) }}" title="Edit">
                                             <i class="bi bi-pencil-square"></i>
                                         </button>
@@ -535,6 +536,7 @@
                 $('#edit_department').val(data.department);
                 $('#edit_phone').val(data.phone);
                 $('#edit_email').val(data.email);
+                $('#edit_status').val(data.status.toLowerCase());
 
                 $('#editOfficerModal').modal('show');
             });
