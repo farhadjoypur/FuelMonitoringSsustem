@@ -11,7 +11,7 @@
             {{-- DASHBOARD --}}
             <li class="menu-item">
                 <a href="{{ route('admin.dashboard.index') }}"
-                   class="menu-link {{ request()->routeIs('admin.dashboard.*') ? 'active' : '' }}">
+                    class="menu-link {{ request()->routeIs('admin.dashboard.*') ? 'active' : '' }}">
                     <span class="material-symbols-rounded">dashboard</span>
                     <span class="menu-label">Dashboard</span>
                 </a>
@@ -20,7 +20,7 @@
             {{-- COMPANY (SIMPLE MENU) --}}
             <li class="menu-item">
                 <a href="{{ route('admin.companies.index') }}"
-                   class="menu-link {{ request()->routeIs('admin.companies.*') ? 'active' : '' }}">
+                    class="menu-link {{ request()->routeIs('admin.companies.*') ? 'active' : '' }}">
                     <span class="material-symbols-rounded">business</span>
                     <span class="menu-label">Company</span>
                 </a>
@@ -29,7 +29,7 @@
             {{-- DEPOT --}}
             <li class="menu-item">
                 <a href="{{ route('admin.depots.index') }}"
-                   class="menu-link {{ request()->routeIs('admin.depots.*') ? 'active' : '' }}">
+                    class="menu-link {{ request()->routeIs('admin.depots.*') ? 'active' : '' }}">
                     <span class="material-symbols-rounded">group</span>
                     <span class="menu-label">Depot</span>
                 </a>
@@ -38,7 +38,7 @@
             {{-- FILLING STATION (SIMPLE MENU) --}}
             <li class="menu-item">
                 <a href="{{ route('admin.stations.index') }}"
-                   class="menu-link {{ request()->routeIs('admin.stations.*') ? 'active' : '' }}">
+                    class="menu-link {{ request()->routeIs('admin.stations.*') ? 'active' : '' }}">
                     <span class="material-symbols-rounded">local_gas_station</span>
                     <span class="menu-label">Filling Station</span>
                 </a>
@@ -47,7 +47,7 @@
             {{-- DC OFFICER --}}
             <li class="menu-item">
                 <a href="{{ route('admin.dc-officer.index') }}"
-                   class="menu-link {{ request()->routeIs('admin.dc-officer.*') ? 'active' : '' }}">
+                    class="menu-link {{ request()->routeIs('admin.dc-officer.*') ? 'active' : '' }}">
                     <span class="material-symbols-rounded">group</span>
                     <span class="menu-label">DC Officer</span>
                 </a>
@@ -56,7 +56,7 @@
             {{-- TAG OFFICER --}}
             <li class="menu-item">
                 <a href="{{ route('admin.tag-officer.index') }}"
-                   class="menu-link {{ request()->routeIs('admin.tag-officer.*') ? 'active' : '' }}">
+                    class="menu-link {{ request()->routeIs('admin.tag-officer.*') ? 'active' : '' }}">
                     <span class="material-symbols-rounded">assignment_ind</span>
                     <span class="menu-label">Tag Officer</span>
                 </a>
@@ -65,12 +65,19 @@
             {{-- ASSIGN TAG OFFICER --}}
             <li class="menu-item">
                 <a href="{{ route('admin.assign-tag-officer.index') }}"
-                   class="menu-link {{ request()->routeIs('admin.assign-tag-officer.*') ? 'active' : '' }}">
+                    class="menu-link {{ request()->routeIs('admin.assign-tag-officer.*') ? 'active' : '' }}">
                     <span class="material-symbols-rounded">assignment_turned_in</span>
                     <span class="menu-label">Assign Tag Officer</span>
                 </a>
             </li>
 
+            <li class="menu-item">
+                <a href="{{ route('admin.admin-user.index') }}"
+                    class="menu-link {{ request()->routeIs('admin.admin-user.*') ? 'active' : '' }}">
+                    <span class="material-symbols-rounded">admin_panel_settings</span>
+                    <span class="menu-label">Admin User</span>
+                </a>
+            </li>
         </ul>
     </div>
 

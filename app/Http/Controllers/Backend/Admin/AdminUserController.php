@@ -11,26 +11,16 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 
-class TagOfficerController extends Controller
+class AdminUserController extends Controller
 {
-    private function getLocationData()
-    {
-        $path = resource_path('data/location.json');
-
-        if (! File::exists($path)) {
-            return [];
-        }
-
-        $json = File::get($path);
-
-        return json_decode($json, true);
-    }
-
+    /**
+     * Display a listing of the resource.
+     */
     public function index(Request $request)
     {
         $search = $request->input('search');
 
-        $baseQuery = User::where('role', UserRole::TAG_OFFICER);
+        $baseQuery = User::where('role', UserRole::ADMIN);
 
         $stats = [
             'total' => (clone $baseQuery)->count(),
@@ -41,7 +31,7 @@ class TagOfficerController extends Controller
                 ->distinct('district')->count('district'),
         ];
 
-        $tagOfficers = User::where('role', UserRole::TAG_OFFICER)
+        $admins = User::where('role', UserRole::ADMIN)
             ->with('profile')
             ->when($search, function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
@@ -49,8 +39,6 @@ class TagOfficerController extends Controller
                         ->orWhere('email', 'LIKE', "%{$search}%")
                         ->orWhereHas('profile', function ($pq) use ($search) {
                             $pq->where('name', 'LIKE', "%{$search}%")
-                                ->orWhere('district', 'LIKE', "%{$search}%")
-                                ->orWhere('division', 'LIKE', "%{$search}%")
                                 ->orWhere('department', 'LIKE', "%{$search}%")
                                 ->orWhere('designation', 'LIKE', "%{$search}%");
                         });
@@ -60,9 +48,7 @@ class TagOfficerController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        $locationData = $this->getLocationData();
-
-        return view('backend.admin.pages.tagOfficer.index', compact('tagOfficers', 'locationData', 'search', 'stats'));
+        return view('backend.admin.pages.adminUser.index', compact('admins', 'search', 'stats'));
     }
 
     /**
@@ -84,9 +70,6 @@ class TagOfficerController extends Controller
             'department' => 'required|string|max:150',
             'phone' => 'required|unique:users,phone',
             'email' => 'nullable|email|unique:users,email',
-            'division' => 'required',
-            'district' => 'required',
-            'upazila' => 'required',
             'password' => 'required',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
@@ -99,7 +82,7 @@ class TagOfficerController extends Controller
                 'phone' => $request->phone,
                 'status' => 'active',
                 'password' => Hash::make($request->password),
-                'role' => UserRole::TAG_OFFICER,
+                'role' => UserRole::ADMIN,
             ]);
 
             $photoPath = null;
@@ -115,15 +98,12 @@ class TagOfficerController extends Controller
                 'name' => $request->name,
                 'designation' => $request->designation,
                 'department' => $request->department,
-                'division' => $request->division,
-                'district' => $request->district,
-                'upazila' => $request->upazila,
                 'photo' => $photoPath,
             ]);
 
             DB::commit();
 
-            return redirect()->back()->with('success', 'Tag Officer added successfully!');
+            return redirect()->back()->with('success', 'Admin added successfully!');
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -148,6 +128,9 @@ class TagOfficerController extends Controller
         //
     }
 
+    /**
+     * Update the specified resource in storage.
+     */
     public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
@@ -158,9 +141,6 @@ class TagOfficerController extends Controller
             'phone' => 'required|string|unique:users,phone,'.$id,
             'designation' => 'required|string',
             'department' => 'required|string',
-            'division' => 'required',
-            'district' => 'required',
-            'upazila' => 'required',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'password' => 'nullable|min:6',
         ]);
@@ -180,9 +160,6 @@ class TagOfficerController extends Controller
             'name' => $request->name,
             'designation' => $request->designation,
             'department' => $request->department,
-            'division' => $request->division,
-            'district' => $request->district,
-            'upazila' => $request->upazila,
         ];
 
         if ($request->hasFile('photo')) {
@@ -201,7 +178,7 @@ class TagOfficerController extends Controller
             $user->profile()->create($profileData);
         }
 
-        return redirect()->back()->with('success', 'Officer updated successfully!');
+        return redirect()->back()->with('success', 'Admin updated successfully!');
     }
 
     public function destroy($id)
@@ -215,6 +192,6 @@ class TagOfficerController extends Controller
         }
         $user->delete();
 
-        return redirect()->back()->with('success', 'Tag Officer deleted successfully!');
+        return redirect()->back()->with('success', 'DC Officer deleted successfully!');
     }
 }
