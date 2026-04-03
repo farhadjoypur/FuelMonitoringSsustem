@@ -193,7 +193,7 @@
 <div class="db-wrap">
 
     <div class="db-title">Dashboard Overview</div>
-    <p class="db-sub">Bangladesh Fuel Management System &mdash; Real-time Monitoring</p>
+    <p class="db-sub">Bangladesh Fuel Management System</p>
 
     {{-- ============================================================
          TODAY'S STOCK
