@@ -180,6 +180,10 @@
             gap: 3px;
         }
 
+        .closing-stock {
+            background: #EFF6FF;
+        }
+
         .input-field {
             width: 100%;
             border: 1px solid #e2e8f0;
@@ -502,7 +506,7 @@
                             <span class="invalid-feedback">{{ $message }}</span>
                         @enderror
                     </div>
-                    <div class="grid-cell-auto" data-label="Closing Stock">
+                    <div class="grid-cell-auto closing-stock" data-label="Closing Stock">
                         <span class="auto-value" id="petrol_closing_display">0</span>
                         <span class="auto-label">Auto</span>
                     </div>
@@ -562,7 +566,7 @@
                             <span class="invalid-feedback">{{ $message }}</span>
                         @enderror
                     </div>
-                    <div class="grid-cell-auto" data-label="Closing Stock">
+                    <div class="grid-cell-auto closing-stock" data-label="Closing Stock">
                         <span class="auto-value" id="diesel_closing_display">0</span>
                         <span class="auto-label">Auto</span>
                     </div>
@@ -622,7 +626,7 @@
                             <span class="invalid-feedback">{{ $message }}</span>
                         @enderror
                     </div>
-                    <div class="grid-cell-auto" data-label="Closing Stock">
+                    <div class="grid-cell-auto closing-stock" data-label="Closing Stock">
                         <span class="auto-value" id="octane_closing_display">0</span>
                         <span class="auto-label">Auto</span>
                     </div>
