@@ -79,6 +79,16 @@
                 </a>
             </li>
 
+            {{-- Report --}}
+
+                <li class="menu-item">
+                    <a href="{{ route('admin.reports.index') }}"
+                        class="menu-link {{ request()->routeIs('admin.reports.index') ? 'active' : '' }}">
+                        <span class="material-symbols-rounded">bar_chart</span>
+                        <span class="menu-label">Sales Report</span>
+                    </a>
+                </li>
+
             <li class="menu-item">
                 <a href="{{ route('admin.admin-user.index') }}"
                     class="menu-link {{ request()->routeIs('admin.admin-user.*') ? 'active' : '' }}">

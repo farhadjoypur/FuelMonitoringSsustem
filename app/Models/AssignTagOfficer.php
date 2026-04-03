@@ -27,4 +27,9 @@ class AssignTagOfficer extends Model
     {
         return $this->belongsTo(FillingStation::class, 'filling_station_id');
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'officer_id');
+    }
 }
