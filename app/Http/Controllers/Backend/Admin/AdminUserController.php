@@ -186,6 +186,10 @@ class AdminUserController extends Controller
     public function destroy($id)
     {
         $user = User::findOrFail($id);
+        if ($id == 1 && $user->role == UserRole::ADMIN) {
+            return redirect()->back()->with('error', 'Administrator cannot be deleted for security reasons!');
+        }
+
         if ($user->profile && $user->profile->photo) {
             $fullPath = public_path($user->profile->photo);
             if (File::exists($fullPath)) {
@@ -194,6 +198,6 @@ class AdminUserController extends Controller
         }
         $user->delete();
 
-        return redirect()->back()->with('success', 'DC Officer deleted successfully!');
+        return redirect()->back()->with('success', 'Admin has been deleted successfully!');
     }
 }
