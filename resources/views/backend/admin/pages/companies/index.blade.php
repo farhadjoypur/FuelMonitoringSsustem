@@ -244,7 +244,6 @@
     }
 </style>
 @endpush
-@extends('backend.admin.layouts.app')   {{-- আপনার লেআউট অনুযায়ী পরিবর্তন করুন যদি দরকার হয় --}}
 
 @section('content')
 <div class="cm-wrapper">
