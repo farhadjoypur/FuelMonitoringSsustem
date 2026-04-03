@@ -15,11 +15,25 @@ class AssignTagOfficerController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $assignments = AssignTagOfficer::with(['officer.profile', 'fillingStation'])
-            ->latest()
-            ->get();
+        $query = AssignTagOfficer::with(['officer.profile', 'fillingStation']);
+
+        if ($request->has('search') && $request->search != '') {
+            $searchTerm = $request->search;
+
+            $query->where(function ($q) use ($searchTerm) {
+
+                $q->whereHas('officer.profile', function ($profileQuery) use ($searchTerm) {
+                    $profileQuery->where('name', 'like', '%'.$searchTerm.'%');
+                })
+                    ->orWhereHas('fillingStation', function ($stationQuery) use ($searchTerm) {
+                        $stationQuery->where('station_name', 'like', '%'.$searchTerm.'%');
+                    });
+            });
+        }
+
+        $assignments = $query->latest()->paginate(10)->withQueryString();
 
         $officers = User::with('profile')->where('role', UserRole::TAG_OFFICER)->get();
         $stations = FillingStation::all();
@@ -48,17 +62,32 @@ class AssignTagOfficerController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return back()->withErrors($validator)->withInput()->with('error', 'দয়া করে সব ফিল্ড ঠিকঠাক পূরণ করুন।');
+            return back()
+                ->withErrors($validator)
+                ->withInput()
+                ->with('error', 'Please fill in all required fields correctly.');
         }
 
         try {
+            $alreadyAssigned = AssignTagOfficer::where('filling_station_id', $request->filling_station_id)
+                ->where('officer_id', $request->officer_id)
+                ->exists();
+
+            if ($alreadyAssigned) {
+                return back()
+                    ->withInput()
+                    ->with('error', 'This officer is already assigned to this station!');
+            }
+
             if ($request->status == 'active') {
-                $exists = AssignTagOfficer::where('filling_station_id', $request->filling_station_id)
+                $existsActive = AssignTagOfficer::where('filling_station_id', $request->filling_station_id)
                     ->where('status', 'active')
                     ->exists();
 
-                if ($exists) {
-                    return back()->with('error', 'This station already has an active officer assigned!');
+                if ($existsActive) {
+                    return back()
+                        ->withInput()
+                        ->with('error', 'An active officer is already assigned to this filling station!');
                 }
             }
 
@@ -74,7 +103,9 @@ class AssignTagOfficerController extends Controller
                 ->with('success', 'Tag Officer assigned successfully!');
 
         } catch (\Exception $e) {
-            return back()->with('error', 'Something went wrong: '.$e->getMessage());
+            return back()
+                ->withInput()
+                ->with('error', 'Something went wrong: '.$e->getMessage());
         }
     }
 
@@ -114,8 +145,7 @@ class AssignTagOfficerController extends Controller
             $assignment = AssignTagOfficer::findOrFail($id);
             $assignment->update($request->all());
 
-            return redirect()->route('admin.assign-tag-officer.index')
-                ->with('success', 'অ্যাসাইনমেন্ট সফলভাবে আপডেট করা হয়েছে।');
+            return redirect()->back()->with('success', 'অ্যাসাইনমেন্ট সফলভাবে আপডেট করা হয়েছে।');
 
         } catch (\Exception $e) {
             return back()->with('error', 'আপডেট করতে সমস্যা হয়েছে: '.$e->getMessage());
