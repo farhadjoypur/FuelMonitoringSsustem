@@ -91,7 +91,7 @@
                 <p class="text-muted small mb-0">Manage tag officer assignments to filling stations</p>
             </div>
             <button class="btn btn-create" data-bs-toggle="modal" data-bs-target="#assignOfficerModal">
-                <i class="bi bi-plus-lg me-1"></i> Create Assign Tag Officer
+                <i class="bi bi-plus-lg me-1"></i>Assign Tag Officer
             </button>
         </div>
 
@@ -191,7 +191,7 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content" style="border-radius: 15px; border: none;">
                 <div class="modal-header border-0 pt-4 px-4">
-                    <h5 class="modal-title fw-bold" style="color: #1a202c;">Create Tag Officer Assignment</h5>
+                    <h5 class="modal-title fw-bold" style="color: #1a202c;">Tag Officer Assignment</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body px-4">
