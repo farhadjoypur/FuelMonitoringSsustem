@@ -66,8 +66,8 @@ class AdminUserController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:150',
-            'designation' => 'required|string|max:150',
-            'department' => 'required|string|max:150',
+            'designation' => 'nullable|string|max:150',
+            'department' => 'nullable|string|max:150',
             'phone' => 'required|unique:users,phone',
             'email' => 'nullable|email|unique:users,email',
             'password' => 'required',
@@ -139,8 +139,9 @@ class AdminUserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'nullable|email|unique:users,email,'.$id,
             'phone' => 'required|string|unique:users,phone,'.$id,
-            'designation' => 'required|string',
-            'department' => 'required|string',
+            'designation' => 'nullable|string',
+            'department' => 'nullable|string',
+            'status' => 'required|string',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'password' => 'nullable|min:6',
         ]);
@@ -148,6 +149,7 @@ class AdminUserController extends Controller
         $userData = [
             'email' => $request->email,
             'phone' => $request->phone,
+            'status' => $request->status,
         ];
 
         if ($request->filled('password')) {
