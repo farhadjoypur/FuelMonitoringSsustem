@@ -16,6 +16,13 @@ class DepotController extends Controller
     
     public function index()
     {
+        $path = resource_path('data/location.json');
+
+        if (!file_exists($path)) {
+            dd("Location file not found at: " . $path);
+        }
+
+        $locations = json_decode(file_get_contents($path), true);
         $depots = Depot::latest()->paginate(15);
     
         // Only these 3 counts as requested
@@ -32,7 +39,8 @@ class DepotController extends Controller
             'totalDepots',
             'activeDepots',
             'inactiveDepots',
-            'divisions'
+            'divisions',
+            'locations'
         ));
     }
 
@@ -53,7 +61,7 @@ class DepotController extends Controller
 
         Depot::create($request->all());
 
-        return redirect()->route('depots.index')->with('success', 'Created Successfully');
+        return response()->json(['success' => true, 'message' => 'Created Successfully']);
     }
 
     public function edit(Depot $depot)
@@ -73,7 +81,7 @@ class DepotController extends Controller
 
         $depot->update($request->all());
 
-        return redirect()->route('depots.index')->with('success', 'Updated Successfully');
+        return response()->json(['success' => true, 'message' => 'Updated Successfully']);
     }
 
     public function destroy(Depot $depot)
