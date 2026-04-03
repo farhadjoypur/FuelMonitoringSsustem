@@ -20,18 +20,18 @@
             </li>
 
             <li class="menu-item">
-                <a href="{{ route('tag-officer.profile.index') }}"
-                    class="menu-link {{ request()->routeIs('tag-officer.profile.*') ? 'active' : '' }}">
-                    <span class="material-symbols-rounded">person</span>
-                    <span class="menu-label">Profile</span>
-                </a>
-            </li>
-
-            <li class="menu-item">
                 <a href="{{ route('fuel-reports.index') }}"
                     class="menu-link {{ request()->routeIs('fuel-reports.*') ? 'active' : '' }}">
                     <span class="material-symbols-rounded">analytics</span>
                     <span class="menu-label">Sales Report</span>
+                </a>
+            </li>
+
+            <li class="menu-item">
+                <a href="{{ route('tag-officer.profile.index') }}"
+                    class="menu-link {{ request()->routeIs('tag-officer.profile.*') ? 'active' : '' }}">
+                    <span class="material-symbols-rounded">person</span>
+                    <span class="menu-label">Profile</span>
                 </a>
             </li>
         </ul>
