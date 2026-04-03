@@ -185,7 +185,7 @@
                                ================================================ */
         .fuel-row {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 14px;
             margin-bottom: 18px;
         }
@@ -571,6 +571,15 @@
                 </div>
             </div>
 
+            {{-- others --}}
+                <div class="fuel-card fc-petrol">
+                    <div class="fuel-icon" style="background-color: #10888c"><i class="fa-solid fa-droplet"></i></div>
+                    <div>
+                        <div class="fuel-val" style="color: #10888c">0 L</div>
+                        <div class="fuel-name" style="color: #10888c">Other</div>
+                    </div>
+                </div>
+
         </div>
 
         {{-- ══════════════════════════════════════════
@@ -602,6 +611,14 @@
                     <div class="fuel-name">Octane</div>
                 </div>
             </div>
+
+            <div class="fuel-card fc-petrol">
+                    <div class="fuel-icon" style="background-color: #10888c"><i class="fa-solid fa-droplet"></i></div>
+                    <div>
+                        <div class="fuel-val" style="color: #10888c">0 L</div>
+                        <div class="fuel-name" style="color: #10888c">Other</div>
+                    </div>
+                </div>
 
         </div>
 
