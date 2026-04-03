@@ -206,7 +206,17 @@
                                 <td>{{ $officer->phone ?? 'N/A' }}</td>
 
                                 <td>
-                                    <span class="status-active">Active</span>
+                                    @if (strtolower($officer->status) == 'active')
+                                        <span
+                                            style="background-color: #e6fffa; color: #38a169; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-block;">
+                                            Active
+                                        </span>
+                                    @else
+                                        <span
+                                            style="background-color: #fff5f5; color: #e53e3e; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-block;">
+                                            Inactive
+                                        </span>
+                                    @endif
                                 </td>
 
                                 <td class="text-center">
@@ -216,6 +226,7 @@
                                             data-designation="{{ $officer->profile->designation ?? '' }}"
                                             data-department="{{ $officer->profile->department ?? '' }}"
                                             data-phone="{{ $officer->phone }}" data-email="{{ $officer->email }}"
+                                            data-status="{{ $officer->status }}"
                                             data-division="{{ $officer->profile->division ?? '' }}"
                                             data-district="{{ $officer->profile->district ?? '' }}"
                                             data-upazila="{{ $officer->profile->upazila ?? '' }}"
@@ -237,7 +248,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="text-center py-4 text-muted">No DC Officers found.</td>
+                                <td colspan="12" class="text-center py-4 text-muted">No DC Officers found.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -275,7 +286,7 @@
                             <label class="form-label small fw-bold">Designation *</label>
                             <input type="text" name="designation"
                                 class="form-control bg-light border-0 py-2 @error('designation') is-invalid @enderror"
-                                placeholder="Enter Designation" value="{{ old('designation') }}">
+                                placeholder="Enter Designation" value="{{ old('designation', 'Deputy Commissioner') }}">
                             @error('designation')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -504,6 +515,20 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div> --}}
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Status *</label>
+                            <select name="status" id="edit_status"
+                                class="form-select bg-light border-0 py-2 @error('status') is-invalid @enderror">
+                                <option value="active" {{ old('status') == 'active' ? 'selected' : '' }}>Active</option>
+                                <option value="inactive" {{ old('status') == 'inactive' ? 'selected' : '' }}>Inactive
+                                </option>
+                            </select>
+                            @error('status')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
 
                         <div class="mb-4 text-center">
                             <label class="form-label d-block text-start small fw-bold">Change Photo (Optional)</label>
