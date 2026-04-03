@@ -155,16 +155,16 @@
         }
 
         .fuel-dot {
-            width: 7px;
+            /* width: 7px;
             height: 7px;
             border-radius: 50%;
             background: var(--primary);
             display: inline-block;
-            flex-shrink: 0;
+            flex-shrink: 0; */
         }
 
         .fuel-dot.muted {
-            background: #cbd5e1;
+            /* background: #cbd5e1; */
         }
 
         .station-name {
