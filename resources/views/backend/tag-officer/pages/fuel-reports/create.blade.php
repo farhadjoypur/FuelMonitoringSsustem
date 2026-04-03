@@ -169,7 +169,7 @@
         }
 
         .grid-cell-auto {
-            background: #f8fafc;
+            background: #FEF2F2;
             padding: 12px;
             border-bottom: 1px solid #f1f5f9;
             border-right: 1px solid #f1f5f9;
@@ -655,9 +655,9 @@
             const diffEl = document.getElementById(fuel + '_difference_display');
             const closingEl = document.getElementById(fuel + '_closing_display');
 
-            if (diffEl) {
+           if (diffEl) {
                 diffEl.textContent = diff.toFixed(2);
-                diffEl.style.color = diff < 0 ? '#dc2626' : diff > 0 ? '#16a34a' : '#94a3b8';
+                diffEl.style.color = '#dc2626'; 
             }
 
             if (closingEl) {
