@@ -69,7 +69,7 @@
     {{-- Station Info --}}
     <div class="custom-card">
         <div class="report-header">
-            <h5><i class="fa-solid fa-gas-pump"></i> Fuel Oil Receipt and Distribution Summary Daily Report</h5>
+            <h5><i class="fa-solid fa-gas-pump"></i> Daily Fuel Summary Report </h5>
             <div class="meta-grid">
                 <div class="meta-item">
                     <div class="meta-label"><i class="fa-solid fa-building-columns fa-xs"></i> Filling Station</div>

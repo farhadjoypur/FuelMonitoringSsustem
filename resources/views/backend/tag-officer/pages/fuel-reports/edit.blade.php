@@ -80,7 +80,7 @@
         {{-- Station Info --}}
         <div class="custom-card">
             <div class="report-header">
-                <h5><i class="fa-solid fa-file-lines"></i> Fuel Oil Receipt and Distribution Summary Daily Report</h5>
+                <h5><i class="fa-solid fa-file-lines"></i> Daily Fuel Summary Report </h5>
                 <span class="edit-badge"><i class="fa-regular fa-pen-to-square"></i> Editing</span>
             </div>
             <div class="station-form">

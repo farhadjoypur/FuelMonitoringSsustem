@@ -385,7 +385,7 @@
                 <div class="report-header">
                     <h5>
                         <i class="fa-solid fa-file-lines"></i>
-                        Fuel Oil Receipt and Distribution Summary Daily Report
+                        Daily Fuel Summary Report
                     </h5>
                 </div>
 
