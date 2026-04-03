@@ -67,17 +67,8 @@
 
 @section('content')
     <div class="container-fluid py-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="mb-4">
             <h4 class="fw-bold mb-0">My Profile</h4>
-            <div class="d-flex gap-2">
-                <button type="submit" form="profileUpdateForm" class="btn btn-success px-4" style="border-radius: 10px;">
-                    <i class="fas fa-save me-2"></i> Save Changes
-                </button>
-                <a href="{{ route('tag-officer.dashboard.index') }}" class="btn btn-secondary px-4"
-                    style="border-radius: 10px; background-color: #64748b; border: none;">
-                    <i class="fas fa-times me-2"></i> Cancel
-                </a>
-            </div>
         </div>
 
         <div class="alert edit-alert mb-4 d-flex align-items-center" role="alert">
@@ -93,7 +84,6 @@
                 <div class="col-lg-4 mb-4">
                     <div class="card profile-card h-100 p-5 text-center shadow-sm">
                         <div class="avatar-circle">
-
                             @php
                                 $nameParts = explode(' ', auth()->user()->profile->name ?? 'User');
                                 $initials =
@@ -163,6 +153,21 @@
                                 <label class="form-label"><i class="fas fa-shield-alt me-2"></i> Confirm Password</label>
                                 <input type="password" name="password_confirmation" class="form-control form-control-custom"
                                     placeholder="Confirm new password">
+                            </div>
+
+                            <div class="col-12 mt-4">
+                                <div
+                                    class="d-flex flex-column flex-sm-row justify-content-sm-end gap-2 gap-sm-3 border-top pt-4">
+                                    <a href="{{ route('admin.dashboard.index') }}"
+                                        class="btn btn-secondary px-sm-5 py-2 order-2 order-sm-1"
+                                        style="border-radius: 10px; background-color: #64748b; border: none;">
+                                        <i class="fas fa-times me-2"></i> Cancel
+                                    </a>
+                                    <button type="submit" class="btn btn-primary px-sm-5 py-2 order-1 order-sm-2"
+                                        style="border-radius: 10px; background-color: #006699; border: none;">
+                                        <i class="fas fa-save me-2"></i> Save Changes
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
