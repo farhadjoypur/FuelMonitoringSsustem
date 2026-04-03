@@ -75,7 +75,7 @@
         }
 
         .btn-add {
-            background: var(--primary);
+            background: #006699;;
             color: #fff;
             padding: 10px 20px;
             border-radius: 7px;
@@ -86,7 +86,7 @@
         }
 
         .btn-add:hover {
-            background: #1d4ed8;
+            background: #0088cc;
             color: #fff;
         }
 
@@ -95,7 +95,7 @@
         }
 
         .btn-filter {
-            background: var(--primary);
+            background: #006699;
             color: #fff;
             border: none;
             border-radius: 6px;
@@ -104,6 +104,9 @@
             font-weight: 600;
         }
 
+        .btn-filter:hover {
+            background: #0088cc;
+        }
         .btn-reset {
             background: #f1f5f9;
             color: var(--dark);
@@ -224,7 +227,7 @@
         }
 
         .btn-act-edit {
-            background: var(--primary);
+            background:  #006699;
             color: #fff;
         }
 
@@ -240,7 +243,7 @@
         }
 
         .btn-act-edit:hover {
-            background: #1d4ed8;
+            background: #0088cc;
             color: #fff;
         }
 
