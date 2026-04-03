@@ -23,9 +23,9 @@
         }
 
         .db-wrap {
-            background: var(--bg);
+            /* background: var(--bg); */
             min-height: 100vh;
-            padding: 28px;
+            /* padding: 28px; */
         }
 
         .db-title {
@@ -598,7 +598,7 @@
 
         @media (max-width: 992px) {
             .db-wrap {
-                padding: 15px;
+                padding: 0px;
             }
 
             .g-5 {
@@ -677,7 +677,7 @@
 @endpush
 
 @section('content')
-    <div class="db-wrap">
+    <div class="container-fluid py-4">
 
         <div class="db-title">Dashboard Overview</div>
         <p class="db-sub">Bangladesh Fuel Management System &mdash; Real-time Monitoring</p>
