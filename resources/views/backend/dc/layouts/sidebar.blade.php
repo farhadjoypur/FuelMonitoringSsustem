@@ -20,6 +20,14 @@
                 </a>
             </li>
 
+            <li class="menu-item">
+                <a href="{{ route('dc.assign-tag-officer.index') }}"
+                    class="menu-link {{ request()->routeIs('dc.assign-tag-officer.*') ? 'active' : '' }}">
+                    <span class="material-symbols-rounded">assignment_turned_in</span>
+                    <span class="menu-label">Assign Tag Officer</span>
+                </a>
+            </li>
+
         </ul>
     </div>
 
