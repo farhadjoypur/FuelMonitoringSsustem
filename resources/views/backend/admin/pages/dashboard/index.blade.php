@@ -39,7 +39,7 @@
         .fuel-grid,
         .fuel-diff-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 14px;
             margin-bottom: 10px;
         }
@@ -223,6 +223,14 @@
                 <div class="fmi-name">Octane</div>
             </div>
         </div>
+        {{-- other cards --}}
+        <div class="fuel-main-card octane">
+            <div class="fuel-icon-circle o"><i class="fa-solid fa-droplet"></i></div>
+            <div class="fuel-main-info">
+                <div class="fmi-val">0 L</div>
+                <div class="fmi-name">Octane</div>
+            </div>
+        </div>
     </div>
 
     {{-- Row 2: Difference % --}}
@@ -258,6 +266,7 @@
             Octane Difference: <strong>{{ number_format(abs($todayOctaneDiff)) }}L</strong>
         </div>
     </div>
+    
 
     {{-- ============================================================
          TODAY'S SOLD
@@ -282,6 +291,14 @@
             <div class="fuel-icon-circle o"><i class="fa-solid fa-droplet"></i></div>
             <div class="fuel-main-info">
                 <div class="fmi-val">{{ number_format($todayOctaneSold) }} L</div>
+                <div class="fmi-name">Octane</div>
+            </div>
+        </div>
+
+                <div class="fuel-main-card octane">
+            <div class="fuel-icon-circle o"><i class="fa-solid fa-droplet"></i></div>
+            <div class="fuel-main-info">
+                <div class="fmi-val">0 L</div>
                 <div class="fmi-name">Octane</div>
             </div>
         </div>
