@@ -36,7 +36,7 @@
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        background-color: #1e3a5f;
+        background-color: #006796;
         color: #fff;
         border: none;
         border-radius: 10px;
