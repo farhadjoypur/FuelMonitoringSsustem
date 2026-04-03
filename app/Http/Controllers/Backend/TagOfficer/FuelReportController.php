@@ -40,7 +40,11 @@ class FuelReportController extends Controller
     public function index(Request $request)
     {
         $ctx = $this->getOfficerAssignment();
-
+        $stationList = AssignTagOfficer::with('fillingStation')
+            ->where('officer_id', $ctx['officerId'])
+            ->where('status', 'active')
+            ->get()
+            ->pluck('fillingStation.station_name', 'fillingStation.id');
         // Station assign না থাকলে empty paginator
         if (! $ctx['stationId']) {
             $emptyReports = new LengthAwarePaginator([], 0, 15);
@@ -69,6 +73,7 @@ class FuelReportController extends Controller
             'reports'     => $reports,
             'stationName' => $ctx['stationName'],
             'stationInfo' => $ctx['stationInfo'],
+                'stationList' => $stationList,
         ]);
     }
 
@@ -79,12 +84,16 @@ class FuelReportController extends Controller
     public function create()
     {
         $ctx = $this->getOfficerAssignment();
-
+        $stationList = AssignTagOfficer::with('fillingStation')
+            ->where('officer_id', $ctx['officerId'])
+            ->where('status', 'active')
+            ->get()
+            ->pluck('fillingStation.station_name', 'fillingStation.id');
         // Station assign না থাকলে ফর্ম দেখানো যাবে না
         if (! $ctx['stationId']) {
             return redirect()
                 ->route('fuel-reports.index')
-                ->with('error', 'আপনার কোনো Active Station Assignment নেই।');
+                ->with('error', 'You do not have any active station assignment.');
         }
 
         // Officer + Station দিয়ে আগের closing stock বের করা
@@ -101,6 +110,7 @@ class FuelReportController extends Controller
             'stationName'    => $ctx['stationName'],
             'stationInfo'    => $ctx['stationInfo'],
             'defaultDate'    => $defaultDate,
+            'stationList'    => $stationList,
         ]);
     }
 
@@ -114,7 +124,7 @@ class FuelReportController extends Controller
         if (! $ctx['stationId']) {
             return redirect()
                 ->route('tag-officer.fuel-reports.index')
-                ->with('error', 'আপনার কোনো Active Station Assignment নেই।');
+                ->with('error', 'You do not have any active station assignment.');
         }
 
         $request->validate([
@@ -145,9 +155,9 @@ class FuelReportController extends Controller
         if ($exists) {
             return back()
                 ->withInput()
-                ->with('error', 'এই তারিখে "' . $ctx['stationName'] . '" স্টেশনের রিপোর্ট ইতোমধ্যে সেভ করা আছে। Edit করুন।');
+                ->with('error', 'A report for the station "' . $ctx['stationName'] . '" on this date already exists. Please edit it.');
         }
-
+    
         // Auto Calculate — difference & closing stock
         $petrolDiff    = $request->petrol_supply  - $request->petrol_received;
         $petrolClosing = $request->petrol_prev_stock + $request->petrol_received - $request->petrol_sales;
@@ -196,7 +206,7 @@ class FuelReportController extends Controller
 
         return redirect()
             ->route('fuel-reports.index')
-            ->with('success', 'রিপোর্ট সফলভাবে সেভ হয়েছে!');
+            ->with('success', 'Report saved successfully!');
     }
 
     // ═══════════════════════════════════════════════════════
@@ -258,7 +268,7 @@ class FuelReportController extends Controller
         if ($exists) {
             return back()
                 ->withInput()
-                ->with('error', 'এই তারিখে এই স্টেশনের অন্য একটি রিপোর্ট ইতোমধ্যে আছে।');
+                ->with('error', 'Another report for this station on this date already exists.');
         }
 
         // Auto Calculate
@@ -298,7 +308,7 @@ class FuelReportController extends Controller
 
         return redirect()
             ->route('fuel-reports.index')
-            ->with('success', 'রিপোর্ট সফলভাবে আপডেট হয়েছে!');
+            ->with('success', 'Report updated successfully!');
     }
 
     // ═══════════════════════════════════════════════════════
@@ -312,7 +322,7 @@ class FuelReportController extends Controller
 
         return redirect()
             ->route('fuel-reports.index')
-            ->with('success', 'রিপোর্ট মুছে ফেলা হয়েছে।');
+            ->with('success', 'The report has been deleted.');
     }
 
     // ═══════════════════════════════════════════════════════
@@ -348,7 +358,7 @@ class FuelReportController extends Controller
         $officerId = Auth::id();
 
         if ($fuelReport->tag_officer_id !== $officerId) {
-            abort(403, 'এই রিপোর্ট দেখার অনুমতি নেই।');
+            abort(403, 'You are not authorized to view this report.');
         }
     }
 }

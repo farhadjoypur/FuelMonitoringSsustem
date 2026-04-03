@@ -185,7 +185,7 @@
                                ================================================ */
         .fuel-row {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 14px;
             margin-bottom: 18px;
         }
@@ -472,25 +472,25 @@
         @if (!$stationName)
             <div class="no-station">
                 <i class="fa-solid fa-triangle-exclamation"></i>
-                আপনার কোনো Active Station Assignment নেই। Admin এর সাথে যোগাযোগ করুন।
+                You do not have any active station assignment. Please contact the admin.
             </div>
         @endif
 
         {{-- ══════════════════════════════════════════
          TOP 5 STAT CARDS
          ══════════════════════════════════════════ --}}
-        <div class="stat-row">
+        {{-- <div class="stat-row"> --}}
 
             {{-- 1. Today's Total Stock --}}
-            <div class="stat-card">
+            {{-- <div class="stat-card">
                 <div class="sc-icon ic-blue"><i class="fa-solid fa-cube"></i></div>
                 <div class="sc-label">Today's Total Stock</div>
                 <div class="sc-value">{{ number_format($totalStockToday) }} L</div>
                 <div class="sc-sub">Todays</div>
-            </div>
+            </div> --}}
 
             {{-- 2. Today's Total Received --}}
-            <div class="stat-card">
+            {{-- <div class="stat-card">
                 <div class="sc-icon ic-green"><i class="fa-solid fa-arrow-trend-up"></i></div>
                 <div class="sc-label">Today's Total Received</div>
                 <div class="sc-value">{{ number_format($totalReceivedToday) }} L</div>
@@ -502,18 +502,18 @@
                         <span style="color:#ef4444">{{ $receivedChangePct }}%</span>
                     @endif
                 </div>
-            </div>
+            </div> --}}
 
             {{-- 3. Today's Total Sold --}}
-            <div class="stat-card">
+            {{-- <div class="stat-card">
                 <div class="sc-icon ic-purple"><i class="fa-solid fa-arrow-trend-down"></i></div>
                 <div class="sc-label">Today's Total Sold</div>
                 <div class="sc-value">{{ number_format($totalSoldToday) }} L</div>
                 <div class="sc-sub">Todays</div>
-            </div>
+            </div> --}}
 
             {{-- 4. Today's Difference (L) --}}
-            <div class="stat-card">
+            {{-- <div class="stat-card">
                 <div class="sc-icon ic-orange"><i class="fa-solid fa-droplet"></i></div>
                 <div class="sc-label">Today's Difference</div>
                 <div class="sc-value">{{ number_format(abs($totalDiffToday)) }} L</div>
@@ -524,10 +524,10 @@
                     </div>
                 @endif
                 <div class="sc-sub">Todays</div>
-            </div>
+            </div> --}}
 
             {{-- 5. Today's Difference (%) --}}
-            <div class="stat-card">
+            {{-- <div class="stat-card">
                 <div class="sc-icon ic-teal"><i class="fa-solid fa-percent"></i></div>
                 <div class="sc-label">Today's Difference</div>
                 <div class="sc-value">{{ $totalDiffPct }}%</div>
@@ -539,7 +539,7 @@
                 <div class="sc-sub">Todays</div>
             </div>
 
-        </div>
+        </div> --}}
 
         {{-- ══════════════════════════════════════════
          TODAY'S STOCK
@@ -570,6 +570,15 @@
                     <div class="fuel-name">Octane</div>
                 </div>
             </div>
+
+            {{-- others --}}
+                <div class="fuel-card fc-petrol">
+                    <div class="fuel-icon" style="background-color: #10888c"><i class="fa-solid fa-droplet"></i></div>
+                    <div>
+                        <div class="fuel-val" style="color: #10888c">0 L</div>
+                        <div class="fuel-name" style="color: #10888c">Other</div>
+                    </div>
+                </div>
 
         </div>
 
@@ -603,12 +612,20 @@
                 </div>
             </div>
 
+            <div class="fuel-card fc-petrol">
+                    <div class="fuel-icon" style="background-color: #10888c"><i class="fa-solid fa-droplet"></i></div>
+                    <div>
+                        <div class="fuel-val" style="color: #10888c">0 L</div>
+                        <div class="fuel-name" style="color: #10888c">Other</div>
+                    </div>
+                </div>
+
         </div>
 
         {{-- ══════════════════════════════════════════
          CHART — Received vs Sold (Last 7 Days)
          ══════════════════════════════════════════ --}}
-        <div class="chart-card">
+        {{-- <div class="chart-card">
             <div class="chart-title">Received vs Sold (Last 7 Days)</div>
             <canvas id="rvsSoldChart" height="95"></canvas>
             <div class="chart-legend">
@@ -621,12 +638,12 @@
                     Sold (L)
                 </div>
             </div>
-        </div>
+        </div> --}}
 
         {{-- ══════════════════════════════════════════
          BOTTOM — Weekly Summary + Recent Alerts
          ══════════════════════════════════════════ --}}
-        <div class="bottom-row">
+        {{-- <div class="bottom-row">
 
             <div class="bottom-card">
                 <div class="bc-title">Weekly Summary</div>
@@ -656,7 +673,7 @@
                 @endforeach
             </div>
 
-        </div>
+        </div> --}}
 
     </div>
 @endsection

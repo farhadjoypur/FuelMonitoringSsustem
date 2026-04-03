@@ -309,169 +309,187 @@
 @endpush
 
 @section('content')
-    <div class="report-container">
+<div class="report-container">
 
-        <div
-            class="page-header d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 mb-4">
-            <h4 class="mb-0"><i class="fa-solid fa-gas-pump me-2"></i> Fuel Report List</h4>
+    <div class="page-header d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 mb-4">
+        <h4 class="mb-0"><i class="fa-solid fa-gas-pump me-2"></i> Fuel Report List</h4>
 
-            <a href="{{ route('fuel-reports.create') }}" class="btn-add text-nowrap">
-                <i class="fa-solid fa-plus me-1"></i> New Report
-            </a>
-        </div>
-
-        @if (session('success'))
-            <div class="alert-success"><i class="fa-solid fa-circle-check"></i> {{ session('success') }}</div>
-        @endif
-        @if (session('error'))
-            <div class="alert-danger"><i class="fa-solid fa-circle-exclamation"></i> {{ session('error') }}</div>
-        @endif
-
-        <div class="filter-section">
-            <form method="GET" action="{{ route('fuel-reports.index') }}">
-                <div class="row g-2 align-items-end">
-                    <div class="col-md-4">
-                        <label><i class="fa-solid fa-magnifying-glass fa-xs"></i> Station Name</label>
-                        <input type="text" name="station_name" class="form-control" placeholder="Search station..."
-                            value="{{ request('station_name') }}">
-                    </div>
-                    <div class="col-md-3">
-                        <label><i class="fa-regular fa-calendar fa-xs"></i> From Date</label>
-                        <input type="date" name="from_date" class="form-control" value="{{ request('from_date') }}">
-                    </div>
-                    <div class="col-md-3">
-                        <label><i class="fa-regular fa-calendar fa-xs"></i> To Date</label>
-                        <input type="date" name="to_date" class="form-control" value="{{ request('to_date') }}">
-                    </div>
-                    <div class="col-md-2 d-flex gap-2">
-                        <button type="submit" class="btn-filter flex-grow-1">
-                            <i class="fa-solid fa-filter fa-xs"></i> Filter
-                        </button>
-                        <a href="{{ route('fuel-reports.index') }}" class="btn-reset">
-                            <i class="fa-solid fa-rotate-left fa-xs"></i>
-                        </a>
-                    </div>
-                </div>
-            </form>
-        </div>
-
-        <div class="custom-card">
-            <div class="table-responsive">
-                <table class="table table-custom mb-0">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Date</th>
-                            <th>Station</th>
-                            <th>Fuel</th>
-                            <th>Prev. Stock (L)</th>
-                            <th>Supply (L)</th>
-                            <th>Received (L)</th>
-                            <th>Diff (L)</th>
-                            <th>Sales (L)</th>
-                            <th>Closing Stock (L)</th>
-                            <th class="text-center">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($reports as $report)
-                            <tr>
-                                <td rowspan="3" class="align-middle text-center fw-bold"
-                                    style="color:#94a3b8;background:#fafafa;">
-                                    {{ $loop->iteration }}
-                                </td>
-                                <td rowspan="3" class="align-middle">
-                                    <div class="fw-bold" style="font-size:13px">{{ $report->report_date->format('d M Y') }}
-                                    </div>
-                                    <div style="font-size:11px;color:#94a3b8">{{ $report->report_date->format('l') }}</div>
-                                </td>
-                                <td rowspan="3" class="align-middle">
-                                    <div class="station-name">{{ $report->station_name }}</div>
-                                    <div class="station-sub">
-                                        <i class="fa-solid fa-location-dot fa-xs"></i>
-                                        {{ $report->thana_upazila }}, {{ $report->district }}
-                                    </div>
-                                </td>
-
-                                {{-- Petrol --}}
-                                <td><span class="fuel-type"><span class="fuel-dot"></span>Petrol</span></td>
-                                <td>{{ number_format($report->petrol_prev_stock, 0) }}</td>
-                                <td>{{ number_format($report->petrol_supply, 0) }}</td>
-                                <td>{{ number_format($report->petrol_received, 0) }}</td>
-                                <td
-                                    class="{{ $report->petrol_difference < 0 ? 'diff-neg' : ($report->petrol_difference > 0 ? 'diff-pos' : 'diff-zero') }}">
-                                    {{ $report->petrol_difference >= 0 ? '+' : '' }}{{ number_format($report->petrol_difference, 0) }}
-                                </td>
-                                <td>{{ number_format($report->petrol_sales, 0) }}</td>
-                                <td class="closing-val">{{ number_format($report->petrol_closing_stock, 0) }}</td>
-
-                                <td rowspan="3" class="align-middle text-center" style="background:#fafafa;">
-                                    <div class="action-wrap">
-                                        <a href="{{ route('fuel-reports.show', $report) }}" class="btn-act btn-act-view">
-                                            <i class="fa-regular fa-eye fa-xs"></i> View
-                                        </a>
-                                        <a href="{{ route('fuel-reports.edit', $report) }}" class="btn-act btn-act-edit">
-                                            <i class="fa-regular fa-pen-to-square fa-xs"></i> Edit
-                                        </a>
-                                        <form action="{{ route('fuel-reports.destroy', $report) }}" method="POST"
-                                            onsubmit="return confirm('এই রিপোর্ট মুছে ফেলবেন?')">
-                                            @csrf @method('DELETE')
-                                            <button type="submit" class="btn-act btn-act-del">
-                                                <i class="fa-regular fa-trash-can fa-xs"></i> Delete
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-
-                            {{-- Diesel --}}
-                            <tr>
-                                <td><span class="fuel-type"><span class="fuel-dot muted"></span>Diesel</span></td>
-                                <td>{{ number_format($report->diesel_prev_stock, 0) }}</td>
-                                <td>{{ number_format($report->diesel_supply, 0) }}</td>
-                                <td>{{ number_format($report->diesel_received, 0) }}</td>
-                                <td
-                                    class="{{ $report->diesel_difference < 0 ? 'diff-neg' : ($report->diesel_difference > 0 ? 'diff-pos' : 'diff-zero') }}">
-                                    {{ $report->diesel_difference >= 0 ? '+' : '' }}{{ number_format($report->diesel_difference, 0) }}
-                                </td>
-                                <td>{{ number_format($report->diesel_sales, 0) }}</td>
-                                <td class="closing-val">{{ number_format($report->diesel_closing_stock, 0) }}</td>
-                            </tr>
-
-                            {{-- Octane --}}
-                            <tr class="group-border">
-                                <td><span class="fuel-type"><span class="fuel-dot muted"></span>Octane</span></td>
-                                <td>{{ number_format($report->octane_prev_stock, 0) }}</td>
-                                <td>{{ number_format($report->octane_supply, 0) }}</td>
-                                <td>{{ number_format($report->octane_received, 0) }}</td>
-                                <td
-                                    class="{{ $report->octane_difference < 0 ? 'diff-neg' : ($report->octane_difference > 0 ? 'diff-pos' : 'diff-zero') }}">
-                                    {{ $report->octane_difference >= 0 ? '+' : '' }}{{ number_format($report->octane_difference, 0) }}
-                                </td>
-                                <td>{{ number_format($report->octane_sales, 0) }}</td>
-                                <td class="closing-val">{{ number_format($report->octane_closing_stock, 0) }}</td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="11">
-                                    <div class="empty-state">
-                                        <i class="fa-regular fa-folder-open"></i>
-                                        <p>কোনো রিপোর্ট পাওয়া যায়নি।</p>
-                                        <a href="{{ route('fuel-reports.create') }}" class="btn-add">
-                                            <i class="fa-solid fa-plus"></i> প্রথম রিপোর্ট যোগ করুন
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-
-            @if ($reports->hasPages())
-                <div class="pagination-wrap">{{ $reports->links() }}</div>
-            @endif
-        </div>
-
+        <a href="{{ route('fuel-reports.create') }}" class="btn-add text-nowrap">
+            <i class="fa-solid fa-plus me-1"></i> New Report
+        </a>
     </div>
+
+    @if (session('success'))
+        <div class="alert-success"><i class="fa-solid fa-circle-check"></i> {{ session('success') }}</div>
+    @endif
+    @if (session('error'))
+        <div class="alert-danger"><i class="fa-solid fa-circle-exclamation"></i> {{ session('error') }}</div>
+    @endif
+
+    <div class="filter-section">
+        <form method="GET" action="{{ route('fuel-reports.index') }}">
+            <div class="row g-2 align-items-end">
+                <div class="col-md-4">
+                    <label><i class="fa-solid fa-magnifying-glass fa-xs"></i> Station Name</label>
+                    {{-- stationList --}}
+                    <select name="station_name" class="form-control">
+                        <option value="">Select Station</option>
+                        @foreach($stationList as $id => $name)
+                            <option value="{{ $name }}" {{ request('station_name') == $name ? 'selected' : '' }}>
+                                {{ $name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label><i class="fa-regular fa-calendar fa-xs"></i> From Date</label>
+                    <input type="date" name="from_date" class="form-control" value="{{ request('from_date') }}">
+                </div>
+                <div class="col-md-3">
+                    <label><i class="fa-regular fa-calendar fa-xs"></i> To Date</label>
+                    <input type="date" name="to_date" class="form-control" value="{{ request('to_date') }}">
+                </div>
+                <div class="col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn-filter flex-grow-1">
+                        <i class="fa-solid fa-filter fa-xs"></i> Filter
+                    </button>
+                    <a href="{{ route('fuel-reports.index') }}" class="btn-reset">
+                        <i class="fa-solid fa-rotate-left fa-xs"></i>
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="custom-card">
+        <div class="table-responsive">
+            <table class="table table-custom mb-0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Date</th>
+                        <th>Station</th>
+                        <th>Fuel</th>
+                        <th>Prev. Stock (L)</th>
+                        <th>Supply (L)</th>
+                        <th>Received (L)</th>
+                        <th>Diff (L)</th>
+                        <th>Sales (L)</th>
+                        <th>Closing Stock (L)</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @forelse($reports as $report)
+
+                    {{-- Petrol --}}
+                    <tr>
+                        <td rowspan="3" class="align-middle text-center fw-bold" style="color:#94a3b8;background:#fafafa;">
+                            {{ $loop->iteration }}
+                        </td>
+
+                        <td rowspan="3" class="align-middle">
+                            <div class="fw-bold" style="font-size:13px">{{ $report->report_date->format('d M Y') }}</div>
+                            <div style="font-size:11px;color:#94a3b8">{{ $report->report_date->format('l') }}</div>
+                        </td>
+
+                        <td rowspan="3" class="align-middle">
+                            <div class="station-name">{{ $report->station_name }}</div>
+                            <div class="station-sub">
+                                <i class="fa-solid fa-location-dot fa-xs"></i>
+                                {{ $report->thana_upazila }}, {{ $report->district }}
+                            </div>
+                        </td>
+
+                        <td><span class="fuel-type"><span class="fuel-dot"></span>Petrol</span></td>
+
+                        <td>{{ number_format($report->petrol_prev_stock, 0) }}</td>
+                        <td>{{ number_format($report->petrol_supply, 0) }}</td>
+                        <td>{{ number_format($report->petrol_received, 0) }}</td>
+
+                        {{-- ✅ FIXED DIFF --}}
+                        <td style="color:#dc2626;font-weight:600;">
+                            {{ number_format($report->petrol_difference, 0) }}
+                        </td>
+
+                        <td>{{ number_format($report->petrol_sales, 0) }}</td>
+                        <td class="closing-val">{{ number_format($report->petrol_closing_stock, 0) }}</td>
+
+                        <td rowspan="3" class="align-middle text-center" style="background:#fafafa;">
+                            <div class="action-wrap">
+                                <a href="{{ route('fuel-reports.show', $report) }}" class="btn-act btn-act-view">
+                                    <i class="fa-regular fa-eye fa-xs"></i> View
+                                </a>
+                                <a href="{{ route('fuel-reports.edit', $report) }}" class="btn-act btn-act-edit">
+                                    <i class="fa-regular fa-pen-to-square fa-xs"></i> Edit
+                                </a>
+                                <form action="{{ route('fuel-reports.destroy', $report) }}" method="POST"
+                                    onsubmit="return confirm('Are you sure you want to delete this report?')">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" class="btn-act btn-act-del">
+                                        <i class="fa-regular fa-trash-can fa-xs"></i> Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+
+                    {{-- Diesel --}}
+                    <tr>
+                        <td><span class="fuel-type"><span class="fuel-dot muted"></span>Diesel</span></td>
+
+                        <td>{{ number_format($report->diesel_prev_stock, 0) }}</td>
+                        <td>{{ number_format($report->diesel_supply, 0) }}</td>
+                        <td>{{ number_format($report->diesel_received, 0) }}</td>
+
+                        {{-- ✅ FIXED --}}
+                        <td style="color:#dc2626;font-weight:600;">
+                            {{ number_format($report->diesel_difference, 0) }}
+                        </td>
+
+                        <td>{{ number_format($report->diesel_sales, 0) }}</td>
+                        <td class="closing-val">{{ number_format($report->diesel_closing_stock, 0) }}</td>
+                    </tr>
+
+                    {{-- Octane --}}
+                    <tr class="group-border">
+                        <td><span class="fuel-type"><span class="fuel-dot muted"></span>Octane</span></td>
+
+                        <td>{{ number_format($report->octane_prev_stock, 0) }}</td>
+                        <td>{{ number_format($report->octane_supply, 0) }}</td>
+                        <td>{{ number_format($report->octane_received, 0) }}</td>
+
+                        {{-- ✅ FIXED --}}
+                        <td style="color:#dc2626;font-weight:600;">
+                            {{ number_format($report->octane_difference, 0) }}
+                        </td>
+
+                        <td>{{ number_format($report->octane_sales, 0) }}</td>
+                        <td class="closing-val">{{ number_format($report->octane_closing_stock, 0) }}</td>
+                    </tr>
+
+                    @empty
+                    <tr>
+                        <td colspan="11">
+                            <div class="empty-state">
+                                <i class="fa-regular fa-folder-open"></i>
+                                <p>No reports found.</p>
+                                <a href="{{ route('fuel-reports.create') }}" class="btn-add">
+                                    <i class="fa-solid fa-plus"></i> Add First Report
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        @if ($reports->hasPages())
+            <div class="pagination-wrap">{{ $reports->links() }}</div>
+        @endif
+    </div>
+
+</div>
 @endsection
