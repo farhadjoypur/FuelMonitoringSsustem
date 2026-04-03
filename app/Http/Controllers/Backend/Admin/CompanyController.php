@@ -39,14 +39,14 @@ class CompanyController extends Controller
     public function show(string $id)
     {
         $company = Company::findOrFail($id);
-        return view('backend.admin.pages.companies.show', compact('company'));
+        return response()->json($company);
     }
 
     // EDIT FORM
     public function edit(string $id)
     {
         $company = Company::findOrFail($id);
-        return view('backend.admin.pages.companies.edit', compact('company'));
+        return response()->json($company);
     }
 
     // UPDATE
@@ -61,8 +61,7 @@ class CompanyController extends Controller
 
         $company->update($request->all());
 
-        return redirect()->route('companies.index')
-            ->with('success', 'Company updated successfully');
+        return response()->json(['success' => true, 'message' => 'Company updated successfully']);
     }
 
     // DELETE
