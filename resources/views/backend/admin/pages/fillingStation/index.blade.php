@@ -827,8 +827,8 @@
                 </div>
                 <select class="fs-input" id="divisionFilter" style="min-width:140px;cursor:pointer;">
                     <option value="">All Divisions</option>
-                    @foreach ($divisions as $div)
-                        <option value="{{ $div }}">{{ $div }}</option>
+                    @foreach ($locations['divisions'] as $div)
+                        <option value="{{ $div['name_en'] }}">{{ $div['name_en'] }}</option>
                     @endforeach
                 </select>
                 <select class="fs-input" id="statusFilter" style="min-width:130px;cursor:pointer;">
