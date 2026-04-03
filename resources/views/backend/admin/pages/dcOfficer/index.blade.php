@@ -150,7 +150,7 @@
                             <th>Department</th>
                             <th>Division</th>
                             <th>District</th>
-                            <th>Thana</th>
+                            {{-- <th>Thana</th> --}}
                             <th>Phone</th>
                             <th>Status</th>
                             <th class="text-center">Actions</th>
@@ -177,7 +177,7 @@
                                 <td>{{ $officer->profile->division ?? 'N/A' }}</td>
 
                                 <td>{{ $officer->profile->district ?? 'N/A' }}</td>
-                                <td>{{ $officer->profile->upazila ?? 'N/A' }}</td>
+                                {{-- <td>{{ $officer->profile->upazila ?? 'N/A' }}</td> --}}
 
                                 <td>{{ $officer->phone ?? 'N/A' }}</td>
 
@@ -200,11 +200,10 @@
                                         </button>
 
                                         <form action="{{ route('admin.dc-officer.destroy', $officer->id) }}" method="POST"
-                                            class="d-inline">
+                                            class="d-inline delete-form">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn-action btn-delete"
-                                                onclick="return confirm('Are you sure you want to delete this officer?')"
+                                            <button type="button" class="btn-action btn-delete delete-confirm"
                                                 title="Delete">
                                                 <i class="bi bi-trash"></i>
                                             </button>
@@ -329,7 +328,7 @@
                             @enderror
                         </div>
 
-                        <div class="mb-3">
+                        {{-- <div class="mb-3">
                             <label class="form-label small fw-bold">upazila *</label>
                             <select name="upazila" id="add_upazila"
                                 class="form-select bg-light border-0 py-2 @error('upazila') is-invalid @enderror" disabled>
@@ -338,7 +337,7 @@
                             @error('upazila')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
-                        </div>
+                        </div> --}}
 
                         <div class="mb-4 text-center">
                             <label class="form-label d-block text-start small fw-bold">Upload Photo</label>
@@ -473,14 +472,14 @@
                             @enderror
                         </div>
 
-                        <div class="mb-3">
+                        {{-- <div class="mb-3">
                             <label class="form-label small fw-bold">Upazila *</label>
                             <select name="upazila" id="edit_upazila"
                                 class="form-select bg-light border-0 py-2 @error('upazila') is-invalid @enderror"></select>
                             @error('upazila')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
-                        </div>
+                        </div> --}}
 
                         <div class="mb-4 text-center">
                             <label class="form-label d-block text-start small fw-bold">Change Photo (Optional)</label>
@@ -507,188 +506,29 @@
 
 @endsection
 
-{{-- @push('scripts')
-    <script>
-        $(document).ready(function() {
-
-            @if ($errors->any())
-                // ১. চেক করা হচ্ছে এটা কি Edit Modal এর এরর?
-                var oldAction = "{{ old('edit_url_handler') }}";
-
-                if (oldAction) {
-                    // --- Edit Modal এর লজিক ---
-                    var editModalElement = document.getElementById('editOfficerModal');
-                    if (editModalElement) {
-                        var editModal = new bootstrap.Modal(editModalElement);
-                        $('#editOfficerForm').attr('action', oldAction);
-
-                        const oldDiv = "{{ old('division') }}";
-                        const oldDist = "{{ old('district') }}";
-                        const oldUpz = "{{ old('upazila') }}";
-
-                        if (oldDiv) {
-                            populateDivisions(oldDiv, '#edit_division'); // ডিভিশন সিলেক্ট করা
-                            loadDistricts(oldDiv, oldDist, '#edit_district');
-                            if (oldDist) {
-                                loadupazilas(oldDiv, oldDist, oldUpz, '#edit_upazila');
-                            }
-                        }
-                        editModal.show();
-                    }
-                } else {
-                    // --- ২. Add Modal এর লজিক (যেহেতু কোন Edit Action নেই) ---
-                    var addModalElement = document.getElementById('addOfficerModal');
-                    if (addModalElement) {
-                        var addModal = new bootstrap.Modal(addModalElement);
-
-                        const oldDiv = "{{ old('division') }}";
-                        const oldDist = "{{ old('district') }}";
-                        const oldUpz = "{{ old('upazila') }}";
-
-                        if (oldDiv) {
-                            populateDivisions(oldDiv, '#add_division'); // অ্যাড মোডালের ডিভিশন সেট
-                            loadDistricts(oldDiv, oldDist, '#add_district');
-                            if (oldDist) {
-                                loadupazilas(oldDiv, oldDist, oldUpz, '#add_upazila');
-                            }
-                        }
-                        addModal.show();
-                    }
-                }
-            @else
-                // যদি কোন এরর না থাকে, তবে নরমালি অ্যাড মোডালের জন্য ডিভিশন লোড করে রাখা
-                populateDivisions('', '#add_division');
-            @endif
-
-            // --- ড্রপডাউন চেঞ্জ ইভেন্ট (Add Modal) ---
-            $('#add_division').on('change', function() {
-                loadDistricts($(this).val(), '', '#add_district');
-                $('#add_upazila').html('<option value="">Select upazila</option>').prop('disabled', true);
-            });
-
-            $('#add_district').on('change', function() {
-                loadupazilas($('#add_division').val(), $(this).val(), '', '#add_upazila');
-            });
-
-        });
-    </script>
-
-    <script>
-        const locationData = @json($locationData);
-        const divisions = locationData.divisions || [];
-
-        $(document).ready(function() {
-            // --- কমন ফাংশনসমূহ ---
-            function loadDistricts(divName, selectedDist, target) {
-                const div = divisions.find(d => d.name_en === divName);
-                let options = '<option value="">Select District</option>';
-                if (div && div.districts) {
-                    div.districts.forEach(dist => {
-                        const sel = (dist.name_en === selectedDist) ? 'selected' : '';
-                        options += `<option value="${dist.name_en}" ${sel}>${dist.name_en}</option>`;
-                    });
-                    $(target).html(options).prop('disabled', false);
-                } else {
-                    $(target).html(options).prop('disabled', true);
-                }
-            }
-
-            function loadupazilas(divName, distName, selectedUpz, target) {
-                const div = divisions.find(d => d.name_en === divName);
-                const dist = div?.districts?.find(d => d.name_en === distName);
-                let options = '<option value="">Select upazila</option>';
-                if (dist && dist.police_stations) {
-                    dist.police_stations.forEach(ps => {
-                        const isSelected = (String(ps.name_en).trim() === String(selectedUpz).trim()) ?
-                            'selected' : '';
-                        options += `<option value="${ps.name_en}" ${isSelected}>${ps.name_en}</option>`;
-                    });
-                    $(target).html(options).prop('disabled', false);
-                } else {
-                    $(target).html(options).prop('disabled', true);
-                }
-            }
-
-            function populateDivisions(selectedDiv, target) {
-                let divOptions = '<option value="">Select Division</option>';
-                divisions.forEach(div => {
-                    const isSelected = (div.name_en === selectedDiv) ? 'selected' : '';
-                    divOptions += `<option value="${div.name_en}" ${isSelected}>${div.name_en}</option>`;
-                });
-                $(target).html(divOptions);
-            }
-
-            // --- Add Modal এর জন্য ইনিশিয়াল ডিভিশন লোড ---
-            populateDivisions('', '#add_division');
-
-            // Add Modal ড্রপডাউন চেঞ্জ
-            $('#add_division').on('change', function() {
-                loadDistricts($(this).val(), '', '#add_district');
-                $('#add_upazila').html('<option value="">Select upazila</option>').prop('disabled', true);
-            });
-
-            $('#add_district').on('change', function() {
-                loadupazilas($('#add_division').val(), $(this).val(), '', '#add_upazila');
-            });
-
-            // --- Edit Modal বাটন ক্লিক ---
-            $(document).on('click', '.edit-btn', function() {
-                const data = $(this).data();
-                $('#editOfficerForm').attr('action', data.url);
-                $('#edit_url_handler').val(data.url);
-                $('#edit_name').val(data.name);
-                $('#edit_designation').val(data.designation);
-                $('#edit_department').val(data.department);
-                $('#edit_phone').val(data.phone);
-                $('#edit_email').val(data.email);
-
-                populateDivisions(data.division, '#edit_division');
-                loadDistricts(data.division, data.district, '#edit_district');
-                loadupazilas(data.division, data.district, data.upazila, '#edit_upazila');
-
-                $('#editOfficerModal').modal('show');
-            });
-
-            // Edit Modal ড্রপডাউন চেঞ্জ
-            $('#edit_division').on('change', function() {
-                loadDistricts($(this).val(), '', '#edit_district');
-                $('#edit_upazila').html('<option value="">Select upazila</option>').prop('disabled', true);
-            });
-
-            $('#edit_district').on('change', function() {
-                loadupazilas($('#edit_division').val(), $(this).val(), '', '#edit_upazila');
-            });
-
-            // --- ভ্যালিডেশন এরর হ্যান্ডেলিং (Old Values Restore) ---
-            // যদি Edit মোডালের এরর হয়
-            const oldEditUrl = $('#edit_url_handler').val();
-            if (oldEditUrl) {
-                const oldDiv = $('#old_division').val();
-                populateDivisions(oldDiv, '#edit_division');
-                loadDistricts(oldDiv, $('#old_district').val(), '#edit_district');
-                loadupazilas(oldDiv, $('#old_district').val(), $('#old_upazila').val(), '#edit_upazila');
-                $('#editOfficerModal').modal('show');
-            }
-            // যদি Add মোডালের এরর হয়
-            else if ("{{ $errors->any() }}" && !"{{ old('edit_url_handler') }}") {
-                const oldAddDiv = "{{ old('division') }}";
-                const oldAddDist = "{{ old('district') }}";
-                const oldAddUpz = "{{ old('upazila') }}";
-
-                populateDivisions(oldAddDiv, '#add_division');
-                if (oldAddDiv) {
-                    loadDistricts(oldAddDiv, oldAddDist, '#add_district');
-                    if (oldAddDist) {
-                        loadupazilas(oldAddDiv, oldAddDist, oldAddUpz, '#add_upazila');
-                    }
-                }
-                $('#addOfficerModal').modal('show');
-            }
-        });
-    </script>
-@endpush --}}
-
 @push('scripts')
+    <script>
+        $(document).on('click', '.delete-confirm', function(e) {
+            let form = $(this).closest('form');
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+    </script>
+
     <script>
         let timer;
         $('#searchInput').on('keyup', function() {

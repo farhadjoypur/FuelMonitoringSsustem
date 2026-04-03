@@ -76,7 +76,7 @@ class DcOfficerController extends Controller
             'email' => 'nullable|email|unique:users,email',
             'division' => 'required',
             'district' => 'required',
-            'upazila' => 'required',
+            'upazila' => 'nullable',
             'password' => 'required',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
@@ -157,7 +157,7 @@ class DcOfficerController extends Controller
             'department' => 'required|string',
             'division' => 'required',
             'district' => 'required',
-            'upazila' => 'required',
+            'upazila' => 'nullable',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'password' => 'nullable|min:6',
         ]);

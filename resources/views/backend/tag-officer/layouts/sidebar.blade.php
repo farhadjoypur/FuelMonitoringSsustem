@@ -13,7 +13,7 @@
         <ul class="menu-list list-unstyled">
             <li class="menu-item">
                 <a href="{{ route('tag-officer.dashboard.index') }}"
-                    class="menu-link {{ request()->routeIs('user.dashboard.*') ? 'active' : '' }}">
+                    class="menu-link {{ request()->routeIs('tag-officer.dashboard.*') ? 'active' : '' }}">
                     <span class="material-symbols-rounded">dashboard</span>
                     <span class="menu-label">Dashboard</span>
                 </a>
@@ -29,7 +29,7 @@
 
             <li class="menu-item">
                 <a href="{{ route('fuel-reports.index') }}"
-                    class="menu-link {{ request()->routeIs('tag-officer.sales-report.*') ? 'active' : '' }}">
+                    class="menu-link {{ request()->routeIs('fuel-reports.*') ? 'active' : '' }}">
                     <span class="material-symbols-rounded">analytics</span>
                     <span class="menu-label">Sales Report</span>
                 </a>

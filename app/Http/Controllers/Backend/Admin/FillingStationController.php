@@ -3,21 +3,35 @@
 namespace App\Http\Controllers\Backend\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\FillingStation;
 use App\Models\Company;
+use App\Models\FillingStation;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 
 class FillingStationController extends Controller
 {
+    private function getLocationData()
+    {
+        $path = resource_path('data/location.json');
+
+        if (! File::exists($path)) {
+            return [];
+        }
+
+        $json = File::get($path);
+
+        return json_decode($json, true);
+    }
+
     public function index()
     {
         $stations = FillingStation::with('company')->latest()->paginate(10);
 
-        $totalStations    = FillingStation::count();
-        $activeStations   = FillingStation::where('status', 'active')->count();
+        $totalStations = FillingStation::count();
+        $activeStations = FillingStation::where('status', 'active')->count();
         $inactiveStations = FillingStation::where('status', 'inactive')->count();
-        $govtStations     = FillingStation::where('type', 'government')->count();
-        $privateStations  = FillingStation::where('type', 'private')->count();
+        $govtStations = FillingStation::where('type', 'government')->count();
+        $privateStations = FillingStation::where('type', 'private')->count();
 
         $divisions = FillingStation::whereNotNull('division')->distinct()->pluck('division');
         $companies = Company::orderBy('name')->get(['id', 'name']);
@@ -33,13 +47,14 @@ class FillingStationController extends Controller
     public function create()
     {
         $companies = Company::all();
+
         return view('backend.admin.pages.fillingStation.create', compact('companies'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'company_id'   => 'required',
+            'company_id' => 'required',
             'station_name' => 'required',
             'station_code' => 'required|unique:filling_stations',
         ]);
@@ -56,7 +71,7 @@ class FillingStationController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Created successfully'
+            'message' => 'Created successfully',
         ]);
     }
 
@@ -64,13 +79,15 @@ class FillingStationController extends Controller
     public function getStation($id)
     {
         $station = FillingStation::findOrFail($id);
+
         return response()->json($station);
     }
 
     public function edit($id)
     {
-        $station  = FillingStation::findOrFail($id);
+        $station = FillingStation::findOrFail($id);
         $companies = Company::all();
+
         return view('backend.admin.pages.fillingStation.edit', compact('station', 'companies'));
     }
 
@@ -80,7 +97,7 @@ class FillingStationController extends Controller
 
         $request->validate([
             'station_name' => 'required',
-            'station_code' => 'required|unique:filling_stations,station_code,' . $id,
+            'station_code' => 'required|unique:filling_stations,station_code,'.$id,
         ]);
 
         $data = $request->all();
