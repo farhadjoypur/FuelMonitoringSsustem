@@ -1177,95 +1177,200 @@
     </div>
 
 @endsection
-
 @push('scripts')
-    <script>
-        /* ── Filter Logic ── */
-        const searchInput = document.getElementById('searchInput');
-        const divisionFilter = document.getElementById('divisionFilter');
-        const statusFilter = document.getElementById('statusFilter');
-        const companyFilter = document.getElementById('companyFilter');
-        const tableBody = document.getElementById('tableBody');
-        const noResults = document.getElementById('noResultsRow');
-
-        function applyFilters() {
-            const q = searchInput.value.toLowerCase().trim();
-            const division = divisionFilter.value.toLowerCase();
-            const status = statusFilter.value.toLowerCase();
-            const company = companyFilter.value.toLowerCase();
-            let visible = 0;
-
-            tableBody.querySelectorAll('tr').forEach(row => {
-                if (row.classList.contains('empty-row')) return;
-                const matchQ = !q || row.innerText.toLowerCase().includes(q);
-                const matchD = !division || (row.dataset.division || '').toLowerCase().includes(division);
-                const matchS = !status || (row.dataset.status || '').toLowerCase() === status;
-                const matchC = !company || (row.dataset.company || '').toLowerCase().includes(company);
-                const show = matchQ && matchD && matchS && matchC;
-                row.style.display = show ? '' : 'none';
-                if (show) visible++;
-            });
-
-            noResults.style.display = visible === 0 ? 'block' : 'none';
-        }
-
-        function clearFilters() {
-            searchInput.value = divisionFilter.value = statusFilter.value = companyFilter.value = '';
-            applyFilters();
-        }
-
-        function openCreateModal() {
-            const modal = new bootstrap.Modal(document.getElementById('createStationModal'));
-            modal.show();
-        }
-
-        searchInput.addEventListener('input', applyFilters);
-        divisionFilter.addEventListener('change', applyFilters);
-        statusFilter.addEventListener('change', applyFilters);
-        companyFilter.addEventListener('change', applyFilters);
-
-        /* ── Edit Modal Logic ── */
-        let currentEditId = null;
-
-        function openEditModal(id) {
-            currentEditId = id;
-            const body = document.getElementById('editModalBody');
-            const footer = document.getElementById('editModalFooter');
-
-            // Reset to loading state
+<script>
+// ═══════════════════════════════════════════════════════════
+//  LOCATIONS DATA (একবারই declare)
+// ═══════════════════════════════════════════════════════════
+const locations = @json($locations['divisions']);
+ 
+// ═══════════════════════════════════════════════════════════
+//  HELPER — Division → Districts populate
+// ═══════════════════════════════════════════════════════════
+function populateDistricts(divisionName, districtEl, selectedDistrict = null) {
+    districtEl.innerHTML = '<option value="">— Select District —</option>';
+ 
+    const division = locations.find(d => d.name_en === divisionName);
+    if (!division) return;
+ 
+    division.districts.forEach(dist => {
+        const opt = document.createElement('option');
+        opt.value       = dist.name_en;
+        opt.textContent = dist.name_en;
+        if (selectedDistrict === dist.name_en) opt.selected = true;
+        districtEl.appendChild(opt);
+    });
+}
+ 
+// ═══════════════════════════════════════════════════════════
+//  HELPER — District → Upazilas populate
+// ═══════════════════════════════════════════════════════════
+function populateUpazilas(divisionName, districtName, upazilaEl, selectedUpazila = null) {
+    upazilaEl.innerHTML = '<option value="">— Select Upazila —</option>';
+ 
+    const division = locations.find(d => d.name_en === divisionName);
+    if (!division) return;
+ 
+    const district = division.districts.find(d => d.name_en === districtName);
+    if (!district) return;
+ 
+    district.police_stations.forEach(up => {
+        const opt = document.createElement('option');
+        opt.value       = up.name_en;
+        opt.textContent = up.name_en;
+        if (selectedUpazila === up.name_en) opt.selected = true;
+        upazilaEl.appendChild(opt);
+    });
+}
+ 
+// ═══════════════════════════════════════════════════════════
+//  CREATE MODAL — Dropdown chain
+// ═══════════════════════════════════════════════════════════
+const createDivision = document.getElementById('division');
+const createDistrict = document.getElementById('district');
+const createUpazila  = document.getElementById('upazila');
+ 
+createDivision?.addEventListener('change', function () {
+    populateDistricts(this.value, createDistrict);
+    createUpazila.innerHTML = '<option value="">— Select Upazila —</option>';
+});
+ 
+createDistrict?.addEventListener('change', function () {
+    populateUpazilas(createDivision.value, this.value, createUpazila);
+});
+ 
+// ═══════════════════════════════════════════════════════════
+//  TABLE FILTER
+// ═══════════════════════════════════════════════════════════
+const searchInput    = document.getElementById('searchInput');
+const divisionFilter = document.getElementById('divisionFilter');
+const statusFilter   = document.getElementById('statusFilter');
+const companyFilter  = document.getElementById('companyFilter');
+const tableBody      = document.getElementById('tableBody');
+const noResults      = document.getElementById('noResultsRow');
+ 
+function applyFilters() {
+    const q        = searchInput.value.toLowerCase().trim();
+    const division = divisionFilter.value.toLowerCase();
+    const status   = statusFilter.value.toLowerCase();
+    const company  = companyFilter.value.toLowerCase();
+    let visible    = 0;
+ 
+    tableBody.querySelectorAll('tr').forEach(row => {
+        if (row.classList.contains('empty-row')) return;
+        const matchQ = !q        || row.innerText.toLowerCase().includes(q);
+        const matchD = !division || (row.dataset.division || '').toLowerCase().includes(division);
+        const matchS = !status   || (row.dataset.status   || '').toLowerCase() === status;
+        const matchC = !company  || (row.dataset.company  || '').toLowerCase().includes(company);
+        const show   = matchQ && matchD && matchS && matchC;
+        row.style.display = show ? '' : 'none';
+        if (show) visible++;
+    });
+ 
+    noResults.style.display = visible === 0 ? 'block' : 'none';
+}
+ 
+function clearFilters() {
+    searchInput.value = divisionFilter.value = statusFilter.value = companyFilter.value = '';
+    applyFilters();
+}
+ 
+searchInput?.addEventListener('input', applyFilters);
+divisionFilter?.addEventListener('change', applyFilters);
+statusFilter?.addEventListener('change', applyFilters);
+companyFilter?.addEventListener('change', applyFilters);
+ 
+// ═══════════════════════════════════════════════════════════
+//  CREATE MODAL — Open
+// ═══════════════════════════════════════════════════════════
+function openCreateModal() {
+    const modal = new bootstrap.Modal(document.getElementById('createStationModal'));
+    modal.show();
+}
+ 
+// ═══════════════════════════════════════════════════════════
+//  CREATE MODAL — Submit
+// ═══════════════════════════════════════════════════════════
+function submitCreateForm() {
+    const form    = document.getElementById('createStationForm');
+    const formData = new FormData(form);
+    const btn     = document.querySelector('#createStationModal .btn-save');
+ 
+    if (btn) { btn.disabled = true; btn.innerHTML = 'Saving...'; }
+ 
+    fetch(`/admin/stations`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json',
+        },
+        body: formData,
+    })
+    .then(async res => {
+        const data = await res.json().catch(() => null);
+        if (!res.ok) throw data || { message: 'Server Error' };
+        return data;
+    })
+    .then(data => {
+        if (data.success) location.reload();
+        else alert(data.message || 'Failed');
+    })
+    .catch(err => alert(err?.message || 'Something went wrong'))
+    .finally(() => {
+        if (btn) { btn.disabled = false; btn.innerHTML = 'Save Station'; }
+    });
+}
+ 
+// ═══════════════════════════════════════════════════════════
+//  EDIT MODAL — Open (AJAX দিয়ে data load, তারপর dropdown chain)
+// ═══════════════════════════════════════════════════════════
+let currentEditId = null;
+ 
+function openEditModal(id) {
+    currentEditId = id;
+ 
+    const body   = document.getElementById('editModalBody');
+    const footer = document.getElementById('editModalFooter');
+ 
+    // Loading state
+    body.innerHTML = `
+        <div class="modal-loading">
+            <div class="spinner-border text-primary mb-3" role="status" style="width:2rem;height:2rem;"></div>
+            <div>Loading station data...</div>
+        </div>`;
+    footer.style.display = 'none';
+ 
+    const modal = new bootstrap.Modal(document.getElementById('editStationModal'));
+    modal.show();
+ 
+    // Fetch station data
+    fetch(`/admin/stations/${id}/get`)
+        .then(r => r.json())
+        .then(s => {
+            const fuels    = s.fuel_types || [];
+            const companies = @json($companies);
+ 
+            const companyOptions = companies.map(c =>
+                `<option value="${c.id}" ${s.company_id == c.id ? 'selected' : ''}>${c.name}</option>`
+            ).join('');
+ 
+            const fuelHtml = ['Petrol', 'Diesel', 'Octane'].map(f => `
+                <label class="fuel-check ${fuels.includes(f) ? 'checked' : ''}" data-fuel="${f}">
+                    <input type="checkbox" name="fuel_types[]" value="${f}" ${fuels.includes(f) ? 'checked' : ''}>
+                    ${f}
+                </label>`).join('');
+ 
+            // Division options build — সব division option add করি
+            const divisionOptions = locations.map(d =>
+                `<option value="${d.name_en}" ${s.division === d.name_en ? 'selected' : ''}>${d.name_en}</option>`
+            ).join('');
+ 
+            // Form HTML inject
             body.innerHTML = `
-            <div class="modal-loading">
-                <div class="spinner-border text-primary mb-3" role="status" style="width:2rem;height:2rem;"></div>
-                <div>Loading station data...</div>
-            </div>`;
-            footer.style.display = 'none';
-
-            // Open modal
-            const modal = new bootstrap.Modal(document.getElementById('editStationModal'));
-            modal.show();
-
-            // Fetch station data
-            fetch(`/admin/stations/${id}/get`)
-                .then(r => r.json())
-                .then(s => {
-                    const fuels = s.fuel_types || [];
-                    const companies = @json($companies);
-
-                    let companyOptions = companies.map(c =>
-                        `<option value="${c.id}" ${s.company_id == c.id ? 'selected' : ''}>${c.name}</option>`
-                    ).join('');
-
-                    let fuelHtml = ['Petrol', 'Diesel', 'Octane'].map(f => `
-                    <label class="fuel-check ${fuels.includes(f) ? 'checked' : ''}" data-fuel="${f}">
-                        <input type="checkbox" name="fuel_types[]" value="${f}" ${fuels.includes(f) ? 'checked' : ''}>
-                        ${f}
-                    </label>`).join('');
-
-                    body.innerHTML = `
                 <form id="editStationForm" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
-
+ 
                     {{-- Basic Info --}}
                     <div class="section-title">Basic Information</div>
                     <div class="row g-3 mb-4">
@@ -1292,7 +1397,7 @@
                                    value="${s.linked_depot ?? ''}">
                         </div>
                     </div>
-
+ 
                     {{-- Owner Info --}}
                     <div class="section-title">Owner Information</div>
                     <div class="row g-3 mb-4">
@@ -1307,50 +1412,36 @@
                                    value="${s.owner_phone ?? ''}">
                         </div>
                     </div>
-
+ 
                     {{-- Location --}}
                     <div class="section-title">Location</div>
                     <div class="row g-3 mb-4">
-
-                    {{-- Division --}}
-                    <div class="col-md-4">
-                        <label class="form-label">Division <span class="req">*</span></label>
-                        <select id="edit_division" name="division" class="form-select" required>
-                            <option value="">— Select Division —</option>
-
-                            @foreach ($locations['divisions'] as $division)
-                                <option value="{{ $division['name_en'] }}">
-                                    {{ $division['name_en'] }}
-                                </option>
-                            @endforeach
-
-                        </select>
+                        <div class="col-md-4">
+                            <label class="form-label">Division <span class="req">*</span></label>
+                            <select id="edit_division" name="division" class="form-select" required>
+                                <option value="">— Select Division —</option>
+                                ${divisionOptions}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">District <span class="req">*</span></label>
+                            <select id="edit_district" name="district" class="form-select" required>
+                                <option value="">— Select District —</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Upazila</label>
+                            <select id="edit_upazila" name="upazila" class="form-select">
+                                <option value="">— Select Upazila —</option>
+                            </select>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">Address</label>
+                            <input type="text" name="address" class="form-control"
+                                   value="${s.address ?? ''}">
+                        </div>
                     </div>
-
-                    {{-- District --}}
-                    <div class="col-md-4">
-                        <label class="form-label">District <span class="req">*</span></label>
-                        <select id="edit_district" name="district" class="form-select" required>
-                            <option value="">— Select District —</option>
-                        </select>
-                    </div>
-
-                    {{-- Upazila --}}
-                    <div class="col-md-4">
-                        <label class="form-label">Upazila <span class="req">*</span></label>
-                        <select id="edit_upazila" name="upazila" class="form-select" required>
-                            <option value="">— Select Upazila —</option>
-                        </select>
-                    </div>
-
-                    {{-- Address --}}
-                    <div class="col-md-12">
-                        <label class="form-label">Address <span class="req">*</span></label>
-                        <input type="text" name="address" id="edit_address" class="form-control">
-                    </div>
-
-                </div>
-
+ 
                     {{-- Technical --}}
                     <div class="section-title">Technical Details</div>
                     <div class="row g-3 mb-3">
@@ -1373,7 +1464,11 @@
                         <div class="col-md-6">
                             <label class="form-label">Replace License File</label>
                             <label class="file-upload-label" for="edit_license_file">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor" stroke-width="1.8">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                                </svg>
                                 <span id="editFileLabelText">Click to upload (PDF/Image)</span>
                             </label>
                             <input type="file" name="license_file" id="edit_license_file"
@@ -1382,337 +1477,130 @@
                         </div>
                     </div>
                 </form>`;
-
-                    // Bind fuel toggles
-                    document.querySelectorAll('#editFuelOptions .fuel-check').forEach(label => {
-                        label.addEventListener('click', function() {
-                            const cb = this.querySelector('input');
-                            cb.checked = !cb.checked;
-                            this.classList.toggle('checked', cb.checked);
-                        });
-                    });
-
-                    footer.style.display = 'flex';
-                })
-                .catch(() => {
-                    body.innerHTML =
-                        `<div class="text-center text-danger py-4">Failed to load station data. Please try again.</div>`;
-                });
-        }
-
-        function submitCreateForm() {
-            const form = document.getElementById('createStationForm');
-            const formData = new FormData(form);
-
-            const btn = document.querySelector('#createStationModal .btn-save');
-
-            if (btn) {
-                btn.disabled = true;
-                btn.innerHTML = "Saving...";
+ 
+            // ── এখানে DOM তৈরি হয়েছে, এখন dropdown chain setup করি ──
+            const editDivisionEl = document.getElementById('edit_division');
+            const editDistrictEl = document.getElementById('edit_district');
+            const editUpazilaEl  = document.getElementById('edit_upazila');
+ 
+            // ১. আগের data দিয়ে district ও upazila populate করি
+            if (s.division) {
+                populateDistricts(s.division, editDistrictEl, s.district);
             }
-
-            fetch(`/admin/stations`, {
-                    method: "POST",
-                    headers: {
-                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
-                        "Accept": "application/json"
-                    },
-                    body: formData
-                })
-                .then(async res => {
-                    const data = await res.json().catch(() => null);
-
-                    if (!res.ok) {
-                        throw data || {
-                            message: "Server Error"
-                        };
-                    }
-
-                    return data;
-                })
-                .then(data => {
-                    if (data.success) {
-                        location.reload();
-                    } else {
-                        alert(data.message || "Failed");
-                    }
-                })
-                .catch(err => {
-                    alert(err?.message || "Something went wrong");
-                })
-                .finally(() => {
-                    const btn = document.querySelector('#createStationModal .btn-save');
-                    if (btn) {
-                        btn.disabled = false;
-                        btn.innerHTML = "Save Station";
-                    }
-                });
-        }
-
-        function submitEditForm() {
-            const form = document.getElementById('editStationForm');
-            if (!form) return;
-
-            const formData = new FormData(form);
-            formData.append('_method', 'PUT');
-
-            const saveBtn = document.querySelector('#editModalFooter .btn-save');
-            saveBtn.disabled = true;
-            saveBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Saving...`;
-
-            fetch(`/stations/${currentEditId}`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    },
-                    body: formData,
-                })
-                .then(r => {
-                    if (r.redirected) {
-                        window.location.href = r.url;
-                        return;
-                    }
-                    return r.json().then(data => {
-                        if (data.success) window.location.reload();
-                        else alert(data.message || 'Update failed.');
-                    });
-                })
-                .catch(() => alert('Something went wrong. Please try again.'))
-                .finally(() => {
-                    saveBtn.disabled = false;
-                    saveBtn.innerHTML =
-                        `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Save Changes`;
-                });
-        }
-
-        // Delete Station with AJAX
-        function deleteStation(id) {
-            if (!confirm('Are you sure you want to delete this station?')) {
-                return;
+            if (s.division && s.district) {
+                populateUpazilas(s.division, s.district, editUpazilaEl, s.upazila);
             }
-
-            const btn = event.currentTarget; // clicked button
-            const originalHTML = btn.innerHTML;
-
-            // Disable button and show loading
-            btn.disabled = true;
-            btn.innerHTML = `
-        <span class="spinner-border spinner-border-sm" role="status"></span>
-    `;
-
-            fetch(`/admin/stations/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Optional: nice animation before reload
-                        const row = btn.closest('tr');
-                        if (row) {
-                            row.style.transition = 'all 0.3s';
-                            row.style.opacity = '0';
-                            setTimeout(() => {
-                                location.reload();
-                            }, 300);
-                        } else {
-                            location.reload();
-                        }
-                    } else {
-                        alert(data.message || 'Delete failed.');
-                        btn.disabled = false;
-                        btn.innerHTML = originalHTML;
-                    }
-                })
-                .catch(error => {
-                    console.error(error);
-                    alert('Something went wrong. Please try again.');
-                    btn.disabled = false;
-                    btn.innerHTML = originalHTML;
+ 
+            // ২. Division change → district reload
+            editDivisionEl.addEventListener('change', function () {
+                populateDistricts(this.value, editDistrictEl);
+                editUpazilaEl.innerHTML = '<option value="">— Select Upazila —</option>';
+            });
+ 
+            // ৩. District change → upazila reload
+            editDistrictEl.addEventListener('change', function () {
+                populateUpazilas(editDivisionEl.value, this.value, editUpazilaEl);
+            });
+ 
+            // ── Fuel type toggle ──
+            document.querySelectorAll('#editFuelOptions .fuel-check').forEach(label => {
+                label.addEventListener('click', function () {
+                    const cb = this.querySelector('input');
+                    cb.checked = !cb.checked;
+                    this.classList.toggle('checked', cb.checked);
                 });
-        }
-    </script>
-
-    <script>
-        const locations = @json($locations['divisions']);
-
-        const divisionEl = document.getElementById('division');
-        const districtEl = document.getElementById('district');
-        const upazilaEl = document.getElementById('upazila');
-
-        // ======================
-        // Division change
-        // ======================
-        divisionEl.addEventListener('change', function() {
-
-            districtEl.innerHTML = '<option value="">— Select District —</option>';
-            upazilaEl.innerHTML = '<option value="">— Select Upazila —</option>';
-
-            const division = locations.find(d => d.name_en === this.value);
-
-            if (!division) return;
-
-            division.districts.forEach(dist => {
-                const opt = document.createElement('option');
-                opt.value = dist.name_en;
-                opt.textContent = dist.name_en;
-                districtEl.appendChild(opt);
             });
+ 
+            footer.style.display = 'flex';
+        })
+        .catch(() => {
+            body.innerHTML = `
+                <div class="text-center text-danger py-4">
+                    Failed to load station data. Please try again.
+                </div>`;
         });
-
-        // ======================
-        // District change
-        // ======================
-        districtEl.addEventListener('change', function() {
-
-            upazilaEl.innerHTML = '<option value="">— Select Upazila —</option>';
-
-            const division = locations.find(d => d.name_en === divisionEl.value);
-            if (!division) return;
-
-            const district = division.districts.find(d => d.name_en === this.value);
-            if (!district) return;
-
-            district.police_stations.forEach(up => {
-                const opt = document.createElement('option');
-                opt.value = up.name_en;
-                opt.textContent = up.name_en;
-                upazilaEl.appendChild(opt);
-            });
-        });
-    </script>
-<script>
-const locations = @json($locations['divisions']);
-
-// =========================
-// CREATE DROPDOWN
-// =========================
-const divisionEl = document.getElementById('division');
-const districtEl = document.getElementById('district');
-const upazilaEl = document.getElementById('upazila');
-
-// =========================
-// EDIT DROPDOWN
-// =========================
-const editDivision = document.getElementById('edit_division');
-const editDistrict = document.getElementById('edit_district');
-const editUpazila  = document.getElementById('edit_upazila');
-
-
-// =====================================================
-// CREATE: Division Change
-// =====================================================
-divisionEl?.addEventListener('change', function () {
-
-    districtEl.innerHTML = '<option value="">— Select District —</option>';
-    upazilaEl.innerHTML = '<option value="">— Select Upazila —</option>';
-
-    const division = locations.find(d => d.name_en === this.value);
-    if (!division) return;
-
-    division.districts.forEach(dist => {
-        districtEl.innerHTML += `<option value="${dist.name_en}">${dist.name_en}</option>`;
-    });
-});
-
-
-// =====================================================
-// CREATE: District Change
-// =====================================================
-districtEl?.addEventListener('change', function () {
-
-    upazilaEl.innerHTML = '<option value="">— Select Upazila —</option>';
-
-    const division = locations.find(d => d.name_en === divisionEl.value);
-    if (!division) return;
-
-    const district = division.districts.find(d => d.name_en === this.value);
-    if (!district) return;
-
-    district.police_stations.forEach(up => {
-        upazilaEl.innerHTML += `<option value="${up.name_en}">${up.name_en}</option>`;
-    });
-});
-
-
-// =====================================================
-// EDIT: Open Modal
-// =====================================================
-function openEditModal(s) {
-
-    editDivision.value = s.division || '';
-
-    loadEditDistricts(s.division, s.district);
-    loadEditUpazilas(s.division, s.district, s.upazila);
-
-    document.getElementById('edit_address').value = s.address || '';
 }
-
-
-// =====================================================
-// EDIT: Division Change
-// =====================================================
-editDivision?.addEventListener('change', function () {
-
-    editDistrict.innerHTML = '<option value="">— Select District —</option>';
-    editUpazila.innerHTML = '<option value="">— Select Upazila —</option>';
-
-    loadEditDistricts(this.value);
-});
-
-
-// =====================================================
-// EDIT: District Change
-// =====================================================
-editDistrict?.addEventListener('change', function () {
-
-    editUpazila.innerHTML = '<option value="">— Select Upazila —</option>';
-
-    loadEditUpazilas(editDivision.value, this.value);
-});
-
-
-// =====================================================
-// EDIT: Load Districts
-// =====================================================
-function loadEditDistricts(divisionName, selectedDistrict = null) {
-
-    const division = locations.find(d => d.name_en === divisionName);
-    if (!division) return;
-
-    division.districts.forEach(dist => {
-
-        editDistrict.innerHTML += `
-            <option value="${dist.name_en}" ${selectedDistrict === dist.name_en ? 'selected' : ''}>
-                ${dist.name_en}
-            </option>
-        `;
+ 
+// ═══════════════════════════════════════════════════════════
+//  EDIT MODAL — Submit
+// ═══════════════════════════════════════════════════════════
+function submitEditForm() {
+    const form = document.getElementById('editStationForm');
+    if (!form) return;
+ 
+    const formData = new FormData(form);
+    formData.append('_method', 'PUT');
+ 
+    const saveBtn = document.querySelector('#editModalFooter .btn-save');
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Saving...`;
+ 
+    fetch(`/admin/stations/${currentEditId}`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+        },
+        body: formData,
+    })
+    .then(r => {
+        if (r.redirected) { window.location.href = r.url; return; }
+        return r.json().then(data => {
+            if (data.success) window.location.reload();
+            else alert(data.message || 'Update failed.');
+        });
+    })
+    .catch(() => alert('Something went wrong. Please try again.'))
+    .finally(() => {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor" stroke-width="2.2" style="width:15px;height:15px;">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+            </svg> Save Changes`;
     });
 }
-
-
-// =====================================================
-// EDIT: Load Upazila
-// =====================================================
-function loadEditUpazilas(divisionName, districtName, selectedUpazila = null) {
-
-    const division = locations.find(d => d.name_en === divisionName);
-    if (!division) return;
-
-    const district = division.districts.find(d => d.name_en === districtName);
-    if (!district) return;
-
-    district.police_stations.forEach(up => {
-
-        editUpazila.innerHTML += `
-            <option value="${up.name_en}" ${selectedUpazila === up.name_en ? 'selected' : ''}>
-                ${up.name_en}
-            </option>
-        `;
+ 
+// ═══════════════════════════════════════════════════════════
+//  DELETE — AJAX
+// ═══════════════════════════════════════════════════════════
+function deleteStation(id) {
+    if (!confirm('Are you sure you want to delete this station?')) return;
+ 
+    const btn = event.currentTarget;
+    const originalHTML = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status"></span>`;
+ 
+    fetch(`/admin/stations/${id}`, {
+        method: 'DELETE',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json',
+        },
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            const row = btn.closest('tr');
+            if (row) {
+                row.style.transition = 'opacity 0.3s';
+                row.style.opacity    = '0';
+                setTimeout(() => location.reload(), 300);
+            } else {
+                location.reload();
+            }
+        } else {
+            alert(data.message || 'Delete failed.');
+            btn.disabled  = false;
+            btn.innerHTML = originalHTML;
+        }
+    })
+    .catch(() => {
+        alert('Something went wrong. Please try again.');
+        btn.disabled  = false;
+        btn.innerHTML = originalHTML;
     });
 }
 </script>
 @endpush
+ 
