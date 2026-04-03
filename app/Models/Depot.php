@@ -18,4 +18,8 @@ class Depot extends Model
         'status',
         'remarks'
     ];
+    public function fillingStations()
+{
+    return $this->hasMany(FillingStation::class, 'linked_depot');
+}
 }

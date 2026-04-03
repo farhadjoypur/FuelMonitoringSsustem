@@ -14,6 +14,10 @@ class AssignTagOfficer extends Model
         'remarks',
     ];
 
+    public function dc()
+    {
+        return $this->belongsTo(User::class, 'dc_id');
+    }
     public function officer()
     {
         return $this->belongsTo(User::class, 'officer_id');

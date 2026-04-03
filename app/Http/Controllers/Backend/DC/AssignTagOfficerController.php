@@ -92,6 +92,7 @@ class AssignTagOfficerController extends Controller
             }
 
             AssignTagOfficer::create([
+                'dc_id'              => auth()->id(),
                 'officer_id' => $request->officer_id,
                 'filling_station_id' => $request->filling_station_id,
                 'assign_date' => $request->assign_date,

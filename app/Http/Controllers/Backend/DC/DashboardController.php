@@ -20,16 +20,39 @@ class DashboardController extends Controller
      */
     public function index()
     {
+        $dc        = auth()->user();  // logged-in DC
         $today     = Carbon::today();
         $thisMonth = Carbon::now()->startOfMonth();
- 
+    
+        // =============================================
+        // DC-এর আন্ডারে যে Station IDs আছে সেগুলো বের করো
+        // AssignTagOfficer টেবিলে dc_id কলাম আছে ধরে নিচ্ছি
+        // যদি না থাকে, নিচের বিকল্প দেখো
+        // =============================================
+        $stationIds = AssignTagOfficer::where('dc_id', $dc->id)
+                        ->pluck('filling_station_id')
+                        ->unique()
+                        ->toArray();
+    
+        // বিকল্প: যদি dc_id না থেকে district দিয়ে link থাকে তাহলে:
+        // $stationIds = FillingStation::where('district', $dc->district)->pluck('id')->toArray();
+    
+        // =============================================
+        // DC-এর আন্ডারে যে Station Names আছে (Fuelreport filter-এর জন্য)
+        // =============================================
+        $stationNames = FillingStation::whereIn('id', $stationIds)
+                        ->pluck('station_name')
+                        ->toArray();
+    
         // =============================================
         // TOP STAT CARDS
         // =============================================
- 
-        // আজকের সব রিপোর্ট থেকে মোট stock, received, sold, difference
-        $todayReports = Fuelreport::whereDate('report_date', $today)->get();
- 
+    
+        // আজকের রিপোর্ট — শুধু DC-এর stations থেকে
+        $todayReports = Fuelreport::whereDate('report_date', $today)
+                        ->whereIn('station_name', $stationNames)
+                        ->get();
+    
         $totalStockToday = $todayReports->sum(fn($r) =>
             $r->petrol_closing_stock + $r->diesel_closing_stock + $r->octane_closing_stock
         );
@@ -45,79 +68,106 @@ class DashboardController extends Controller
         $totalDiffPct = $totalReceivedToday > 0
             ? round(abs($totalDiffToday) / $totalReceivedToday * 100, 1)
             : 0;
- 
-        // গত মাসের তুলনায় received % change
-        $lastMonthReceived = Fuelreport::whereMonth('report_date', Carbon::now()->subMonth()->month)
+    
+        // গত মাস vs এই মাসের received — DC-এর stations
+        $lastMonthReceived = Fuelreport::whereIn('station_name', $stationNames)
+            ->whereMonth('report_date', Carbon::now()->subMonth()->month)
             ->sum(DB::raw('petrol_received + diesel_received + octane_received'));
-        $thisMonthReceived = Fuelreport::whereMonth('report_date', Carbon::now()->month)
+    
+        $thisMonthReceived = Fuelreport::whereIn('station_name', $stationNames)
+            ->whereMonth('report_date', Carbon::now()->month)
             ->sum(DB::raw('petrol_received + diesel_received + octane_received'));
+    
         $receivedChangePct = $lastMonthReceived > 0
             ? round((($thisMonthReceived - $lastMonthReceived) / $lastMonthReceived) * 100, 1)
             : 0;
- 
+    
         // =============================================
-        // TODAY'S STOCK (per fuel type)
+        // TODAY'S STOCK & SOLD (per fuel type) — DC scope
         // =============================================
-        $todayPetrolStock  = $todayReports->sum('petrol_closing_stock');
-        $todayDieselStock  = $todayReports->sum('diesel_closing_stock');
-        $todayOctaneStock  = $todayReports->sum('octane_closing_stock');
- 
-        // =============================================
-        // TODAY'S SOLD (per fuel type)
-        // =============================================
+        $todayPetrolStock = $todayReports->sum('petrol_closing_stock');
+        $todayDieselStock = $todayReports->sum('diesel_closing_stock');
+        $todayOctaneStock = $todayReports->sum('octane_closing_stock');
+    
         $todayPetrolSold  = $todayReports->sum('petrol_sales');
         $todayDieselSold  = $todayReports->sum('diesel_sales');
         $todayOctaneSold  = $todayReports->sum('octane_sales');
- 
+    
         // =============================================
-        // SUMMARY CARDS
+        // SUMMARY CARDS — শুধু DC-এর scope
         // =============================================
-        $totalDepots    = Depot::count();
-        $totalStations  = FillingStation::count();
-        $totalOfficers = User::where('role', 'tag_officer')->count();
-        // যদি Spatie না থাকে:
-        // $totalOfficers = User::where('role', 'tag_officer')->count();
- 
-        $activeAssignments = AssignTagOfficer::where('status', 'active')->count();
- 
-        // this month new counts
-        $newDepots    = Depot::where('created_at', '>=', $thisMonth)->count();
-        $newStations  = FillingStation::where('created_at', '>=', $thisMonth)->count();
-        $newOfficers  = User::where('created_at', '>=', $thisMonth)->count();
-        $assignChange = AssignTagOfficer::where('created_at', '>=', $thisMonth)->count()
-                      - AssignTagOfficer::where('status', 'inactive')
+        $totalDepots   = Depot::whereHas('fillingStations', fn($q) =>
+                            $q->whereIn('id', $stationIds)
+                         )->count();
+    
+        $totalStations = FillingStation::whereIn('id', $stationIds)->count();
+    
+        // DC-এর আন্ডারে Tag Officers (unique)
+       // ✅ সঠিক:
+        $totalOfficers = AssignTagOfficer::where('dc_id', $dc->id)
+        ->distinct('officer_id')
+        ->count('officer_id');
+
+        $newOfficers = AssignTagOfficer::where('dc_id', $dc->id)
+        ->where('created_at', '>=', $thisMonth)
+        ->distinct('officer_id')
+        ->count('officer_id');
+    
+        $activeAssignments = AssignTagOfficer::where('dc_id', $dc->id)
+                                ->where('status', 'active')
+                                ->count();
+    
+        // এই মাসের নতুন additions — DC scope
+        $newDepots   = Depot::whereHas('fillingStations', fn($q) =>
+                            $q->whereIn('id', $stationIds)
+                       )->where('created_at', '>=', $thisMonth)->count();
+    
+        $newStations = FillingStation::whereIn('id', $stationIds)
+                        ->where('created_at', '>=', $thisMonth)->count();
+    
+        $newOfficers = AssignTagOfficer::where('dc_id', $dc->id)
+                        ->where('created_at', '>=', $thisMonth)
+                        ->distinct('officer_id')->count('officer_id');
+    
+        $assignChange = AssignTagOfficer::where('dc_id', $dc->id)
+                            ->where('created_at', '>=', $thisMonth)->count()
+                      - AssignTagOfficer::where('dc_id', $dc->id)
+                            ->where('status', 'inactive')
                             ->where('updated_at', '>=', $thisMonth)->count();
- 
+    
         // =============================================
-        // FUEL TYPE DISTRIBUTION PIE (from all reports - latest per station)
+        // FUEL TYPE DISTRIBUTION PIE — DC scope
         // =============================================
         $latestReports = Fuelreport::select(
                 'station_name',
                 DB::raw('MAX(report_date) as max_date')
             )
+            ->whereIn('station_name', $stationNames)
             ->groupBy('station_name');
- 
+    
         $fuelDistribution = Fuelreport::joinSub($latestReports, 'latest', function ($join) {
             $join->on('fuelreports.station_name', '=', 'latest.station_name')
                  ->on('fuelreports.report_date', '=', 'latest.max_date');
         })
+        ->whereIn('fuelreports.station_name', $stationNames)
         ->selectRaw('
             SUM(petrol_closing_stock) as total_petrol,
             SUM(diesel_closing_stock) as total_diesel,
             SUM(octane_closing_stock) as total_octane
         ')
         ->first();
- 
+    
         $totalPetrol = $fuelDistribution->total_petrol ?? 0;
         $totalDiesel = $fuelDistribution->total_diesel ?? 0;
         $totalOctane = $fuelDistribution->total_octane ?? 0;
-        $totalOthers = 0; // প্রয়োজনে অন্য fuel type থাকলে যোগ করুন
- 
+        $totalOthers = 0;
+    
         // =============================================
-        // COMPANY TYPE DISTRIBUTION PIE
+        // COMPANY TYPE DISTRIBUTION — DC scope
         // =============================================
         $companyDistribution = FillingStation::select('company_id', DB::raw('count(*) as total'))
             ->with('company:id,name')
+            ->whereIn('id', $stationIds)
             ->whereNotNull('company_id')
             ->groupBy('company_id')
             ->orderByDesc('total')
@@ -127,11 +177,12 @@ class DashboardController extends Controller
                 'name'  => $item->company->name ?? 'Unknown',
                 'total' => $item->total,
             ]);
- 
+    
         // =============================================
-        // DIVISION-WISE DISTRIBUTION BAR
+        // DIVISION-WISE DISTRIBUTION BAR — DC scope
         // =============================================
         $divisionDistribution = FillingStation::select('division', DB::raw('count(*) as total'))
+            ->whereIn('id', $stationIds)
             ->whereNotNull('division')
             ->groupBy('division')
             ->orderByDesc('total')
@@ -140,58 +191,66 @@ class DashboardController extends Controller
                 'division' => $item->division,
                 'total'    => $item->total,
             ]);
- 
+    
         // =============================================
-        // FUEL SALES TREND (last 12 months)
+        // FUEL SALES TREND (last 12 months) — DC scope
         // =============================================
         $salesTrend = Fuelreport::select(
                 DB::raw("DATE_FORMAT(report_date, '%b') as month_label"),
                 DB::raw("DATE_FORMAT(report_date, '%Y-%m') as month_key"),
                 DB::raw('SUM(petrol_sales + diesel_sales + octane_sales) as total_sales')
             )
+            ->whereIn('station_name', $stationNames)
             ->where('report_date', '>=', Carbon::now()->subMonths(11)->startOfMonth())
             ->groupBy('month_key', 'month_label')
             ->orderBy('month_key')
             ->get();
- 
+    
         // =============================================
-        // RECENT DEPOT ENTRIES
+        // RECENT DEPOT ENTRIES — DC scope
         // =============================================
-        $recentDepots = Depot::latest()->take(5)->get()->map(function ($depot) {
-            // utilization: linked stations এর received vs capacity
-            $stationCount = FillingStation::where('linked_depot', $depot->id)->count();
-            $utilization  = $depot->capacity > 0
-                ? min(100, round(($stationCount * 5000 / $depot->capacity) * 100))
-                : 0; // placeholder logic; real data থাকলে replace করুন
- 
-            return [
-                'name'        => $depot->depot_name,
-                'district'    => $depot->district,
-                'capacity'    => number_format($depot->capacity) . ' L',
-                'utilization' => $utilization,
-                'status'      => $depot->status,
-            ];
-        });
- 
+        $recentDepots = Depot::whereHas('fillingStations', fn($q) =>
+                            $q->whereIn('id', $stationIds)
+                        )
+            ->latest()->take(5)->get()
+            ->map(function ($depot) use ($stationIds) {
+                $stationCount = FillingStation::where('linked_depot', $depot->id)
+                                ->whereIn('id', $stationIds)->count();
+                $utilization  = $depot->capacity > 0
+                    ? min(100, round(($stationCount * 5000 / $depot->capacity) * 100))
+                    : 0;
+    
+                return [
+                    'name'        => $depot->depot_name,
+                    'district'    => $depot->district,
+                    'capacity'    => number_format($depot->capacity) . ' L',
+                    'utilization' => $utilization,
+                    'status'      => $depot->status,
+                ];
+            });
+    
         // =============================================
-        // RECENT ACTIVITIES (mixed from multiple models)
+        // RECENT ACTIVITIES — DC scope
         // =============================================
         $recentActivities = collect();
- 
-        // নতুন depot add
-        Depot::latest()->take(3)->get()->each(function ($d) use (&$recentActivities) {
-            $recentActivities->push([
-                'type'  => 'depot',
-                'title' => 'New Depot Added',
-                'sub'   => $d->district . ' — ' . $d->depot_name,
-                'time'  => $d->created_at,
-                'color' => 'green',
-                'icon'  => 'fa-circle-info',
-            ]);
-        });
- 
-        // নতুন assignment
+    
+        // নতুন depot (DC-এর stations এর সাথে linked)
+        Depot::whereHas('fillingStations', fn($q) => $q->whereIn('id', $stationIds))
+            ->latest()->take(3)->get()
+            ->each(function ($d) use (&$recentActivities) {
+                $recentActivities->push([
+                    'type'  => 'depot',
+                    'title' => 'New Depot Added',
+                    'sub'   => $d->district . ' — ' . $d->depot_name,
+                    'time'  => $d->created_at,
+                    'color' => 'green',
+                    'icon'  => 'fa-circle-info',
+                ]);
+            });
+    
+        // নতুন assignment — DC scope
         AssignTagOfficer::with(['fillingStation:id,station_name,district'])
+            ->where('dc_id', $dc->id)
             ->latest()->take(3)->get()
             ->each(function ($a) use (&$recentActivities) {
                 $recentActivities->push([
@@ -203,9 +262,10 @@ class DashboardController extends Controller
                     'icon'  => 'fa-circle-info',
                 ]);
             });
- 
-        // Stock alert — difference > 0 reports
-        Fuelreport::whereRaw('ABS(petrol_difference) + ABS(diesel_difference) + ABS(octane_difference) > 50')
+    
+        // Stock alert — DC scope
+        Fuelreport::whereIn('station_name', $stationNames)
+            ->whereRaw('ABS(petrol_difference) + ABS(diesel_difference) + ABS(octane_difference) > 50')
             ->latest('report_date')->take(2)->get()
             ->each(function ($r) use (&$recentActivities) {
                 $recentActivities->push([
@@ -217,9 +277,10 @@ class DashboardController extends Controller
                     'icon'  => 'fa-circle-exclamation',
                 ]);
             });
- 
-        // Operational loss — negative closing
-        Fuelreport::where(function ($q) {
+    
+        // Operational loss — DC scope
+        Fuelreport::whereIn('station_name', $stationNames)
+            ->where(function ($q) {
                 $q->where('petrol_closing_stock', '<', 0)
                   ->orWhere('diesel_closing_stock', '<', 0)
                   ->orWhere('octane_closing_stock', '<', 0);
@@ -235,31 +296,21 @@ class DashboardController extends Controller
                     'icon'  => 'fa-circle-xmark',
                 ]);
             });
- 
-        // সময় অনুযায়ী sort করে সর্বশেষ ৫টা দেখাও
+    
         $recentActivities = $recentActivities
             ->sortByDesc('time')
             ->take(5)
             ->values();
- 
+    
         return view('backend.dc.pages.dashboard.index', compact(
-            // stat cards
             'totalStockToday', 'totalReceivedToday', 'totalSoldToday',
             'totalDiffToday',  'totalDiffPct', 'receivedChangePct',
- 
-            // fuel type stocks & sold
             'todayPetrolStock', 'todayDieselStock', 'todayOctaneStock',
             'todayPetrolSold',  'todayDieselSold',  'todayOctaneSold',
- 
-            // summary
             'totalDepots', 'totalStations', 'totalOfficers', 'activeAssignments',
             'newDepots', 'newStations', 'newOfficers', 'assignChange',
- 
-            // charts
             'totalPetrol', 'totalDiesel', 'totalOctane', 'totalOthers',
             'companyDistribution', 'divisionDistribution', 'salesTrend',
- 
-            // table & activities
             'recentDepots', 'recentActivities'
         ));
     }
