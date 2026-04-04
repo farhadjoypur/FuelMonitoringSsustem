@@ -828,16 +828,16 @@
         {{-- ============================================================
          ROW 4: SUMMARY 4 CARDS
          ============================================================ --}}
-        <div class="g-4">
-            <div class="sum-card blue-c">
+        <div class="g-22">
+            <!-- <div class="sum-card blue-c">
                 <div class="sm-icon"><i class="fa-solid fa-warehouse"></i></div>
                 <div class="sm-val">{{ $totalDepots }}</div>
                 <div class="sm-name">Total Depots</div>
-                <!-- <div class="sm-trend">
+                <div class="sm-trend">
                     <i class="fa-solid fa-arrow-trend-{{ $newDepots >= 0 ? 'up' : 'down' }}"></i>
                     {{ $newDepots >= 0 ? '+' : '' }}{{ $newDepots }} this month
-                </div> -->
-            </div>
+                </div>
+            </div> -->
             <div class="sum-card green-c">
                 <div class="sm-icon"><i class="fa-solid fa-gas-pump"></i></div>
                 <div class="sm-val">{{ $totalStations }}</div>
@@ -856,15 +856,15 @@
                     {{ $newOfficers >= 0 ? '+' : '' }}{{ $newOfficers }} this month
                 </div> -->
             </div>
-            <div class="sum-card orange-c">
+            <!-- <div class="sum-card orange-c">
                 <div class="sm-icon"><i class="fa-solid fa-user-check"></i></div>
                 <div class="sm-val">{{ $activeAssignments }}</div>
                 <div class="sm-name">Active Assignments</div>
-                <!-- <div class="sm-trend">
+                <div class="sm-trend">
                     <i class="fa-solid fa-arrow-trend-{{ $assignChange >= 0 ? 'up' : 'down' }}"></i>
                     {{ $assignChange >= 0 ? '+' : '' }}{{ $assignChange }} this month
-                </div> -->
-            </div>
+                </div>
+            </div> -->
         </div>
 
         {{-- ============================================================
