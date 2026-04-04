@@ -42,6 +42,11 @@ class Fuelreport extends Model
         'others_sales',
         'others_closing_stock',
         'comment',
+
+        'petrol_status',
+        'diesel_status',
+        'octane_status',
+        'others_status',
     ];
 
     protected $casts = [

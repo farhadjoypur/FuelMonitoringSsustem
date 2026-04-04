@@ -195,7 +195,29 @@ class FuelReportController extends Controller
 
         $othersDiff    = $request->others_supply  - $request->others_received;
         $othersClosing = $request->others_prev_stock + $request->others_received - $request->others_sales;
+        $petrolStatus = $this->getFuelStatus(
+            $petrolClosing,
+            $petrolDiff,
+            $request->petrol_supply
+        );
 
+        $dieselStatus = $this->getFuelStatus(
+            $dieselClosing,
+            $dieselDiff,
+            $request->diesel_supply
+        );
+
+        $octaneStatus = $this->getFuelStatus(
+            $octaneClosing,
+            $octaneDiff,
+            $request->octane_supply
+        );
+
+        $othersStatus = $this->getFuelStatus(
+            $othersClosing,
+            $othersDiff,
+            $request->others_supply
+        );
         Fuelreport::create([
             // ── FK ──────────────────────────────────────
             'tag_officer_id' => $ctx['officerId'],
@@ -239,6 +261,11 @@ class FuelReportController extends Controller
             'others_difference'    => $othersDiff,
             'others_sales'         => $request->others_sales,
             'others_closing_stock' => $othersClosing,
+
+            'petrol_status' => $petrolStatus,
+            'diesel_status' => $dieselStatus,
+            'octane_status' => $octaneStatus,
+            'others_status' => $othersStatus
         ]);
 
         return redirect()
@@ -324,7 +351,29 @@ class FuelReportController extends Controller
 
         $othersDiff    = $request->others_supply  - $request->others_received;
         $othersClosing = $request->others_prev_stock + $request->others_received - $request->others_sales;
+        $petrolStatus = $this->getFuelStatus(
+            $petrolClosing,
+            $petrolDiff,
+            $request->petrol_supply
+        );
 
+        $dieselStatus = $this->getFuelStatus(
+            $dieselClosing,
+            $dieselDiff,
+            $request->diesel_supply
+        );
+
+        $octaneStatus = $this->getFuelStatus(
+            $octaneClosing,
+            $octaneDiff,
+            $request->octane_supply
+        );
+
+        $othersStatus = $this->getFuelStatus(
+            $othersClosing,
+            $othersDiff,
+            $request->others_supply
+        );
         $fuelReport->update([
             'report_date'   => $request->report_date,
             'comment'       => $request->comment,
@@ -356,6 +405,11 @@ class FuelReportController extends Controller
             'others_difference'    => $othersDiff,
             'others_sales'         => $request->others_sales,
             'others_closing_stock' => $othersClosing,
+
+            'petrol_status' => $petrolStatus,
+            'diesel_status' => $dieselStatus,
+            'octane_status' => $octaneStatus,
+            'others_status' => $othersStatus,
         ]);
 
         return redirect()
@@ -427,5 +481,22 @@ class FuelReportController extends Controller
         if ($fuelReport->tag_officer_id !== Auth::id()) {
             abort(403, 'You are not authorized to view this report.');
         }
+    }
+
+    private function getFuelStatus($closing, $difference, $supply)
+    {
+        if ($closing <= 0) {
+            return 'Zero Stock';
+        }
+
+        if ($closing < 1000) {
+            return 'Low Stock';
+        }
+
+        if ($supply > 0 && abs($difference) > ($supply * 0.30)) {
+            return 'High Difference';
+        }
+
+        return 'Normal';
     }
 }
