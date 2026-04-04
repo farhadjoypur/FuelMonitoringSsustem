@@ -17,13 +17,7 @@
                 </a>
             </li>
 
-            <li class="menu-item">
-                <a href="{{ route('admin.profile.index') }}"
-                    class="menu-link {{ request()->routeIs('admin.profile.*') ? 'active' : '' }}">
-                    <span class="material-symbols-rounded">person</span>
-                    <span class="menu-label">Profile</span>
-                </a>
-            </li>
+          
 
             {{-- COMPANY (SIMPLE MENU) --}}
             <li class="menu-item">
@@ -94,6 +88,13 @@
                     class="menu-link {{ request()->routeIs('admin.admin-user.*') ? 'active' : '' }}">
                     <span class="material-symbols-rounded">admin_panel_settings</span>
                     <span class="menu-label">Admin User</span>
+                </a>
+            </li>
+              <li class="menu-item">
+                <a href="{{ route('admin.profile.index') }}"
+                    class="menu-link {{ request()->routeIs('admin.profile.*') ? 'active' : '' }}">
+                    <span class="material-symbols-rounded">person</span>
+                    <span class="menu-label">Profile</span>
                 </a>
             </li>
         </ul>

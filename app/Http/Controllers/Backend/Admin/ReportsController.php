@@ -14,6 +14,13 @@ class ReportsController extends Controller
 {
     public function salesReport(Request $request)
     {
+        $path = resource_path('data/location.json');
+
+        if (!file_exists($path)) {
+            dd("Location file not found at: " . $path);
+        }
+
+        $locations = json_decode(file_get_contents($path), true);
         // ── Filter Dropdown Data (সবসময় load হবে) ────────────
         $divisions = FillingStation::whereNotNull('division')
             ->distinct()->pluck('division')->sort()->values();
@@ -66,6 +73,7 @@ class ReportsController extends Controller
                 'diffReports'    => collect(),
                 // flag
                 'filtered'       => false,
+                'locations'      => $locations,
             ]);
         }
 
@@ -87,10 +95,10 @@ class ReportsController extends Controller
                 )
 
                 // location filters
-                ->when(
-                    $request->filled('division'),
-                    fn($q) => $q->where('division', $request->division)
-                )
+                // ->when(
+                //     $request->filled('division'),
+                //     fn($q) => $q->where('division', $request->division)
+                // )
                 ->when(
                     $request->filled('district'),
                     fn($q) => $q->where('district', $request->district)
@@ -273,6 +281,7 @@ class ReportsController extends Controller
             'salesReports',
             'officerReports',
             'diffReports',
+            'locations'
         ) + ['filtered' => true]);
     }
 }
