@@ -61,7 +61,7 @@ class DashboardController extends Controller
         // =============================================
         $totalDepots   = Depot::count();
         $totalStations = FillingStation::count();
-        $totalOfficers = User::where('role', 'tag_officer')->count();
+        $totalOfficers = User::where('role', '2')->count();
 
         $newDepots   = Depot::where('created_at', '>=', $thisMonth)->count();
         $newStations = FillingStation::where('created_at', '>=', $thisMonth)->count();
