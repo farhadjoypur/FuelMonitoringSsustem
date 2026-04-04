@@ -95,10 +95,10 @@ class ReportsController extends Controller
                 )
 
                 // location filters
-                ->when(
-                    $request->filled('division'),
-                    fn($q) => $q->where('division', $request->division)
-                )
+                // ->when(
+                //     $request->filled('division'),
+                //     fn($q) => $q->where('division', $request->division)
+                // )
                 ->when(
                     $request->filled('district'),
                     fn($q) => $q->where('district', $request->district)
