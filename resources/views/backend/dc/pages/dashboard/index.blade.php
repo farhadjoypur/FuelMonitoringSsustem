@@ -680,12 +680,13 @@
     <div class="container-fluid py-4">
 
         <div class="db-title">Dashboard Overview</div>
-        <p class="db-sub">Bangladesh Fuel Management System &mdash; Real-time Monitoring</p>
+        <!-- <p class="db-sub">Bangladesh Fuel Management System &mdash; Real-time Monitoring</p> -->
+        <p class="db-sub">Bangladesh Fuel Management System</p>
 
         {{-- ============================================================
          ROW 1: TOP STAT CARDS
          ============================================================ --}}
-        <div class="g-5">
+        <!-- <div class="g-5">
 
             {{-- Total Stock --}}
             <div class="stat-card">
@@ -741,7 +742,7 @@
                 @endif
                 <div class="sc-footer">Todays</div>
             </div>
-        </div>
+        </div> -->
 
         {{-- ============================================================
          ROW 2: TODAY'S STOCK
@@ -807,44 +808,44 @@
                 <div class="sm-icon"><i class="fa-solid fa-warehouse"></i></div>
                 <div class="sm-val">{{ $totalDepots }}</div>
                 <div class="sm-name">Total Depots</div>
-                <div class="sm-trend">
+                <!-- <div class="sm-trend">
                     <i class="fa-solid fa-arrow-trend-{{ $newDepots >= 0 ? 'up' : 'down' }}"></i>
                     {{ $newDepots >= 0 ? '+' : '' }}{{ $newDepots }} this month
-                </div>
+                </div> -->
             </div>
             <div class="sum-card green-c">
                 <div class="sm-icon"><i class="fa-solid fa-gas-pump"></i></div>
                 <div class="sm-val">{{ $totalStations }}</div>
                 <div class="sm-name">Total Filling Stations</div>
-                <div class="sm-trend">
+                <!-- <div class="sm-trend">
                     <i class="fa-solid fa-arrow-trend-{{ $newStations >= 0 ? 'up' : 'down' }}"></i>
                     {{ $newStations >= 0 ? '+' : '' }}{{ $newStations }} this month
-                </div>
+                </div> -->
             </div>
             <div class="sum-card purple-c">
                 <div class="sm-icon"><i class="fa-solid fa-user-group"></i></div>
                 <div class="sm-val">{{ $totalOfficers }}</div>
                 <div class="sm-name">Total Tag Officers</div>
-                <div class="sm-trend">
+                <!-- <div class="sm-trend">
                     <i class="fa-solid fa-arrow-trend-{{ $newOfficers >= 0 ? 'up' : 'down' }}"></i>
                     {{ $newOfficers >= 0 ? '+' : '' }}{{ $newOfficers }} this month
-                </div>
+                </div> -->
             </div>
             <div class="sum-card orange-c">
                 <div class="sm-icon"><i class="fa-solid fa-user-check"></i></div>
                 <div class="sm-val">{{ $activeAssignments }}</div>
                 <div class="sm-name">Active Assignments</div>
-                <div class="sm-trend">
+                <!-- <div class="sm-trend">
                     <i class="fa-solid fa-arrow-trend-{{ $assignChange >= 0 ? 'up' : 'down' }}"></i>
                     {{ $assignChange >= 0 ? '+' : '' }}{{ $assignChange }} this month
-                </div>
+                </div> -->
             </div>
         </div>
 
         {{-- ============================================================
          ROW 5: CHARTS
          ============================================================ --}}
-        <div class="g-22">
+        <!-- <div class="g-22">
 
             {{-- Fuel Type Distribution Pie --}}
             <div class="card chart-card">
@@ -891,9 +892,9 @@
                     @endforeach
                 </div>
             </div>
-        </div>
+        </div> -->
 
-        <div class="g-22">
+        <!-- <div class="g-22">
 
             {{-- Division-wise Distribution Bar --}}
             <div class="card chart-card">
@@ -915,15 +916,16 @@
                 </div>
                 <canvas id="salesLineChart" height="220"></canvas>
             </div>
-        </div>
+        </div> -->
 
         {{-- ============================================================
          ROW 6: DEPOT TABLE + ACTIVITIES
          ============================================================ --}}
-        <div class="g-22">
+        <div style="margin-bottom: 24px;">
+        <!-- <div class="g-22"> -->
 
             {{-- Recent Depot Entries --}}
-            <div class="card depot-table-card">
+            <!-- <div class="card depot-table-card">
                 <div class="dt-head">
                     <i class="fa-solid fa-warehouse"></i>
                     <span class="dt-title">Recent Depot Entries</span>
@@ -974,7 +976,7 @@
                         @endforelse
                     </tbody>
                 </table>
-            </div>
+            </div> -->
 
             {{-- Recent Activities --}}
             <div class="card activity-card">
