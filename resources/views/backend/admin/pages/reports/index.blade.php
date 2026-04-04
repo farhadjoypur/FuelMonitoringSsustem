@@ -672,7 +672,7 @@
             <button class="tab-btn active" onclick="switchTab('stock', this)">
                 <i class="fa-solid fa-box-archive" style="margin-right:6px; font-size:.78rem;"></i>Stock Report
             </button>
-            {{-- <button class="tab-btn" onclick="switchTab('sales', this)">
+            <button class="tab-btn" onclick="switchTab('sales', this)">
       <i class="fa-solid fa-chart-line" style="margin-right:6px; font-size:.78rem;"></i>Sales Report
     </button>
     <button class="tab-btn" onclick="switchTab('officer', this)">
@@ -683,7 +683,7 @@
     </button>
     <button class="tab-btn" onclick="switchTab('due', this)">
       <i class="fa-solid fa-clock-rotate-left" style="margin-right:6px; font-size:.78rem;"></i>Due Sales Report
-    </button> --}}
+    </button>
         </div>
 
         {{-- ══════════════════════════════════════
