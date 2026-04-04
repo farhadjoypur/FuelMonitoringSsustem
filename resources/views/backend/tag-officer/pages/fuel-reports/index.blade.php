@@ -1033,31 +1033,31 @@
                                 <td>{{ number_format($ft['sales'], 0) }}</td>
                                 <td style="font-weight:600;">{{ number_format($ft['closing'], 0) }}</td>
                                 <td>
-    @if (!empty($ft['status']))
-        @php
-            $status = strtolower(trim($ft['status']));
-            $class = match($status) {
-                'low stock'       => 'status-low',
-                'high difference' => 'status-highdiff',
-                'zero stock'      => 'status-zero',
-                default           => 'status-ok',
-            };
-            $icon = match($status) {
-                'low stock'       => 'fa-arrow-down',
-                'high difference' => 'fa-exclamation-triangle',
-                'zero stock'      => 'fa-ban',
-                default           => 'fa-check-circle',
-            };
-        @endphp
+                                    @if (!empty($ft['status']))
+                                        @php
+                                            $status = strtolower(trim($ft['status']));
+                                            $class = match ($status) {
+                                                'low stock' => 'status-low',
+                                                'high difference' => 'status-highdiff',
+                                                'zero stock' => 'status-zero',
+                                                default => 'status-ok',
+                                            };
+                                            $icon = match ($status) {
+                                                'low stock' => 'fa-arrow-down',
+                                                'high difference' => 'fa-exclamation-triangle',
+                                                'zero stock' => 'fa-ban',
+                                                default => 'fa-check-circle',
+                                            };
+                                        @endphp
 
-        <span class="status-badge {{ $class }}">
-            <i class="fas {{ $icon }} me-1"></i>
-            {{ ucwords($ft['status']) }}
-        </span>
-    @else
-        <span class="text-muted">-</span>
-    @endif
-</td>
+                                        <span class="status-badge {{ $class }}">
+                                            <i class="fas {{ $icon }} me-1"></i>
+                                            {{ ucwords($ft['status']) }}
+                                        </span>
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
+                                </td>
 
                                 @if ($fi === 0)
                                     <td rowspan="{{ $rowCount }}" style="vertical-align:top;padding-top:12px;">
