@@ -3,11 +3,12 @@
 namespace App\Http\Controllers\Backend\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\AssignTagOfficer;
+use App\Models\Company;
 use App\Models\Depot;
 use App\Models\FillingStation;
 use App\Models\Fuelreport;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class DcReportsController extends Controller
@@ -32,141 +33,275 @@ class DcReportsController extends Controller
     // ═══════════════════════════════════════════════════════════
     public function index(Request $request)
     {
-        ['officerIds' => $officerIds, 'stationIds' => $stationIds] = $this->getDcScope();
+        $path = resource_path('data/location.json');
 
-        // ── Filter Dropdowns (শুধু DC-এর stations থেকে) ──────────────────────
-        $districts = FillingStation::whereIn('id', $stationIds)
-            ->whereNotNull('district')
-            ->distinct()->pluck('district')->sort()->values();
+        if (!file_exists($path)) {
+            dd("Location file not found at: " . $path);
+        }
 
-        $divisions = FillingStation::whereIn('id', $stationIds)
-            ->whereNotNull('division')
+        $locations = json_decode(file_get_contents($path), true);
+
+        // ── Filter Dropdown Data (সবসময় load হবে) ────────────
+        $divisions = FillingStation::whereNotNull('division')
             ->distinct()->pluck('division')->sort()->values();
 
-        $depots = Depot::whereIn(
-            'id',
-            FillingStation::whereIn('id', $stationIds)
-                ->whereNotNull('linked_depot')
-                ->pluck('linked_depot')
-        )->orderBy('depot_name')->get(['id', 'depot_name']);
+        $districts = FillingStation::whereNotNull('district')
+            ->distinct()->pluck('district')->sort()->values();
 
-        $stations = FillingStation::whereIn('id', $stationIds)
-            ->orderBy('station_name')->get(['id', 'station_name']);
+        $upazilas = FillingStation::whereNotNull('upazila')
+            ->distinct()->pluck('upazila')->sort()->values();
 
-        $officers = AssignTagOfficer::where('dc_id', auth()->id())
-            ->with('officer')
-            ->distinct('officer_id')
-            ->get()
-            ->pluck('officer')
-            ->filter()
-            ->unique('id')
-            ->values();
+        $depots = Depot::orderBy('depot_name')->get(['id', 'depot_name']);
 
-        // ── Base Fuelreport Query (DC scope: tag_officer_id OR station_id) ───
-        $baseQuery = function () use ($request, $officerIds, $stationIds) {
+        $stations = FillingStation::orderBy('station_name')
+            ->get(['id', 'station_name']);
+
+        $companies = Company::orderBy('name')->get(['id', 'name']);
+
+        // ── Filter applied কিনা check ─────────────────────────
+        // যেকোনো একটি filter দিলেই data load হবে
+        $filtered = $request->hasAny([
+            'from_date',
+            'to_date',
+            'division',
+            'district',
+            'upazila',
+            'company_id',
+            'depot_id',
+            'station_name',
+            'fuel_type',
+            'stock_status',
+            'assign_status',
+            'officer_id',
+            'min_diff',
+        ]);
+
+        // ── Filter না করলে সব empty return করো ───────────────
+        if (! $filtered) {
+            return view('backend.dc.pages.reports.index', [
+                // dropdowns
+                'divisions'      => $divisions,
+                'districts'      => $districts,
+                'upazilas'       => $upazilas,
+                'depots'         => $depots,
+                'stations'       => $stations,
+                'companies'      => $companies,
+                // empty collections
+                'stockReports'   => collect(),
+                'salesReports'   => collect(),
+                'officerReports' => collect(),
+                'diffReports'    => collect(),
+                // flag
+                'filtered'       => false,
+                'locations'      => $locations,
+            ]);
+        }
+
+        // ═══════════════════════════════════════════════════════
+        //  BASE QUERY — shared filters (date, location, station)
+        //  সব tab এই base query use করে
+        // ═══════════════════════════════════════════════════════
+        $baseQuery = function () use ($request) {
             return Fuelreport::query()
-                ->where(function ($q) use ($officerIds, $stationIds) {
-                    $q->whereIn('tag_officer_id', $officerIds)
-                        ->orWhereIn('station_id', $stationIds);
-                })
-                ->when($request->from_date,    fn($q) => $q->whereDate('report_date', '>=', $request->from_date))
-                ->when($request->to_date,      fn($q) => $q->whereDate('report_date', '<=', $request->to_date))
-                ->when($request->district,     fn($q) => $q->where('district', $request->district))
-                ->when($request->station_name, fn($q) => $q->where('station_name', $request->station_name))
-                ->when($request->officer_id,   fn($q) => $q->where('tag_officer_id', $request->officer_id));
+
+                // তারিখ range
+                ->when(
+                    $request->filled('from_date'),
+                    fn($q) => $q->whereDate('report_date', '>=', $request->from_date)
+                )
+                ->when(
+                    $request->filled('to_date'),
+                    fn($q) => $q->whereDate('report_date', '<=', $request->to_date)
+                )
+
+                // location filters
+                // ->when(
+                //     $request->filled('division'),
+                //     fn($q) => $q->where('division', $request->division)
+                // )
+                ->when(
+                    $request->filled('district'),
+                    fn($q) => $q->where('district', $request->district)
+                )
+                ->when(
+                    $request->filled('upazila'),
+                    fn($q) => $q->where('thana_upazila', $request->upazila)
+                )
+
+                // station filter
+                ->when(
+                    $request->filled('station_name'),
+                    fn($q) => $q->where('station_name', $request->station_name)
+                );
         };
 
-        // ── TAB 1: STOCK REPORT ───────────────────────────────────────────────
-        $stockReports = $baseQuery()
-            ->when($request->depot_id, function ($q) use ($request) {
+        // ═══════════════════════════════════════════════════════
+        //  TAB 1 — STOCK REPORT
+        //
+        //  Calculation:
+        //    Opening  = prev_stock (আগের দিনের closing)
+        //    Received = supply আসা fuel
+        //    Sold     = বিক্রয়
+        //    Closing  = prev_stock + received - sales
+        //    Status   : closing >= 2000 → Available
+        //               1–1999         → Low Stock
+        //               <= 0           → Zero Stock
+        // ═══════════════════════════════════════════════════════
+        $stockQuery = $baseQuery()
+
+            // Depot filter — depot_name দিয়ে match
+            ->when($request->filled('depot_id'), function ($q) use ($request) {
                 $depotName = Depot::find($request->depot_id)?->depot_name;
-                return $q->where('depot_name', $depotName);
-            })
-            ->when($request->stock_status, function ($q, $status) {
-                if ($status === 'available') {
-                    $q->whereRaw('(diesel_closing_stock + petrol_closing_stock + octane_closing_stock) >= 2000');
-                } elseif ($status === 'low') {
-                    $q->whereRaw('(diesel_closing_stock + petrol_closing_stock + octane_closing_stock) > 0')
-                        ->whereRaw('(diesel_closing_stock + petrol_closing_stock + octane_closing_stock) < 2000');
-                } elseif ($status === 'zero') {
-                    $q->whereRaw('(diesel_closing_stock + petrol_closing_stock + octane_closing_stock) <= 0');
+                if ($depotName) {
+                    $q->where('depot_name', $depotName);
                 }
             })
-            ->orderByDesc('report_date')
-            ->get();
 
-        // ── TAB 2: SALES REPORT ───────────────────────────────────────────────
+            // Company filter — FillingStation থেকে station names নিয়ে filter
+            ->when($request->filled('company_id'), function ($q) use ($request) {
+                $stationNames = FillingStation::where('company_id', $request->company_id)
+                    ->pluck('station_name');
+                $q->whereIn('station_name', $stationNames);
+            })
+
+            // Stock Status filter
+            ->when($request->filled('stock_status'), function ($q) use ($request) {
+                $status = $request->stock_status;
+
+                if ($status === 'available') {
+                    // মোট closing >= 2000 L
+                    $q->whereRaw(
+                        '(diesel_closing_stock + petrol_closing_stock + octane_closing_stock) >= 2000'
+                    );
+                } elseif ($status === 'low') {
+                    // মোট closing 1 থেকে 1999 এর মধ্যে
+                    $q->whereRaw(
+                        '(diesel_closing_stock + petrol_closing_stock + octane_closing_stock) BETWEEN 1 AND 1999'
+                    );
+                } elseif ($status === 'zero') {
+                    // মোট closing 0 বা তার কম
+                    $q->whereRaw(
+                        '(diesel_closing_stock + petrol_closing_stock + octane_closing_stock) <= 0'
+                    );
+                }
+            })
+
+            // Company name পাওয়ার জন্য relation load
+            ->with(['fillingStation.company', 'tagOfficer'])
+
+            ->orderByDesc('report_date');
+
+        $stockReports = $stockQuery->get();
+
+        // ═══════════════════════════════════════════════════════
+        //  TAB 2 — SALES REPORT
+        //
+        //  Calculation:
+        //    Total Sold = diesel_sales + petrol_sales + octane_sales
+        //    fuel_type filter দিলে শুধু সেই fuel এর sales > 0 দেখাবে
+        // ═══════════════════════════════════════════════════════
         $salesReports = $baseQuery()
-            ->when($request->fuel_type, fn($q, $type) => $q->where("{$type}_sales", '>', 0))
+
+            // Depot filter
+            ->when($request->filled('depot_id'), function ($q) use ($request) {
+                $depotName = Depot::find($request->depot_id)?->depot_name;
+                if ($depotName) {
+                    $q->where('depot_name', $depotName);
+                }
+            })
+
+            // Fuel type filter — সেই fuel এর sales > 0 হলে দেখাবে
+            ->when($request->filled('fuel_type'), function ($q) use ($request) {
+                $type = $request->fuel_type; // diesel | petrol | octane
+                $q->where("{$type}_sales", '>', 0);
+            })
+
             ->orderByDesc('report_date')
             ->get();
 
-        // ── TAB 3: TAG OFFICER REPORT (DC-এর officers) ───────────────────────
-        $officerQuery = AssignTagOfficer::where('dc_id', auth()->id())
-            ->with([
-                'officer',
-                'fillingStation:id,station_name,district,division',
-            ]);
+        // ═══════════════════════════════════════════════════════
+        //  TAB 3 — TAG OFFICER REPORT
+        //
+        //  AssignTagOfficer টেবিল থেকে আসে
+        //  officer → User model
+        //  fillingStation → FillingStation model
+        // ═══════════════════════════════════════════════════════
+        $officerQuery = AssignTagOfficer::with([
+            'officer',
+            'fillingStation:id,station_name,district,division',
+        ]);
 
-        if ($request->district) {
-            $officerQuery->whereHas('fillingStation', fn($q) => $q->where('district', $request->district));
+        // District filter — fillingStation এর district দিয়ে
+        if ($request->filled('district')) {
+            $officerQuery->whereHas(
+                'fillingStation',
+                fn($q) => $q->where('district', $request->district)
+            );
         }
-        if ($request->assign_status) {
+
+        // Division filter — fillingStation এর division দিয়ে
+        if ($request->filled('division')) {
+            $officerQuery->whereHas(
+                'fillingStation',
+                fn($q) => $q->where('division', $request->division)
+            );
+        }
+
+        // Assignment status filter (active / inactive)
+        if ($request->filled('assign_status')) {
             $officerQuery->where('status', $request->assign_status);
-        }
-        if ($request->officer_id) {
-            $officerQuery->where('officer_id', $request->officer_id);
         }
 
         $officerReports = $officerQuery->latest()->get();
 
-        // ── TAB 3 EXTRA: প্রতিটি Officer কতটা report submit করেছে ─────────────
-        $officerSubmitCounts = Fuelreport::whereIn('tag_officer_id', $officerIds)
-            ->when($request->from_date, fn($q) => $q->whereDate('report_date', '>=', $request->from_date))
-            ->when($request->to_date,   fn($q) => $q->whereDate('report_date', '<=', $request->to_date))
-            ->select('tag_officer_id', DB::raw('COUNT(*) as report_count'))
-            ->groupBy('tag_officer_id')
-            ->pluck('report_count', 'tag_officer_id');
+        // ═══════════════════════════════════════════════════════
+        //  TAB 4 — DIFFERENCE (%) REPORT
+        //
+        //  Calculation:
+        //    difference     = received - (closing - prev_stock)
+        //                   = received - sales  (ideally = 0)
+        //
+        //    difference %   = difference / received × 100
+        //
+        //    difference > 0 → বেশি fuel এসেছে / কম বিক্রি এন্ট্রি
+        //    difference < 0 → কম fuel এসেছে / বেশি বিক্রি এন্ট্রি
+        //    difference = 0 → সব ঠিক আছে
+        //
+        //    High Diff      = total |diff| > 50 L (alert threshold)
+        // ═══════════════════════════════════════════════════════
+        $minDiff = (float) $request->get('min_diff', 0);
 
-        // ── TAB 4: DIFFERENCE (%) REPORT ─────────────────────────────────────
-        $minDiff     = $request->get('min_diff', 0);
         $diffReports = $baseQuery()
-            ->when(
-                $minDiff > 0,
-                fn($q) => $q->whereRaw(
+
+            // Min difference filter
+            ->when($minDiff > 0, function ($q) use ($minDiff) {
+                $q->whereRaw(
                     'ABS(petrol_difference) + ABS(diesel_difference) + ABS(octane_difference) >= ?',
                     [$minDiff]
-                )
-            )
-            ->orderByDesc('report_date')
-            ->get();
-
-        // ── TAB 5: DUE SALES — opening stock এ আগের দিনের closing মিলছে না ──
-        // যে reports এ petrol_prev_stock != আগের দিনের petrol_closing_stock সেগুলো
-        // For now: যেখানে sales > received (negative closing indicator)
-        $dueSalesReports = $baseQuery()
-            ->where(function ($q) {
-                $q->whereRaw('petrol_sales > petrol_received + petrol_prev_stock')
-                    ->orWhereRaw('diesel_sales > diesel_received + diesel_prev_stock')
-                    ->orWhereRaw('octane_sales > octane_received + octane_prev_stock');
+                );
             })
+
             ->orderByDesc('report_date')
             ->get();
 
+        // ═══════════════════════════════════════════════════════
+        //  RETURN VIEW
+        // ═══════════════════════════════════════════════════════
         return view('backend.dc.pages.reports.index', compact(
-            // dropdowns
-            'districts',
+            // filter dropdowns
             'divisions',
+            'districts',
+            'upazilas',
             'depots',
             'stations',
-            'officers',
+            'companies',
+
             // tab data
             'stockReports',
             'salesReports',
             'officerReports',
-            'officerSubmitCounts',
             'diffReports',
-            'dueSalesReports',
-        ));
+            'locations'
+        ) + ['filtered' => true]);
     }
 }
