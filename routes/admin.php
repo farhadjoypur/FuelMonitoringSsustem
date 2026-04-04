@@ -29,5 +29,5 @@ Route::prefix('admin')->middleware(['role:'.UserRole::ADMIN])->as('admin.')->gro
 
     // reports 
 
-    Route::get('reports/sales', [ReportsController::class, 'salesReport'])->name('reports.index');
+    Route::get('reports/sales', [ReportsController::class, 'index'])->name('reports.index');
 });

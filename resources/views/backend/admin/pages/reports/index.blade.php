@@ -13,7 +13,7 @@
 
         :root {
             --bg: #f0f2f7;
-            --surface: #ffffff;
+            --surface: #fff;
             --border: #e2e8f0;
             --text: #1a202c;
             --muted: #718096;
@@ -23,7 +23,6 @@
             --purple: #8b5cf6;
             --orange: #f97316;
             --red: #ef4444;
-            --yellow: #f59e0b;
             --teal: #14b8a6;
             --radius: 12px;
             --shadow: 0 1px 3px rgba(0, 0, 0, .08), 0 4px 16px rgba(0, 0, 0, .06);
@@ -33,7 +32,6 @@
             font-family: 'DM Sans', sans-serif;
             background: var(--bg);
             color: var(--text);
-            min-height: 100vh;
         }
 
         .page-title {
@@ -63,7 +61,6 @@
         }
 
         .tab-btn {
-            font-family: 'DM Sans', sans-serif;
             font-size: .875rem;
             font-weight: 500;
             color: var(--muted);
@@ -84,14 +81,6 @@
             color: var(--primary);
             border-bottom-color: var(--primary);
             font-weight: 600;
-        }
-
-        .tab-panel {
-            display: none;
-        }
-
-        .tab-panel.active {
-            display: block;
         }
 
         /* ── FILTER ── */
@@ -121,39 +110,116 @@
 
         .filter-group label {
             display: block;
-            font-size: .76rem;
-            font-weight: 500;
+            font-size: .72rem;
+            font-weight: 600;
             color: var(--muted);
             margin-bottom: 4px;
             text-transform: uppercase;
-            letter-spacing: .3px;
+            letter-spacing: .4px;
         }
 
         .filter-group input,
         .filter-group select {
             width: 100%;
             padding: 9px 11px;
-            border: 1px solid var(--border);
+            border: 1.5px solid var(--border);
             border-radius: 8px;
             font-family: 'DM Sans', sans-serif;
             font-size: .875rem;
             color: var(--text);
             background: #fafbfc;
             outline: none;
-            transition: border-color .2s, box-shadow .2s;
+            transition: border-color .15s, box-shadow .15s;
             appearance: none;
         }
 
         .filter-group input:focus,
         .filter-group select:focus {
             border-color: var(--blue);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, .12);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, .1);
             background: #fff;
         }
 
-        /* Apply button row — col 3-4 centered */
-        .filter-apply-row {
-            grid-column: 3 / 5;
+        select:disabled {
+            opacity: .45;
+            cursor: not-allowed;
+            background: #f1f5f9;
+        }
+
+        /* Station Combobox */
+        .station-combobox {
+            position: relative;
+        }
+
+        .station-combobox input {
+            padding-right: 32px;
+        }
+
+        .station-combobox .clear-btn {
+            position: absolute;
+            right: 9px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--muted);
+            font-size: .8rem;
+            padding: 2px;
+            line-height: 1;
+        }
+
+        .station-combobox .clear-btn:hover {
+            color: var(--red);
+        }
+
+        .station-dropdown {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            z-index: 999;
+            background: #fff;
+            border: 1.5px solid var(--blue);
+            border-radius: 9px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, .12);
+            max-height: 220px;
+            overflow-y: auto;
+        }
+
+        .station-dropdown-item {
+            padding: 9px 13px;
+            font-size: .84rem;
+            cursor: pointer;
+            transition: background .1s;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .station-dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .station-dropdown-item:hover {
+            background: #eff6ff;
+            color: var(--primary);
+        }
+
+        .station-dropdown-item.selected {
+            background: #eff6ff;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .station-dropdown-empty {
+            padding: 12px 13px;
+            font-size: .82rem;
+            color: var(--muted);
+            text-align: center;
+        }
+
+        /* Filter buttons */
+        .filter-btn-row {
+            grid-column: 3/5;
             display: flex;
             align-items: flex-end;
             justify-content: center;
@@ -161,49 +227,44 @@
         }
 
         .btn-apply {
-            background: #1a3c5e;
+            background: linear-gradient(135deg, #2563eb, #1e40af);
             color: #fff;
             border: none;
-            border-radius: 8px;
-            padding: 10px 40px;
-            font-family: 'DM Sans', sans-serif;
-            font-size: .875rem;
+            padding: 10px 28px;
+            border-radius: 10px;
             font-weight: 600;
+            font-size: .9rem;
             cursor: pointer;
-            letter-spacing: .2px;
-            transition: background .15s, transform .15s;
+            transition: all .2s;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, .25);
         }
 
         .btn-apply:hover {
-            background: #0f4c81;
             transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, .35);
         }
 
         .btn-reset {
-            background: transparent;
-            color: var(--muted);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 10px 18px;
-            font-family: 'DM Sans', sans-serif;
-            font-size: .875rem;
-            font-weight: 500;
+            background: #f1f5f9;
+            color: #475569;
+            border: 1.5px solid #cbd5e1;
+            padding: 10px 22px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: .9rem;
             cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            transition: all .15s;
+            transition: all .2s;
         }
 
         .btn-reset:hover {
-            background: var(--bg);
-            color: var(--text);
+            background: #e2e8f0;
+            color: #1e293b;
         }
 
-        /* ── STAT CARDS — 5 columns ── */
+        /* ── STAT CARDS ── */
         .stat-cards {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
+            grid-template-columns: repeat(6, 1fr);
             gap: 14px;
             padding: 0 22px 22px;
         }
@@ -218,9 +279,7 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            cursor: pointer;
             transition: transform .2s, box-shadow .2s;
-            animation: fadeUp .35s ease both;
         }
 
         .stat-card:hover {
@@ -236,6 +295,10 @@
             background: linear-gradient(135deg, #22c55e, #15803d);
         }
 
+        .stat-card.yellow {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        }
+
         .stat-card.purple {
             background: linear-gradient(135deg, #8b5cf6, #6d28d9);
         }
@@ -248,24 +311,19 @@
             background: linear-gradient(135deg, #14b8a6, #0f766e);
         }
 
-        .stat-card:nth-child(1) {
-            animation-delay: .04s;
+        .stat-card.red {
+            background: linear-gradient(135deg, #ef4444, #b91c1c);
         }
 
-        .stat-card:nth-child(2) {
-            animation-delay: .08s;
-        }
-
-        .stat-card:nth-child(3) {
-            animation-delay: .12s;
-        }
-
-        .stat-card:nth-child(4) {
-            animation-delay: .16s;
-        }
-
-        .stat-card:nth-child(5) {
-            animation-delay: .20s;
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            right: -18px;
+            bottom: -18px;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, .08);
         }
 
         .stat-card-top {
@@ -285,22 +343,18 @@
             font-size: .95rem;
         }
 
-        .stat-card-trend {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            font-size: .72rem;
+        .stat-card-badge {
+            font-size: .7rem;
             background: rgba(255, 255, 255, .15);
             padding: 3px 7px;
             border-radius: 20px;
         }
 
         .stat-card-label {
-            font-size: .74rem;
+            font-size: .72rem;
             font-weight: 500;
             opacity: .88;
             margin-top: 8px;
-            letter-spacing: .1px;
         }
 
         .stat-card-value {
@@ -309,17 +363,6 @@
             font-weight: 800;
             letter-spacing: -.5px;
             margin-top: 2px;
-        }
-
-        .stat-card::after {
-            content: '';
-            position: absolute;
-            right: -18px;
-            bottom: -18px;
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, .08);
         }
 
         /* ── TABLE ── */
@@ -331,7 +374,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 13px;
+            margin-bottom: 12px;
         }
 
         .table-title {
@@ -342,7 +385,7 @@
         }
 
         .table-meta {
-            font-size: .76rem;
+            font-size: .75rem;
             color: var(--muted);
         }
 
@@ -366,7 +409,7 @@
         thead th {
             padding: 10px 13px;
             text-align: left;
-            font-size: .69rem;
+            font-size: .68rem;
             font-weight: 700;
             color: var(--muted);
             text-transform: uppercase;
@@ -394,13 +437,8 @@
             vertical-align: middle;
         }
 
-        /* grouped row borders */
-        .group-first td {
-            border-top: 1px solid #e9eef5;
-        }
-
         .date-cell {
-            font-size: .79rem;
+            font-size: .78rem;
             color: var(--muted);
             white-space: nowrap;
             font-weight: 500;
@@ -409,17 +447,11 @@
         .company-cell {
             font-weight: 600;
             font-size: .80rem;
-            color: var(--text);
         }
 
         .station-cell {
             font-weight: 500;
             font-size: .80rem;
-        }
-
-        .fuel-badge {
-            font-size: .78rem;
-            color: var(--text);
         }
 
         .received-val {
@@ -436,63 +468,22 @@
             font-weight: 700;
         }
 
-        /* Status as plain colored text (no pill) */
         .status-available {
             color: #16a34a;
             font-weight: 600;
-            font-size: .80rem;
+            font-size: .79rem;
         }
 
         .status-low {
             color: #b45309;
             font-weight: 600;
-            font-size: .80rem;
+            font-size: .79rem;
         }
 
         .status-zero {
             color: #b91c1c;
             font-weight: 600;
-            font-size: .80rem;
-        }
-
-        /* badge variants for other tabs */
-        .status-badge {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: .72rem;
-            font-weight: 600;
-            white-space: nowrap;
-        }
-
-        .badge-available {
-            background: #dcfce7;
-            color: #15803d;
-        }
-
-        .badge-low {
-            background: #fef9c3;
-            color: #b45309;
-        }
-
-        .badge-zero {
-            background: #fee2e2;
-            color: #b91c1c;
-        }
-
-        .badge-active {
-            background: #dcfce7;
-            color: #15803d;
-        }
-
-        .badge-inactive {
-            background: #fee2e2;
-            color: #b91c1c;
-        }
-
-        .officer-name {
-            font-weight: 600;
-            font-size: .82rem;
+            font-size: .79rem;
         }
 
         .diff-positive {
@@ -507,21 +498,56 @@
 
         .diff-zero {
             color: var(--muted);
-            font-weight: 500;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: .70rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .badge-active {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .badge-inactive {
+            background: #fee2e2;
+            color: #b91c1c;
         }
 
         .summary-row td {
             background: #f7f9fc;
             font-weight: 700;
-            font-size: .81rem;
+            font-size: .80rem;
             border-top: 2px solid var(--border);
         }
 
-        .empty-row td {
+        .empty-state {
             text-align: center;
-            padding: 40px;
+            padding: 52px 20px;
             color: var(--muted);
-            font-size: .86rem;
+        }
+
+        .empty-state i {
+            font-size: 2rem;
+            opacity: .2;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            font-size: .88rem;
+            font-weight: 500;
+        }
+
+        .empty-state small {
+            font-size: .76rem;
+            margin-top: 4px;
+            display: block;
         }
 
         /* ── EXPORT ── */
@@ -536,16 +562,14 @@
         .btn-export {
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 9px 20px;
+            gap: 7px;
+            padding: 8px 18px;
             border-radius: 8px;
-            font-family: 'DM Sans', sans-serif;
-            font-size: .84rem;
+            font-size: .82rem;
             font-weight: 600;
             cursor: pointer;
             border: 1.5px solid;
             transition: all .15s;
-            text-decoration: none;
         }
 
         .btn-pdf {
@@ -568,1198 +592,1341 @@
             background: #15803d;
         }
 
+        /* Tab panels */
+        .tab-content>div {
+            display: none;
+        }
+
+        .tab-content>div.active {
+            display: block;
+        }
+
         @keyframes fadeUp {
             from {
                 opacity: 0;
-                transform: translateY(12px);
+                transform: translateY(10px)
             }
 
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: translateY(0)
             }
         }
 
-        @media (max-width: 1100px) {
+        @media(max-width:1100px) {
             .stat-cards {
-                grid-template-columns: repeat(3, 1fr);
+                grid-template-columns: repeat(3, 1fr)
             }
         }
 
-        @media (max-width: 900px) {
+        @media(max-width:900px) {
             .filter-grid {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(2, 1fr)
             }
 
-            .filter-apply-row {
-                grid-column: 1 / 3;
-                justify-content: flex-start;
+            .filter-btn-row {
+                grid-column: 1/3;
+                justify-content: flex-start
             }
 
             .stat-cards {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(2, 1fr)
             }
         }
 
-        /* Filter Buttons */
-.btn-apply {
-    background: linear-gradient(135deg, #2563eb, #1e40af);
-    color: white;
-    border: none;
-    padding: 12px 28px;
-    border-radius: 10px;
-    font-weight: 600;
-    font-size: 0.95rem;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
-    transition: all 0.2s ease;
-    min-width: 160px;
-}
+        @media(max-width:600px) {
+            .stat-cards {
+                grid-template-columns: repeat(1, 1fr)
+            }
 
-.btn-apply:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
-    color: white;
-}
+            .filter-grid {
+                grid-template-columns: 1fr
+            }
 
-.btn-reset {
-    background: #f1f5f9;
-    color: #475569;
-    border: 1.5px solid #cbd5e1;
-    padding: 12px 28px;
-    border-radius: 10px;
-    font-weight: 600;
-    font-size: 0.95rem;
-    text-decoration: none;
-    transition: all 0.2s ease;
-    min-width: 160px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.btn-reset:hover {
-    background: #e2e8f0;
-    color: #1e293b;
-    border-color: #94a3b8;
-}
-
-/* Optional: Responsive */
-@media (max-width: 768px) {
-    .d-flex.justify-content-center.gap-3 {
-        flex-direction: column;
-        align-items: center;
-    }
-    
-    .btn-apply, .btn-reset {
-        width: 100%;
-        max-width: 280px;
-    }
-}
+            .filter-btn-row {
+                grid-column: 1/2
+            }
+        }
     </style>
 @endpush
 
 @section('content')
+    {{-- ══ Pass PHP data to Alpine.js (NO fn() inside @json) ══ --}}
+    <script>
+        window.__REPORTS__ = {
+            stock: @json($stockReports),
+            officer: @json($officerReports),
+            stations: @json($stationsList),
+            companies: @json($companiesList),
+            depots: @json($depotsList),
+            locations: @json($locations['divisions'] ?? []),
+        };
+    </script>
 
     <h1 class="page-title">
-        <i class="fa-solid fa-chart-mixed" style="font-size:1.2rem; margin-right:8px; opacity:.7;"></i>
+        <i class="fa-solid fa-chart-mixed" style="font-size:1.1rem; margin-right:8px; opacity:.7;"></i>
         Reports &amp; Analytics
     </h1>
 
-    <div class="card">
+    <div class="card" x-data="reportsApp()" x-init="init()">
 
-        {{-- ══ TABS ══ --}}
+        {{-- ── TABS ── --}}
         <div class="tabs-bar">
-            <button class="tab-btn active" onclick="switchTab('stock', this)">
-                <i class="fa-solid fa-box-archive" style="margin-right:6px; font-size:.78rem;"></i>Stock Report
+            <button class="tab-btn" :class="{ active: tab === 'stock' }" @click="tab='stock'">
+                <i class="fa-solid fa-box-archive" style="margin-right:5px;font-size:.76rem;"></i>Stock Report
             </button>
-            <button class="tab-btn" onclick="switchTab('sales', this)">
-      <i class="fa-solid fa-chart-line" style="margin-right:6px; font-size:.78rem;"></i>Sales Report
-    </button>
-    <button class="tab-btn" onclick="switchTab('officer', this)">
-      <i class="fa-solid fa-user-tie" style="margin-right:6px; font-size:.78rem;"></i>Tag Officer Report
-    </button>
-    <button class="tab-btn" onclick="switchTab('diff', this)">
-      <i class="fa-solid fa-percent" style="margin-right:6px; font-size:.78rem;"></i>Difference (%) Report
-    </button>
-    <button class="tab-btn" onclick="switchTab('due', this)">
-      <i class="fa-solid fa-clock-rotate-left" style="margin-right:6px; font-size:.78rem;"></i>Due Sales Report
-    </button>
+            <button class="tab-btn" :class="{ active: tab === 'sales' }" @click="tab='sales'">
+                <i class="fa-solid fa-chart-line" style="margin-right:5px;font-size:.76rem;"></i>Sales Report
+            </button>
+            <button class="tab-btn" :class="{ active: tab === 'officer' }" @click="tab='officer'">
+                <i class="fa-solid fa-user-tie" style="margin-right:5px;font-size:.76rem;"></i>Tag Officer Report
+            </button>
+            <button class="tab-btn" :class="{ active: tab === 'diff' }" @click="tab='diff'">
+                <i class="fa-solid fa-percent" style="margin-right:5px;font-size:.76rem;"></i>Difference (%) Report
+            </button>
+            <button class="tab-btn" :class="{ active: tab === 'due' }" @click="tab='due'">
+                <i class="fa-solid fa-clock-rotate-left" style="margin-right:5px;font-size:.76rem;"></i>Due Sales Report
+            </button>
         </div>
 
-        {{-- ══════════════════════════════════════
-       TAB 1 — STOCK REPORT (Figma updated)
-  ══════════════════════════════════════ --}}
-        <div id="tab-stock" class="tab-panel active">
+        <div class="tab-content">
 
-            {{-- ── FILTERS ── --}}
-            <div class="filter-section">
-                <div class="filter-header"><i class="fa-solid fa-sliders"></i> Filter Options</div>
-                <form method="GET" action="{{ route('admin.reports.index') }}">
-                    <input type="hidden" name="tab" value="stock">
+            {{-- ══════════════════════════════════════
+         TAB 1 — STOCK REPORT
+    ══════════════════════════════════════ --}}
+            <div :class="{ active: tab === 'stock' }">
+                <div class="filter-section">
+                    <div class="filter-header"><i class="fa-solid fa-sliders"></i> Filter Options</div>
                     <div class="filter-grid">
 
-                        {{-- Row 1 --}}
                         <div class="filter-group">
                             <label>From Date</label>
-                            <input type="date" name="from_date" value="{{ request('from_date') }}"
-                                placeholder="dd/mm/yyyy">
+                            <input type="date" x-model="f.fromDate">
                         </div>
                         <div class="filter-group">
                             <label>To Date</label>
-                            <input type="date" name="to_date" value="{{ request('to_date') }}" placeholder="dd/mm/yyyy">
+                            <input type="date" x-model="f.toDate">
                         </div>
+
                         <div class="filter-group">
                             <label>Division</label>
-                            <select id="divisionFilter" name="division">
+                            <select x-model="f.division" @change="onDivisionChange()">
                                 <option value="">All Divisions</option>
-                                @foreach ($locations['divisions'] as $div)
-                                    <option value="{{ $div['name_en'] }}"
-                                        {{ request('division') == $div['name_en'] ? 'selected' : '' }}>
-                                        {{ $div['name_en'] }}
-                                    </option>
-                                @endforeach
+                                <template x-for="d in locations" :key="d.name_en">
+                                    <option :value="d.name_en" x-text="d.name_en"></option>
+                                </template>
                             </select>
                         </div>
 
                         <div class="filter-group">
                             <label>District</label>
-                            <select id="districtFilter" name="district">
+                            <select x-model="f.district" @change="onDistrictChange()" :disabled="!f.division">
                                 <option value="">All Districts</option>
+                                <template x-for="d in filteredDistricts" :key="d.name_en">
+                                    <option :value="d.name_en" x-text="d.name_en"></option>
+                                </template>
                             </select>
                         </div>
 
                         <div class="filter-group">
                             <label>Upazila</label>
-                            <select id="upazilaFilter" name="upazila">
+                            <select x-model="f.upazila" :disabled="!f.district">
                                 <option value="">All Upazilas</option>
+                                <template x-for="u in filteredUpazilas" :key="u.name_en">
+                                    <option :value="u.name_en" x-text="u.name_en"></option>
+                                </template>
                             </select>
                         </div>
+
                         <div class="filter-group">
                             <label>Company</label>
-                            <select name="company_id">
+                            <select x-model="f.companyId">
                                 <option value="">All Companies</option>
-                                @foreach ($companies as $company)
-                                    <option value="{{ $company->id }}"
-                                        {{ request('company_id') == $company->id ? 'selected' : '' }}>
-                                        {{ $company->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label>Depot</label>
-                            <select name="depot_id">
-                                <option value="">All Depots</option>
-                                @foreach ($depots as $depot)
-                                    <option value="{{ $depot->id }}"
-                                        {{ request('depot_id') == $depot->id ? 'selected' : '' }}>
-                                        {{ $depot->depot_name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label>Filling Station</label>
-                            <select name="station_name">
-                                <option value="">All Stations</option>
-                                @foreach ($stations as $station)
-                                    <option value="{{ $station->station_name }}"
-                                        {{ request('station_name') == $station->station_name ? 'selected' : '' }}>
-                                        {{ $station->station_name }}
-                                    </option>
-                                @endforeach
+                                <template x-for="c in companies" :key="c.id">
+                                    <option :value="String(c.id)" x-text="c.name"></option>
+                                </template>
                             </select>
                         </div>
 
-                        {{-- Row 3 --}}
                         <div class="filter-group">
-                            <label>Fuel Type</label>
-                            <select name="fuel_type">
-                                <option value="">All Types</option>
-                                <option value="diesel" {{ request('fuel_type') == 'diesel' ? 'selected' : '' }}>Diesel
-                                </option>
-                                <option value="petrol" {{ request('fuel_type') == 'petrol' ? 'selected' : '' }}>Petrol
-                                </option>
-                                <option value="octane" {{ request('fuel_type') == 'octane' ? 'selected' : '' }}>Octane
-                                </option>
+                            <label>Depot</label>
+                            <select x-model="f.depotName">
+                                <option value="">All Depots</option>
+                                <template x-for="d in depots" :key="d.id">
+                                    <option :value="d.depot_name" x-text="d.depot_name"></option>
+                                </template>
                             </select>
                         </div>
+
+                        <div class="filter-group">
+                            <label>Filling Station</label>
+                            <div class="station-combobox" x-data="stationCombobox()" x-init="initCombo()"
+                                @station-selected.window="if($event.target.closest('[x-data]') === $el) $root.f.stationName = $event.detail">
+                                <input type="text" :placeholder="selectedLabel || 'Search station...'" x-model="query"
+                                    @focus="open=true" @input="open=true" @keydown.escape="open=false"
+                                    @keydown.enter.prevent="selectFirst()" autocomplete="off">
+                                <button class="clear-btn" x-show="selectedVal || query" @click="clear()" type="button">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                                <div class="station-dropdown" x-show="open && results.length > 0"
+                                    @click.outside="open=false" x-transition>
+                                    <template x-for="s in results" :key="s.name">
+                                        <div class="station-dropdown-item" :class="{ selected: selectedVal === s.name }"
+                                            @click="select(s); $root.f.stationName = s.name">
+                                            <span x-text="s.name"></span>
+                                            <span style="font-size:.70rem;color:#94a3b8;margin-left:6px;"
+                                                x-text="s.district ? '— '+s.district : ''"></span>
+                                        </div>
+                                    </template>
+                                </div>
+                                <div class="station-dropdown" x-show="open && query.length > 0 && results.length === 0"
+                                    @click.outside="open=false">
+                                    <div class="station-dropdown-empty">No stations found</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="filter-group">
+                            <label>Fuel Type</label>
+                            <select x-model="f.fuelType">
+                                <option value="">All Types</option>
+                                <option value="petrol">Petrol</option>
+                                <option value="diesel">Diesel</option>
+                                <option value="octane">Octane</option>
+                                <option value="others">Others</option>
+                            </select>
+                        </div>
+
                         <div class="filter-group">
                             <label>Stock Status</label>
-                            <select name="stock_status">
+                            <select x-model="f.stockStatus">
                                 <option value="">All Stock</option>
-                                <option value="available" {{ request('stock_status') == 'available' ? 'selected' : '' }}>
-                                    Available</option>
-                                <option value="low" {{ request('stock_status') == 'low' ? 'selected' : '' }}>Low
-                                    Stock</option>
-                                <option value="zero" {{ request('stock_status') == 'zero' ? 'selected' : '' }}>Zero
-                                    Stock</option>
+                                <option value="available">Available</option>
+                                <option value="low">Low Stock</option>
+                                <option value="zero">Zero Stock</option>
                             </select>
                         </div>
-{{-- Apply & Reset Buttons - Side by Side --}}
-<div class="filter-apply-row mt-3">
-    <div class="d-flex justify-content-center gap-3">
-        
-        <!-- Apply Button -->
-        <button type="submit" class="btn-apply">
-            <i class="fas fa-filter me-2"></i> Apply Filters
-        </button>
 
-        <!-- Reset Button -->
-        <a href="{{ route('admin.reports.index') }}" class="btn-reset">
-            <i class="fas fa-undo me-2"></i> Reset Filters
-        </a>
-        
-    </div>
-</div>
-                    </div>
-                </form>
-            </div>
+                        <div class="filter-btn-row">
+                            <button class="btn-apply" @click="applyStockFilter()">
+                                <i class="fas fa-filter" style="margin-right:6px;"></i>Apply Filters
+                            </button>
+                            <button class="btn-reset" @click="resetStock()">
+                                <i class="fas fa-undo" style="margin-right:6px;"></i>Reset
+                            </button>
+                        </div>
 
-            {{-- ── STAT CARDS (5 cards) ── --}}
-            @php
-                $fuelType = request('fuel_type');
-                $showAll = !$fuelType;
-
-                $totalStock =
-                    $stockReports->sum('diesel_closing_stock') +
-                    $stockReports->sum('petrol_closing_stock') +
-                    $stockReports->sum('octane_closing_stock');
-                $dieselStock = $stockReports->sum('diesel_closing_stock');
-                $petrolStock = $stockReports->sum('petrol_closing_stock');
-                $octaneStock = $stockReports->sum('octane_closing_stock');
-                $othersStock = 0; // অন্য fuel type থাকলে এখানে যোগ করুন
-            @endphp
-
-            <div class="stat-cards">
-                <div class="stat-card blue">
-                    <div class="stat-card-top">
-                        <div class="stat-card-icon"><i class="fa-solid fa-boxes-stacked"></i></div>
-                        <div class="stat-card-trend"><i class="fa-solid fa-arrow-trend-up"></i></div>
-                    </div>
-                    <div>
-                        <div class="stat-card-label">Total Stock</div>
-                        <div class="stat-card-value">{{ number_format($totalStock) }} L</div>
                     </div>
                 </div>
 
-                <div class="stat-card green">
-                    <div class="stat-card-top">
-                        <div class="stat-card-icon"><i class="fa-solid fa-gas-pump"></i></div>
-                        <div class="stat-card-trend"><i class="fa-solid fa-arrow-trend-up"></i></div>
+                <div class="stat-cards">
+                    <div class="stat-card blue">
+                        <div class="stat-card-top">
+                            <div class="stat-card-icon"><i class="fa-solid fa-boxes-stacked"></i></div>
+                            <div class="stat-card-badge">Total</div>
+                        </div>
+                        <div>
+                            <div class="stat-card-label">Total Stock</div>
+                            <div class="stat-card-value" x-text="fmtL(stockTotals.total)"></div>
+                        </div>
                     </div>
-                    <div>
-                        <div class="stat-card-label">Diesel Stock</div>
-                        <div class="stat-card-value">{{ number_format($dieselStock) }} L</div>
+
+                     <div class="stat-card orange">
+                        <div class="stat-card-top">
+                            <div class="stat-card-icon"><i class="fa-solid fa-gas-pump"></i></div>
+                            <div class="stat-card-badge">Octane</div>
+                        </div>
+                        <div>
+                            <div class="stat-card-label">Octane Stock</div>
+                            <div class="stat-card-value" x-text="fmtL(stockTotals.octane)"></div>
+                        </div>
+                    </div>
+                   
+                    <div class="stat-card purple">
+                        <div class="stat-card-top">
+                            <div class="stat-card-icon"><i class="fa-solid fa-gas-pump"></i></div>
+                            <div class="stat-card-badge">Petrol</div>
+                        </div>
+                        <div>
+                            <div class="stat-card-label">Petrol Stock</div>
+                            <div class="stat-card-value" x-text="fmtL(stockTotals.petrol)"></div>
+                        </div>
+                    </div>
+                   
+                     <div class="stat-card green">
+                        <div class="stat-card-top">
+                            <div class="stat-card-icon"><i class="fa-solid fa-gas-pump"></i></div>
+                            <div class="stat-card-badge">Diesel</div>
+                        </div>
+                        <div>
+                            <div class="stat-card-label">Diesel Stock</div>
+                            <div class="stat-card-value" x-text="fmtL(stockTotals.diesel)"></div>
+                        </div>
+                    </div>
+                    {{-- others --}}
+                    <div class="stat-card yellow">
+                        <div class="stat-card-top">
+                            <div class="stat-card-icon"><i class="fa-solid fa-gas-pump"></i></div>
+                            <div class="stat-card-badge">Others</div>
+                        </div>
+                        <div>
+                            <div class="stat-card-label">Others Stock</div>
+                            <div class="stat-card-value" x-text="fmtL(stockTotals.others)"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card teal">
+                        <div class="stat-card-top">
+                            <div class="stat-card-icon"><i class="fa-solid fa-file-lines"></i></div>
+                            <div class="stat-card-badge">Records</div>
+                        </div>
+                        <div>
+                            <div class="stat-card-label">Total Records</div>
+                            <div class="stat-card-value" x-text="stockFiltered.length"></div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="stat-card purple">
-                    <div class="stat-card-top">
-                        <div class="stat-card-icon"><i class="fa-solid fa-gas-pump"></i></div>
-                        <div class="stat-card-trend"><i class="fa-solid fa-arrow-trend-up"></i></div>
+                <div class="table-section">
+                    <div class="table-header-row">
+                        <div class="table-title">Stock Report by Company &amp; Filling Station</div>
+                        <div class="table-meta" x-text="stockFiltered.length + ' record(s) found'"></div>
                     </div>
-                    <div>
-                        <div class="stat-card-label">Petrol Stock</div>
-                        <div class="stat-card-value">{{ number_format($petrolStock) }} L</div>
-                    </div>
-                </div>
 
-                <div class="stat-card orange">
-                    <div class="stat-card-top">
-                        <div class="stat-card-icon"><i class="fa-solid fa-gas-pump"></i></div>
-                        <div class="stat-card-trend"><i class="fa-solid fa-arrow-trend-up"></i></div>
-                    </div>
-                    <div>
-                        <div class="stat-card-label">Octane Stock</div>
-                        <div class="stat-card-value">{{ number_format($octaneStock) }} L</div>
-                    </div>
-                </div>
+                    <template x-if="!stockApplied">
+                        <div class="empty-state">
+                            <i class="fa-solid fa-filter"></i>
+                            <p>Apply filters — data will be loaded</p>
+                            <small>Filter by date, district, or station</small>
+                        </div>
+                    </template>
 
-                <div class="stat-card teal">
-                    <div class="stat-card-top">
-                        <div class="stat-card-icon"><i class="fa-solid fa-gas-pump"></i></div>
-                        <div class="stat-card-trend"><i class="fa-solid fa-arrow-trend-up"></i></div>
-                    </div>
-                    <div>
-                        <div class="stat-card-label">Others Stock</div>
-                        <div class="stat-card-value">{{ number_format($othersStock) }} L</div>
-                    </div>
-                </div>
-            </div>
-
-            {{-- ── TABLE ── --}}
-            <div class="table-section">
-                <div class="table-header-row">
-                    <div class="table-title">Stock Report by Company &amp; Filling Station</div>
-                    <div class="table-meta">{{ $stockReports->count() }} record(s) found</div>
-                </div>
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Company Name</th>
-                                <th>Filling Station</th>
-                                <th>Fuel Type</th>
-                                <th>Opening Stock</th>
-                                <th>Received</th>
-                                <th>Sold</th>
-                                <th>Current Stock</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($stockReports as $report)
-                                @php
-                                    // {{-- build fuel rows based on filter --}}
-                                    $fuels = [];
-                                    if ($showAll || $fuelType === 'diesel') {
-                                        $fuels[] = 'diesel';
-                                    }
-                                    if ($showAll || $fuelType === 'petrol') {
-                                        $fuels[] = 'petrol';
-                                    }
-                                    if ($showAll || $fuelType === 'octane') {
-                                        $fuels[] = 'octane';
-                                    }
-                                    $rowspan = count($fuels);
-
-                                    // {{-- company name via relation --}}
-                                    $companyName =
-                                        $report->fillingStation->company->name ??
-                                        ($report->fillingStation->company_name ?? '—');
-
-                                    // {{-- status based on total closing --}}
-                                    $totalClosing =
-                                        $report->diesel_closing_stock +
-                                        $report->petrol_closing_stock +
-                                        $report->octane_closing_stock;
-                                    if ($totalClosing <= 0) {
-                                        $sClass = 'status-zero';
-                                        $sLabel = 'Zero Stock';
-                                    } elseif ($totalClosing < 2000) {
-                                        $sClass = 'status-low';
-                                        $sLabel = 'Low Stock';
-                                    } else {
-                                        $sClass = 'status-available';
-                                        $sLabel = 'Available';
-                                    }
-                                @endphp
-
-                                @foreach ($fuels as $idx => $fuel)
-                                    <tr class="{{ $idx === 0 ? 'group-first' : '' }}">
-
-                                        {{-- Shared cells — rowspan on first row only --}}
-                                        @if ($idx === 0)
-                                            <td rowspan="{{ $rowspan }}" class="date-cell">
-                                                {{ \Carbon\Carbon::parse($report->report_date)->format('Y-m-d') }}
-                                            </td>
-                                            <td rowspan="{{ $rowspan }}" class="company-cell">{{ $companyName }}
-                                            </td>
-                                            <td rowspan="{{ $rowspan }}" class="station-cell">
-                                                {{ $report->station_name }}
-                                            </td>
-                                        @endif
-
-                                        {{-- Fuel-type specific data --}}
-                                        <td class="fuel-badge">{{ ucfirst($fuel) }}</td>
-                                        <td>{{ number_format($report->{$fuel . '_prev_stock'}) }} L</td>
-                                        <td class="received-val">{{ number_format($report->{$fuel . '_received'}) }} L
-                                        </td>
-                                        <td class="sold-val">{{ number_format($report->{$fuel . '_sales'}) }} L</td>
-                                        <td class="current-val">{{ number_format($report->{$fuel . '_closing_stock'}) }} L
-                                        </td>
-
-                                        {{-- Status — plain text, rowspan on first row --}}
-                                        @if ($idx === 0)
-                                            <td rowspan="{{ $rowspan }}" class="{{ $sClass }}">
-                                                {{ $sLabel }}</td>
-                                        @endif
-
+                    <template x-if="stockApplied">
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Company</th>
+                                        <th>Filling Station</th>
+                                        <th>Fuel Type</th>
+                                        <th>Opening Stock</th>
+                                        <th>Received</th>
+                                        <th>Sold</th>
+                                        <th>Closing Stock</th>
+                                        <th>Status</th>
                                     </tr>
-                                @endforeach
+                                </thead>
+                                <tbody>
+                                    <template x-if="stockTableRows.length === 0">
+                                        <tr>
+                                            <td colspan="9" style="text-align:center;padding:36px;color:var(--muted);">
+                                                <i class="fa-solid fa-inbox" style="margin-right:7px;opacity:.3;"></i>No
+                                                data found
+                                            </td>
+                                        </tr>
+                                    </template>
 
-                            @empty
-                                <tr class="empty-row">
-                                    <td colspan="9">
-                                        <i class="fa-solid fa-inbox" style="margin-right:8px; opacity:.4;"></i>No stock
-                                        report data found.
-                                    </td>
-                                </tr>
-                            @endforelse
+                                    <template x-for="(row, idx) in stockTableRows" :key="idx">
+                                        <tr :style="row.isFirst ? 'border-top:1px solid #e9eef5' : ''">
+                                            <template x-if="row.isFirst">
+                                                <td :rowspan="row.rowspan" class="date-cell" x-text="row.report_date">
+                                                </td>
+                                            </template>
+                                            <template x-if="row.isFirst">
+                                                <td :rowspan="row.rowspan" class="company-cell"
+                                                    x-text="row.company_name"></td>
+                                            </template>
+                                            <template x-if="row.isFirst">
+                                                <td :rowspan="row.rowspan" class="station-cell"
+                                                    x-text="row.station_name"></td>
+                                            </template>
+                                            <td x-text="row.fuelLabel" style="font-size:.78rem;"></td>
+                                            <td x-text="fmtL(row.prev)"></td>
+                                            <td class="received-val" x-text="fmtL(row.received)"></td>
+                                            <td class="sold-val" x-text="fmtL(row.sales)"></td>
+                                            <td class="current-val" x-text="fmtL(row.closing)"></td>
+                                            <template x-if="row.isFirst">
+                                                <td :rowspan="row.rowspan" :class="row.statusClass"
+                                                    x-text="row.statusLabel"></td>
+                                            </template>
+                                        </tr>
+                                    </template>
 
-                            {{-- Summary row --}}
-                            @if ($stockReports->count() > 0)
-                                <tr class="summary-row">
-                                    <td colspan="4" style="text-align:right; padding-right:14px; color:var(--muted);">
-                                        TOTAL</td>
-                                    <td>
-                                        {{ number_format(
-                                            ($showAll || $fuelType === 'diesel' ? $stockReports->sum('diesel_prev_stock') : 0) +
-                                                ($showAll || $fuelType === 'petrol' ? $stockReports->sum('petrol_prev_stock') : 0) +
-                                                ($showAll || $fuelType === 'octane' ? $stockReports->sum('octane_prev_stock') : 0),
-                                        ) }}
-                                        L
-                                    </td>
-                                    <td class="received-val">
-                                        {{ number_format(
-                                            ($showAll || $fuelType === 'diesel' ? $stockReports->sum('diesel_received') : 0) +
-                                                ($showAll || $fuelType === 'petrol' ? $stockReports->sum('petrol_received') : 0) +
-                                                ($showAll || $fuelType === 'octane' ? $stockReports->sum('octane_received') : 0),
-                                        ) }}
-                                        L
-                                    </td>
-                                    <td class="sold-val">
-                                        {{ number_format(
-                                            ($showAll || $fuelType === 'diesel' ? $stockReports->sum('diesel_sales') : 0) +
-                                                ($showAll || $fuelType === 'petrol' ? $stockReports->sum('petrol_sales') : 0) +
-                                                ($showAll || $fuelType === 'octane' ? $stockReports->sum('octane_sales') : 0),
-                                        ) }}
-                                        L
-                                    </td>
-                                    <td class="current-val">{{ number_format($totalStock) }} L</td>
-                                    <td></td>
-                                </tr>
-                            @endif
-                        </tbody>
-                    </table>
+                                    <template x-if="stockFiltered.length > 0">
+                                        <tr class="summary-row">
+                                            <td colspan="4"
+                                                style="text-align:right;padding-right:14px;color:var(--muted);">TOTAL</td>
+                                            <td x-text="fmtL(stockTotals.prevSum)"></td>
+                                            <td class="received-val" x-text="fmtL(stockTotals.recvSum)"></td>
+                                            <td class="sold-val" x-text="fmtL(stockTotals.salesSum)"></td>
+                                            <td class="current-val" x-text="fmtL(stockTotals.total)"></td>
+                                            <td></td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </template>
                 </div>
-            </div>
 
-            {{-- <div class="export-row">
-      <button class="btn-export btn-pdf">
-        <i class="fa-regular fa-file-pdf"></i> Export to PDF
-      </button>
-      <button class="btn-export btn-excel">
-        <i class="fa-regular fa-file-excel"></i> Export to Excel
-      </button>
-    </div> --}}
-        </div>{{-- /tab-stock --}}
+                <div class="export-row">
+                    <button class="btn-export btn-pdf"><i class="fa-regular fa-file-pdf"></i> Export PDF</button>
+                    <button class="btn-export btn-excel"><i class="fa-regular fa-file-excel"></i> Export Excel</button>
+                </div>
+            </div>{{-- /stock --}}
 
 
-        {{-- ══════════════════════════════════════
-       TAB 2 — SALES REPORT
-  ══════════════════════════════════════ --}}
-        <div id="tab-sales" class="tab-panel">
-            <div class="filter-section">
-                <div class="filter-header"><i class="fa-solid fa-sliders"></i> Filter Options</div>
-                <form method="GET" action="{{ route('admin.reports.index') }}">
-                    <input type="hidden" name="tab" value="sales">
+            {{-- ══════════════════════════════════════
+         TAB 2 — SALES REPORT
+    ══════════════════════════════════════ --}}
+            <div :class="{ active: tab === 'sales' }">
+                <div class="filter-section">
+                    <div class="filter-header"><i class="fa-solid fa-sliders"></i> Filter Options</div>
                     <div class="filter-grid">
-                        <div class="filter-group">
-                            <label>From Date</label>
-                            <input type="date" name="from_date" value="{{ request('from_date') }}">
+                        <div class="filter-group"><label>From Date</label><input type="date" x-model="sf.fromDate">
                         </div>
-                        <div class="filter-group">
-                            <label>To Date</label>
-                            <input type="date" name="to_date" value="{{ request('to_date') }}">
-                        </div>
+                        <div class="filter-group"><label>To Date</label><input type="date" x-model="sf.toDate"></div>
                         <div class="filter-group">
                             <label>Division</label>
-                            <select name="division">
+                            <select x-model="sf.division" @change="onSalesDivisionChange()">
                                 <option value="">All Divisions</option>
-                                @foreach ($locations['divisions'] as $div)
-                                    <option value="{{ $div['name_en'] }}"
-                                        {{ request('division') == $div['name_en'] ? 'selected' : '' }}>
-                                        {{ $div['name_en'] }}</option>
-                                @endforeach
+                                <template x-for="d in locations" :key="d.name_en">
+                                    <option :value="d.name_en" x-text="d.name_en"></option>
+                                </template>
                             </select>
                         </div>
                         <div class="filter-group">
                             <label>District</label>
-                            <select name="district">
+                            <select x-model="sf.district" :disabled="!sf.division">
                                 <option value="">All Districts</option>
-                                @foreach ($locations['divisions'] as $dist)
-                                    <option value="{{ $dist['name_en'] }}"
-                                        {{ request('district') == $dist['name_en'] ? 'selected' : '' }}>
-                                        {{ $dist['name_en'] }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label>Depot</label>
-                            <select name="depot_id">
-                                <option value="">All Depots</option>
-                                @foreach ($depots as $depot)
-                                    <option value="{{ $depot->id }}"
-                                        {{ request('depot_id') == $depot->id ? 'selected' : '' }}>{{ $depot->depot_name }}
-                                    </option>
-                                @endforeach
+                                <template x-for="d in salesDistricts" :key="d.name_en">
+                                    <option :value="d.name_en" x-text="d.name_en"></option>
+                                </template>
                             </select>
                         </div>
                         <div class="filter-group">
                             <label>Filling Station</label>
-                            <select name="station_name">
-                                <option value="">All Stations</option>
-                                @foreach ($stations as $station)
-                                    <option value="{{ $station->station_name }}"
-                                        {{ request('station_name') == $station->station_name ? 'selected' : '' }}>
-                                        {{ $station->station_name }}</option>
-                                @endforeach
-                            </select>
+                            <div class="station-combobox" x-data="stationCombobox()" x-init="initCombo()">
+                                <input type="text" :placeholder="selectedLabel || 'Search station...'" x-model="query"
+                                    @focus="open=true" @input="open=true" @keydown.escape="open=false"
+                                    @keydown.enter.prevent="selectFirst()" autocomplete="off">
+                                <button class="clear-btn" x-show="selectedVal || query"
+                                    @click="clear(); $root.sf.stationName=''" type="button"><i
+                                        class="fa-solid fa-xmark"></i></button>
+                                <div class="station-dropdown" x-show="open && results.length > 0"
+                                    @click.outside="open=false" x-transition>
+                                    <template x-for="s in results" :key="s.name">
+                                        <div class="station-dropdown-item" :class="{ selected: selectedVal === s.name }"
+                                            @click="select(s); $root.sf.stationName = s.name">
+                                            <span x-text="s.name"></span>
+                                            <span style="font-size:.70rem;color:#94a3b8;margin-left:6px;"
+                                                x-text="s.district ? '— '+s.district : ''"></span>
+                                        </div>
+                                    </template>
+                                </div>
+                                <div class="station-dropdown" x-show="open && query.length > 0 && results.length === 0"
+                                    @click.outside="open=false">
+                                    <div class="station-dropdown-empty">No stations found</div>
+                                </div>
+                            </div>
                         </div>
                         <div class="filter-group">
                             <label>Fuel Type</label>
-                            <select name="fuel_type">
+                            <select x-model="sf.fuelType">
                                 <option value="">All Types</option>
-                                <option value="diesel" {{ request('fuel_type') == 'diesel' ? 'selected' : '' }}>Diesel
-                                </option>
-                                <option value="petrol" {{ request('fuel_type') == 'petrol' ? 'selected' : '' }}>Petrol
-                                </option>
-                                <option value="octane" {{ request('fuel_type') == 'octane' ? 'selected' : '' }}>Octane
-                                </option>
+                                <option value="petrol">Petrol</option>
+                                <option value="diesel">Diesel</option>
+                                <option value="octane">Octane</option>
                             </select>
                         </div>
-                        <div class="filter-apply-row" style="grid-column: 4/5; justify-content:flex-end;">
-                            <a href="{{ route('admin.reports.index') }}?tab=sales" class="btn-reset">
-                                <i class="fa-solid fa-rotate-left" style="margin-right:5px;"></i>Reset
-                            </a>
-                            <button type="submit" class="btn-apply">Apply Filters</button>
+                        <div class="filter-btn-row" style="grid-column:3/5;justify-content:flex-end;">
+                            <button class="btn-apply" @click="applySalesFilter()"><i class="fas fa-filter"
+                                    style="margin-right:6px;"></i>Apply</button>
+                            <button class="btn-reset" @click="resetSales()"><i class="fas fa-undo"
+                                    style="margin-right:6px;"></i>Reset</button>
                         </div>
                     </div>
-                </form>
-            </div>
+                </div>
 
-            <div class="stat-cards">
-                <div class="stat-card blue">
-                    <div class="stat-card-top">
-                        <div class="stat-card-icon"><i class="fa-solid fa-cart-shopping"></i></div>
-                        <div class="stat-card-trend">Total</div>
+                <div class="stat-cards">
+                    <div class="stat-card blue">
+                        <div class="stat-card-top">
+                            <div class="stat-card-icon"><i class="fa-solid fa-cart-shopping"></i></div>
+                            <div class="stat-card-badge">Total</div>
+                        </div>
+                        <div>
+                            <div class="stat-card-label">Total Sales</div>
+                            <div class="stat-card-value" x-text="fmtL(salesTotals.total)"></div>
+                        </div>
                     </div>
-                    <div>
-                        <div class="stat-card-label">Total Sales</div>
-                        <div class="stat-card-value">
-                            {{ number_format($salesReports->sum('petrol_sales') + $salesReports->sum('diesel_sales') + $salesReports->sum('octane_sales')) }}
-                            L</div>
+                    <div class="stat-card green">
+                        <div class="stat-card-top">
+                            <div class="stat-card-icon"><i class="fa-solid fa-gas-pump"></i></div>
+                            <div class="stat-card-badge">Diesel</div>
+                        </div>
+                        <div>
+                            <div class="stat-card-label">Diesel Sold</div>
+                            <div class="stat-card-value" x-text="fmtL(salesTotals.diesel)"></div>
+                        </div>
+                    </div>
+                    <div class="stat-card purple">
+                        <div class="stat-card-top">
+                            <div class="stat-card-icon"><i class="fa-solid fa-gas-pump"></i></div>
+                            <div class="stat-card-badge">Petrol</div>
+                        </div>
+                        <div>
+                            <div class="stat-card-label">Petrol Sold</div>
+                            <div class="stat-card-value" x-text="fmtL(salesTotals.petrol)"></div>
+                        </div>
+                    </div>
+                    <div class="stat-card orange">
+                        <div class="stat-card-top">
+                            <div class="stat-card-icon"><i class="fa-solid fa-gas-pump"></i></div>
+                            <div class="stat-card-badge">Octane</div>
+                        </div>
+                        <div>
+                            <div class="stat-card-label">Octane Sold</div>
+                            <div class="stat-card-value" x-text="fmtL(salesTotals.octane)"></div>
+                        </div>
+                    </div>
+                    <div class="stat-card teal">
+                        <div class="stat-card-top">
+                            <div class="stat-card-icon"><i class="fa-solid fa-chart-bar"></i></div>
+                            <div class="stat-card-badge">Records</div>
+                        </div>
+                        <div>
+                            <div class="stat-card-label">Total Records</div>
+                            <div class="stat-card-value" x-text="salesFiltered.length"></div>
+                        </div>
                     </div>
                 </div>
-                <div class="stat-card green">
-                    <div class="stat-card-top">
-                        <div class="stat-card-icon"><i class="fa-solid fa-gas-pump"></i></div>
-                        <div class="stat-card-trend">Diesel</div>
-                    </div>
-                    <div>
-                        <div class="stat-card-label">Diesel Sold</div>
-                        <div class="stat-card-value">{{ number_format($salesReports->sum('diesel_sales')) }} L</div>
-                    </div>
-                </div>
-                <div class="stat-card purple">
-                    <div class="stat-card-top">
-                        <div class="stat-card-icon"><i class="fa-solid fa-gas-pump"></i></div>
-                        <div class="stat-card-trend">Petrol</div>
-                    </div>
-                    <div>
-                        <div class="stat-card-label">Petrol Sold</div>
-                        <div class="stat-card-value">{{ number_format($salesReports->sum('petrol_sales')) }} L</div>
-                    </div>
-                </div>
-                <div class="stat-card orange">
-                    <div class="stat-card-top">
-                        <div class="stat-card-icon"><i class="fa-solid fa-gas-pump"></i></div>
-                        <div class="stat-card-trend">Octane</div>
-                    </div>
-                    <div>
-                        <div class="stat-card-label">Octane Sold</div>
-                        <div class="stat-card-value">{{ number_format($salesReports->sum('octane_sales')) }} L</div>
-                    </div>
-                </div>
-                <div class="stat-card teal">
-                    <div class="stat-card-top">
-                        <div class="stat-card-icon"><i class="fa-solid fa-chart-bar"></i></div>
-                        <div class="stat-card-trend">Records</div>
-                    </div>
-                    <div>
-                        <div class="stat-card-label">Total Records</div>
-                        <div class="stat-card-value">{{ $salesReports->count() }}</div>
-                    </div>
-                </div>
-            </div>
 
-            <div class="table-section">
-                <div class="table-header-row">
-                    <div class="table-title">Sales Report by Station</div>
-                    <div class="table-meta">{{ $salesReports->count() }} record(s) found</div>
+                <div class="table-section">
+                    <div class="table-header-row">
+                        <div class="table-title">Sales Report by Station</div>
+                        <div class="table-meta" x-text="salesFiltered.length + ' record(s) found'"></div>
+                    </div>
+                    <template x-if="!salesApplied">
+                        <div class="empty-state"><i class="fa-solid fa-filter"></i>
+                            <p>Apply filters</p>
+                            <small>Filter by date or station</small>
+                        </div>
+                    </template>
+                    <template x-if="salesApplied">
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Station</th>
+                                        <th>District</th>
+                                        <th>Date</th>
+                                        <th>Diesel Recv</th>
+                                        <th>Diesel Sold</th>
+                                        <th>Petrol Recv</th>
+                                        <th>Petrol Sold</th>
+                                        <th>Octane Recv</th>
+                                        <th>Octane Sold</th>
+                                        <th>Total Sold</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template x-if="salesFiltered.length === 0">
+                                        <tr>
+                                            <td colspan="11" style="text-align:center;padding:36px;color:var(--muted);">
+                                                <i class="fa-solid fa-inbox" style="margin-right:7px;opacity:.3;"></i>No
+                                                data found
+                                            </td>
+                                        </tr>
+                                    </template>
+                                    <template x-for="(r, i) in salesFiltered" :key="i">
+                                        <tr>
+                                            <td x-text="i+1"></td>
+                                            <td class="station-cell" x-text="r.station_name"></td>
+                                            <td x-text="r.district"></td>
+                                            <td class="date-cell" x-text="r.report_date"></td>
+                                            <td class="received-val" x-text="fmtL(r.diesel_received)"></td>
+                                            <td class="sold-val" x-text="fmtL(r.diesel_sales)"></td>
+                                            <td class="received-val" x-text="fmtL(r.petrol_received)"></td>
+                                            <td class="sold-val" x-text="fmtL(r.petrol_sales)"></td>
+                                            <td class="received-val" x-text="fmtL(r.octane_received)"></td>
+                                            <td class="sold-val" x-text="fmtL(r.octane_sales)"></td>
+                                            <td class="current-val"
+                                                x-text="fmtL(r.diesel_sales + r.petrol_sales + r.octane_sales)"></td>
+                                        </tr>
+                                    </template>
+                                    <template x-if="salesFiltered.length > 0">
+                                        <tr class="summary-row">
+                                            <td colspan="4"
+                                                style="text-align:right;padding-right:14px;color:var(--muted);">TOTAL</td>
+                                            <td x-text="fmtL(salesTotals.dieselRecv)"></td>
+                                            <td x-text="fmtL(salesTotals.diesel)"></td>
+                                            <td x-text="fmtL(salesTotals.petrolRecv)"></td>
+                                            <td x-text="fmtL(salesTotals.petrol)"></td>
+                                            <td x-text="fmtL(salesTotals.octaneRecv)"></td>
+                                            <td x-text="fmtL(salesTotals.octane)"></td>
+                                            <td x-text="fmtL(salesTotals.total)"></td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </template>
                 </div>
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Station</th>
-                                <th>District</th>
-                                <th>Report Date</th>
-                                <th>Diesel Recv</th>
-                                <th>Diesel Sold</th>
-                                <th>Petrol Recv</th>
-                                <th>Petrol Sold</th>
-                                <th>Octane Recv</th>
-                                <th>Octane Sold</th>
-                                <th>Total Sold</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($salesReports as $i => $report)
-                                @php $totalSold = $report->diesel_sales + $report->petrol_sales + $report->octane_sales; @endphp
-                                <tr>
-                                    <td>{{ $i + 1 }}</td>
-                                    <td class="station-cell">{{ $report->station_name }}</td>
-                                    <td>{{ $report->district }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($report->report_date)->format('d M Y') }}</td>
-                                    <td class="received-val">{{ number_format($report->diesel_received) }} L</td>
-                                    <td class="sold-val">{{ number_format($report->diesel_sales) }} L</td>
-                                    <td class="received-val">{{ number_format($report->petrol_received) }} L</td>
-                                    <td class="sold-val">{{ number_format($report->petrol_sales) }} L</td>
-                                    <td class="received-val">{{ number_format($report->octane_received) }} L</td>
-                                    <td class="sold-val">{{ number_format($report->octane_sales) }} L</td>
-                                    <td class="current-val">{{ number_format($totalSold) }} L</td>
-                                </tr>
-                            @empty
-                                <tr class="empty-row">
-                                    <td colspan="11"><i class="fa-solid fa-inbox"
-                                            style="margin-right:8px;opacity:.4;"></i>No sales data found.</td>
-                                </tr>
-                            @endforelse
-                            @if ($salesReports->count() > 0)
-                                <tr class="summary-row">
-                                    <td colspan="4" style="text-align:right;padding-right:14px;">TOTAL</td>
-                                    <td>{{ number_format($salesReports->sum('diesel_received')) }} L</td>
-                                    <td>{{ number_format($salesReports->sum('diesel_sales')) }} L</td>
-                                    <td>{{ number_format($salesReports->sum('petrol_received')) }} L</td>
-                                    <td>{{ number_format($salesReports->sum('petrol_sales')) }} L</td>
-                                    <td>{{ number_format($salesReports->sum('octane_received')) }} L</td>
-                                    <td>{{ number_format($salesReports->sum('octane_sales')) }} L</td>
-                                    <td>{{ number_format($salesReports->sum('petrol_sales') + $salesReports->sum('diesel_sales') + $salesReports->sum('octane_sales')) }}
-                                        L</td>
-                                </tr>
-                            @endif
-                        </tbody>
-                    </table>
+                <div class="export-row">
+                    <button class="btn-export btn-pdf"><i class="fa-regular fa-file-pdf"></i> Export PDF</button>
+                    <button class="btn-export btn-excel"><i class="fa-regular fa-file-excel"></i> Export Excel</button>
                 </div>
-            </div>
-            {{-- <div class="export-row">
-      <button class="btn-export btn-pdf"><i class="fa-regular fa-file-pdf"></i> Export to PDF</button>
-      <button class="btn-export btn-excel"><i class="fa-regular fa-file-excel"></i> Export to Excel</button>
-    </div> --}}
-        </div>{{-- /tab-sales --}}
+            </div>{{-- /sales --}}
 
 
-        {{-- ══════════════════════════════════════
-       TAB 3 — TAG OFFICER REPORT
-  ══════════════════════════════════════ --}}
-        <div id="tab-officer" class="tab-panel">
-            <div class="filter-section">
-                <div class="filter-header"><i class="fa-solid fa-sliders"></i> Filter Options</div>
-                <form method="GET" action="{{ route('admin.reports.index') }}">
-                    <input type="hidden" name="tab" value="officer">
+            {{-- ══════════════════════════════════════
+         TAB 3 — TAG OFFICER REPORT
+    ══════════════════════════════════════ --}}
+            <div :class="{ active: tab === 'officer' }">
+                <div class="filter-section">
+                    <div class="filter-header"><i class="fa-solid fa-sliders"></i> Filter Options</div>
                     <div class="filter-grid">
                         <div class="filter-group">
                             <label>Division</label>
-                            <select name="division">
+                            <select x-model="of.division" @change="onOfficerDivisionChange()">
                                 <option value="">All Divisions</option>
-                                @foreach ($locations['divisions'] as $div)
-                                    <option value="{{ $div['name_en'] }}"
-                                        {{ request('division') == $div['name_en'] ? 'selected' : '' }}>
-                                        {{ $div['name_en'] }}</option>
-                                @endforeach
+                                <template x-for="d in locations" :key="d.name_en">
+                                    <option :value="d.name_en" x-text="d.name_en"></option>
+                                </template>
                             </select>
                         </div>
                         <div class="filter-group">
                             <label>District</label>
-                            <select name="district">
+                            <select x-model="of.district" :disabled="!of.division">
                                 <option value="">All Districts</option>
-                                @foreach ($locations['divisions'] as $dist)
-                                    <option value="{{ $dist['name_en'] }}"
-                                        {{ request('district') == $dist['name_en'] ? 'selected' : '' }}>
-                                        {{ $dist['name_en'] }}</option>
-                                @endforeach
+                                <template x-for="d in officerDistricts" :key="d.name_en">
+                                    <option :value="d.name_en" x-text="d.name_en"></option>
+                                </template>
                             </select>
                         </div>
                         <div class="filter-group">
                             <label>Assignment Status</label>
-                            <select name="assign_status">
+                            <select x-model="of.status">
                                 <option value="">All</option>
-                                <option value="active" {{ request('assign_status') == 'active' ? 'selected' : '' }}>
-                                    Active</option>
-                                <option value="inactive" {{ request('assign_status') == 'inactive' ? 'selected' : '' }}>
-                                    Inactive</option>
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
                             </select>
                         </div>
-                        <div class="filter-apply-row" style="grid-column: 4/5; justify-content:flex-end;">
-                            <a href="{{ route('admin.reports.index') }}?tab=officer" class="btn-reset">
-                                <i class="fa-solid fa-rotate-left" style="margin-right:5px;"></i>Reset
-                            </a>
-                            <button type="submit" class="btn-apply">Apply Filters</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-
-            <div class="stat-cards">
-                <div class="stat-card blue">
-                    <div class="stat-card-top">
-                        <div class="stat-card-icon"><i class="fa-solid fa-users"></i></div>
-                        <div class="stat-card-trend">Total</div>
-                    </div>
-                    <div>
-                        <div class="stat-card-label">Total Officers</div>
-                        <div class="stat-card-value">{{ $officerReports->count() }}</div>
-                    </div>
-                </div>
-                <div class="stat-card green">
-                    <div class="stat-card-top">
-                        <div class="stat-card-icon"><i class="fa-solid fa-user-check"></i></div>
-                        <div class="stat-card-trend">Active</div>
-                    </div>
-                    <div>
-                        <div class="stat-card-label">Active Assignments</div>
-                        <div class="stat-card-value">{{ $officerReports->where('status', 'active')->count() }}</div>
-                    </div>
-                </div>
-                <div class="stat-card red" style="background:linear-gradient(135deg,#ef4444,#b91c1c);">
-                    <div class="stat-card-top">
-                        <div class="stat-card-icon"><i class="fa-solid fa-user-xmark"></i></div>
-                        <div class="stat-card-trend">Inactive</div>
-                    </div>
-                    <div>
-                        <div class="stat-card-label">Inactive Assignments</div>
-                        <div class="stat-card-value">{{ $officerReports->where('status', 'inactive')->count() }}</div>
-                    </div>
-                </div>
-                <div class="stat-card teal">
-                    <div class="stat-card-top">
-                        <div class="stat-card-icon"><i class="fa-solid fa-building"></i></div>
-                        <div class="stat-card-trend">Stations</div>
-                    </div>
-                    <div>
-                        <div class="stat-card-label">Stations Covered</div>
-                        <div class="stat-card-value">
-                            {{ $officerReports->pluck('filling_station_id')->unique()->count() }}</div>
-                    </div>
-                </div>
-                <div class="stat-card orange">
-                    <div class="stat-card-top">
-                        <div class="stat-card-icon"><i class="fa-solid fa-map-location-dot"></i></div>
-                        <div class="stat-card-trend">Districts</div>
-                    </div>
-                    <div>
-                        <div class="stat-card-label">Districts Covered</div>
-                        <div class="stat-card-value">
-                            {{ $officerReports->map(fn($a) => $a->fillingStation->district ?? '')->unique()->filter()->count() }}
+                        <div class="filter-btn-row" style="grid-column:4/5;justify-content:flex-end;">
+                            <button class="btn-apply" @click="applyOfficerFilter()"><i class="fas fa-filter"
+                                    style="margin-right:6px;"></i>Apply</button>
+                            <button class="btn-reset" @click="resetOfficer()"><i class="fas fa-undo"
+                                    style="margin-right:6px;"></i>Reset</button>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="table-section">
-                <div class="table-header-row">
-                    <div class="table-title">Tag Officer Assignment Report</div>
-                    <div class="table-meta">{{ $officerReports->count() }} record(s) found</div>
+                <div class="stat-cards">
+                    <div class="stat-card blue">
+                        <div class="stat-card-top">
+                            <div class="stat-card-icon"><i class="fa-solid fa-users"></i></div>
+                            <div class="stat-card-badge">Total</div>
+                        </div>
+                        <div>
+                            <div class="stat-card-label">Total Officers</div>
+                            <div class="stat-card-value" x-text="officerFiltered.length"></div>
+                        </div>
+                    </div>
+                    <div class="stat-card green">
+                        <div class="stat-card-top">
+                            <div class="stat-card-icon"><i class="fa-solid fa-user-check"></i></div>
+                            <div class="stat-card-badge">Active</div>
+                        </div>
+                        <div>
+                            <div class="stat-card-label">Active</div>
+                            <div class="stat-card-value"
+                                x-text="officerFiltered.filter(function(r){return r.status==='active'}).length"></div>
+                        </div>
+                    </div>
+                    <div class="stat-card red">
+                        <div class="stat-card-top">
+                            <div class="stat-card-icon"><i class="fa-solid fa-user-xmark"></i></div>
+                            <div class="stat-card-badge">Inactive</div>
+                        </div>
+                        <div>
+                            <div class="stat-card-label">Inactive</div>
+                            <div class="stat-card-value"
+                                x-text="officerFiltered.filter(function(r){return r.status==='inactive'}).length"></div>
+                        </div>
+                    </div>
+                    <div class="stat-card teal">
+                        <div class="stat-card-top">
+                            <div class="stat-card-icon"><i class="fa-solid fa-building"></i></div>
+                            <div class="stat-card-badge">Stations</div>
+                        </div>
+                        <div>
+                            <div class="stat-card-label">Stations Covered</div>
+                            <div class="stat-card-value"
+                                x-text="new Set(officerFiltered.map(function(r){return r.filling_station_id})).size"></div>
+                        </div>
+                    </div>
+                    <div class="stat-card orange">
+                        <div class="stat-card-top">
+                            <div class="stat-card-icon"><i class="fa-solid fa-map-location-dot"></i></div>
+                            <div class="stat-card-badge">Districts</div>
+                        </div>
+                        <div>
+                            <div class="stat-card-label">Districts Covered</div>
+                            <div class="stat-card-value"
+                                x-text="new Set(officerFiltered.map(function(r){return r.district}).filter(Boolean)).size">
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Officer Name</th>
-                                <th>Email / Phone</th>
-                                <th>Filling Station</th>
-                                <th>District</th>
-                                <th>Division</th>
-                                <th>Assigned At</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($officerReports as $i => $assign)
-                                <tr>
-                                    <td>{{ $i + 1 }}</td>
-                                    <td class="officer-name">{{ $assign->officer->name ?? '—' }}</td>
-                                    <td style="font-size:.76rem; color:var(--muted); line-height:1.7;">
-                                        {{ $assign->officer->email ?? '' }}<br>{{ $assign->officer->phone ?? '' }}
-                                    </td>
-                                    <td class="station-cell">{{ $assign->fillingStation->station_name ?? '—' }}</td>
-                                    <td>{{ $assign->fillingStation->district ?? '—' }}</td>
-                                    <td>{{ $assign->fillingStation->division ?? '—' }}</td>
-                                    <td>{{ $assign->created_at?->format('d M Y') ?? '—' }}</td>
-                                    <td>
-                                        <span
-                                            class="status-badge {{ $assign->status === 'active' ? 'badge-active' : 'badge-inactive' }}">
-                                            {{ ucfirst($assign->status) }}
-                                        </span>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr class="empty-row">
-                                    <td colspan="8"><i class="fa-solid fa-inbox"
-                                            style="margin-right:8px;opacity:.4;"></i>No officer data found.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+
+                <div class="table-section">
+                    <div class="table-header-row">
+                        <div class="table-title">Tag Officer Assignment Report</div>
+                        <div class="table-meta" x-text="officerFiltered.length + ' record(s) found'"></div>
+                    </div>
+                    <template x-if="!officerApplied">
+                        <div class="empty-state"><i class="fa-solid fa-filter"></i>
+                            <p>Apply filters</p>
+                            <small>Filter by division, district, or status</small>
+                        </div>
+                    </template>
+                    <template x-if="officerApplied">
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Officer Name</th>
+                                        <th>Email / Phone</th>
+                                        <th>Filling Station</th>
+                                        <th>District</th>
+                                        <th>Division</th>
+                                        <th>Assigned At</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template x-if="officerFiltered.length === 0">
+                                        <tr>
+                                            <td colspan="8" style="text-align:center;padding:36px;color:var(--muted);">
+                                                <i class="fa-solid fa-inbox" style="margin-right:7px;opacity:.3;"></i>No
+                                                data found
+                                            </td>
+                                        </tr>
+                                    </template>
+                                    <template x-for="(r, i) in officerFiltered" :key="i">
+                                        <tr>
+                                            <td x-text="i+1"></td>
+                                            <td class="station-cell" style="font-weight:600;" x-text="r.officer_name">
+                                            </td>
+                                            <td style="font-size:.75rem;color:var(--muted);line-height:1.7;">
+                                                <span x-text="r.officer_email"></span><br>
+                                                <span x-text="r.officer_phone"></span>
+                                            </td>
+                                            <td class="station-cell" x-text="r.station_name"></td>
+                                            <td x-text="r.district"></td>
+                                            <td x-text="r.division"></td>
+                                            <td class="date-cell" x-text="r.assigned_at"></td>
+                                            <td>
+                                                <span class="status-badge"
+                                                    :class="r.status === 'active' ? 'badge-active' : 'badge-inactive'"
+                                                    x-text="r.status.charAt(0).toUpperCase() + r.status.slice(1)"></span>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </template>
                 </div>
-            </div>
-            {{-- <div class="export-row">
-      <button class="btn-export btn-pdf"><i class="fa-regular fa-file-pdf"></i> Export to PDF</button>
-      <button class="btn-export btn-excel"><i class="fa-regular fa-file-excel"></i> Export to Excel</button>
-    </div> --}}
-        </div>
-        {{-- /tab-officer --}}
+                <div class="export-row">
+                    <button class="btn-export btn-pdf"><i class="fa-regular fa-file-pdf"></i> Export PDF</button>
+                    <button class="btn-export btn-excel"><i class="fa-regular fa-file-excel"></i> Export Excel</button>
+                </div>
+            </div>{{-- /officer --}}
 
 
-        {{-- ══════════════════════════════════════
-       TAB 4 — DIFFERENCE (%) REPORT
-  ══════════════════════════════════════ --}}
-        <div id="tab-diff" class="tab-panel">
-            <div class="filter-section">
-                <div class="filter-header"><i class="fa-solid fa-sliders"></i> Filter Options</div>
-                <form method="GET" action="{{ route('admin.reports.index') }}">
-                    <input type="hidden" name="tab" value="diff">
+            {{-- ══════════════════════════════════════
+         TAB 4 — DIFFERENCE (%) REPORT
+    ══════════════════════════════════════ --}}
+            <div :class="{ active: tab === 'diff' }">
+                <div class="filter-section">
+                    <div class="filter-header"><i class="fa-solid fa-sliders"></i> Filter Options</div>
                     <div class="filter-grid">
-                        <div class="filter-group"><label>From Date</label><input type="date" name="from_date"
-                                value="{{ request('from_date') }}"></div>
-                        <div class="filter-group"><label>To Date</label><input type="date" name="to_date"
-                                value="{{ request('to_date') }}"></div>
+                        <div class="filter-group"><label>From Date</label><input type="date" x-model="df.fromDate">
+                        </div>
+                        <div class="filter-group"><label>To Date</label><input type="date" x-model="df.toDate"></div>
                         <div class="filter-group">
                             <label>District</label>
-                            <select name="district">
+                            <select x-model="df.district">
                                 <option value="">All Districts</option>
-                                @foreach ($locations['divisions'] as $dist)
-                                    <option value="{{ $dist['name_en'] }}"
-                                        {{ request('district') == $dist['name_en'] ? 'selected' : '' }}>
-                                        {{ $dist['name_en'] }}</option>
-                                @endforeach
+                                <template x-for="d in allDistricts" :key="d">
+                                    <option :value="d" x-text="d"></option>
+                                </template>
                             </select>
                         </div>
-                        <div class="filter-group"><label>Min Difference (L)</label><input type="number" name="min_diff"
-                                value="{{ request('min_diff', 0) }}" placeholder="e.g. 50"></div>
-                        <div class="filter-apply-row" style="grid-column: 3/5;">
-                            <a href="{{ route('admin.reports.index') }}?tab=diff" class="btn-reset">
-                                <i class="fa-solid fa-rotate-left" style="margin-right:5px;"></i>Reset
-                            </a>
-                            <button type="submit" class="btn-apply">Apply Filters</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-
-            <div class="stat-cards">
-                <div class="stat-card blue">
-                    <div class="stat-card-top">
-                        <div class="stat-card-icon"><i class="fa-solid fa-scale-balanced"></i></div>
-                        <div class="stat-card-trend">All</div>
-                    </div>
-                    <div>
-                        <div class="stat-card-label">Total Records</div>
-                        <div class="stat-card-value">{{ $diffReports->count() }}</div>
-                    </div>
-                </div>
-                <div class="stat-card red" style="background:linear-gradient(135deg,#ef4444,#b91c1c);">
-                    <div class="stat-card-top">
-                        <div class="stat-card-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
-                        <div class="stat-card-trend">Alert</div>
-                    </div>
-                    <div>
-                        <div class="stat-card-label">High Diff (&gt; 50L)</div>
-                        <div class="stat-card-value">
-                            {{ $diffReports->filter(fn($r) => abs($r->petrol_difference) + abs($r->diesel_difference) + abs($r->octane_difference) > 50)->count() }}
-                        </div>
-                    </div>
-                </div>
-                <div class="stat-card orange">
-                    <div class="stat-card-top">
-                        <div class="stat-card-icon"><i class="fa-solid fa-gas-pump"></i></div>
-                        <div class="stat-card-trend">Net</div>
-                    </div>
-                    <div>
-                        <div class="stat-card-label">Total Diesel Diff</div>
-                        <div class="stat-card-value">{{ number_format(abs($diffReports->sum('diesel_difference'))) }} L
-                        </div>
-                    </div>
-                </div>
-                <div class="stat-card purple">
-                    <div class="stat-card-top">
-                        <div class="stat-card-icon"><i class="fa-solid fa-gas-pump"></i></div>
-                        <div class="stat-card-trend">Net</div>
-                    </div>
-                    <div>
-                        <div class="stat-card-label">Total Petrol Diff</div>
-                        <div class="stat-card-value">{{ number_format(abs($diffReports->sum('petrol_difference'))) }} L
-                        </div>
-                    </div>
-                </div>
-                <div class="stat-card teal">
-                    <div class="stat-card-top">
-                        <div class="stat-card-icon"><i class="fa-solid fa-gas-pump"></i></div>
-                        <div class="stat-card-trend">Net</div>
-                    </div>
-                    <div>
-                        <div class="stat-card-label">Total Octane Diff</div>
-                        <div class="stat-card-value">{{ number_format(abs($diffReports->sum('octane_difference'))) }} L
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="table-section">
-                <div class="table-header-row">
-                    <div class="table-title">Fuel Difference (%) Report</div>
-                    <div class="table-meta">{{ $diffReports->count() }} record(s) found</div>
-                </div>
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Station</th>
-                                <th>District</th>
-                                <th>Report Date</th>
-                                <th>Petrol Diff (L)</th>
-                                <th>Petrol Diff (%)</th>
-                                <th>Diesel Diff (L)</th>
-                                <th>Diesel Diff (%)</th>
-                                <th>Octane Diff (L)</th>
-                                <th>Octane Diff (%)</th>
-                                <th>Total Diff</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($diffReports as $i => $report)
-                                @php
-                                    $pPct =
-                                        $report->petrol_received > 0
-                                            ? round(($report->petrol_difference / $report->petrol_received) * 100, 2)
-                                            : 0;
-                                    $dPct =
-                                        $report->diesel_received > 0
-                                            ? round(($report->diesel_difference / $report->diesel_received) * 100, 2)
-                                            : 0;
-                                    $oPct =
-                                        $report->octane_received > 0
-                                            ? round(($report->octane_difference / $report->octane_received) * 100, 2)
-                                            : 0;
-                                    $totalDiff =
-                                        $report->petrol_difference +
-                                        $report->diesel_difference +
-                                        $report->octane_difference;
-                                    $dc = fn($v) => $v > 0 ? 'diff-positive' : ($v < 0 ? 'diff-negative' : 'diff-zero');
-                                @endphp
-                                <tr>
-                                    <td>{{ $i + 1 }}</td>
-                                    <td class="station-cell">{{ $report->station_name }}</td>
-                                    <td>{{ $report->district }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($report->report_date)->format('d M Y') }}</td>
-                                    <td class="{{ $dc($report->petrol_difference) }}">
-                                        {{ $report->petrol_difference > 0 ? '' : '' }}{{ number_format($report->petrol_difference) }}
-                                        L</td>
-                                    <td class="{{ $pPct > 0 ? 'diff-positive' : 'diff-zero' }}">{{ $pPct }}%
-                                    </td>
-                                    <td class="{{ $dc($report->diesel_difference) }}">
-                                        {{ $report->diesel_difference > 0 ? '' : '' }}{{ number_format($report->diesel_difference) }}
-                                        L</td>
-                                    <td class="{{ $dPct > 0 ? 'diff-positive' : 'diff-zero' }}">{{ $dPct }}%
-                                    </td>
-                                    <td class="{{ $dc($report->octane_difference) }}">
-                                        {{ $report->octane_difference > 0 ? '' : '' }}{{ number_format($report->octane_difference) }}
-                                        L</td>
-                                    <td class="{{ $oPct > 0 ? 'diff-positive' : 'diff-zero' }}">{{ $oPct }}%
-                                    </td>
-                                    <td class="{{ $dc($totalDiff) }}" style="font-weight:700;">
-                                        {{ $totalDiff > 0 ? '' : '' }}{{ number_format($totalDiff) }} L</td>
-                                </tr>
-                            @empty
-                                <tr class="empty-row">
-                                    <td colspan="11"><i class="fa-solid fa-inbox"
-                                            style="margin-right:8px;opacity:.4;"></i>No difference data found.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            {{-- <div class="export-row">
-      <button class="btn-export btn-pdf"><i class="fa-regular fa-file-pdf"></i> Export to PDF</button>
-      <button class="btn-export btn-excel"><i class="fa-regular fa-file-excel"></i> Export to Excel</button>
-    </div> --}}
-        </div>{{-- /tab-diff --}}
-
-
-        {{-- ══════════════════════════════════════
-       TAB 5 — DUE SALES REPORT
-  ══════════════════════════════════════ --}}
-        <div id="tab-due" class="tab-panel">
-            <div class="filter-section">
-                <div class="filter-header"><i class="fa-solid fa-sliders"></i> Filter Options</div>
-                <form method="GET" action="{{ route('admin.reports.index') }}">
-                    <input type="hidden" name="tab" value="due">
-                    <div class="filter-grid">
-                        <div class="filter-group"><label>From Date</label><input type="date" name="from_date"
-                                value="{{ request('from_date') }}"></div>
-                        <div class="filter-group"><label>To Date</label><input type="date" name="to_date"
-                                value="{{ request('to_date') }}"></div>
                         <div class="filter-group">
-                            <label>District</label>
-                            <select name="district">
-                                <option value="">All Districts</option>
-                                @foreach ($locations['divisions'] as $dist)
-                                    <option value="{{ $dist['name_en'] }}"
-                                        {{ request('district') == $dist['name_en'] ? 'selected' : '' }}>
-                                        {{ $dist['name_en'] }}</option>
-                                @endforeach
-                            </select>
+                            <label>Min Difference (L)</label>
+                            <input type="number" x-model.number="df.minDiff" placeholder="e.g. 50" min="0">
                         </div>
-                        <div class="filter-apply-row" style="grid-column: 4/5; justify-content:flex-end;">
-                            <a href="{{ route('admin.reports.index') }}?tab=due" class="btn-reset">
-                                <i class="fa-solid fa-rotate-left" style="margin-right:5px;"></i>Reset
-                            </a>
-                            <button type="submit" class="btn-apply">Apply Filters</button>
+                        <div class="filter-btn-row" style="grid-column:3/5;">
+                            <button class="btn-apply" @click="applyDiffFilter()"><i class="fas fa-filter"
+                                    style="margin-right:6px;"></i>Apply</button>
+                            <button class="btn-reset" @click="resetDiff()"><i class="fas fa-undo"
+                                    style="margin-right:6px;"></i>Reset</button>
                         </div>
                     </div>
-                </form>
+                </div>
+
+                <div class="stat-cards">
+                    <div class="stat-card blue">
+                        <div class="stat-card-top">
+                            <div class="stat-card-icon"><i class="fa-solid fa-scale-balanced"></i></div>
+                            <div class="stat-card-badge">All</div>
+                        </div>
+                        <div>
+                            <div class="stat-card-label">Total Records</div>
+                            <div class="stat-card-value" x-text="diffFiltered.length"></div>
+                        </div>
+                    </div>
+                    <div class="stat-card red">
+                        <div class="stat-card-top">
+                            <div class="stat-card-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                            <div class="stat-card-badge">Alert</div>
+                        </div>
+                        <div>
+                            <div class="stat-card-label">High Diff (&gt;50L)</div>
+                            <div class="stat-card-value"
+                                x-text="diffFiltered.filter(function(r){return Math.abs(r.petrol_difference)+Math.abs(r.diesel_difference)+Math.abs(r.octane_difference)>50}).length">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card orange">
+                        <div class="stat-card-top">
+                            <div class="stat-card-icon"><i class="fa-solid fa-gas-pump"></i></div>
+                            <div class="stat-card-badge">Diesel</div>
+                        </div>
+                        <div>
+                            <div class="stat-card-label">Total Diesel Diff</div>
+                            <div class="stat-card-value"
+                                x-text="fmtL(diffFiltered.reduce(function(a,r){return a+Math.abs(r.diesel_difference)},0))">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card purple">
+                        <div class="stat-card-top">
+                            <div class="stat-card-icon"><i class="fa-solid fa-gas-pump"></i></div>
+                            <div class="stat-card-badge">Petrol</div>
+                        </div>
+                        <div>
+                            <div class="stat-card-label">Total Petrol Diff</div>
+                            <div class="stat-card-value"
+                                x-text="fmtL(diffFiltered.reduce(function(a,r){return a+Math.abs(r.petrol_difference)},0))">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card teal">
+                        <div class="stat-card-top">
+                            <div class="stat-card-icon"><i class="fa-solid fa-gas-pump"></i></div>
+                            <div class="stat-card-badge">Octane</div>
+                        </div>
+                        <div>
+                            <div class="stat-card-label">Total Octane Diff</div>
+                            <div class="stat-card-value"
+                                x-text="fmtL(diffFiltered.reduce(function(a,r){return a+Math.abs(r.octane_difference)},0))">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-section">
+                    <div class="table-header-row">
+                        <div class="table-title">Fuel Difference (%) Report</div>
+                        <div class="table-meta" x-text="diffFiltered.length + ' record(s) found'"></div>
+                    </div>
+                    <template x-if="!diffApplied">
+                        <div class="empty-state"><i class="fa-solid fa-filter"></i>
+                            <p>Filter apply to load data</p>
+                        </div>
+                    </template>
+                    <template x-if="diffApplied">
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Station</th>
+                                        <th>District</th>
+                                        <th>Date</th>
+                                        <th>Petrol Diff (L)</th>
+                                        <th>Petrol (%)</th>
+                                        <th>Diesel Diff (L)</th>
+                                        <th>Diesel (%)</th>
+                                        <th>Octane Diff (L)</th>
+                                        <th>Octane (%)</th>
+                                        <th>Total Diff</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template x-if="diffFiltered.length === 0">
+                                        <tr>
+                                            <td colspan="11" style="text-align:center;padding:36px;color:var(--muted);">
+                                                <i class="fa-solid fa-inbox" style="margin-right:7px;opacity:.3;"></i>No
+                                                data found
+                                            </td>
+                                        </tr>
+                                    </template>
+                                    <template x-for="(r, i) in diffFiltered" :key="i">
+                                        <tr>
+                                            <td x-text="i+1"></td>
+                                            <td class="station-cell" x-text="r.station_name"></td>
+                                            <td x-text="r.district"></td>
+                                            <td class="date-cell" x-text="r.report_date"></td>
+                                            <td :class="diffClass(r.petrol_difference)"
+                                                x-text="diffFmt(r.petrol_difference) + ' L'"></td>
+                                            <td :class="r.petrol_difference > 0 ? 'diff-positive' : 'diff-zero'"
+                                                x-text="pct(r.petrol_difference, r.petrol_received) + '%'"></td>
+                                            <td :class="diffClass(r.diesel_difference)"
+                                                x-text="diffFmt(r.diesel_difference) + ' L'"></td>
+                                            <td :class="r.diesel_difference > 0 ? 'diff-positive' : 'diff-zero'"
+                                                x-text="pct(r.diesel_difference, r.diesel_received) + '%'"></td>
+                                            <td :class="diffClass(r.octane_difference)"
+                                                x-text="diffFmt(r.octane_difference) + ' L'"></td>
+                                            <td :class="r.octane_difference > 0 ? 'diff-positive' : 'diff-zero'"
+                                                x-text="pct(r.octane_difference, r.octane_received) + '%'"></td>
+                                            <td :class="diffClass(r.petrol_difference + r.diesel_difference + r.octane_difference)"
+                                                style="font-weight:700;"
+                                                x-text="diffFmt(r.petrol_difference + r.diesel_difference + r.octane_difference) + ' L'">
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </template>
+                </div>
+                <div class="export-row">
+                    <button class="btn-export btn-pdf"><i class="fa-regular fa-file-pdf"></i> Export PDF</button>
+                    <button class="btn-export btn-excel"><i class="fa-regular fa-file-excel"></i> Export Excel</button>
+                </div>
+            </div>{{-- /diff --}}
+
+
+            {{-- ══ TAB 5 — DUE SALES ══ --}}
+            <div :class="{ active: tab === 'due' }">
+                <div class="empty-state" style="padding:80px 20px;">
+                    <i class="fa-solid fa-clock-rotate-left"
+                        style="font-size:2.5rem;opacity:.2;display:block;margin-bottom:14px;"></i>
+                    <p style="font-size:.95rem;font-weight:600;">Due Sales Report</p>
+                    <small>Due sales will be displayed here once the column is configured</small>
+                </div>
             </div>
 
-            <div class="stat-cards">
-                <div class="stat-card blue">
-                    <div class="stat-card-top">
-                        <div class="stat-card-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
-                        <div class="stat-card-trend">Total</div>
-                    </div>
-                    <div>
-                        <div class="stat-card-label">Due Records</div>
-                        <div class="stat-card-value">—</div>
-                    </div>
-                </div>
-                <div class="stat-card red" style="background:linear-gradient(135deg,#ef4444,#b91c1c);">
-                    <div class="stat-card-top">
-                        <div class="stat-card-icon"><i class="fa-solid fa-gas-pump"></i></div>
-                        <div class="stat-card-trend">Diesel</div>
-                    </div>
-                    <div>
-                        <div class="stat-card-label">Diesel Due Sales</div>
-                        <div class="stat-card-value">—</div>
-                    </div>
-                </div>
-                <div class="stat-card orange">
-                    <div class="stat-card-top">
-                        <div class="stat-card-icon"><i class="fa-solid fa-gas-pump"></i></div>
-                        <div class="stat-card-trend">Petrol</div>
-                    </div>
-                    <div>
-                        <div class="stat-card-label">Petrol Due Sales</div>
-                        <div class="stat-card-value">—</div>
-                    </div>
-                </div>
-                <div class="stat-card purple">
-                    <div class="stat-card-top">
-                        <div class="stat-card-icon"><i class="fa-solid fa-gas-pump"></i></div>
-                        <div class="stat-card-trend">Octane</div>
-                    </div>
-                    <div>
-                        <div class="stat-card-label">Octane Due Sales</div>
-                        <div class="stat-card-value">—</div>
-                    </div>
-                </div>
-                <div class="stat-card teal">
-                    <div class="stat-card-top">
-                        <div class="stat-card-icon"><i class="fa-solid fa-circle-exclamation"></i></div>
-                        <div class="stat-card-trend">Total</div>
-                    </div>
-                    <div>
-                        <div class="stat-card-label">Total Due Amount</div>
-                        <div class="stat-card-value">—</div>
-                    </div>
-                </div>
-            </div>
+        </div>{{-- /tab-content --}}
+    </div>{{-- /card --}}
+@endsection
 
-            <div class="table-section">
-                <div class="table-header-row">
-                    <div class="table-title">Due Sales Report</div>
-                </div>
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Station</th>
-                                <th>District</th>
-                                <th>Report Date</th>
-                                <th>Diesel Due Sales</th>
-                                <th>Petrol Due Sales</th>
-                                <th>Octane Due Sales</th>
-                                <th>Total Due</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr class="empty-row">
-                                <td colspan="8"><i class="fa-solid fa-inbox"
-                                        style="margin-right:8px;opacity:.4;"></i>Due sales column not yet configured.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            {{-- <div class="export-row">
-      <button class="btn-export btn-pdf"><i class="fa-regular fa-file-pdf"></i> Export to PDF</button>
-      <button class="btn-export btn-excel"><i class="fa-regular fa-file-excel"></i> Export to Excel</button>
-    </div> --}}
-        </div>{{-- /tab-due --}}
-
-    </div>{{-- /.card --}}
-
+@push('scripts')
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>
-        (function() {
-            const params = new URLSearchParams(window.location.search);
-            const activeTab = params.get('tab') || 'stock';
-            const btn = document.querySelector(`.tab-btn[onclick*="'${activeTab}'"]`);
-            if (btn) switchTab(activeTab, btn);
-        })();
+        // ═══════════════════════════════════════════════════════════
+        //  Station Combobox — reusable Alpine.js component
+        // ═══════════════════════════════════════════════════════════
+        function stationCombobox() {
+            return {
+                query: '',
+                open: false,
+                selectedVal: '',
+                selectedLabel: '',
+                allStations: window.__REPORTS__.stations,
 
-        function switchTab(name, btn) {
-            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('tab-' + name).classList.add('active');
-            btn.classList.add('active');
+                get results() {
+                    if (!this.query.trim()) return this.allStations.slice(0, 30);
+                    var q = this.query.toLowerCase();
+                    return this.allStations.filter(function(s) {
+                        return s.name.toLowerCase().includes(q) ||
+                            (s.district || '').toLowerCase().includes(q);
+                    }).slice(0, 50);
+                },
+
+                initCombo() {},
+
+                select(s) {
+                    this.selectedVal = s.name;
+                    this.selectedLabel = s.name;
+                    this.query = '';
+                    this.open = false;
+                },
+
+                selectFirst() {
+                    if (this.results.length > 0) this.select(this.results[0]);
+                },
+
+                clear() {
+                    this.selectedVal = '';
+                    this.selectedLabel = '';
+                    this.query = '';
+                    this.open = false;
+                },
+            };
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        //  Main Reports App
+        // ═══════════════════════════════════════════════════════════
+        function reportsApp() {
+            var D = window.__REPORTS__;
+
+            return {
+                tab: 'stock',
+
+                // Raw data
+                allStock: D.stock,
+                allOfficer: D.officer,
+                locations: D.locations,
+                companies: D.companies,
+                depots: D.depots,
+
+                // Cascade state
+                filteredDistricts: [],
+                filteredUpazilas: [],
+                salesDistricts: [],
+                officerDistricts: [],
+                allDistricts: [],
+
+                // ── Stock filter ──
+                f: {
+                    fromDate: '',
+                    toDate: '',
+                    division: '',
+                    district: '',
+                    upazila: '',
+                    companyId: '',
+                    depotName: '',
+                    stationName: '',
+                    fuelType: '',
+                    stockStatus: ''
+                },
+                stockFiltered: [],
+                stockApplied: false,
+
+                // ── Sales filter ──
+                sf: {
+                    fromDate: '',
+                    toDate: '',
+                    division: '',
+                    district: '',
+                    stationName: '',
+                    fuelType: ''
+                },
+                salesFiltered: [],
+                salesApplied: false,
+
+                // ── Officer filter ──
+                of: {
+                    division: '',
+                    district: '',
+                    status: ''
+                },
+                officerFiltered: [],
+                officerApplied: false,
+
+                // ── Diff filter ──
+                df: {
+                    fromDate: '',
+                    toDate: '',
+                    district: '',
+                    minDiff: 0
+                },
+                diffFiltered: [],
+                diffApplied: false,
+
+                // ────────────────────────────────────────────────────
+                init() {
+                    var dists = new Set(this.allStock.map(function(r) {
+                        return r.district;
+                    }).filter(Boolean));
+                    this.allDistricts = Array.from(dists).sort();
+                },
+
+                // ── Location Cascade ──────────────────────────────────
+                onDivisionChange() {
+                    this.f.district = '';
+                    this.f.upazila = '';
+                    this.filteredUpazilas = [];
+                    var div = this.locations.find(function(d) {
+                        return d.name_en === this.f.division;
+                    }.bind(this));
+                    this.filteredDistricts = div ? div.districts : [];
+                },
+                onDistrictChange() {
+                    this.f.upazila = '';
+                    var div = this.locations.find(function(d) {
+                        return d.name_en === this.f.division;
+                    }.bind(this));
+                    var dist = div && div.districts ? div.districts.find(function(d) {
+                        return d.name_en === this.f.district;
+                    }.bind(this)) : null;
+                    this.filteredUpazilas = dist ? (dist.police_stations || []) : [];
+                },
+                onSalesDivisionChange() {
+                    this.sf.district = '';
+                    var div = this.locations.find(function(d) {
+                        return d.name_en === this.sf.division;
+                    }.bind(this));
+                    this.salesDistricts = div ? div.districts : [];
+                },
+                onOfficerDivisionChange() {
+                    this.of.district = '';
+                    var div = this.locations.find(function(d) {
+                        return d.name_en === this.of.division;
+                    }.bind(this));
+                    this.officerDistricts = div ? div.districts : [];
+                },
+
+                // ── STOCK FILTER ──────────────────────────────────────
+                applyStockFilter() {
+                    var self = this;
+                    this.stockFiltered = this.allStock.filter(function(r) {
+                        if (self.f.fromDate && r.report_date < self.f.fromDate) return false;
+                        if (self.f.toDate && r.report_date > self.f.toDate) return false;
+                        if (self.f.division && r.division !== self.f.division) return false;
+                        if (self.f.district && r.district !== self.f.district) return false;
+                        if (self.f.upazila && r.thana_upazila !== self.f.upazila) return false;
+                        if (self.f.companyId && r.company_id !== self.f.companyId) return false;
+                        if (self.f.depotName && r.depot_name !== self.f.depotName) return false;
+                        if (self.f.stationName && r.station_name !== self.f.stationName) return false;
+                        if (self.f.stockStatus) {
+                            var tot = r.diesel_closing_stock + r.petrol_closing_stock + r.octane_closing_stock;
+                            if (self.f.stockStatus === 'available' && tot < 2000) return false;
+                            if (self.f.stockStatus === 'low' && !(tot >= 1 && tot < 2000)) return false;
+                            if (self.f.stockStatus === 'zero' && tot > 0) return false;
+                        }
+                        return true;
+                    });
+                    this.stockApplied = true;
+                },
+
+                resetStock() {
+                    this.f = {
+                        fromDate: '',
+                        toDate: '',
+                        division: '',
+                        district: '',
+                        upazila: '',
+                        companyId: '',
+                        depotName: '',
+                        stationName: '',
+                        fuelType: '',
+                        stockStatus: ''
+                    };
+                    this.filteredDistricts = [];
+                    this.filteredUpazilas = [];
+                    this.stockFiltered = [];
+                    this.stockApplied = false;
+                },
+
+                get stockTableRows() {
+                    var rows = [];
+                    var fuels = [];
+                    if (!this.f.fuelType || this.f.fuelType === 'diesel') fuels.push('diesel');
+                    if (!this.f.fuelType || this.f.fuelType === 'petrol') fuels.push('petrol');
+                    if (!this.f.fuelType || this.f.fuelType === 'octane') fuels.push('octane');
+
+                    for (var ri = 0; ri < this.stockFiltered.length; ri++) {
+                        var r = this.stockFiltered[ri];
+                        var tot = r.diesel_closing_stock + r.petrol_closing_stock + r.octane_closing_stock;
+                        var statusClass = tot <= 0 ? 'status-zero' : tot < 2000 ? 'status-low' : 'status-available';
+                        var statusLabel = tot <= 0 ? 'Zero Stock' : tot < 2000 ? 'Low Stock' : 'Available';
+
+                        for (var fi = 0; fi < fuels.length; fi++) {
+                            var fuel = fuels[fi];
+                            rows.push({
+                                isFirst: fi === 0,
+                                rowspan: fuels.length,
+                                report_date: r.report_date,
+                                company_name: r.company_name,
+                                station_name: r.station_name,
+                                fuelLabel: fuel.charAt(0).toUpperCase() + fuel.slice(1),
+                                prev: r[fuel + '_prev_stock'] || 0,
+                                received: r[fuel + '_received'] || 0,
+                                sales: r[fuel + '_sales'] || 0,
+                                closing: r[fuel + '_closing_stock'] || 0,
+                                statusClass: statusClass,
+                                statusLabel: statusLabel,
+                            });
+                        }
+                    }
+                    return rows;
+                },
+
+                get stockTotals() {
+                    var s = this.stockFiltered;
+                    var diesel = s.reduce(function(a, r) {
+                        return a + r.diesel_closing_stock;
+                    }, 0);
+                    var petrol = s.reduce(function(a, r) {
+                        return a + r.petrol_closing_stock;
+                    }, 0);
+                    var octane = s.reduce(function(a, r) {
+                        return a + r.octane_closing_stock;
+                    }, 0);
+                    var prevSum = s.reduce(function(a, r) {
+                        return a + r.diesel_prev_stock + r.petrol_prev_stock + r.octane_prev_stock;
+                    }, 0);
+                    var recvSum = s.reduce(function(a, r) {
+                        return a + r.diesel_received + r.petrol_received + r.octane_received;
+                    }, 0);
+                    var salesSum = s.reduce(function(a, r) {
+                        return a + r.diesel_sales + r.petrol_sales + r.octane_sales;
+                    }, 0);
+                    return {
+                        diesel: diesel,
+                        petrol: petrol,
+                        octane: octane,
+                        total: diesel + petrol + octane,
+                        prevSum: prevSum,
+                        recvSum: recvSum,
+                        salesSum: salesSum
+                    };
+                },
+
+                // ── SALES FILTER ──────────────────────────────────────
+                applySalesFilter() {
+                    var self = this;
+                    this.salesFiltered = this.allStock.filter(function(r) {
+                        if (self.sf.fromDate && r.report_date < self.sf.fromDate) return false;
+                        if (self.sf.toDate && r.report_date > self.sf.toDate) return false;
+                        if (self.sf.division && r.division !== self.sf.division) return false;
+                        if (self.sf.district && r.district !== self.sf.district) return false;
+                        if (self.sf.stationName && r.station_name !== self.sf.stationName) return false;
+                        if (self.sf.fuelType) {
+                            var ft = self.sf.fuelType;
+                            if (r[ft + '_sales'] <= 0) return false;
+                        }
+                        return true;
+                    });
+                    this.salesApplied = true;
+                },
+
+                resetSales() {
+                    this.sf = {
+                        fromDate: '',
+                        toDate: '',
+                        division: '',
+                        district: '',
+                        stationName: '',
+                        fuelType: ''
+                    };
+                    this.salesFiltered = [];
+                    this.salesApplied = false;
+                    this.salesDistricts = [];
+                },
+
+                get salesTotals() {
+                    var s = this.salesFiltered;
+                    var diesel = s.reduce(function(a, r) {
+                        return a + r.diesel_sales;
+                    }, 0);
+                    var petrol = s.reduce(function(a, r) {
+                        return a + r.petrol_sales;
+                    }, 0);
+                    var octane = s.reduce(function(a, r) {
+                        return a + r.octane_sales;
+                    }, 0);
+                    var dieselRecv = s.reduce(function(a, r) {
+                        return a + r.diesel_received;
+                    }, 0);
+                    var petrolRecv = s.reduce(function(a, r) {
+                        return a + r.petrol_received;
+                    }, 0);
+                    var octaneRecv = s.reduce(function(a, r) {
+                        return a + r.octane_received;
+                    }, 0);
+                    return {
+                        diesel: diesel,
+                        petrol: petrol,
+                        octane: octane,
+                        total: diesel + petrol + octane,
+                        dieselRecv: dieselRecv,
+                        petrolRecv: petrolRecv,
+                        octaneRecv: octaneRecv
+                    };
+                },
+
+                // ── OFFICER FILTER ────────────────────────────────────
+                applyOfficerFilter() {
+                    var self = this;
+                    this.officerFiltered = this.allOfficer.filter(function(r) {
+                        if (self.of.division && r.division !== self.of.division) return false;
+                        if (self.of.district && r.district !== self.of.district) return false;
+                        if (self.of.status && r.status !== self.of.status) return false;
+                        return true;
+                    });
+                    this.officerApplied = true;
+                },
+
+                resetOfficer() {
+                    this.of = {
+                        division: '',
+                        district: '',
+                        status: ''
+                    };
+                    this.officerFiltered = [];
+                    this.officerApplied = false;
+                    this.officerDistricts = [];
+                },
+
+                // ── DIFF FILTER ───────────────────────────────────────
+                applyDiffFilter() {
+                    var self = this;
+                    this.diffFiltered = this.allStock.filter(function(r) {
+                        if (self.df.fromDate && r.report_date < self.df.fromDate) return false;
+                        if (self.df.toDate && r.report_date > self.df.toDate) return false;
+                        if (self.df.district && r.district !== self.df.district) return false;
+                        if (self.df.minDiff > 0) {
+                            var tot = Math.abs(r.petrol_difference) + Math.abs(r.diesel_difference) + Math.abs(r
+                                .octane_difference);
+                            if (tot < self.df.minDiff) return false;
+                        }
+                        return true;
+                    });
+                    this.diffApplied = true;
+                },
+
+                resetDiff() {
+                    this.df = {
+                        fromDate: '',
+                        toDate: '',
+                        district: '',
+                        minDiff: 0
+                    };
+                    this.diffFiltered = [];
+                    this.diffApplied = false;
+                },
+
+                // ── HELPERS ───────────────────────────────────────────
+                fmt(n) {
+                    return Number(n || 0).toLocaleString('en-BD');
+                },
+                fmtL(n) {
+                    return this.fmt(n) + ' L';
+                },
+                diffFmt(v) {
+                    return (v > 0 ? '+' : '') + this.fmt(v);
+                },
+                pct(diff, recv) {
+                    if (!recv || recv <= 0) return '0.00';
+                    return (diff / recv * 100).toFixed(2);
+                },
+                diffClass(v) {
+                    if (v > 0) return 'diff-positive';
+                    if (v < 0) return 'diff-negative';
+                    return 'diff-zero';
+                },
+            };
         }
     </script>
-    <script>
-        const locations = @json($locations['divisions']);
-
-        const divisionEl = document.getElementById('divisionFilter');
-        const districtEl = document.getElementById('districtFilter');
-        const upazilaEl = document.getElementById('upazilaFilter');
-
-        // ======================
-        // Division Change
-        // ======================
-        divisionEl.addEventListener('change', function() {
-
-            districtEl.innerHTML = '<option value="">All Districts</option>';
-            upazilaEl.innerHTML = '<option value="">All Upazilas</option>';
-
-            const division = locations.find(d => d.name_en === this.value);
-            if (!division) return;
-
-            division.districts.forEach(dist => {
-                districtEl.innerHTML += `<option value="${dist.name_en}">${dist.name_en}</option>`;
-            });
-        });
-
-        // ======================
-        // District Change
-        // ======================
-        districtEl.addEventListener('change', function() {
-
-            upazilaEl.innerHTML = '<option value="">All Upazilas</option>';
-
-            const division = locations.find(d => d.name_en === divisionEl.value);
-            if (!division) return;
-
-            const district = division.districts.find(d => d.name_en === this.value);
-            if (!district) return;
-
-            district.police_stations.forEach(up => {
-                upazilaEl.innerHTML += `<option value="${up.name_en}">${up.name_en}</option>`;
-            });
-        });
-    </script>
-@endsection
+@endpush
