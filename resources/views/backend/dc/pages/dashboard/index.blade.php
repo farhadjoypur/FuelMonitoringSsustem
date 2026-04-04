@@ -4,676 +4,687 @@
 
 @push('styles')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <style>
-        :root {
-            --bg: #f0f2f5;
-            --white: #ffffff;
-            --border: #e8ecf0;
-            --text: #1a1f2e;
-            --muted: #7c8db5;
-            --petrol: #80AA57;
-            --diesel: #D19529;
-            --octane: #ED4033;
-            --blue: #2563eb;
-            --green: #16a34a;
-            --purple: #7c3aed;
-            --orange: #ea580c;
-            --shadow: 0 1px 3px rgba(0, 0, 0, .07), 0 4px 16px rgba(0, 0, 0, .04);
-            --radius: 14px;
-        }
+<style>
+    :root {
+        --bg: #f0f2f5;
+        --white: #ffffff;
+        --border: #e8ecf0;
+        --text: #1a1f2e;
+        --muted: #7c8db5;
+        --petrol: #80AA57;
+        --diesel: #D19529;
+        --octane: #ED4033;
+        --others: #199CA1;
+        --blue: #2563eb;
+        --green: #16a34a;
+        --purple: #7c3aed;
+        --orange: #ea580c;
+        --shadow: 0 1px 3px rgba(0, 0, 0, .07), 0 4px 16px rgba(0, 0, 0, .04);
+        --radius: 14px;
+    }
 
-        .db-wrap {
-            /* background: var(--bg); */
-            min-height: 100vh;
-            /* padding: 28px; */
-        }
+    .db-wrap {
+        /* background: var(--bg); */
+        min-height: 100vh;
+        /* padding: 28px; */
+    }
 
-        .db-title {
-            font-size: 22px;
-            font-weight: 800;
-            color: var(--text);
-            margin: 0 0 3px;
-            letter-spacing: -.3px;
-        }
+    .db-title {
+        font-size: 22px;
+        font-weight: 800;
+        color: var(--text);
+        margin: 0 0 3px;
+        letter-spacing: -.3px;
+    }
 
-        .db-sub {
-            font-size: 13px;
-            color: var(--muted);
-            margin-bottom: 26px;
-        }
+    .db-sub {
+        font-size: 13px;
+        color: var(--muted);
+        margin-bottom: 26px;
+    }
 
-        /* grids */
+    /* grids */
+    .g-5 {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .g-3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .g-4 {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .g-22 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .section-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--text);
+        margin: 0 0 14px;
+        text-align: center;
+    }
+
+    /* stat card */
+    .stat-card {
+        background: var(--white);
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+        padding: 20px 18px;
+        position: relative;
+    }
+
+    .stat-card .sc-label {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: .5px;
+    }
+
+    .stat-card .sc-value {
+        font-size: 26px;
+        font-weight: 800;
+        color: var(--text);
+        letter-spacing: -.5px;
+        line-height: 1.1;
+        margin: 6px 0;
+    }
+
+    .stat-card .sc-footer {
+        font-size: 12px;
+        color: var(--muted);
+    }
+
+    .stat-card .sc-footer .up {
+        color: var(--green);
+        font-weight: 600;
+    }
+
+    .stat-card .sc-footer .down {
+        color: var(--octane);
+        font-weight: 600;
+    }
+
+    .sc-alert {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--octane);
+        margin: 4px 0;
+    }
+
+    .sc-icon {
+        position: absolute;
+        top: 18px;
+        right: 18px;
+        width: 44px;
+        height: 44px;
+        border-radius: 11px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        color: #fff;
+    }
+
+    .sc-icon.blue {
+        background: var(--blue);
+    }
+
+    .sc-icon.green {
+        background: var(--green);
+    }
+
+    .sc-icon.purple {
+        background: var(--purple);
+    }
+
+    .sc-icon.orange {
+        background: var(--orange);
+    }
+
+    .sc-icon.red {
+        background: var(--octane);
+    }
+
+    /* fuel cards */
+    .fuel-card {
+        border-radius: var(--radius);
+        border: 1px solid transparent;
+        padding: 20px 22px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .fuel-card.petrol {
+        background: #E1EDDF;
+    }
+
+    .fuel-card.diesel {
+        background: #EDEADA;
+    }
+
+    .fuel-card.octane {
+        background: #F1DEDC;
+    }
+
+    .fuel-card.others {
+        background: #C8EFF0;
+    }
+
+    .fuel-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        color: #fff;
+        flex-shrink: 0;
+    }
+
+    .fuel-icon.p {
+        background: var(--petrol);
+    }
+
+    .fuel-icon.d {
+        background: var(--diesel);
+    }
+
+    .fuel-icon.o {
+        background: var(--octane);
+    }
+
+    .fuel-icon.ot {
+        background: var(--others);
+    }
+
+    .fuel-info .fi-val {
+        font-size: 26px;
+        font-weight: 800;
+        letter-spacing: -.5px;
+        line-height: 1;
+    }
+
+    .fuel-info .fi-name {
+        font-size: 13px;
+        font-weight: 500;
+        margin-top: 3px;
+    }
+
+    .fuel-card.petrol .fi-val,
+    .fuel-card.petrol .fi-name {
+        color: var(--petrol);
+    }
+
+    .fuel-card.diesel .fi-val,
+    .fuel-card.diesel .fi-name {
+        color: var(--diesel);
+    }
+
+    .fuel-card.octane .fi-val,
+    .fuel-card.octane .fi-name {
+        color: var(--octane);
+    }
+
+    .fuel-card.others .fi-val,
+    .fuel-card.others .fi-name {
+        color: var(--others);
+    }
+
+    /* summary cards */
+    .sum-card {
+        border-radius: var(--radius);
+        padding: 24px 22px;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .sum-card::before {
+        content: '';
+        position: absolute;
+        top: -20px;
+        right: -20px;
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, .1);
+    }
+
+    .sum-card.blue-c {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    }
+
+    .sum-card.green-c {
+        background: linear-gradient(135deg, #16a34a, #15803d);
+    }
+
+    .sum-card.purple-c {
+        background: linear-gradient(135deg, #7c3aed, #6d28d9);
+    }
+
+    .sum-card.orange-c {
+        background: linear-gradient(135deg, #ea580c, #c2410c);
+    }
+
+    .sum-card .sm-icon {
+        font-size: 24px;
+        margin-bottom: 12px;
+        opacity: .9;
+    }
+
+    .sum-card .sm-val {
+        font-size: 36px;
+        font-weight: 800;
+        letter-spacing: -1px;
+        line-height: 1;
+    }
+
+    .sum-card .sm-name {
+        font-size: 13px;
+        opacity: .85;
+        margin-top: 4px;
+        font-weight: 500;
+    }
+
+    .sum-card .sm-trend {
+        font-size: 12px;
+        opacity: .8;
+        margin-top: 10px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    /* chart cards */
+    .card {
+        background: var(--white);
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+    }
+
+    .chart-card {
+        padding: 22px;
+    }
+
+    .cc-head {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        margin-bottom: 20px;
+    }
+
+    .cc-head i {
+        color: var(--blue);
+        font-size: 15px;
+    }
+
+    .cc-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--text);
+    }
+
+    .cc-select {
+        margin-left: auto;
+        border: 1px solid var(--border);
+        border-radius: 7px;
+        padding: 5px 10px;
+        font-size: 12px;
+        color: var(--text);
+        background: var(--bg);
+    }
+
+    .chart-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        margin-top: 16px;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text);
+    }
+
+    .legend-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    /* depot table */
+    .depot-table-card {
+        padding: 0;
+    }
+
+    .dt-head {
+        padding: 18px 22px 14px;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .dt-head i {
+        color: var(--blue);
+    }
+
+    .dt-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--text);
+    }
+
+    .dep-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .dep-table thead th {
+        padding: 10px 18px;
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        background: #fafbfc;
+        border-bottom: 1px solid var(--border);
+        text-align: left;
+    }
+
+    .dep-table tbody td {
+        padding: 13px 18px;
+        font-size: 13px;
+        color: var(--text);
+        border-bottom: 1px solid #f5f6fa;
+    }
+
+    .dep-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .dep-table tbody tr:hover td {
+        background: #fafbfc;
+    }
+
+    .depot-name {
+        font-weight: 700;
+    }
+
+    .util-wrap {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .util-bar {
+        flex: 1;
+        height: 6px;
+        background: #e8ecf0;
+        border-radius: 3px;
+        overflow: hidden;
+        min-width: 80px;
+    }
+
+    .util-fill {
+        height: 100%;
+        border-radius: 3px;
+        transition: width .3s;
+    }
+
+    .util-fill.high {
+        background: #ef4444;
+    }
+
+    .util-fill.medium {
+        background: #f59e0b;
+    }
+
+    .util-fill.low {
+        background: #22c55e;
+    }
+
+    .util-fill.zero {
+        background: #e2e8f0;
+    }
+
+    .util-pct {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--text);
+        min-width: 34px;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .badge.active {
+        background: #dcfce7;
+        color: var(--green);
+    }
+
+    .badge.inactive {
+        background: #fee2e2;
+        color: var(--octane);
+    }
+
+    /* activities */
+    .activity-card {
+        padding: 0;
+    }
+
+    .ac-head {
+        padding: 18px 22px 14px;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .ac-head i {
+        color: var(--purple);
+    }
+
+    .ac-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--text);
+    }
+
+    .act-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 14px 22px;
+        border-bottom: 1px solid #f5f6fa;
+    }
+
+    .act-item:last-child {
+        border-bottom: none;
+    }
+
+    .act-dot {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        flex-shrink: 0;
+    }
+
+    .act-dot.green {
+        background: #dcfce7;
+        color: var(--green);
+    }
+
+    .act-dot.yellow {
+        background: #fef9c3;
+        color: #d97706;
+    }
+
+    .act-dot.blue {
+        background: #dbeafe;
+        color: var(--blue);
+    }
+
+    .act-dot.red {
+        background: #fee2e2;
+        color: var(--octane);
+    }
+
+    .ai-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--text);
+    }
+
+    .ai-sub {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 1px;
+    }
+
+    .ai-time {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 3px;
+    }
+
+    /* no-data */
+    .no-data {
+        text-align: center;
+        padding: 30px;
+        color: var(--muted);
+        font-size: 13px;
+    }
+
+    /* ================= Mobile Responsive Styles ================= */
+
+    @media (max-width: 1200px) {
         .g-5 {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-
-        .g-3 {
-            display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-            margin-bottom: 24px;
         }
 
         .g-4 {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
-            margin-bottom: 24px;
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 992px) {
+        .db-wrap {
+            padding: 0px;
+        }
+
+        .g-5 {
+            grid-template-columns: repeat(2, 1fr);
         }
 
         .g-22 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin-bottom: 24px;
+            grid-template-columns: 1fr;
         }
 
-        .section-title {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--text);
-            margin: 0 0 14px;
-            text-align: center;
+        /* চার্টগুলো একে অপরের নিচে আসবে */
+    }
+
+    @media (max-width: 768px) {
+
+        .g-5,
+        .g-4,
+        .g-3,
+        .g-22 {
+            grid-template-columns: 1fr;
+            /* সব গ্রিড ১ কলাম হয়ে যাবে */
+            gap: 12px;
         }
 
-        /* stat card */
-        .stat-card {
-            background: var(--white);
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
-            padding: 20px 18px;
-            position: relative;
-        }
-
-        .stat-card .sc-label {
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: .5px;
+        .db-title {
+            font-size: 18px;
         }
 
         .stat-card .sc-value {
-            font-size: 26px;
-            font-weight: 800;
-            color: var(--text);
-            letter-spacing: -.5px;
-            line-height: 1.1;
-            margin: 6px 0;
+            font-size: 20px;
         }
 
-        .stat-card .sc-footer {
-            font-size: 12px;
-            color: var(--muted);
-        }
-
-        .stat-card .sc-footer .up {
-            color: var(--green);
-            font-weight: 600;
-        }
-
-        .stat-card .sc-footer .down {
-            color: var(--octane);
-            font-weight: 600;
-        }
-
-        .sc-alert {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--octane);
-            margin: 4px 0;
-        }
-
-        .sc-icon {
-            position: absolute;
-            top: 18px;
-            right: 18px;
-            width: 44px;
-            height: 44px;
-            border-radius: 11px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            color: #fff;
-        }
-
-        .sc-icon.blue {
-            background: var(--blue);
-        }
-
-        .sc-icon.green {
-            background: var(--green);
-        }
-
-        .sc-icon.purple {
-            background: var(--purple);
-        }
-
-        .sc-icon.orange {
-            background: var(--orange);
-        }
-
-        .sc-icon.red {
-            background: var(--octane);
-        }
-
-        /* fuel cards */
-        .fuel-card {
-            border-radius: var(--radius);
-            border: 1px solid transparent;
-            padding: 20px 22px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .fuel-card.petrol {
-            background: #E1EDDF;
-            /* border-color: #bbf7d0; */
-        }
-
-        .fuel-card.diesel {
-            background: #EDEADA;
-            /* border-color: #fed7aa; */
-        }
-
-        .fuel-card.octane {
-            background: #F1DEDC;
-            /* border-color: #fecaca; */
-        }
-
-        .fuel-icon {
-            width: 52px;
-            height: 52px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-            color: #fff;
-            flex-shrink: 0;
-        }
-
-        .fuel-icon.p {
-            background: var(--petrol);
-        }
-
-        .fuel-icon.d {
-            background: var(--diesel);
-        }
-
-        .fuel-icon.o {
-            background: var(--octane);
-        }
-
-        .fuel-info .fi-val {
-            font-size: 26px;
-            font-weight: 800;
-            letter-spacing: -.5px;
-            line-height: 1;
-        }
-
-        .fuel-info .fi-name {
-            font-size: 13px;
-            font-weight: 500;
-            margin-top: 3px;
-        }
-
-        .fuel-card.petrol .fi-val,
-        .fuel-card.petrol .fi-name {
-            color: var(--petrol);
-        }
-
-        .fuel-card.diesel .fi-val,
-        .fuel-card.diesel .fi-name {
-            color: var(--diesel);
-        }
-
-        .fuel-card.octane .fi-val,
-        .fuel-card.octane .fi-name {
-            color: var(--octane);
-        }
-
-        /* summary cards */
-        .sum-card {
-            border-radius: var(--radius);
-            padding: 24px 22px;
-            color: #fff;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .sum-card::before {
-            content: '';
-            position: absolute;
-            top: -20px;
-            right: -20px;
-            width: 90px;
-            height: 90px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, .1);
-        }
-
-        .sum-card.blue-c {
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
-        }
-
-        .sum-card.green-c {
-            background: linear-gradient(135deg, #16a34a, #15803d);
-        }
-
-        .sum-card.purple-c {
-            background: linear-gradient(135deg, #7c3aed, #6d28d9);
-        }
-
-        .sum-card.orange-c {
-            background: linear-gradient(135deg, #ea580c, #c2410c);
-        }
-
-        .sum-card .sm-icon {
-            font-size: 24px;
-            margin-bottom: 12px;
-            opacity: .9;
-        }
-
-        .sum-card .sm-val {
-            font-size: 36px;
-            font-weight: 800;
-            letter-spacing: -1px;
-            line-height: 1;
-        }
-
-        .sum-card .sm-name {
-            font-size: 13px;
-            opacity: .85;
-            margin-top: 4px;
-            font-weight: 500;
-        }
-
-        .sum-card .sm-trend {
-            font-size: 12px;
-            opacity: .8;
-            margin-top: 10px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        /* chart cards */
-        .card {
-            background: var(--white);
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
-            overflow: hidden;
-        }
-
-        .chart-card {
-            padding: 22px;
-        }
-
-        .cc-head {
-            display: flex;
-            align-items: center;
-            gap: 9px;
-            margin-bottom: 20px;
-        }
-
-        .cc-head i {
-            color: var(--blue);
-            font-size: 15px;
-        }
-
-        .cc-title {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--text);
-        }
-
-        .cc-select {
-            margin-left: auto;
-            border: 1px solid var(--border);
-            border-radius: 7px;
-            padding: 5px 10px;
-            font-size: 12px;
-            color: var(--text);
-            background: var(--bg);
-        }
-
-        .chart-legend {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 14px;
-            margin-top: 16px;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text);
-        }
-
-        .legend-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
-
-        /* depot table */
+        /* টেবিল রেসপন্সিভ করার জন্য */
         .depot-table-card {
-            padding: 0;
-        }
-
-        .dt-head {
-            padding: 18px 22px 14px;
-            display: flex;
-            align-items: center;
-            gap: 9px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .dt-head i {
-            color: var(--blue);
-        }
-
-        .dt-title {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--text);
+            overflow-x: auto;
         }
 
         .dep-table {
-            width: 100%;
-            border-collapse: collapse;
+            min-width: 600px;
+            /* টেবিল যেন একদম ছোট হয়ে না যায়, স্ক্রল হবে */
         }
 
-        .dep-table thead th {
-            padding: 10px 18px;
-            font-size: 10px;
-            font-weight: 700;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: .5px;
-            background: #fafbfc;
-            border-bottom: 1px solid var(--border);
-            text-align: left;
+        /* চার্টের উচ্চতা মোবাইলে কিছুটা কমানো */
+        canvas {
+            max-height: 250px;
         }
 
-        .dep-table tbody td {
-            padding: 13px 18px;
-            font-size: 13px;
-            color: var(--text);
-            border-bottom: 1px solid #f5f6fa;
+        /* ফিউয়েল কার্ডের টেক্সট সাইজ ছোট করা */
+        .fuel-info .fi-val {
+            font-size: 20px;
         }
 
-        .dep-table tbody tr:last-child td {
-            border-bottom: none;
+        .sum-card .sm-val {
+            font-size: 28px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .g-5 {
+            grid-template-columns: 1fr;
         }
 
-        .dep-table tbody tr:hover td {
-            background: #fafbfc;
+        .stat-card {
+            padding: 15px;
         }
 
-        .depot-name {
-            font-weight: 700;
-        }
-
-        .util-wrap {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .util-bar {
-            flex: 1;
-            height: 6px;
-            background: #e8ecf0;
-            border-radius: 3px;
-            overflow: hidden;
-            min-width: 80px;
-        }
-
-        .util-fill {
-            height: 100%;
-            border-radius: 3px;
-            transition: width .3s;
-        }
-
-        .util-fill.high {
-            background: #ef4444;
-        }
-
-        .util-fill.medium {
-            background: #f59e0b;
-        }
-
-        .util-fill.low {
-            background: #22c55e;
-        }
-
-        .util-fill.zero {
-            background: #e2e8f0;
-        }
-
-        .util-pct {
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--text);
-            min-width: 34px;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 700;
-        }
-
-        .badge.active {
-            background: #dcfce7;
-            color: var(--green);
-        }
-
-        .badge.inactive {
-            background: #fee2e2;
-            color: var(--octane);
-        }
-
-        /* activities */
-        .activity-card {
-            padding: 0;
-        }
-
-        .ac-head {
-            padding: 18px 22px 14px;
-            display: flex;
-            align-items: center;
-            gap: 9px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .ac-head i {
-            color: var(--purple);
-        }
-
-        .ac-title {
+        .sc-icon {
+            width: 35px;
+            height: 35px;
+            top: 12px;
+            right: 12px;
             font-size: 14px;
-            font-weight: 700;
-            color: var(--text);
         }
-
-        .act-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 14px;
-            padding: 14px 22px;
-            border-bottom: 1px solid #f5f6fa;
-        }
-
-        .act-item:last-child {
-            border-bottom: none;
-        }
-
-        .act-dot {
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 13px;
-            flex-shrink: 0;
-        }
-
-        .act-dot.green {
-            background: #dcfce7;
-            color: var(--green);
-        }
-
-        .act-dot.yellow {
-            background: #fef9c3;
-            color: #d97706;
-        }
-
-        .act-dot.blue {
-            background: #dbeafe;
-            color: var(--blue);
-        }
-
-        .act-dot.red {
-            background: #fee2e2;
-            color: var(--octane);
-        }
-
-        .ai-title {
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--text);
-        }
-
-        .ai-sub {
-            font-size: 12px;
-            color: var(--muted);
-            margin-top: 1px;
-        }
-
-        .ai-time {
-            font-size: 11px;
-            color: var(--muted);
-            margin-top: 3px;
-        }
-
-        /* no-data */
-        .no-data {
-            text-align: center;
-            padding: 30px;
-            color: var(--muted);
-            font-size: 13px;
-        }
-
-        /* ================= Mobile Responsive Styles ================= */
-
-        @media (max-width: 1200px) {
-            .g-5 {
-                grid-template-columns: repeat(3, 1fr);
-            }
-
-            .g-4 {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 992px) {
-            .db-wrap {
-                padding: 0px;
-            }
-
-            .g-5 {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .g-22 {
-                grid-template-columns: 1fr;
-            }
-
-            /* চার্টগুলো একে অপরের নিচে আসবে */
-        }
-
-        @media (max-width: 768px) {
-
-            .g-5,
-            .g-4,
-            .g-3,
-            .g-22 {
-                grid-template-columns: 1fr;
-                /* সব গ্রিড ১ কলাম হয়ে যাবে */
-                gap: 12px;
-            }
-
-            .db-title {
-                font-size: 18px;
-            }
-
-            .stat-card .sc-value {
-                font-size: 20px;
-            }
-
-            /* টেবিল রেসপন্সিভ করার জন্য */
-            .depot-table-card {
-                overflow-x: auto;
-            }
-
-            .dep-table {
-                min-width: 600px;
-                /* টেবিল যেন একদম ছোট হয়ে না যায়, স্ক্রল হবে */
-            }
-
-            /* চার্টের উচ্চতা মোবাইলে কিছুটা কমানো */
-            canvas {
-                max-height: 250px;
-            }
-
-            /* ফিউয়েল কার্ডের টেক্সট সাইজ ছোট করা */
-            .fuel-info .fi-val {
-                font-size: 20px;
-            }
-
-            .sum-card .sm-val {
-                font-size: 28px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .g-5 {
-                grid-template-columns: 1fr;
-            }
-
-            .stat-card {
-                padding: 15px;
-            }
-
-            .sc-icon {
-                width: 35px;
-                height: 35px;
-                top: 12px;
-                right: 12px;
-                font-size: 14px;
-            }
-        }
-    </style>
+    }
+</style>
 @endpush
 
 @section('content')
@@ -748,7 +759,7 @@
          ROW 2: TODAY'S STOCK
          ============================================================ --}}
         <p class="section-title">Today's Stock</p>
-        <div class="g-3">
+        <div class="g-4">
             <div class="fuel-card petrol">
                 <div class="fuel-icon p"><i class="fa-solid fa-gas-pump"></i></div>
                 <div class="fuel-info">
@@ -770,13 +781,20 @@
                     <div class="fi-name">Octane</div>
                 </div>
             </div>
+            <div class="fuel-card others">
+                <div class="fuel-icon ot"><i class="fa-solid fa-droplet"></i></div>
+                <div class="fuel-info">
+                    <div class="fi-val">0 L</div>
+                    <div class="fi-name">Others</div>
+                </div>
+            </div>
         </div>
 
         {{-- ============================================================
          ROW 3: TODAY'S SOLD
          ============================================================ --}}
         <p class="section-title">Today's Sold</p>
-        <div class="g-3">
+        <div class="g-4">
             <div class="fuel-card petrol">
                 <div class="fuel-icon p"><i class="fa-solid fa-gas-pump"></i></div>
                 <div class="fuel-info">
@@ -796,6 +814,13 @@
                 <div class="fuel-info">
                     <div class="fi-val">{{ number_format($todayOctaneSold) }} L</div>
                     <div class="fi-name">Octane</div>
+                </div>
+            </div>
+            <div class="fuel-card others">
+                <div class="fuel-icon ot"><i class="fa-solid fa-droplet"></i></div>
+                <div class="fuel-info">
+                    <div class="fi-val">0 L</div>
+                    <div class="fi-name">Others</div>
                 </div>
             </div>
         </div>
