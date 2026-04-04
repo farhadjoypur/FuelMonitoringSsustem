@@ -45,19 +45,22 @@ class FuelReportController extends Controller
             ->where('status', 'active')
             ->get()
             ->pluck('fillingStation.station_name', 'fillingStation.id');
+
         // Station assign না থাকলে empty paginator
         if (! $ctx['stationId']) {
             $emptyReports = new LengthAwarePaginator([], 0, 15);
             return view('backend.tag-officer.pages.fuel-reports.index', [
-                'reports'     => $emptyReports,
-                'stationName' => null,
-                'stationInfo' => null,
+                'reports'        => $emptyReports,
+                'stationName'    => null,
+                'stationInfo'    => null,
+                'previousStocks' => ['petrol' => 0, 'diesel' => 0, 'octane' => 0, 'others' => 0],
+                'defaultDate'    => Carbon::today()->format('Y-m-d'),
             ]);
         }
 
         $query = Fuelreport::where('tag_officer_id', $ctx['officerId'])
-                           ->where('station_id', $ctx['stationId'])
-                           ->orderBy('report_date', 'desc');
+            ->where('station_id', $ctx['stationId'])
+            ->orderBy('report_date', 'desc');
 
         // ফিল্টার: তারিখ range
         if ($request->filled('from_date')) {
@@ -69,17 +72,24 @@ class FuelReportController extends Controller
 
         $reports = $query->paginate(15)->withQueryString();
 
+        // Previous stocks for the form on the same page
+        $previousStocks = Fuelreport::getPreviousStocks(
+            $ctx['officerId'],
+            $ctx['stationId']
+        );
+
         return view('backend.tag-officer.pages.fuel-reports.index', [
-            'reports'     => $reports,
-            'stationName' => $ctx['stationName'],
-            'stationInfo' => $ctx['stationInfo'],
-                'stationList' => $stationList,
+            'reports'        => $reports,
+            'stationName'    => $ctx['stationName'],
+            'stationInfo'    => $ctx['stationInfo'],
+            'stationList'    => $stationList,
+            'previousStocks' => $previousStocks,
+            'defaultDate'    => Carbon::today()->format('Y-m-d'),
         ]);
     }
 
     // ═══════════════════════════════════════════════════════
-    //  CREATE — নতুন রিপোর্ট ফর্ম
-    //  Previous Stock auto-fill হবে officer + station base
+    //  CREATE — নতুন রিপোর্ট ফর্ম + Saved Reports একই পেজে
     // ═══════════════════════════════════════════════════════
     public function create()
     {
@@ -89,6 +99,7 @@ class FuelReportController extends Controller
             ->where('status', 'active')
             ->get()
             ->pluck('fillingStation.station_name', 'fillingStation.id');
+
         // Station assign না থাকলে ফর্ম দেখানো যাবে না
         if (! $ctx['stationId']) {
             return redirect()
@@ -105,12 +116,19 @@ class FuelReportController extends Controller
         // আজকের তারিখ default
         $defaultDate = Carbon::today()->format('Y-m-d');
 
+        // Saved reports for the same page (latest 15)
+        $reports = Fuelreport::where('tag_officer_id', $ctx['officerId'])
+            ->where('station_id', $ctx['stationId'])
+            ->orderBy('report_date', 'desc')
+            ->paginate(15);
+
         return view('backend.tag-officer.pages.fuel-reports.create', [
             'previousStocks' => $previousStocks,
             'stationName'    => $ctx['stationName'],
             'stationInfo'    => $ctx['stationInfo'],
             'defaultDate'    => $defaultDate,
             'stationList'    => $stationList,
+            'reports'        => $reports,
         ]);
     }
 
@@ -144,6 +162,13 @@ class FuelReportController extends Controller
             'octane_supply'     => 'required|numeric|min:0',
             'octane_received'   => 'required|numeric|min:0',
             'octane_sales'      => 'required|numeric|min:0',
+
+            'others_prev_stock' => 'required|numeric|min:0',
+            'others_supply'     => 'required|numeric|min:0',
+            'others_received'   => 'required|numeric|min:0',
+            'others_sales'      => 'required|numeric|min:0',
+
+            'comment'           => 'nullable|string|max:500',
         ]);
 
         // Duplicate check — একই officer, station, date এ দুটো report নয়
@@ -157,7 +182,7 @@ class FuelReportController extends Controller
                 ->withInput()
                 ->with('error', 'A report for the station "' . $ctx['stationName'] . '" on this date already exists. Please edit it.');
         }
-    
+
         // Auto Calculate — difference & closing stock
         $petrolDiff    = $request->petrol_supply  - $request->petrol_received;
         $petrolClosing = $request->petrol_prev_stock + $request->petrol_received - $request->petrol_sales;
@@ -168,18 +193,22 @@ class FuelReportController extends Controller
         $octaneDiff    = $request->octane_supply  - $request->octane_received;
         $octaneClosing = $request->octane_prev_stock + $request->octane_received - $request->octane_sales;
 
+        $othersDiff    = $request->others_supply  - $request->others_received;
+        $othersClosing = $request->others_prev_stock + $request->others_received - $request->others_sales;
+
         Fuelreport::create([
-            // ── FK দুটো ──────────────────────────────
+            // ── FK ──────────────────────────────────────
             'tag_officer_id' => $ctx['officerId'],
             'station_id'     => $ctx['stationId'],
 
-            // ── Station info (display purpose) ───────
+            // ── Station info ─────────────────────────────
             'station_name'  => $ctx['stationName'],
             'thana_upazila' => $ctx['stationInfo']?->upazila  ?? '',
             'district'      => $ctx['stationInfo']?->district ?? '',
             'report_date'   => $request->report_date,
+            'comment'       => $request->comment,
 
-            // ── Petrol ───────────────────────────────
+            // ── Petrol ───────────────────────────────────
             'petrol_prev_stock'    => $request->petrol_prev_stock,
             'petrol_supply'        => $request->petrol_supply,
             'petrol_received'      => $request->petrol_received,
@@ -187,7 +216,7 @@ class FuelReportController extends Controller
             'petrol_sales'         => $request->petrol_sales,
             'petrol_closing_stock' => $petrolClosing,
 
-            // ── Diesel ───────────────────────────────
+            // ── Diesel ───────────────────────────────────
             'diesel_prev_stock'    => $request->diesel_prev_stock,
             'diesel_supply'        => $request->diesel_supply,
             'diesel_received'      => $request->diesel_received,
@@ -195,13 +224,21 @@ class FuelReportController extends Controller
             'diesel_sales'         => $request->diesel_sales,
             'diesel_closing_stock' => $dieselClosing,
 
-            // ── Octane ───────────────────────────────
+            // ── Octane ───────────────────────────────────
             'octane_prev_stock'    => $request->octane_prev_stock,
             'octane_supply'        => $request->octane_supply,
             'octane_received'      => $request->octane_received,
             'octane_difference'    => $octaneDiff,
             'octane_sales'         => $request->octane_sales,
             'octane_closing_stock' => $octaneClosing,
+
+            // ── Others ───────────────────────────────────
+            'others_prev_stock'    => $request->others_prev_stock,
+            'others_supply'        => $request->others_supply,
+            'others_received'      => $request->others_received,
+            'others_difference'    => $othersDiff,
+            'others_sales'         => $request->others_sales,
+            'others_closing_stock' => $othersClosing,
         ]);
 
         return redirect()
@@ -214,9 +251,7 @@ class FuelReportController extends Controller
     // ═══════════════════════════════════════════════════════
     public function show(Fuelreport $fuelReport)
     {
-        // শুধু নিজের report দেখতে পারবে
         $this->authorizeReport($fuelReport);
-
         return view('backend.tag-officer.pages.fuel-reports.show', compact('fuelReport'));
     }
 
@@ -226,7 +261,6 @@ class FuelReportController extends Controller
     public function edit(Fuelreport $fuelReport)
     {
         $this->authorizeReport($fuelReport);
-
         return view('backend.tag-officer.pages.fuel-reports.edit', compact('fuelReport'));
     }
 
@@ -256,6 +290,13 @@ class FuelReportController extends Controller
             'octane_supply'     => 'required|numeric|min:0',
             'octane_received'   => 'required|numeric|min:0',
             'octane_sales'      => 'required|numeric|min:0',
+
+            'others_prev_stock' => 'required|numeric|min:0',
+            'others_supply'     => 'required|numeric|min:0',
+            'others_received'   => 'required|numeric|min:0',
+            'others_sales'      => 'required|numeric|min:0',
+
+            'comment'           => 'nullable|string|max:500',
         ]);
 
         // Duplicate check (নিজের ID বাদ দিয়ে)
@@ -281,8 +322,12 @@ class FuelReportController extends Controller
         $octaneDiff    = $request->octane_supply  - $request->octane_received;
         $octaneClosing = $request->octane_prev_stock + $request->octane_received - $request->octane_sales;
 
+        $othersDiff    = $request->others_supply  - $request->others_received;
+        $othersClosing = $request->others_prev_stock + $request->others_received - $request->others_sales;
+
         $fuelReport->update([
             'report_date'   => $request->report_date,
+            'comment'       => $request->comment,
 
             'petrol_prev_stock'    => $request->petrol_prev_stock,
             'petrol_supply'        => $request->petrol_supply,
@@ -304,6 +349,13 @@ class FuelReportController extends Controller
             'octane_difference'    => $octaneDiff,
             'octane_sales'         => $request->octane_sales,
             'octane_closing_stock' => $octaneClosing,
+
+            'others_prev_stock'    => $request->others_prev_stock,
+            'others_supply'        => $request->others_supply,
+            'others_received'      => $request->others_received,
+            'others_difference'    => $othersDiff,
+            'others_sales'         => $request->others_sales,
+            'others_closing_stock' => $othersClosing,
         ]);
 
         return redirect()
@@ -317,7 +369,6 @@ class FuelReportController extends Controller
     public function destroy(Fuelreport $fuelReport)
     {
         $this->authorizeReport($fuelReport);
-
         $fuelReport->delete();
 
         return redirect()
@@ -351,13 +402,29 @@ class FuelReportController extends Controller
     }
 
     // ═══════════════════════════════════════════════════════
+    //  EXPORT PDF
+    // ═══════════════════════════════════════════════════════
+    public function exportPdf()
+    {
+        // TODO: implement PDF export (e.g. using barryvdh/laravel-dompdf)
+        return back()->with('error', 'PDF export coming soon.');
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //  EXPORT EXCEL
+    // ═══════════════════════════════════════════════════════
+    public function exportExcel()
+    {
+        // TODO: implement Excel export (e.g. using maatwebsite/excel)
+        return back()->with('error', 'Excel export coming soon.');
+    }
+
+    // ═══════════════════════════════════════════════════════
     //  PRIVATE — Officer নিজের report কিনা check
     // ═══════════════════════════════════════════════════════
     private function authorizeReport(Fuelreport $fuelReport): void
     {
-        $officerId = Auth::id();
-
-        if ($fuelReport->tag_officer_id !== $officerId) {
+        if ($fuelReport->tag_officer_id !== Auth::id()) {
             abort(403, 'You are not authorized to view this report.');
         }
     }

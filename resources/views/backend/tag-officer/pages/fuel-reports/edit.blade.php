@@ -258,6 +258,78 @@
             </div>
         </div>
 
+        {{-- OTHERS --}}
+<div class="custom-card">
+    <div class="category-bar">
+        <i class="fa-solid fa-droplet"></i> Others
+        <span class="bar-line"></span>
+    </div>
+
+    <div class="input-grid">
+        <div class="grid-head"><i class="fa-solid fa-clock-rotate-left fa-xs"></i> Previous Stock (L)</div>
+        <div class="grid-head"><i class="fa-solid fa-truck fa-xs"></i> Supply From Depot (L)</div>
+        <div class="grid-head"><i class="fa-solid fa-arrow-down fa-xs"></i> Received (L)</div>
+        <div class="grid-head"><i class="fa-solid fa-calculator fa-xs"></i> Difference (L)</div>
+        <div class="grid-head"><i class="fa-solid fa-chart-line fa-xs"></i> Sales (L)</div>
+        <div class="grid-head"><i class="fa-solid fa-warehouse fa-xs"></i> Closing Stock (L)</div>
+
+        {{-- Previous --}}
+        <div class="grid-cell">
+            <input type="number" step="0.01" min="0"
+                   name="others_prev_stock" id="others_prev_stock"
+                   class="input-field @error('others_prev_stock') is-invalid @enderror"
+                   value="{{ old('others_prev_stock', $fuelReport->others_prev_stock ?? 0) }}"
+                   oninput="calcRow('others')">
+            @error('others_prev_stock')
+                <span class="invalid-feedback">{{ $message }}</span>
+            @enderror
+        </div>
+
+        {{-- Supply --}}
+        <div class="grid-cell">
+            <input type="number" step="0.01" min="0"
+                   name="others_supply" id="others_supply"
+                   class="input-field"
+                   value="{{ old('others_supply', $fuelReport->others_supply ?? 0) }}"
+                   oninput="calcRow('others')">
+        </div>
+
+        {{-- Received --}}
+        <div class="grid-cell">
+            <input type="number" step="0.01" min="0"
+                   name="others_received" id="others_received"
+                   class="input-field"
+                   value="{{ old('others_received', $fuelReport->others_received ?? 0) }}"
+                   oninput="calcRow('others')">
+        </div>
+
+        {{-- Difference (Auto) --}}
+        <div class="grid-cell-auto">
+            <span class="auto-value" id="others_difference_display">
+                {{ $fuelReport->others_difference ?? 0 }}
+            </span>
+            <span class="auto-label">Auto</span>
+        </div>
+
+        {{-- Sales --}}
+        <div class="grid-cell">
+            <input type="number" step="0.01" min="0"
+                   name="others_sales" id="others_sales"
+                   class="input-field"
+                   value="{{ old('others_sales', $fuelReport->others_sales ?? 0) }}"
+                   oninput="calcRow('others')">
+        </div>
+
+        {{-- Closing (Auto) --}}
+        <div class="grid-cell-auto">
+            <span class="auto-value" id="others_closing_display">
+                {{ $fuelReport->others_closing_stock ?? 0 }}
+            </span>
+            <span class="auto-label">Auto</span>
+        </div>
+    </div>
+</div>
+
         <div class="d-flex gap-3 mb-5">
             <button type="submit" class="btn-update">
                 <i class="fa-solid fa-floppy-disk"></i> Update Report
