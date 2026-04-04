@@ -79,7 +79,7 @@
                     <a href="{{ route('admin.reports.index') }}"
                         class="menu-link {{ request()->routeIs('admin.reports.index') ? 'active' : '' }}">
                         <span class="material-symbols-rounded">bar_chart</span>
-                        <span class="menu-label">Sales Report</span>
+                        <span class="menu-label">Reports</span>
                     </a>
                 </li>
 
