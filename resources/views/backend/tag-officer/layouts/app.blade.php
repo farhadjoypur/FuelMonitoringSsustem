@@ -20,18 +20,33 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-lite.min.css">
     <link rel="stylesheet" href="{{ asset('backend/assets/css/layout.css') }}">
     @stack('styles')
-</head>
 
-<body>
+    <style>
+        html.sidebar-is-collapsed .sidebar {
+            width: 0 !important;
+            min-width: 0 !important;
+            overflow: hidden !important;
+            transition: none !important;
+        }
+
+        html.sidebar-is-collapsed * {
+            transition: none !important;
+        }
+    </style>
 
     <script>
         (function() {
             const sidebarState = localStorage.getItem("sidebar-state");
-            if (sidebarState === "collapsed") {
+            const isMobile = window.innerWidth < 768;
+            if (sidebarState === "collapsed" || (!sidebarState && isMobile)) {
                 document.documentElement.classList.add('sidebar-is-collapsed');
             }
         })();
     </script>
+
+</head>
+
+<body>
 
     @include('backend.tag-officer.layouts.navbar')
     <div class="main-wrapper">
