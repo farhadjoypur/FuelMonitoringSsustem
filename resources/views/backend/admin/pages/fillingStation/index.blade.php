@@ -3,6 +3,7 @@
 @push('styles')
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
         *,
         *::before,
@@ -720,11 +721,46 @@
                 gap: 14px;
             }
         }
+
+
+        /* same height + border */
+        .select2-container--default .select2-selection--single {
+            height: 40px !important;
+            border: 1px solid #ced4da96 !important;
+            border-radius: 6px !important;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            background-color: #F8FAFC !important;
+        }
+
+        /* text alignment */
+        .select2-selection__rendered {
+            line-height: normal !important;
+            padding-left: 0 !important;
+            font-size: 14px;
+            color: #495057;
+        }
+
+        .select2-selection__arrow {
+            height: 100% !important;
+            right: 8px !important;
+        }
+
+        .select2-container--default.select2-container--focus .select2-selection--single {
+            border-color: #86b7fe !important;
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, .25);
+        }
+
+        /* dropdown */
+        .select2-dropdown {
+            border-radius: 6px !important;
+        }
     </style>
 @endpush
 
 @section('content')
-    <div class="fs-wrapper">
+    <div class="container-fluid p-4">
 
         {{-- HEADER --}}
         <div class="fs-header">
@@ -807,7 +843,7 @@
         @endif
 
         {{-- FILTERS --}}
-        <div class="fs-filter-card">
+        {{-- <div class="fs-filter-card">
             <div class="fs-filter-row">
                 <span class="fs-filter-label">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
@@ -825,21 +861,34 @@
                     </svg>
                     <input type="text" class="fs-input" id="searchInput" placeholder="Search by name, owner, code...">
                 </div>
+
+                <select class="fs-input select2" id="stationFilter" style="min-width:160px;">
+                    <option></option>
+                    <option value="">All Stations</option>
+                    @foreach ($allStationNames as $station)
+                        <option value="{{ $station->station_name }}">
+                            {{ $station->station_name }}
+                        </option>
+                    @endforeach
+                </select>
+
                 <select class="fs-input" id="divisionFilter" style="min-width:140px;cursor:pointer;">
-                    <option value="">All Divisions</option>
+                    <option value="">Divisions</option>
                     @foreach ($locations['divisions'] as $div)
                         <option value="{{ $div['name_en'] }}">{{ $div['name_en'] }}</option>
                     @endforeach
                 </select>
                 <select class="fs-input" id="statusFilter" style="min-width:130px;cursor:pointer;">
-                    <option value="">All Status</option>
+                    <option value="">Status</option>
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>
                 </select>
                 <select class="fs-input" id="companyFilter" style="min-width:140px;cursor:pointer;">
-                    <option value="">All Companies</option>
+                    <option value="">Companies</option>
                     @foreach ($companies as $company)
-                        <option value="{{ $company->name }}">{{ $company->name }}</option>
+                        <option value="{{ $company->name }}">
+                            {{ explode(' ', trim($company->name))[0] }}
+                        </option>
                     @endforeach
                 </select>
                 <button class="btn-clear" onclick="clearFilters()">
@@ -849,6 +898,61 @@
                     </svg>
                     Clear Filters
                 </button>
+            </div>
+        </div> --}}
+
+
+        <div class="fs-filter-card">
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+
+                <!-- Search -->
+                <input type="text" class="fs-input" id="searchInput" placeholder="Search..." style="min-width:200px;">
+
+                <!-- Station -->
+                <select class="fs-input select2" id="stationFilter" style="min-width:180px;">
+                    <option></option>
+                    <option value="">All Stations</option>
+                    @foreach ($allStationNames as $station)
+                        <option value="{{ $station->station_name }}">
+                            {{ $station->station_name }}
+                        </option>
+                    @endforeach
+                </select>
+
+                <!-- Division -->
+                <select class="fs-input" id="divisionFilter" style="min-width:150px;">
+                    <option value="">Division</option>
+                    @foreach ($locations['divisions'] as $div)
+                        <option value="{{ $div['name_en'] }}">{{ $div['name_en'] }}</option>
+                    @endforeach
+                </select>
+
+                <!-- Status -->
+                <select class="fs-input" id="statusFilter" style="min-width:130px;">
+                    <option value="">Status</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                </select>
+
+                <!-- Company -->
+                <select class="fs-input" id="companyFilter" style="min-width:160px;">
+                    <option value="">Company</option>
+                    @foreach ($companies as $company)
+                        <option value="{{ $company->name }}">
+                            {{ explode(' ', trim($company->name))[0] }}
+                        </option>
+                    @endforeach
+                </select>
+
+                <!-- Clear -->
+                <button class="btn-clear d-flex align-items-center gap-1" onclick="clearFilters()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    <span>Clear</span>
+                </button>
+
             </div>
         </div>
 
@@ -875,6 +979,7 @@
                         @forelse($stations as $station)
                             <tr data-division="{{ strtolower($station->division ?? '') }}"
                                 data-status="{{ strtolower($station->status ?? 'active') }}"
+                                data-station="{{ $station->station_name }}"
                                 data-company="{{ strtolower($station->company->name ?? '') }}">
                                 <td><span class="row-index">{{ $loop->iteration }}</span></td>
 
@@ -899,7 +1004,13 @@
                                     <span class="station-sub">{{ $station->owner_phone ?? '' }}</span>
                                 </td>
 
-                                <td>{{ $station->company->name ?? '—' }}</td>
+                                <td>
+                                    @if (isset($station->company->name))
+                                        {{ explode(' ', trim($station->company->name))[0] }}
+                                    @else
+                                        —
+                                    @endif
+                                </td>
                                 <td>{{ $station->tank_capacity ? number_format($station->tank_capacity) . ' L' : '—' }}
                                 </td>
 
@@ -924,11 +1035,11 @@
                                     <div class="actions-cell">
                                         {{-- View --}}
                                         <!-- <a href="{{ route('admin.stations.show', $station->id) }}" class="action-btn action-btn-view" title="View">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                                        <circle cx="12" cy="12" r="3"/>
-                                                    </svg>
-                                                </a> -->
+                                                                                                                                                                                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                                                                                                                                                                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                                                                                                                                                                                                            <circle cx="12" cy="12" r="3"/>
+                                                                                                                                                                                                                        </svg>
+                                                                                                                                                                                                                    </a> -->
 
                                         {{-- Edit → opens modal --}}
                                         <button type="button" class="action-btn action-btn-edit" title="Edit"
@@ -1181,6 +1292,16 @@
 
 @endsection
 @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            $('.select2').select2({
+                placeholder: "Search station...",
+                allowClear: true,
+                width: 'resolve'
+            });
+        });
+    </script>
     <script>
         // ═══════════════════════════════════════════════════════════
         //  LOCATIONS DATA (একবারই declare)
@@ -1251,12 +1372,14 @@
         const companyFilter = document.getElementById('companyFilter');
         const tableBody = document.getElementById('tableBody');
         const noResults = document.getElementById('noResultsRow');
+        const stationFilter = document.getElementById('stationFilter');
 
         function applyFilters() {
             const q = searchInput.value.toLowerCase().trim();
             const division = divisionFilter.value.toLowerCase();
             const status = statusFilter.value.toLowerCase();
             const company = companyFilter.value.toLowerCase();
+            const station = stationFilter.value.toLowerCase();
             let visible = 0;
 
             tableBody.querySelectorAll('tr').forEach(row => {
@@ -1265,7 +1388,9 @@
                 const matchD = !division || (row.dataset.division || '').toLowerCase().includes(division);
                 const matchS = !status || (row.dataset.status || '').toLowerCase() === status;
                 const matchC = !company || (row.dataset.company || '').toLowerCase().includes(company);
-                const show = matchQ && matchD && matchS && matchC;
+                const matchStation = !station || (row.dataset.station || '').toLowerCase().includes(station);
+                // const show = matchQ && matchD && matchS && matchC;
+                const show = matchQ && matchD && matchS && matchC && matchStation;
                 row.style.display = show ? '' : 'none';
                 if (show) visible++;
             });
@@ -1275,6 +1400,7 @@
 
         function clearFilters() {
             searchInput.value = divisionFilter.value = statusFilter.value = companyFilter.value = '';
+            $('#stationFilter').val(null).trigger('change');
             applyFilters();
         }
 
@@ -1282,6 +1408,11 @@
         divisionFilter?.addEventListener('change', applyFilters);
         statusFilter?.addEventListener('change', applyFilters);
         companyFilter?.addEventListener('change', applyFilters);
+        // stationFilter?.addEventListener('change', applyFilters);
+        $('#stationFilter').on('change', function() {
+            applyFilters();
+        });
+
 
         // ═══════════════════════════════════════════════════════════
         //  CREATE MODAL — Open

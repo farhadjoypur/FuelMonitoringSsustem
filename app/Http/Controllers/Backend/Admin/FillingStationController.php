@@ -27,8 +27,8 @@ class FillingStationController extends Controller
     {
         $path = resource_path('data/location.json');
 
-        if (!file_exists($path)) {
-            dd("Location file not found at: " . $path);
+        if (! file_exists($path)) {
+            dd('Location file not found at: '.$path);
         }
 
         $locations = json_decode(file_get_contents($path), true);
@@ -42,13 +42,15 @@ class FillingStationController extends Controller
 
         $divisions = FillingStation::whereNotNull('division')->distinct()->pluck('division');
         $companies = Company::orderBy('name')->get(['id', 'name']);
+        $allStationNames = FillingStation::orderBy('station_name')->get(['id', 'station_name']);
 
         return view('backend.admin.pages.fillingStation.index', compact(
             'stations',
             'totalStations', 'activeStations', 'inactiveStations',
             'govtStations', 'privateStations',
             'divisions', 'companies',
-            'locations'
+            'locations',
+            'allStationNames'
         ));
     }
 
@@ -120,7 +122,7 @@ class FillingStationController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Updated successfully',    
+            'message' => 'Updated successfully',
         ]);
     }
 
