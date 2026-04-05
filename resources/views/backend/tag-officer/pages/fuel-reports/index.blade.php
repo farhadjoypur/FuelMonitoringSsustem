@@ -726,6 +726,38 @@
                 border-right: none;
             }
         }
+        /* ── Responsive Table ── */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Prevent table from breaking */
+        .reports-table {
+            min-width: 1100px; /* adjust if needed */
+        }
+
+        /* Optional: better mobile spacing */
+        @media (max-width: 768px) {
+
+            .saved-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .export-btns {
+                width: 100%;
+                flex-wrap: wrap;
+            }
+
+            .btn-export-pdf,
+            .btn-export-excel {
+                flex: 1;
+                justify-content: center;
+            }
+        }
     </style>
 @endpush
 
@@ -930,7 +962,7 @@
                     </a>
                 </div>
             </div>
-
+        <div class="table-responsive">
             <table class="reports-table">
                 <thead>
                     <tr>
@@ -1126,7 +1158,7 @@
                     @endforelse
                 </tbody>
             </table>
-
+        </div>
             @if ($reports->hasPages())
                 <div style="padding:16px 20px;border-top:1px solid #f1f5f9;">
                     {{ $reports->links() }}
