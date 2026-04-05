@@ -206,11 +206,12 @@
                         <tr style="font-size: 0.85rem; text-transform: uppercase;">
                             <th>SL</th>
                             <th>Name</th>
-                            <th>Designation</th>
-                            <th>Department</th>
+                            {{-- <th>Designation</th>
+                            <th>Department</th> --}}
                             <th>Division</th>
                             <th>District</th>
                             <th>Thana</th>
+                            <th>Email</th>
                             <th>Phone</th>
                             <th>Status</th>
                             <th class="text-center">Actions</th>
@@ -226,7 +227,7 @@
                                     {{ $officer->profile->name ?? '-' }}
                                 </td>
 
-                                <td>
+                                {{-- <td>
                                     <span class="text-muted small">
                                         {{ $officer->profile->designation ?? '-' }}
                                     </span>
@@ -235,13 +236,14 @@
                                     <span class="text-muted small">
                                         {{ $officer->profile->department ?? '-' }}
                                     </span>
-                                </td>
+                                </td> --}}
 
                                 <td>{{ $officer->profile->division ?? '-' }}</td>
 
                                 <td>{{ $officer->profile->district ?? '-' }}</td>
                                 <td>{{ $officer->profile->upazila ?? '-' }}</td>
 
+                                <td>{{ $officer->email ?? '-' }}</td>
                                 <td>{{ $officer->phone ?? '-' }}</td>
 
                                 <td>
