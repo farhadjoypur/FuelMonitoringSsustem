@@ -93,9 +93,13 @@
                             @endphp
                             {{ strtoupper($initials) }}
                         </div>
-                        <h4 class="fw-bold mb-1">{{ auth()->user()->profile->name ?? '' }}</h4>
-                        <p class="text-muted mb-3 text-uppercase" style="font-size: 13px; letter-spacing: 1px;">
-                            {{ \App\Enums\UserRole::list()[auth()->user()->role] ?? 'Unknown Role' }}
+                        <h4 class="fw-bold mb-1">{{ auth()->user()->profile->name ?? 'User Name' }}</h4>
+                        <p class="text-dark mb-3" style="font-size: 13px; letter-spacing: 0.5px;">
+                            Deputy Commissioner <br>
+                            <span class="text-dark">
+                                {{-- {{ auth()->user()->profile->upazila ?? 'Upazila' }}, --}}
+                                {{ auth()->user()->profile->district ?? 'District' }}
+                            </span>
                         </p>
                         <div>
                             <span class="badge-active">{{ auth()->user()->status ?? 'Active' }}</span>

@@ -94,8 +94,8 @@
                             {{ strtoupper($initials) }}
                         </div>
                         <h4 class="fw-bold mb-1">{{ auth()->user()->profile->name ?? '' }}</h4>
-                        <p class="text-muted mb-3 text-uppercase" style="font-size: 13px; letter-spacing: 1px;">
-                            {{ \App\Enums\UserRole::list()[auth()->user()->role] ?? 'Unknown Role' }}
+                        <p class="text-dark mb-3" style="font-size: 13px; letter-spacing: 1px;">
+                            System Administrator
                         </p>
                         <div>
                             <span class="badge-active">{{ auth()->user()->status ?? 'Active' }}</span>
