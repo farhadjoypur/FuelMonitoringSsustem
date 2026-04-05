@@ -68,8 +68,8 @@ class FillingStationController extends Controller
     {
         $request->validate([
             'company_id' => 'required',
-            'station_name' => 'required',
-            'station_code' => 'required|unique:filling_stations',
+            'station_name' => 'required|unique:filling_stations,station_name',
+            'station_code' => 'required|unique:filling_stations,station_code',
         ]);
 
         $data = $request->all();
