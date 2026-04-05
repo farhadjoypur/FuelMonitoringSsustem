@@ -37,13 +37,13 @@
             </li> --}}
 
 
-            {{-- <li class="menu-item">
-                <a href="{{ route('dc.profile.index') }}"
-                    class="menu-link {{ request()->routeIs('dc.profile.*') ? 'active' : '' }}">
+            <li class="menu-item">
+                <a href="{{ route('uno.profile.index') }}"
+                    class="menu-link {{ request()->routeIs('uno.profile.*') ? 'active' : '' }}">
                     <span class="material-symbols-rounded">person</span>
                     <span class="menu-label">Profile</span>
                 </a>
-            </li> --}}
+            </li>
 
 
 

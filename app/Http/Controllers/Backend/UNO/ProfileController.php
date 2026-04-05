@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\Backend\UNO;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class ProfileController extends Controller
 {
@@ -52,7 +55,41 @@ class ProfileController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|max:150',
+            'phone' => 'required|string|max:20|unique:users,phone,'.$id,
+            'email' => 'required|email|unique:users,email,'.$id,
+            'password' => 'nullable|min:6|confirmed',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $user = User::findOrFail($id);
+
+            $user->email = $request->email;
+            $user->phone = $request->phone;
+
+            if ($request->filled('password')) {
+                $user->password = Hash::make($request->password);
+            }
+            $user->save();
+            $user->profile()->updateOrCreate(
+                ['user_id' => $user->id],
+                ['name' => $request->name]
+            );
+
+            DB::commit();
+
+            return redirect()->back()->with('success', 'Profile updated successfully!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Something went wrong: '.$e->getMessage());
+        }
     }
 
     /**

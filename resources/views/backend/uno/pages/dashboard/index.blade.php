@@ -6,9 +6,9 @@
 @endpush
 
 @section('content')
-    <main>
+    <div class="container-fluid p-4">
         UNO Dashboard
-    </main>
+    </div>
 @endsection
 
 @push('scripts')
