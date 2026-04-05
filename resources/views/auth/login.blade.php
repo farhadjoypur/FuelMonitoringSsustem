@@ -47,19 +47,17 @@
         }
 
         .bd-logo {
-            width: 60px;
-            margin-bottom: 15px;
+            width: 80px;
         }
 
         .welcome-text {
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             margin-bottom: 0;
             font-weight: 500;
         }
 
         .system-title {
-            font-size: 2.2rem;
-            /* টাইটেল কিছুটা ছোট করা হয়েছে */
+            font-size: 2rem;
             font-weight: 700;
             line-height: 1.2;
         }
@@ -77,7 +75,6 @@
             border-radius: 10px;
             width: 100%;
             max-width: 360px;
-            /* কার্ড ছোট করা হয়েছে */
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
             text-align: center;
         }
@@ -171,15 +168,26 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-md-6 left-content">
-                    <img src="{{ asset('backend/assets/images/logo.png') }}" alt="BD Logo" class="bd-logo">
-                    <p class="welcome-text">Welcome To</p>
-                    <h1 class="system-title">Fuel Monitoring <br> System</h1>
+                    <div class="d-flex align-items-center gap-3 flex-column flex-md-row text-center text-md-start">
+
+                        <img src="{{ asset('backend/assets/images/logo.png') }}" alt="BD Logo"
+                            class="bd-logo mb-2 mb-md-0">
+
+                        <div>
+                            <p class="welcome-text mb-1">Welcome To</p>
+                            <h1 class="system-title mb-0">
+                                Fuel Distribution <br>
+                                Management System
+                            </h1>
+                        </div>
+
+                    </div>
                 </div>
 
                 <div class="col-md-6 login-card-container">
                     <div class="login-card">
                         <div class="avatar-circle">FM</div>
-                        <h2 class="card-title">Fuel Monitoring System</h2>
+                        <h2 class="card-title">Fuel Distribution Monitoring System</h2>
                         <p class="card-subtitle my-3">Login Here</p>
 
                         <form action="{{ route('login') }}" method="POST">
@@ -210,10 +218,16 @@
                                         class="input-group-text @error('password') border-danger text-danger @enderror">
                                         <i class="bi bi-lock"></i>
                                     </span>
-                                    <input type="password" name="password"
+
+                                    <input type="password" name="password" id="password"
                                         class="form-control @error('password') is-invalid @enderror"
-                                        placeholder="Enter password">
+                                        placeholder="Enter password"> <button class="btn d-flex align-items-center"
+                                        type="button" id="togglePassword"
+                                        style="border-left: none; border-color: #dee2e6;">
+                                        <i class="bi bi-eye" id="eyeIcon"></i>
+                                    </button>
                                 </div>
+
                                 @error('password')
                                     <div class="text-danger mt-1" style="font-size: 0.8rem;">
                                         <strong>{{ $message }}</strong>
@@ -231,6 +245,18 @@
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+    <script>
+        const togglePassword = document.querySelector('#togglePassword');
+        const password = document.querySelector('#password');
+        const eyeIcon = document.querySelector('#eyeIcon');
+
+        togglePassword.addEventListener('click', function(e) {
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            eyeIcon.classList.toggle('bi-eye');
+            eyeIcon.classList.toggle('bi-eye-slash');
+        });
+    </script>
     <script>
         $(document).ready(function() {
             toastr.options = {
