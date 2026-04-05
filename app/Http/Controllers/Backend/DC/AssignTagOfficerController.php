@@ -18,7 +18,13 @@ class AssignTagOfficerController extends Controller
      */
     public function index(Request $request)
     {
-        $query = AssignTagOfficer::with(['officer.profile', 'fillingStation']);
+        $dcProfile = Auth::user()->profile;
+        $dcDistrict = $dcProfile->district ?? null;
+
+        $query = AssignTagOfficer::with(['officer.profile', 'fillingStation'])
+            ->whereHas('officer.profile', function ($q) use ($dcDistrict) {
+                $q->where('district', $dcDistrict);
+            });
 
         if ($request->has('search') && $request->search != '') {
             $searchTerm = $request->search;
@@ -37,11 +43,18 @@ class AssignTagOfficerController extends Controller
         $assignments = $query->latest()->paginate(10)->withQueryString();
 
         $officers = User::select('id')
-            ->with('profile:id,user_id,name')
+            ->whereHas('profile', function ($q) use ($dcDistrict) {
+                $q->where('district', $dcDistrict);
+            })
+            ->with(['profile' => function ($q) {
+                $q->select('id', 'user_id', 'name', 'upazila', 'district');
+            }])
             ->where('role', UserRole::TAG_OFFICER)
             ->get();
 
-        $stations = FillingStation::select('id', 'station_name')->get();
+        $stations = FillingStation::select('id', 'station_name', 'upazila', 'district')
+            ->where('district', $dcDistrict)
+            ->get();
 
         return view('backend.dc.pages.assignTagOfficer.index', compact('assignments', 'officers', 'stations'));
     }
