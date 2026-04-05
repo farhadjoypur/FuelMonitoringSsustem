@@ -36,11 +36,11 @@ class AssignTagOfficerController extends Controller
         $assignments = $query->latest()->paginate(10)->withQueryString();
 
         $officers = User::select('id')
-            ->with('profile:id,user_id,name')
+            ->with('profile:id,user_id,name,upazila')
             ->where('role', UserRole::TAG_OFFICER)
             ->get();
 
-        $stations = FillingStation::select('id', 'station_name')->get();
+        $stations = FillingStation::select('id', 'station_name', 'upazila')->get();
 
         return view('backend.admin.pages.assignTagOfficer.index', compact('assignments', 'officers', 'stations'));
     }

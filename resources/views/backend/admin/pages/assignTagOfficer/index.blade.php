@@ -195,7 +195,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="text-center py-5 text-muted">
+                                    <td colspan="12" class="text-center py-5 text-muted">
                                         <i class="bi bi-info-circle d-block mb-2 fs-3"></i>
                                         No assignments found.
                                     </td>
@@ -226,12 +226,11 @@
 
                         <div class="mb-3">
                             <label class="form-label small fw-bold text-muted">Select Officer *</label>
-                            <select name="officer_id"
-                                class="form-select searchable-select @error('officer_id') is-invalid @enderror">
+                            <select name="officer_id" id="officerSelect" class="form-select searchable-select">
                                 <option value="">Select Officer</option>
                                 @foreach ($officers as $officer)
                                     <option value="{{ $officer->id }}"
-                                        {{ old('officer_id') == $officer->id ? 'selected' : '' }}>
+                                        data-upazila="{{ $officer->profile->upazila ?? '' }}">
                                         {{ $officer->profile->name ?? '-' }}
                                     </option>
                                 @endforeach
@@ -241,14 +240,13 @@
                             @enderror
                         </div>
 
+                        <!-- Station Select -->
                         <div class="mb-3">
                             <label class="form-label small fw-bold text-muted">Select Filling Station*</label>
-                            <select name="filling_station_id"
-                                class="form-select searchable-select @error('filling_station_id') is-invalid @enderror">
+                            <select name="filling_station_id" id="stationSelect" class="form-select searchable-select">
                                 <option value="">Select Station</option>
                                 @foreach ($stations as $station)
-                                    <option value="{{ $station->id }}"
-                                        {{ old('filling_station_id') == $station->id ? 'selected' : '' }}>
+                                    <option value="{{ $station->id }}" data-upazila="{{ $station->upazila }}">
                                         {{ $station->station_name }}
                                     </option>
                                 @endforeach
@@ -257,6 +255,10 @@
                                 <span class="text-danger small">{{ $message }}</span>
                             @enderror
                         </div>
+
+
+
+
 
                         <div class="mb-3">
                             <label class="form-label small fw-bold text-muted">Assign Date *</label>
@@ -327,6 +329,7 @@
                                 class="form-select searchable-select @error('officer_id') is-invalid @enderror">
                                 @foreach ($officers as $officer)
                                     <option value="{{ $officer->id }}"
+                                        data-upazila="{{ $officer->profile->upazila ?? '' }}"
                                         {{ old('officer_id') == $officer->id ? 'selected' : '' }}>
                                         {{ $officer->profile->name ?? '-' }}
                                     </option>
@@ -342,7 +345,7 @@
                             <select name="filling_station_id" id="edit_station_id"
                                 class="form-select searchable-select @error('filling_station_id') is-invalid @enderror">
                                 @foreach ($stations as $station)
-                                    <option value="{{ $station->id }}"
+                                    <option value="{{ $station->id }}" data-upazila="{{ $station->upazila }}"
                                         {{ old('filling_station_id') == $station->id ? 'selected' : '' }}>
                                         {{ $station->station_name }}
                                     </option>
@@ -393,88 +396,127 @@
 
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            $('#assignOfficerModal .searchable-select').select2({
-                dropdownParent: $('#assignOfficerModal'),
-                width: '100%',
-                placeholder: "Select an option"
-            });
-
-            $('#editAssignOfficerModal .searchable-select').select2({
-                dropdownParent: $('#editAssignOfficerModal'),
-                width: '100%',
-                allowClear: true,
-                placeholder: "Select an option"
-            });
-        });
-    </script>
-
-    <script>
-        let timer;
-        $('#searchInput').on('keyup', function() {
-            clearTimeout(timer);
-            timer = setTimeout(function() {
-                $(this).closest('form').submit();
-            }.bind(this), 500);
-        });
-    </script>
-
-    <script>
-        $(document).on('click', '.delete-confirm', function(e) {
-            let form = $(this).closest('form');
-
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "You won't be able to revert this!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Yes, delete it!',
-                cancelButtonText: 'Cancel',
-                reverseButtons: true
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    form.submit();
-                }
-            });
-        });
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         $(document).ready(function() {
+            // ১. ব্যাকআপ রাখা (যাতে ফিল্টার করার সময় মূল লিস্ট হারিয়ে না যায়)
+            const createStationBackup = $('#stationSelect').html();
+            const editStationBackup = $('#edit_station_id').html();
 
+            function initSelect2(modalId) {
+                $(modalId + ' .searchable-select').each(function() {
+                    $(this).select2({
+                        width: '100%',
+                        placeholder: "Select an option",
+                        allowClear: true,
+                        dropdownParent: $(this).closest('.modal')
+                    });
+                });
+            }
+
+            initSelect2('#assignOfficerModal');
+            initSelect2('#editAssignOfficerModal');
+
+            // ২. ফিল্টারিং ফাংশন
+            function filterStationOptions(officerSelectId, stationSelectId, backupHtml) {
+                const officerSelect = $(officerSelectId);
+                const stationSelect = $(stationSelectId);
+
+                // সিলেক্ট করা অফিসারের উপজেলা গেট করা
+                const selectedUpazila = officerSelect.find(':selected').data('upazila') || '';
+
+                // ড্রপডাউন খালি করে প্রিসেট অপশন যোগ করা
+                stationSelect.empty().append('<option value="">Select Station</option>');
+
+                // ব্যাকআপ থেকে ম্যাচিং উপজেলা ফিল্টার করে অ্যাপেন্ড করা
+                $(backupHtml).each(function() {
+                    if (!$(this).val()) return;
+                    if ($(this).data('upazila') == selectedUpazila) {
+                        stationSelect.append($(this).clone());
+                    }
+                });
+
+                stationSelect.trigger('change');
+            }
+
+            // ৩. Create Modal Event
+            $('#officerSelect').on('change', function() {
+                filterStationOptions('#officerSelect', '#stationSelect', createStationBackup);
+            });
+
+            // ৪. Edit Modal Event
+            $('#edit_officer_id').on('change', function() {
+                filterStationOptions('#edit_officer_id', '#edit_station_id', editStationBackup);
+            });
+
+            // ৫. Edit Button Click (পপুলেট করার সময় ফিল্টার কল করা)
             $(document).on('click', '.edit-btn', function() {
-                var id = $(this).data('id');
-                var officer_id = $(this).data('officer_id');
-                var station_id = $(this).data('station_id');
-                var date = $(this).data('date');
-                var status = $(this).data('status');
-                var url = $(this).data('url');
+                const url = $(this).data('url');
+                const officer_id = $(this).data('officer_id');
+                const station_id = $(this).data('station_id');
+                const date = $(this).data('date');
+                const status = $(this).data('status');
+                const remarks = $(this).data('remarks');
 
                 $('#editAssignForm').attr('action', url);
                 $('#edit_url_handler').val(url);
 
+                // অফিসার ভ্যালু সেট করা
                 $('#edit_officer_id').val(officer_id).trigger('change');
-                $('#edit_station_id').val(station_id).trigger('change');
+
+                // **গুরুত্বপূর্ণ:** এডিট মোডালের জন্য ফিল্টার কল করা
+                filterStationOptions('#edit_officer_id', '#edit_station_id', editStationBackup);
+
+                // স্টেশন সিলেক্ট করার জন্য সামান্য ডিলে রাখা (যাতে ফিল্টার রেন্ডার হতে পারে)
+                setTimeout(() => {
+                    $('#edit_station_id').val(station_id).trigger('change');
+                }, 150);
 
                 $('#edit_assign_date').val(date);
                 $('#edit_status').val(status);
+                $('#editAssignForm input[name="remarks"]').val(remarks);
 
                 $('#editAssignOfficerModal').modal('show');
             });
 
+            // ৭. সার্চ ইনপুট অটো সাবমিট (Debounce)
+            let timer;
+            $('#searchInput').on('keyup', function() {
+                clearTimeout(timer);
+                timer = setTimeout(() => {
+                    $(this).closest('form').submit();
+                }, 500);
+            });
+
+            // ৮. ডিলিট কনফার্মেশন (SweetAlert2)
+            $(document).on('click', '.delete-confirm', function() {
+                const form = $(this).closest('form');
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, delete it!',
+                    cancelButtonText: 'Cancel'
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+
+            // ৯. ভ্যালিডেশন এরর থাকলে মোডাল অটো ওপেন রাখা
             @if ($errors->any())
                 @if (old('form_type') == 'edit')
-
-                    var oldUrl = "{{ old('edit_url_handler') }}";
+                    const oldUrl = "{{ old('edit_url_handler') }}";
                     if (oldUrl) {
                         $('#editAssignForm').attr('action', oldUrl);
                     }
                     $('#editAssignOfficerModal').modal('show');
                 @else
-
                     $('#assignOfficerModal').modal('show');
                 @endif
             @endif
