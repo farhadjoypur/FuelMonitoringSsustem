@@ -1,6 +1,6 @@
 @extends('backend.admin.layouts.app')
 
-@section('title', 'Tag Officer Management')
+@section('title', 'UNO Officer Management')
 
 @push('styles')
     <style>
@@ -91,13 +91,13 @@
     <div class="container-fluid p-4">
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
             <div>
-                <h4 class="fw-bold">Tag Officer Management</h4>
-                <p class="text-muted small">Manage Tag Officers Information and Assignments</p>
+                <h4 class="fw-bold">UNO Management</h4>
+                <p class="text-muted small">Manage UNO Officers Information and Assignments</p>
             </div>
 
             <button class="btn btn-primary px-4 py-2 w-sm-100 w-auto" data-bs-toggle="modal" data-bs-target="#addOfficerModal"
                 style="background-color: #006699; border-radius: 8px; border: none;">
-                <i class="bi bi-plus-lg me-2"></i> Add Tag Officer
+                <i class="bi bi-plus-lg me-2"></i> Add UNO Officer
             </button>
         </div>
 
@@ -105,7 +105,7 @@
             <div class="col-md-3">
                 <div class="card card-stats bg-cyan">
                     <i class="bi bi-shield-check fs-4 mb-2"></i>
-                    <div class="small">Total Tag Officers</div>
+                    <div class="small">Total UNO Officers</div>
                     <h2 class="fw-bold mb-0">{{ $stats['total'] }}</h2>
                 </div>
             </div>
@@ -132,8 +132,7 @@
             </div>
         </div> --}}
 
-        <form action="{{ route('admin.tag-officer.index') }}" method="GET"
-            class="bg-white p-3 rounded shadow-sm border mb-4">
+        <form action="{{ route('admin.uno.index') }}" method="GET" class="bg-white p-3 rounded shadow-sm border mb-4">
             <div class="row g-2 align-items-end">
 
                 {{-- Search Field with Button --}}
@@ -189,7 +188,7 @@
                         <i class="bi bi-funnel-fill me-1"></i> Filter
                     </button>
 
-                    <a href="{{ route('admin.tag-officer.index') }}"
+                    <a href="{{ route('admin.uno.index') }}"
                         class="btn btn-outline-secondary shadow-sm d-flex align-items-center justify-content-center"
                         style="border-radius: 8px; height: 38px; border-color: #dee2e6; min-width: 45px;">
                         <i class="bi bi-arrow-clockwise"></i>
@@ -211,15 +210,14 @@
                             <th>Division</th>
                             <th class="text-nowrap">District / City Corporation</th>
                             <th class="text-nowrap">Thana / Upazila</th>
-                            {{-- <th>Email</th> --}}
+                            <th>Email</th>
                             <th>Phone</th>
-                            <th class="text-nowrap">Assigned Station</th>
                             <th>Status</th>
                             <th class="text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="dcTableBody">
-                        @forelse($tagOfficers as $officer)
+                        @forelse($unoOfficers as $officer)
                             <tr>
                                 <td class="fw-bold text-muted" style="font-size: 0.85rem;">
                                     {{ $loop->iteration }}
@@ -244,23 +242,9 @@
                                 <td>{{ $officer->profile->district ?? '-' }}</td>
                                 <td>{{ $officer->profile->upazila ?? '-' }}</td>
 
-                                {{-- <td>{{ $officer->email ?? '-' }}</td> --}}
+                                <td>{{ $officer->email ?? '-' }}</td>
                                 <td>{{ $officer->phone ?? '-' }}</td>
-                                <td>
-                                    @php $count = $officer->assigned_stations_count ?? 0; @endphp
 
-                                    @if ($count > 0)
-                                        <span class="badge bg-info-subtle text-info border border-info-subtle px-3 py-2"
-                                            style="font-size: 12px; width:100px">
-                                            {{ $count }} {{ Str::plural('Station', $count) }}
-                                        </span>
-                                    @else
-                                        <span class="badge bg-light text-muted border px-3 py-2"
-                                            style="font-size: 12px; width:100px">
-                                            No Station
-                                        </span>
-                                    @endif
-                                </td>
                                 <td>
                                     @if (strtolower($officer->status) == 'active')
                                         <span
@@ -286,13 +270,12 @@
                                             data-division="{{ $officer->profile->division ?? '' }}"
                                             data-district="{{ $officer->profile->district ?? '' }}"
                                             data-upazila="{{ $officer->profile->upazila ?? '' }}"
-                                            data-url="{{ route('admin.tag-officer.update', $officer->id) }}"
-                                            title="Edit">
+                                            data-url="{{ route('admin.uno.update', $officer->id) }}" title="Edit">
                                             <i class="bi bi-pencil-square"></i>
                                         </button>
 
-                                        <form action="{{ route('admin.tag-officer.destroy', $officer->id) }}"
-                                            method="POST" class="d-inline delete-form">
+                                        <form action="{{ route('admin.uno.destroy', $officer->id) }}" method="POST"
+                                            class="d-inline delete-form">
                                             @csrf
                                             @method('DELETE')
                                             <button type="button" class="btn-action btn-delete delete-confirm"
@@ -305,7 +288,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="12" class="text-center py-4 text-muted">No Tag Officers found.</td>
+                                <td colspan="12" class="text-center py-4 text-muted">No UNO Officers found.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -314,20 +297,19 @@
         </div>
 
         <div class="my-4">
-            {{ $tagOfficers->links('pagination::bootstrap-5') }}
+            {{ $unoOfficers->links('pagination::bootstrap-5') }}
         </div>
     </div>
 
-    <div class="modal fade" id="addOfficerModal" tabindex="-1" aria-labelledby="addOfficerModalLabel"
-        aria-hidden="true">
+    <div class="modal fade" id="addOfficerModal" tabindex="-1" aria-labelledby="addOfficerModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content" style="border-radius: 15px;">
                 <div class="modal-header border-0 pt-4 px-4">
-                    <h5 class="modal-title fw-bold" id="addOfficerModalLabel">Add Tag Officer</h5>
+                    <h5 class="modal-title fw-bold" id="addOfficerModalLabel">Add UNO Officer</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body px-4">
-                    <form action="{{ route('admin.tag-officer.store') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('admin.uno.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
 
                         <div class="mb-3">
@@ -464,7 +446,7 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content" style="border-radius: 15px;">
                 <div class="modal-header border-0 pt-4 px-4">
-                    <h5 class="modal-title fw-bold">Edit Tag Officer</h5>
+                    <h5 class="modal-title fw-bold">Edit UNO Officer</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 

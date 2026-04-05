@@ -10,8 +10,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 
-class TagOfficerController extends Controller
+class UnoController extends Controller
 {
+    /**
+     * Display a listing of the resource.
+     */
     private function getLocationData()
     {
         $path = resource_path('data/location.json');
@@ -32,9 +35,8 @@ class TagOfficerController extends Controller
         $district = $request->input('district');
         $upazila = $request->input('upazila');
 
-        $query = User::where('role', UserRole::TAG_OFFICER)
+        $query = User::where('role', UserRole::UNO)
             ->with('profile')
-            ->withCount('assignedStations')
             ->when($search, function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('phone', 'LIKE', "%{$search}%")
@@ -62,19 +64,11 @@ class TagOfficerController extends Controller
                 });
             });
 
-        $tagOfficers = $query->latest()->paginate(10)->withQueryString();
+        $unoOfficers = $query->latest()->paginate(10)->withQueryString();
 
         $locationData = $this->getLocationData();
 
-        return view('backend.admin.pages.tagOfficer.index', compact('tagOfficers', 'locationData', 'search'));
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        return view('backend.admin.pages.uno.index', compact('unoOfficers', 'locationData', 'search'));
     }
 
     /**
@@ -103,7 +97,7 @@ class TagOfficerController extends Controller
                 'phone' => $request->phone,
                 'status' => 'active',
                 'password' => Hash::make($request->password),
-                'role' => UserRole::TAG_OFFICER,
+                'role' => UserRole::UNO,
             ]);
 
             $photoPath = null;
@@ -127,7 +121,7 @@ class TagOfficerController extends Controller
 
             DB::commit();
 
-            return redirect()->back()->with('success', 'Tag Officer added successfully!');
+            return redirect()->back()->with('success', 'UNO Officer added successfully!');
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -136,6 +130,9 @@ class TagOfficerController extends Controller
         }
     }
 
+    /**
+     * Display the specified resource.
+     */
     public function show(string $id)
     {
         //
@@ -149,75 +146,19 @@ class TagOfficerController extends Controller
         //
     }
 
-    public function update(Request $request, $id)
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
     {
-        $user = User::findOrFail($id);
-
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'nullable|email|unique:users,email,'.$id,
-            'phone' => 'required|string|unique:users,phone,'.$id,
-            'designation' => 'nullable|string',
-            'department' => 'nullable|string',
-            'division' => 'required',
-            'district' => 'required',
-            'upazila' => 'required',
-            'status' => 'required',
-            'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'password' => 'nullable|min:6',
-        ]);
-
-        $userData = [
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'status' => $request->status,
-        ];
-
-        if ($request->filled('password')) {
-            $userData['password'] = Hash::make($request->password);
-        }
-
-        $user->update($userData);
-
-        $profileData = [
-            'name' => $request->name,
-            'designation' => $request->designation,
-            'department' => $request->department,
-            'division' => $request->division,
-            'district' => $request->district,
-            'upazila' => $request->upazila,
-        ];
-
-        if ($request->hasFile('photo')) {
-            if ($user->profile && $user->profile->photo && File::exists(public_path($user->profile->photo))) {
-                File::delete(public_path($user->profile->photo));
-            }
-
-            $fileName = time().'.'.$request->photo->extension();
-            $request->photo->move(public_path('uploads/officers'), $fileName);
-            $profileData['photo'] = 'uploads/officers/'.$fileName;
-        }
-
-        if ($user->profile) {
-            $user->profile->update($profileData);
-        } else {
-            $user->profile()->create($profileData);
-        }
-
-        return redirect()->back()->with('success', 'Officer updated successfully!');
+        //
     }
 
-    public function destroy($id)
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
     {
-        $user = User::findOrFail($id);
-        if ($user->profile && $user->profile->photo) {
-            $fullPath = public_path($user->profile->photo);
-            if (File::exists($fullPath)) {
-                File::delete($fullPath);
-            }
-        }
-        $user->delete();
-
-        return redirect()->back()->with('success', 'Tag Officer deleted successfully!');
+        //
     }
 }

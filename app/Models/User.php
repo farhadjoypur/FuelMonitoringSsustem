@@ -53,4 +53,9 @@ class User extends Authenticatable
     {
         return $this->hasOne(Profile::class, 'user_id');
     }
+
+    public function assignedStations()
+    {
+        return $this->hasMany(AssignTagOfficer::class, 'officer_id');
+    }
 }

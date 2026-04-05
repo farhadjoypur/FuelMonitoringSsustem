@@ -11,8 +11,8 @@ use App\Http\Controllers\Backend\Admin\FillingStationController;
 use App\Http\Controllers\Backend\Admin\ProfileController;
 use App\Http\Controllers\Backend\Admin\ReportsController;
 use App\Http\Controllers\Backend\Admin\TagOfficerController;
+use App\Http\Controllers\Backend\Admin\UnoController;
 use Illuminate\Support\Facades\Route;
-
 
 Route::prefix('admin')->middleware(['role:'.UserRole::ADMIN])->as('admin.')->group(function () {
     Route::resource('dashboard', DashboardController::class);
@@ -24,10 +24,11 @@ Route::prefix('admin')->middleware(['role:'.UserRole::ADMIN])->as('admin.')->gro
     Route::get('depots/{id}/get', [DepotController::class, 'getDepot'])->name('depots.get');
     Route::resource('tag-officer', TagOfficerController::class);
     Route::resource('dc-officer', DcOfficerController::class);
+    Route::resource('uno', UnoController::class);
     Route::resource('assign-tag-officer', AssignTagOfficerController::class);
     Route::resource('admin-user', AdminUserController::class);
 
-    // reports 
+    // reports
 
     Route::get('reports/sales', [ReportsController::class, 'index'])->name('reports.index');
 });

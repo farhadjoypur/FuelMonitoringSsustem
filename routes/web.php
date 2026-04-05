@@ -13,4 +13,5 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 require __DIR__.'/admin.php';
 require __DIR__.'/dc.php';
+require __DIR__.'/uno.php';
 require __DIR__.'/tag-officer.php';

@@ -17,7 +17,7 @@
                 </a>
             </li>
 
-          
+
 
             {{-- COMPANY (SIMPLE MENU) --}}
             <li class="menu-item">
@@ -55,6 +55,14 @@
                 </a>
             </li>
 
+            <li class="menu-item">
+                <a href="{{ route('admin.uno.index') }}"
+                    class="menu-link {{ request()->routeIs('admin.uno.*') ? 'active' : '' }}">
+                    <span class="material-symbols-rounded">badge</span>
+                    <span class="menu-label">UNO Officer</span>
+                </a>
+            </li>
+
             {{-- TAG OFFICER --}}
             <li class="menu-item">
                 <a href="{{ route('admin.tag-officer.index') }}"
@@ -75,13 +83,13 @@
 
             {{-- Report --}}
 
-                <li class="menu-item">
-                    <a href="{{ route('admin.reports.index') }}"
-                        class="menu-link {{ request()->routeIs('admin.reports.index') ? 'active' : '' }}">
-                        <span class="material-symbols-rounded">bar_chart</span>
-                        <span class="menu-label">Reports</span>
-                    </a>
-                </li>
+            <li class="menu-item">
+                <a href="{{ route('admin.reports.index') }}"
+                    class="menu-link {{ request()->routeIs('admin.reports.index') ? 'active' : '' }}">
+                    <span class="material-symbols-rounded">bar_chart</span>
+                    <span class="menu-label">Reports</span>
+                </a>
+            </li>
 
             <li class="menu-item">
                 <a href="{{ route('admin.admin-user.index') }}"
@@ -90,7 +98,7 @@
                     <span class="menu-label">Admin User</span>
                 </a>
             </li>
-              <li class="menu-item">
+            <li class="menu-item">
                 <a href="{{ route('admin.profile.index') }}"
                     class="menu-link {{ request()->routeIs('admin.profile.*') ? 'active' : '' }}">
                     <span class="material-symbols-rounded">person</span>
