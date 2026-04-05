@@ -137,16 +137,24 @@
                                     <td class="fw-bold text-muted" style="font-size: 0.85rem;">
                                         {{ $loop->iteration }}
                                     </td>
-                                    <td class="fw-bold">
-                                        {{ $assignment->fillingStation->station_name ?? 'N/A' }}
+                                    <td>
+                                        <div class="officer-info">
+                                            <span
+                                                class="officer-name">{{ $assignment->fillingStation->station_name ?? '-' }}</span>
+                                            <span class="officer-subtext">
+                                                {{ $assignment->fillingStation->district ?? '' }},
+                                                {{ $assignment->fillingStation->upazila ?? '' }}
+                                            </span>
+                                        </div>
                                     </td>
+
                                     <td>
                                         <div class="officer-info">
                                             <span
                                                 class="officer-name">{{ $assignment->officer->profile->name ?? 'N/A' }}</span>
                                             <span class="officer-subtext">
-                                                {{ $assignment->officer->profile->designation ?? 'Officer' }},
-                                                {{ $assignment->officer->profile->upazilla ?? '' }}
+                                                {{ $assignment->officer->profile->district ?? 'Officer' }},
+                                                {{ $assignment->officer->profile->upazila ?? '' }}
                                             </span>
                                         </div>
                                     </td>
@@ -162,7 +170,8 @@
                                     </td>
                                     <td class="text-center">
                                         <button class="btn-action edit-btn border-0 bg-transparent me-2"
-                                            data-id="{{ $assignment->id }}" data-officer_id="{{ $assignment->officer_id }}"
+                                            data-id="{{ $assignment->id }}"
+                                            data-officer_id="{{ $assignment->officer_id }}"
                                             data-station_id="{{ $assignment->filling_station_id }}"
                                             data-date="{{ $assignment->assign_date }}"
                                             data-status="{{ $assignment->status }}"
