@@ -5,7 +5,7 @@
             <img src="{{ asset('backend/assets/images/logo.png') }}" alt="loog" style="width: 40px">
             <h2 class="navbar-brand text-white fw-bold mb-0 mx-2" style="font-size: 24px; padding: 10px 0">DC Officer</h2>
             <p class="text-stat text-white mb-0 d-none d-md-block" style=" padding-left: 45px;">
-                Bangladesh Government - Fuel Distribution Management System
+                Bangladesh Government - Fuel Distribution Monitoring System
             </p>
         </div>
 

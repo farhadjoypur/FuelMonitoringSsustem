@@ -7,7 +7,7 @@
                 Admin Panel
             </h2>
             <p class="text-stat text-white mb-0 d-none d-md-block" style=" padding-left: 16px;">
-                Bangladesh Government - Fuel Distribution Management System
+                Bangladesh Government - Fuel Distribution Monitoring System
             </p>
         </div>
 

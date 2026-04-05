@@ -177,7 +177,7 @@
                             <p class="welcome-text mb-1">Welcome To</p>
                             <h1 class="system-title mb-0">
                                 Fuel Distribution <br>
-                                Management System
+                                Monitoring System
                             </h1>
                         </div>
 
