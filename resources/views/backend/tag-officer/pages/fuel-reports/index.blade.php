@@ -581,7 +581,7 @@
         }
 
         .diff-red {
-            color: #ef4444;
+            color: #ef4444 !important;
             font-weight: 700;
         }
 
@@ -1028,8 +1028,11 @@
                                 <td>{{ number_format($ft['prev'], 0) }}</td>
                                 <td>{{ number_format($ft['supply'], 0) }}</td>
                                 <td>{{ number_format($ft['received'], 0) }}</td>
-                                <td class="{{ abs($ft['diff']) > 0 ? 'diff-red' : '' }}">
-                                    {{ number_format($ft['diff'], 0) }}</td>
+                                <!-- <td class="{{ abs($ft['diff']) > 0 ? 'diff-red' : '' }}">
+                                    {{ number_format($ft['diff'], 0) }}</td> -->
+                                <td class="diff-red">
+                                    {{ number_format($ft['diff'], 0) }}
+                                </td>
                                 <td>{{ number_format($ft['sales'], 0) }}</td>
                                 <td style="font-weight:600;">{{ number_format($ft['closing'], 0) }}</td>
                                 <td>
