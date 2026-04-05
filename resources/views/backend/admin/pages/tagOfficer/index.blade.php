@@ -209,8 +209,8 @@
                             {{-- <th>Designation</th>
                             <th>Department</th> --}}
                             <th>Division</th>
-                            <th>District</th>
-                            <th>Thana</th>
+                            <th class="text-nowrap">District / City Corporation</th>
+                            <th>Thana / Upazila</th>
                             <th>Email</th>
                             <th>Phone</th>
                             <th>Status</th>

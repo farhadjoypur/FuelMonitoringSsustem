@@ -171,7 +171,7 @@
                             {{-- <th>Designation</th>
                             <th>Department</th> --}}
                             <th>Division</th>
-                            <th>District</th>
+                            <th class="text-nowrap">District / City Corporation</th>
                             <th>Email</th>
                             <th>Phone</th>
                             <th>Status</th>
