@@ -30,6 +30,10 @@ class LoginController extends Controller
                     return redirect()
                         ->route('tag-officer.dashboard.index')
                         ->with('success', $message);
+                } elseif ($user->role == UserRole::UNO) {
+                    return redirect()
+                        ->route('uno.dashboard.index')
+                        ->with('success', $message);
                 } else {
                     Auth::logout();
 
@@ -94,6 +98,9 @@ class LoginController extends Controller
                         ->with('success', 'Login successfully');
                 } elseif ($user->role == UserRole::TAG_OFFICER) {
                     return redirect()->route('tag-officer.dashboard.index')
+                        ->with('success', 'Login successfully');
+                } elseif ($user->role == UserRole::UNO) {
+                    return redirect()->route('uno.dashboard.index')
                         ->with('success', 'Login successfully');
                 } else {
                     Auth::logout();

@@ -13,38 +13,37 @@
         <ul class="menu-list list-unstyled">
 
             <li class="menu-item">
-                <a href="{{ route('dc.dashboard.index') }}"
-                    class="menu-link {{ request()->routeIs('dc.dashboard.*') ? 'active' : '' }}">
+                <a href="{{ route('uno.dashboard.index') }}"
+                    class="menu-link {{ request()->routeIs('uno.dashboard.*') ? 'active' : '' }}">
                     <span class="material-symbols-rounded">dashboard</span>
                     <span class="menu-label">Dashboard</span>
                 </a>
             </li>
 
-            {{-- dc.reports.index --}}
-            <li class="menu-item">
+            {{-- <li class="menu-item">
                 <a href="{{ route('dc.reports.index') }}"
                     class="menu-link {{ request()->routeIs('dc.reports.*') ? 'active' : '' }}">
                     <span class="material-symbols-rounded">description</span>
                     <span class="menu-label">Reports</span>
                 </a>
-            </li>
+            </li> --}}
 
-            <li class="menu-item">
+            {{-- <li class="menu-item">
                 <a href="{{ route('dc.assign-tag-officer.index') }}"
                     class="menu-link {{ request()->routeIs('dc.assign-tag-officer.*') ? 'active' : '' }}">
                     <span class="material-symbols-rounded">assignment_turned_in</span>
                     <span class="menu-label">Assign Tag Officer</span>
                 </a>
-            </li>
+            </li> --}}
 
 
-            <li class="menu-item">
+            {{-- <li class="menu-item">
                 <a href="{{ route('dc.profile.index') }}"
                     class="menu-link {{ request()->routeIs('dc.profile.*') ? 'active' : '' }}">
                     <span class="material-symbols-rounded">person</span>
                     <span class="menu-label">Profile</span>
                 </a>
-            </li>
+            </li> --}}
 
 
 
