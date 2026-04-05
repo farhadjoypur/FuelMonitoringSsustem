@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Backend\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Company;
+use App\Models\Depot;
 use App\Models\FillingStation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
@@ -43,6 +44,7 @@ class FillingStationController extends Controller
         $divisions = FillingStation::whereNotNull('division')->distinct()->pluck('division');
         $companies = Company::orderBy('name')->get(['id', 'name']);
         $allStationNames = FillingStation::orderBy('station_name')->get(['id', 'station_name']);
+        $depots = Depot::orderBy('depot_name')->get(['id', 'depot_name']);
 
         return view('backend.admin.pages.fillingStation.index', compact(
             'stations',
@@ -50,7 +52,8 @@ class FillingStationController extends Controller
             'govtStations', 'privateStations',
             'divisions', 'companies',
             'locations',
-            'allStationNames'
+            'allStationNames',
+            'depots'
         ));
     }
 

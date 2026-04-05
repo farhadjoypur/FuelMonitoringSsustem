@@ -756,6 +756,18 @@
         .select2-dropdown {
             border-radius: 6px !important;
         }
+
+        .badge-fuel {
+            display: inline-block;
+            width: 50px;
+            padding: 5px 0;
+            text-align: center;
+            border-radius: 4px;
+            background-color: #e9ecef;
+            font-size: 10px;
+            font-weight: 500;
+            border: 1px solid #dee2e6;
+        }
     </style>
 @endpush
 
@@ -967,6 +979,7 @@
                             <th>Code</th>
                             <th>Division</th>
                             <th>District</th>
+                            <th>Upazila</th>
                             <th>Owner</th>
                             <th>Company</th>
                             <th>Capacity</th>
@@ -990,13 +1003,8 @@
 
                                 <td><span class="badge-code">{{ $station->station_code }}</span></td>
                                 <td>{{ $station->division ?? '—' }}</td>
-
-                                <td>
-                                    {{ $station->district ?? '—' }}
-                                    @if ($station->upazila)
-                                        <br><span class="station-sub">{{ $station->upazila }}</span>
-                                    @endif
-                                </td>
+                                <td> {{ $station->district ?? '—' }} </td>
+                                <td> {{ $station->upazila ?? '—' }} </td>
 
                                 <td>
                                     <span class="station-name"
@@ -1015,13 +1023,15 @@
                                 </td>
 
                                 <td>
-                                    @if ($station->fuel_types)
-                                        @foreach ($station->fuel_types as $fuel)
-                                            <span class="badge-fuel">{{ $fuel }}</span>
-                                        @endforeach
-                                    @else
-                                        <span class="station-sub">—</span>
-                                    @endif
+                                    <div class="d-flex flex-wrap gap-2">
+                                        @if ($station->fuel_types)
+                                            @foreach ($station->fuel_types as $fuel)
+                                                <span class="badge-fuel text-center">{{ $fuel }}</span>
+                                            @endforeach
+                                        @else
+                                            <span class="station-sub">—</span>
+                                        @endif
+                                    </div>
                                 </td>
 
                                 <td>
@@ -1035,11 +1045,11 @@
                                     <div class="actions-cell">
                                         {{-- View --}}
                                         <!-- <a href="{{ route('admin.stations.show', $station->id) }}" class="action-btn action-btn-view" title="View">
-                                                                                                                                                                                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                                                                                                                                                                                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                                                                                                                                                                                                            <circle cx="12" cy="12" r="3"/>
-                                                                                                                                                                                                                        </svg>
-                                                                                                                                                                                                                    </a> -->
+                                                                                                                                                                                                                                                                                                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                                                                                                                                                                                                                                                                                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                                                                                                                                                                                                                                                                                                                        <circle cx="12" cy="12" r="3"/>
+                                                                                                                                                                                                                                                                                                                                    </svg>
+                                                                                                                                                                                                                                                                                                                                </a> -->
 
                                         {{-- Edit → opens modal --}}
                                         <button type="button" class="action-btn action-btn-edit" title="Edit"
@@ -1136,9 +1146,22 @@
                                 <input type="text" name="station_code" class="form-control" required>
                             </div>
 
-                            <div class="col-md-6">
+                            {{-- <div class="col-md-6">
                                 <label class="form-label">Linked Depot</label>
                                 <input type="text" name="linked_depot" class="form-control">
+                            </div> --}}
+
+                            <div class="col-md-6">
+                                <label class="form-label">Linked Depot<span class="req">*</span></label>
+                                <select name="linked_depot" id="depotSelect" class="form-select">
+                                    <option></option>
+                                    <option value="">— Select Depot —</option>
+                                    @foreach ($depots as $depot)
+                                        <option value="{{ $depot->id }}">
+                                            {{ $depot->depot_name }}
+                                        </option>
+                                    @endforeach
+                                </select>
                             </div>
 
                         </div>
@@ -1219,6 +1242,7 @@
                                     <label><input type="checkbox" name="fuel_types[]" value="Petrol"> Petrol</label>
                                     <label><input type="checkbox" name="fuel_types[]" value="Diesel"> Diesel</label>
                                     <label><input type="checkbox" name="fuel_types[]" value="Octane"> Octane</label>
+                                    <label><input type="checkbox" name="fuel_types[]" value="Others"> Others</label>
                                 </div>
                             </div>
 
@@ -1295,12 +1319,43 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            $('.select2').select2({
+
+            // ✅ Global Select2 (station filter etc.)
+            $('.select2').not('#depotSelect').select2({
                 placeholder: "Search station...",
                 allowClear: true,
                 width: 'resolve'
             });
+
+            // ✅ Modal shown event (BEST PRACTICE)
+            $('#createStationModal').on('shown.bs.modal', function() {
+
+                const $depot = $('#depotSelect');
+
+                // 🔥 destroy if already initialized
+                if ($depot.hasClass("select2-hidden-accessible")) {
+                    $depot.select2('destroy');
+                }
+
+                // 🔥 re-init select2 (with search fix)
+                $depot.select2({
+                    placeholder: "Search Depot...",
+                    allowClear: true,
+                    width: '100%',
+                    dropdownParent: $('#createStationModal'),
+                    minimumResultsForSearch: 0 // 🔥 ensure search box always visible
+                });
+
+            });
+
         });
+
+
+        // ✅ Only open modal এখানে (no select2 here)
+        function openCreateModal() {
+            const modal = new bootstrap.Modal(document.getElementById('createStationModal'));
+            modal.show();
+        }
     </script>
     <script>
         // ═══════════════════════════════════════════════════════════
@@ -1496,7 +1551,7 @@
                         `<option value="${c.id}" ${s.company_id == c.id ? 'selected' : ''}>${c.name}</option>`
                     ).join('');
 
-                    const fuelHtml = ['Petrol', 'Diesel', 'Octane'].map(f => `
+                    const fuelHtml = ['Petrol', 'Diesel', 'Octane', 'Others'].map(f => `
                 <label class="fuel-check ${fuels.includes(f) ? 'checked' : ''}" data-fuel="${f}">
                     <input type="checkbox" name="fuel_types[]" value="${f}" ${fuels.includes(f) ? 'checked' : ''}>
                     ${f}
