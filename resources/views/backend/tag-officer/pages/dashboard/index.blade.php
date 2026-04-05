@@ -327,7 +327,7 @@
                     ['theme' => 'octane', 'icon' => 'fa-droplet',  'val' => number_format($todayOctaneStock),  'name' => 'Octane'],
                     ['theme' => 'petrol', 'icon' => 'fa-gas-pump', 'val' => number_format($todayPetrolStock),  'name' => 'Petrol'],
                     ['theme' => 'diesel', 'icon' => 'fa-cube',     'val' => number_format($todayDieselStock),  'name' => 'Diesel'],
-                    ['theme' => 'others', 'icon' => 'fa-droplet',  'val' => '0',                               'name' => 'Others'],
+                    ['theme' => 'others', 'icon' => 'fa-industry',  'val' => '0',                               'name' => 'Others'],
                 ],
             ],
             [
@@ -336,7 +336,7 @@
                     ['theme' => 'octane', 'icon' => 'fa-droplet',  'val' => number_format($todayOctaneReceived),  'name' => 'Octane'],
                     ['theme' => 'petrol', 'icon' => 'fa-gas-pump', 'val' => number_format($todayPetrolReceived),  'name' => 'Petrol'],
                     ['theme' => 'diesel', 'icon' => 'fa-cube',     'val' => number_format($todayDieselReceived),  'name' => 'Diesel'],
-                    ['theme' => 'others', 'icon' => 'fa-droplet',  'val' => '0',                                  'name' => 'Others'],
+                    ['theme' => 'others', 'icon' => 'fa-industry',  'val' => '0',                                  'name' => 'Others'],
                 ],
             ],
             [
@@ -345,7 +345,7 @@
                     ['theme' => 'octane', 'icon' => 'fa-droplet',  'val' => number_format($todayOctaneSold),  'name' => 'Octane'],
                     ['theme' => 'petrol', 'icon' => 'fa-gas-pump', 'val' => number_format($todayPetrolSold),  'name' => 'Petrol'],
                     ['theme' => 'diesel', 'icon' => 'fa-cube',     'val' => number_format($todayDieselSold),  'name' => 'Diesel'],
-                    ['theme' => 'others', 'icon' => 'fa-droplet',  'val' => '0',                              'name' => 'Others'],
+                    ['theme' => 'others', 'icon' => 'fa-industry',  'val' => '0',                              'name' => 'Others'],
                 ],
             ],
             [
@@ -354,7 +354,7 @@
                     ['theme' => 'octane', 'icon' => 'fa-droplet',  'val' => number_format(abs($todayOctaneDiff)) . ' L', 'name' => 'Octane'],
                     ['theme' => 'petrol', 'icon' => 'fa-gas-pump', 'val' => number_format(abs($todayPetrolDiff)) . ' L', 'name' => 'Petrol'],
                     ['theme' => 'diesel', 'icon' => 'fa-cube',     'val' => number_format(abs($todayDieselDiff)) . ' L', 'name' => 'Diesel'],
-                    ['theme' => 'others', 'icon' => 'fa-droplet',  'val' => '0 L',                                        'name' => 'Others'],
+                    ['theme' => 'others', 'icon' => 'fa-industry',  'val' => '0 L',                                        'name' => 'Others'],
                 ],
             ],
             [
@@ -363,7 +363,7 @@
                     ['theme' => 'octane', 'icon' => 'fa-droplet',  'val' => $todayOctaneDiffPct . '%', 'name' => 'Octane'],
                     ['theme' => 'petrol', 'icon' => 'fa-gas-pump', 'val' => $todayPetrolDiffPct . '%', 'name' => 'Petrol'],
                     ['theme' => 'diesel', 'icon' => 'fa-cube',     'val' => $todayDieselDiffPct . '%', 'name' => 'Diesel'],
-                    ['theme' => 'others', 'icon' => 'fa-droplet',  'val' => '0%',                      'name' => 'Others'],
+                    ['theme' => 'others', 'icon' => 'fa-industry',  'val' => '0%',                      'name' => 'Others'],
                 ],
             ],
         ];
