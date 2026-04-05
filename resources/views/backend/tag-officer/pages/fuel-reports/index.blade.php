@@ -499,7 +499,7 @@
         }
 
         .btn-export-excel {
-            background: #16a34a;
+            background: #2E7D32;
             border: none;
             border-radius: 7px;
             padding: 8px 14px;
@@ -514,7 +514,7 @@
         }
 
         .btn-export-excel:hover {
-            background: #15803d;
+            background: #1B5E20;
             color: #fff;
         }
 
@@ -636,12 +636,12 @@
         }
 
         .btn-view {
-            background: #1e293b;
+            background: #2E7D32;
             color: #fff;
         }
 
         .btn-view:hover {
-            background: #0f172a;
+            background: #1B5E20;
             color: #fff;
         }
 
