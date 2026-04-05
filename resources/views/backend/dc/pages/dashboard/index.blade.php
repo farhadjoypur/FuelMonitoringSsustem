@@ -760,6 +760,13 @@
          ============================================================ --}}
         <p class="section-title">Today's Stock</p>
         <div class="g-4">
+            <div class="fuel-card octane">
+                <div class="fuel-icon o"><i class="fa-solid fa-droplet"></i></div>
+                <div class="fuel-info">
+                    <div class="fi-val">{{ number_format($todayOctaneStock) }} L</div>
+                    <div class="fi-name">Octane</div>
+                </div>
+            </div>
             <div class="fuel-card petrol">
                 <div class="fuel-icon p"><i class="fa-solid fa-gas-pump"></i></div>
                 <div class="fuel-info">
@@ -774,15 +781,8 @@
                     <div class="fi-name">Diesel</div>
                 </div>
             </div>
-            <div class="fuel-card octane">
-                <div class="fuel-icon o"><i class="fa-solid fa-droplet"></i></div>
-                <div class="fuel-info">
-                    <div class="fi-val">{{ number_format($todayOctaneStock) }} L</div>
-                    <div class="fi-name">Octane</div>
-                </div>
-            </div>
             <div class="fuel-card others">
-                <div class="fuel-icon ot"><i class="fa-solid fa-droplet"></i></div>
+                <div class="fuel-icon ot"><i class="fa-solid fa-industry"></i></div>
                 <div class="fuel-info">
                     <div class="fi-val">0 L</div>
                     <div class="fi-name">Others</div>
@@ -795,6 +795,13 @@
          ============================================================ --}}
         <p class="section-title">Today's Sold</p>
         <div class="g-4">
+            <div class="fuel-card octane">
+                <div class="fuel-icon o"><i class="fa-solid fa-droplet"></i></div>
+                <div class="fuel-info">
+                    <div class="fi-val">{{ number_format($todayOctaneSold) }} L</div>
+                    <div class="fi-name">Octane</div>
+                </div>
+            </div>
             <div class="fuel-card petrol">
                 <div class="fuel-icon p"><i class="fa-solid fa-gas-pump"></i></div>
                 <div class="fuel-info">
@@ -809,15 +816,8 @@
                     <div class="fi-name">Diesel</div>
                 </div>
             </div>
-            <div class="fuel-card octane">
-                <div class="fuel-icon o"><i class="fa-solid fa-droplet"></i></div>
-                <div class="fuel-info">
-                    <div class="fi-val">{{ number_format($todayOctaneSold) }} L</div>
-                    <div class="fi-name">Octane</div>
-                </div>
-            </div>
             <div class="fuel-card others">
-                <div class="fuel-icon ot"><i class="fa-solid fa-droplet"></i></div>
+                <div class="fuel-icon ot"><i class="fa-solid fa-industry"></i></div>
                 <div class="fuel-info">
                     <div class="fi-val">0 L</div>
                     <div class="fi-name">Others</div>
