@@ -22,6 +22,9 @@ Route::prefix('tag-officer')->name('fuel-reports.')->middleware(['auth'])->group
     Route::get('/fuel-reports/{fuelReport}/edit', [FuelReportController::class, 'edit'])->name('edit');
     Route::put('/fuel-reports/{fuelReport}', [FuelReportController::class, 'update'])->name('update');
     Route::delete('/fuel-reports/{fuelReport}', [FuelReportController::class, 'destroy'])->name('destroy');
+
+    Route::get('fuel-reports/export/pdf',   [FuelReportController::class, 'exportPdf'])->name('fuel-reports.export.pdf');
+    Route::get('fuel-reports/export/excel', [FuelReportController::class, 'exportExcel'])->name('fuel-reports.export.excel');
  
     // AJAX Route: Previous Stock Auto-fill এর জন্য
     Route::post('/fuel-reports/get-previous-stocks', [FuelReportController::class, 'getPreviousStocks'])->name('previous-stocks');
