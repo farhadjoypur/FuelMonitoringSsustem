@@ -1112,11 +1112,21 @@
                                 </option>
                             </select>
                         </div>
-                        <div class="filter-apply-row" style="grid-column: 4/5; justify-content:flex-end;">
+                        <!-- <div class="filter-apply-row" style="grid-column: 4/5; justify-content:flex-end;">
                             <a href="{{ route('admin.reports.index') }}?tab=sales" class="btn-reset">
                                 <i class="fa-solid fa-rotate-left" style="margin-right:5px;"></i>Reset
                             </a>
                             <button type="submit" class="btn-apply">Apply Filters</button>
+                        </div> -->
+                        <div class="filter-apply-row mt-3">
+                            <div class="d-flex justify-content-center gap-3">
+                                <button type="submit" class="btn-apply">
+                                    <i class="fas fa-filter me-2"></i> Apply Filters
+                                </button>
+                                <a href="{{ route('admin.reports.index') }}?tab=sales" class="btn-reset">
+                                    <i class="fas fa-undo me-2"></i> Reset Filters
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </form>
@@ -1286,11 +1296,21 @@
                                     Inactive</option>
                             </select>
                         </div>
-                        <div class="filter-apply-row" style="grid-column: 4/5; justify-content:flex-end;">
+                        <!-- <div class="filter-apply-row" style="grid-column: 4/5; justify-content:flex-end;">
                             <a href="{{ route('admin.reports.index') }}?tab=officer" class="btn-reset">
                                 <i class="fa-solid fa-rotate-left" style="margin-right:5px;"></i>Reset
                             </a>
                             <button type="submit" class="btn-apply">Apply Filters</button>
+                        </div> -->
+                        <div class="filter-apply-row mt-3">
+                            <div class="d-flex justify-content-center gap-3">
+                                <button type="submit" class="btn-apply">
+                                    <i class="fas fa-filter me-2"></i> Apply Filters
+                                </button>
+                                <a href="{{ route('admin.reports.index') }}?tab=officer" class="btn-reset">
+                                    <i class="fas fa-undo me-2"></i> Reset Filters
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </form>
@@ -1434,11 +1454,21 @@
                         </div>
                         <div class="filter-group"><label>Min Difference (L)</label><input type="number" name="min_diff"
                                 value="{{ request('min_diff', 0) }}" placeholder="e.g. 50"></div>
-                        <div class="filter-apply-row" style="grid-column: 3/5;">
+                        <!-- <div class="filter-apply-row" style="grid-column: 3/5;">
                             <a href="{{ route('admin.reports.index') }}?tab=diff" class="btn-reset">
                                 <i class="fa-solid fa-rotate-left" style="margin-right:5px;"></i>Reset
                             </a>
                             <button type="submit" class="btn-apply">Apply Filters</button>
+                        </div> -->
+                        <div class="filter-apply-row mt-3">
+                            <div class="d-flex justify-content-center gap-3">
+                                <button type="submit" class="btn-apply">
+                                    <i class="fas fa-filter me-2"></i> Apply Filters
+                                </button>
+                                <a href="{{ route('admin.reports.index') }}?tab=diff" class="btn-reset">
+                                    <i class="fas fa-undo me-2"></i> Reset Filters
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </form>
@@ -1609,11 +1639,21 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="filter-apply-row" style="grid-column: 4/5; justify-content:flex-end;">
+                        <!-- <div class="filter-apply-row" style="grid-column: 4/5; justify-content:flex-end;">
                             <a href="{{ route('admin.reports.index') }}?tab=due" class="btn-reset">
                                 <i class="fa-solid fa-rotate-left" style="margin-right:5px;"></i>Reset
                             </a>
                             <button type="submit" class="btn-apply">Apply Filters</button>
+                        </div> -->
+                        <div class="filter-apply-row mt-3">
+                            <div class="d-flex justify-content-center gap-3">
+                                <button type="submit" class="btn-apply">
+                                    <i class="fas fa-filter me-2"></i> Apply Filters
+                                </button>
+                                <a href="{{ route('admin.reports.index') }}?tab=due" class="btn-reset">
+                                    <i class="fas fa-undo me-2"></i> Reset Filters
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </form>
