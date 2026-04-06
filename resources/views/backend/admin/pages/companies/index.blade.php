@@ -242,6 +242,50 @@
     .cm-pagination .pagination {
         margin: 0;
     }
+    /* ── Responsive Table Scroll ── */
+    .cm-table-responsive {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Keep table width fixed so scroll works */
+    .cm-table {
+        min-width: 900px;
+    }
+
+    /* ── Mobile تحسين (improvement) ── */
+    @media (max-width: 768px) {
+
+        .cm-wrapper {
+            padding: 16px;
+        }
+
+        .cm-header {
+            flex-direction: column;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .btn-add-company {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .cm-header h2 {
+            font-size: 1.4rem;
+        }
+
+        .cm-table thead th,
+        .cm-table tbody td {
+            padding: 12px 14px;
+            font-size: 0.8rem;
+        }
+
+        .actions-cell {
+            flex-direction: row;
+        }
+    }
 </style>
 @endpush
 
@@ -269,69 +313,71 @@
 
     {{-- ── TABLE CARD ── --}}
     <div class="cm-table-card">
-        <table class="cm-table" id="companyTable">
-            <thead>
-                <tr>
-                    <th>Company Name</th>
-                    <th>Code</th>
-                    <th>Type</th>
-                    <th>Contact Person</th>
-                    <th>Phone</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($companies as $company)
-                <tr>
-                    <td>
-                        <span class="company-name">{{ $company->name }}</span>
-                        <span class="company-email">{{ $company->email }}</span>
-                    </td>
-                    <td><span class="badge-code">{{ $company->code }}</span></td>
-                    <td>{{ $company->type }}</td>
-                    <td>{{ $company->contact_person ?? '—' }}</td>
-                    <td>{{ $company->phone ?? '—' }}</td>
-                    <td>
-                        @if($company->status)
-                            <span class="badge-active">Active</span>
-                        @else
-                            <span class="badge-inactive">Inactive</span>
-                        @endif
-                    </td>
-                    <td>
-                        <div class="actions-cell">
-                            {{-- Edit Button --}}
-                            <button type="button" 
-                                    class="action-btn action-btn-edit"
-                                    onclick="openEditModal({{ $company->id }})"
-                                    title="Edit">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487a2.1 2.1 0 1 1 2.97 2.97L7.5 19.79l-4 1 1-4 12.362-12.303z"/>
-                                </svg>
-                            </button>
-
-                            {{-- Delete --}}
-                            <form action="{{ route('admin.companies.destroy', $company->id) }}" method="POST" style="display:inline;">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="action-btn action-btn-delete" 
-                                        onclick="return confirm('Are you sure you want to delete this company?')">
+        <div class="cm-table-responsive">
+            <table class="cm-table" id="companyTable">
+                <thead>
+                    <tr>
+                        <th>Company Name</th>
+                        <th>Code</th>
+                        <th>Type</th>
+                        <th>Contact Person</th>
+                        <th>Phone</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($companies as $company)
+                    <tr>
+                        <td>
+                            <span class="company-name">{{ $company->name }}</span>
+                            <span class="company-email">{{ $company->email }}</span>
+                        </td>
+                        <td><span class="badge-code">{{ $company->code }}</span></td>
+                        <td>{{ $company->type }}</td>
+                        <td>{{ $company->contact_person ?? '—' }}</td>
+                        <td>{{ $company->phone ?? '—' }}</td>
+                        <td>
+                            @if($company->status)
+                                <span class="badge-active">Active</span>
+                            @else
+                                <span class="badge-inactive">Inactive</span>
+                            @endif
+                        </td>
+                        <td>
+                            <div class="actions-cell">
+                                {{-- Edit Button --}}
+                                <button type="button" 
+                                        class="action-btn action-btn-edit"
+                                        onclick="openEditModal({{ $company->id }})"
+                                        title="Edit">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487a2.1 2.1 0 1 1 2.97 2.97L7.5 19.79l-4 1 1-4 12.362-12.303z"/>
                                     </svg>
                                 </button>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
-                @empty
-                <tr class="empty-row">
-                    <td colspan="7">No companies found.</td>
-                </tr>
-                @endforelse
-            </tbody>
-        </table>
+
+                                {{-- Delete --}}
+                                <form action="{{ route('admin.companies.destroy', $company->id) }}" method="POST" style="display:inline;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="action-btn action-btn-delete" 
+                                            onclick="return confirm('Are you sure you want to delete this company?')">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>
+                                        </svg>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr class="empty-row">
+                        <td colspan="7">No companies found.</td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>    
 
         @if($companies->hasPages())
         <div class="cm-pagination">
