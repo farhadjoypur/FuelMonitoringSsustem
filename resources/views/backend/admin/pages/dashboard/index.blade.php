@@ -208,6 +208,13 @@
 
     {{-- Row 1: Stock values --}}
     <div class="fuel-grid">
+        <div class="fuel-main-card octane">
+            <div class="fuel-icon-circle o"><i class="fa-solid fa-droplet"></i></div>
+            <div class="fuel-main-info">
+                <div class="fmi-val">{{ number_format($todayOctaneStock) }} L</div>
+                <div class="fmi-name">Octane</div>
+            </div>
+        </div>
         <div class="fuel-main-card petrol">
             <div class="fuel-icon-circle p"><i class="fa-solid fa-gas-pump"></i></div>
             <div class="fuel-main-info">
@@ -222,16 +229,9 @@
                 <div class="fmi-name">Diesel</div>
             </div>
         </div>
-        <div class="fuel-main-card octane">
-            <div class="fuel-icon-circle o"><i class="fa-solid fa-droplet"></i></div>
-            <div class="fuel-main-info">
-                <div class="fmi-val">{{ number_format($todayOctaneStock) }} L</div>
-                <div class="fmi-name">Octane</div>
-            </div>
-        </div>
         {{-- other cards --}}
         <div class="fuel-main-card others">
-            <div class="fuel-icon-circle ot"><i class="fa-solid fa-droplet"></i></div>
+            <div class="fuel-icon-circle ot"><i class="fa-solid fa-industry"></i></div>
             <div class="fuel-main-info">
                 <div class="fmi-val">0 L</div>
                 <div class="fmi-name">Others</div>
@@ -249,14 +249,14 @@
             ? round(($todayOctaneDiff / $todayOctaneReceived) * 100, 1) : 0;
     @endphp
 <div class="fuel-diff-grid">
+    <div class="diff-pill octane">
+        Octane Difference: <strong>{{ $octaneDiffPct }}%</strong>
+    </div>
     <div class="diff-pill petrol">
         Petrol Difference: <strong>{{ $petrolDiffPct }}%</strong>
     </div>
     <div class="diff-pill diesel">
         Diesel Difference: <strong>{{ $dieselDiffPct }}%</strong>
-    </div>
-    <div class="diff-pill octane">
-        Octane Difference: <strong>{{ $octaneDiffPct }}%</strong>
     </div>
     <div class="diff-pill others">
        Others Difference: <strong>0%</strong>
@@ -265,14 +265,14 @@
 
     {{-- Row 3: Difference in Litres --}}
     <div class="fuel-diff-grid section-gap">
+        <div class="diff-pill octane">
+            Octane Difference: <strong>{{ number_format(abs($todayOctaneDiff)) }}L</strong>
+        </div>
         <div class="diff-pill petrol">
             Petrol Difference: <strong>{{ number_format(abs($todayPetrolDiff)) }}L</strong>
         </div>
         <div class="diff-pill diesel">
             Diesel Difference: <strong>{{ number_format(abs($todayDieselDiff)) }}L</strong>
-        </div>
-        <div class="diff-pill octane">
-            Octane Difference: <strong>{{ number_format(abs($todayOctaneDiff)) }}L</strong>
         </div>
         <div class="diff-pill others">
             Others Difference: <strong>0L</strong>
@@ -285,6 +285,13 @@
     ============================================================ --}}
     <p class="section-title">Today's Sold</p>
     <div class="fuel-grid section-gap">
+        <div class="fuel-main-card octane">
+            <div class="fuel-icon-circle o"><i class="fa-solid fa-droplet"></i></div>
+            <div class="fuel-main-info">
+                <div class="fmi-val">{{ number_format($todayOctaneSold) }} L</div>
+                <div class="fmi-name">Octane</div>
+            </div>
+        </div>
         <div class="fuel-main-card petrol">
             <div class="fuel-icon-circle p"><i class="fa-solid fa-gas-pump"></i></div>
             <div class="fuel-main-info">
@@ -299,16 +306,8 @@
                 <div class="fmi-name">Diesel</div>
             </div>
         </div>
-        <div class="fuel-main-card octane">
-            <div class="fuel-icon-circle o"><i class="fa-solid fa-droplet"></i></div>
-            <div class="fuel-main-info">
-                <div class="fmi-val">{{ number_format($todayOctaneSold) }} L</div>
-                <div class="fmi-name">Octane</div>
-            </div>
-        </div>
-
          <div class="fuel-main-card others">
-            <div class="fuel-icon-circle ot"><i class="fa-solid fa-droplet"></i></div>
+            <div class="fuel-icon-circle ot"><i class="fa-solid fa-industry"></i></div>
             <div class="fuel-main-info">
                 <div class="fmi-val">0 L</div>
                 <div class="fmi-name">Others</div>
