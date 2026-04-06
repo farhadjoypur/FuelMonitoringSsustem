@@ -83,16 +83,40 @@
             <div class="row">
                 <div class="col-lg-4 mb-4">
                     <div class="card profile-card h-100 p-5 text-center shadow-sm">
-                        <div class="avatar-circle">
+                        <div class="avatar-circle mb-3 mx-auto" style="position: relative; overflow: hidden;">
                             @php
+                                $profilePhoto = auth()->user()->profile->photo ?? null;
                                 $nameParts = explode(' ', auth()->user()->profile->name ?? 'User');
                                 $initials =
                                     count($nameParts) > 1
                                         ? substr($nameParts[0], 0, 1) . substr(end($nameParts), 0, 1)
                                         : substr($nameParts[0], 0, 2);
                             @endphp
-                            {{ strtoupper($initials) }}
+
+                            @if ($profilePhoto && file_exists(public_path($profilePhoto)))
+                                <img src="{{ asset($profilePhoto) }}" id="profilePreview" alt="Profile Photo"
+                                    class="rounded-circle w-100 h-100" style="object-fit: cover;">
+                            @else
+                                <div id="initialsPreview"
+                                    class="d-flex align-items-center justify-content-center w-100 h-100">
+                                    {{ strtoupper($initials) }}
+                                </div>
+                            @endif
                         </div>
+
+                        <div class="mb-3">
+                            <label for="photoInput" class="btn btn-sm btn-light shadow-sm"
+                                style="border-radius: 20px; border: 1px solid #ddd; padding: 5px 15px; cursor: pointer;">
+                                <i class="fas fa-camera me-1"></i> Change Photo
+                            </label>
+                            <input type="file" name="photo" id="photoInput" class="d-none" accept="image/*"
+                                data-url="{{ route('tag-officer.profile.update', auth()->user()->id) }}">
+
+                            @error('photo')
+                                <div class="text-danger small mt-2">{{ $message }}</div>
+                            @enderror
+                        </div>
+
                         <h4 class="fw-bold mb-1">{{ auth()->user()->profile->name ?? '' }}</h4>
                         <p class="text-dark mb-3" style="font-size: 13px; letter-spacing: 0.5px;">
                             Upazila Nirbahi Officer <br>
@@ -162,7 +186,7 @@
                             <div class="col-12 mt-4">
                                 <div
                                     class="d-flex flex-column flex-sm-row justify-content-sm-end gap-2 gap-sm-3 border-top pt-4">
-                                    <a href="{{ route('admin.dashboard.index') }}"
+                                    <a href="{{ route('uno.dashboard.index') }}"
                                         class="btn btn-secondary px-sm-5 py-2 order-2 order-sm-1"
                                         style="border-radius: 10px; background-color: #64748b; border: none;">
                                         <i class="fas fa-times me-2"></i> Cancel
@@ -180,3 +204,43 @@
         </form>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        $('#photoInput').on('change', function() {
+            const file = this.files[0];
+            if (file) {
+                let preview = document.getElementById('profilePreview');
+                if (preview) {
+                    preview.src = URL.createObjectURL(file);
+                }
+                $('.avatar-circle').css('opacity', '0.5');
+
+                let formData = new FormData();
+                formData.append('photo', file);
+                formData.append('_token', '{{ csrf_token() }}');
+                formData.append('_method', 'PUT');
+
+                formData.append('name', '{{ auth()->user()->profile->name ?? '' }}');
+                formData.append('phone', '{{ auth()->user()->phone ?? '' }}');
+                formData.append('email', '{{ auth()->user()->email ?? '' }}');
+
+                $.ajax({
+                    url: "{{ route('uno.profile.update', auth()->user()->id) }}",
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        location.reload();
+                    },
+                    error: function(xhr) {
+                        $('.avatar-circle').css('opacity', '1');
+                        alert('Error uploading photo: ' + (xhr.responseJSON.message ||
+                            'Unknown error'));
+                    }
+                });
+            }
+        });
+    </script>
+@endpush

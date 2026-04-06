@@ -207,30 +207,30 @@
             color: #2563eb;
             border-bottom-color: #bfdbfe;
         }
-
-        .fuel-header .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            flex-shrink: 0;
+        
+        /* icon */
+        .fuel-header i {
+            font-size: 14px;
+            width: 18px;
+            text-align: center;
         }
 
-        .fuel-header.octane .dot {
-            background: #ef4444;
+        .fuel-header.octane i {
+            color: #c0392b;
         }
 
-        .fuel-header.petrol .dot {
-            background: #22c55e;
+        .fuel-header.petrol i {
+            color: #16a34a;
         }
 
-        .fuel-header.diesel .dot {
-            background: #f59e0b;
+        .fuel-header.diesel i {
+            color: #b45309;
         }
 
-        .fuel-header.others .dot {
-            background: #3b82f6;
+        .fuel-header.others i {
+            color: #2563eb;
         }
-
+        
         /* ── 6-col grid ── */
         .fuel-grid {
             display: grid;
@@ -834,24 +834,28 @@
                         'key' => 'octane',
                         'label' => 'Octane',
                         'cls' => 'octane',
+                        'icon' => 'fa-droplet',
                         'prev' => $previousStocks['octane'] ?? 0,
                     ],
                     [
                         'key' => 'petrol',
                         'label' => 'Petrol',
                         'cls' => 'petrol',
+                        'icon' => 'fa-gas-pump',
                         'prev' => $previousStocks['petrol'] ?? 0,
                     ],
                     [
                         'key' => 'diesel',
                         'label' => 'Diesel',
                         'cls' => 'diesel',
+                        'icon' => 'fa-cube',
                         'prev' => $previousStocks['diesel'] ?? 0,
                     ],
                     [
                         'key' => 'others',
                         'label' => 'Others',
                         'cls' => 'others',
+                        'icon' => 'fa-industry',
                         'prev' => $previousStocks['others'] ?? 0,
                     ],
                 ];
@@ -860,7 +864,7 @@
             @foreach ($fuels as $fuel)
                 <div class="fuel-card">
                     <div class="fuel-header {{ $fuel['cls'] }}">
-                        <span class="dot"></span> {{ $fuel['label'] }}
+                        <i class="fa-solid {{ $fuel['icon'] }}"></i> {{ $fuel['label'] }}
                     </div>
                     <div class="fuel-grid">
                         <div class="col-head"><i class="fa-solid fa-clock-rotate-left fa-xs"></i> Previous Stock (L)</div>

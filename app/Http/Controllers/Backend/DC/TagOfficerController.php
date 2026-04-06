@@ -6,6 +6,7 @@ use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
@@ -21,8 +22,32 @@ class TagOfficerController extends Controller
         }
 
         $json = File::get($path);
+        $data = json_decode($json, true);
 
-        return json_decode($json, true);
+        $dcProfile = Auth::user()->profile;
+        $dcDistrictName = $dcProfile->district ?? '';
+        $dcDivisionName = $dcProfile->division ?? '';
+
+        $filteredData = ['divisions' => []];
+
+        foreach ($data['divisions'] as $division) {
+            if ($division['name_en'] === $dcDivisionName) {
+
+                $tempDivision = $division;
+                $tempDivision['districts'] = [];
+
+                foreach ($division['districts'] as $district) {
+                    if ($district['name_en'] === $dcDistrictName) {
+                        $tempDivision['districts'][] = $district;
+                    }
+                }
+
+                $filteredData['divisions'][] = $tempDivision;
+                break;
+            }
+        }
+
+        return $filteredData;
     }
 
     public function index(Request $request)
@@ -31,10 +56,14 @@ class TagOfficerController extends Controller
         $division = $request->input('division');
         $district = $request->input('district');
         $upazila = $request->input('upazila');
+        $dcDistrict = Auth::user()->profile->district;
 
         $query = User::where('role', UserRole::TAG_OFFICER)
             ->with('profile')
             ->withCount('assignedStations')
+            ->whereHas('profile', function ($q) use ($dcDistrict) {
+                $q->where('district', $dcDistrict);
+            })
             ->when($search, function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('phone', 'LIKE', "%{$search}%")

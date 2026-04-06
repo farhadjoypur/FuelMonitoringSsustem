@@ -60,13 +60,13 @@ class ProfileController extends Controller
             'phone' => 'required|string|max:20|unique:users,phone,'.$id,
             'email' => 'required|email|unique:users,email,'.$id,
             'password' => 'nullable|min:6|confirmed',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         try {
             DB::beginTransaction();
 
             $user = User::findOrFail($id);
-
             $user->email = $request->email;
             $user->phone = $request->phone;
 
@@ -74,9 +74,25 @@ class ProfileController extends Controller
                 $user->password = Hash::make($request->password);
             }
             $user->save();
+
+            $profileData = ['name' => $request->name];
+
+            if ($request->hasFile('photo')) {
+                $profile = $user->profile;
+
+                if ($profile && $profile->photo && file_exists(public_path($profile->photo))) {
+                    unlink(public_path($profile->photo));
+                }
+
+                $file = $request->file('photo');
+                $fileName = 'profile_'.time().'.'.$file->getClientOriginalExtension();
+                $file->move(public_path('uploads/profile'), $fileName);
+                $profileData['photo'] = 'uploads/profile/'.$fileName;
+            }
+
             $user->profile()->updateOrCreate(
                 ['user_id' => $user->id],
-                ['name' => $request->name]
+                $profileData
             );
 
             DB::commit();
@@ -86,9 +102,7 @@ class ProfileController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Something went wrong: '.$e->getMessage());
+            return redirect()->back()->with('error', 'Error: '.$e->getMessage());
         }
     }
 

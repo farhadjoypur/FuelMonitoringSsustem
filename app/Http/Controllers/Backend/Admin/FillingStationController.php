@@ -35,12 +35,6 @@ class FillingStationController extends Controller
         $locations = json_decode(file_get_contents($path), true);
         $stations = FillingStation::with('company', 'depot')->latest()->paginate(10);
 
-        $totalStations = FillingStation::count();
-        $activeStations = FillingStation::where('status', 'active')->count();
-        $inactiveStations = FillingStation::where('status', 'inactive')->count();
-        $govtStations = FillingStation::where('type', 'government')->count();
-        $privateStations = FillingStation::where('type', 'private')->count();
-
         $divisions = FillingStation::whereNotNull('division')->distinct()->pluck('division');
         $companies = Company::orderBy('name')->get(['id', 'name']);
         $allStationNames = FillingStation::orderBy('station_name')->get(['id', 'station_name']);
@@ -48,8 +42,6 @@ class FillingStationController extends Controller
 
         return view('backend.admin.pages.fillingStation.index', compact(
             'stations',
-            'totalStations', 'activeStations', 'inactiveStations',
-            'govtStations', 'privateStations',
             'divisions', 'companies',
             'locations',
             'allStationNames',
