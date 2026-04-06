@@ -315,13 +315,9 @@
 
                         <div class="mb-4 text-center">
                             <label class="form-label d-block text-start small fw-bold">Upload Photo</label>
-                            <div class="upload-area border border-2 border-dashed rounded p-4 bg-light @error('photo') border-danger @enderror"
-                                style="cursor: pointer;">
-                                <input type="file" name="photo" class="d-none" id="photoInput">
-                                <label for="photoInput" class="mb-0" style="cursor: pointer;">
-                                    <i class="bi bi-cloud-arrow-up fs-2 text-muted"></i>
-                                    <p class="mb-0 text-muted small">Upload</p>
-                                </label>
+                            <div
+                                class="upload-area border border-2 border-dashed rounded p-3 bg-light @error('photo') border-danger @enderror">
+                                <input type="file" name="photo" class="form-control form-control-sm">
                             </div>
                             @error('photo')
                                 <div class="text-danger small mt-1">{{ $message }}</div>
