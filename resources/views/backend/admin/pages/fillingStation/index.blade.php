@@ -914,7 +914,7 @@
         </div> --}}
 
 
-        <div class="fs-filter-card">
+        {{-- <div class="fs-filter-card">
             <div class="d-flex align-items-center gap-2 flex-wrap">
 
                 <!-- Search -->
@@ -966,6 +966,62 @@
                 </button>
 
             </div>
+        </div> --}}
+
+        <div class="gs-filter-container">
+            <form action="{{ route('admin.stations.index') }}" method="GET" id="gsFilterForm">
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+
+                    <input type="text" name="search" class="gs-input-field" value="{{ request('search') }}"
+                        placeholder="Code/Owner/Phone...">
+
+                    <div style="min-width: 200px;">
+                        <select class="gs-select-station" name="station_id" id="gsStationSelect">
+                            <option value="">— Select Station —</option>
+                            @foreach ($allStationNames as $station)
+                                <option value="{{ $station->id }}"
+                                    {{ request('station_id') == $station->id ? 'selected' : '' }}>
+                                    {{ $station->station_name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <select class="gs-input-field" name="division" id="gsDivisionFilter">
+                        <option value="">Division</option>
+                        @foreach ($locations['divisions'] as $div)
+                            <option value="{{ $div['name_en'] }}"
+                                {{ request('division') == $div['name_en'] ? 'selected' : '' }}>
+                                {{ $div['name_en'] }}
+                            </option>
+                        @endforeach
+                    </select>
+
+                    <select class="gs-input-field" name="district" id="gsDistrictFilter">
+                        <option value="">District</option>
+                    </select>
+
+                    <select class="gs-input-field" name="upazila" id="gsUpazilaFilter">
+                        <option value="">Upazila</option>
+                    </select>
+
+                    <select class="gs-input-field" name="company">
+                        <option value="">Company</option>
+                        @foreach ($companies as $company)
+                            <option value="{{ $company->name }}"
+                                {{ request('company') == $company->name ? 'selected' : '' }}>
+                                {{ $company->name }}
+                            </option>
+                        @endforeach
+                    </select>
+
+                    <button type="submit" class="btn btn-primary btn-sm px-3">Apply Filter</button>
+
+                    <a href="{{ route('admin.stations.index') }}" class="btn btn-outline-secondary btn-sm px-3">
+                        Reset
+                    </a>
+                </div>
+            </form>
         </div>
 
         {{-- TABLE --}}
@@ -1045,11 +1101,11 @@
                                     <div class="actions-cell">
                                         {{-- View --}}
                                         <!-- <a href="{{ route('admin.stations.show', $station->id) }}" class="action-btn action-btn-view" title="View">
-                                                                                                                                                                                                                                                                                                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                                                                                                                                                                                                                                                                                                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                                                                                                                                                                                                                                                                                                                        <circle cx="12" cy="12" r="3"/>
-                                                                                                                                                                                                                                                                                                                                    </svg>
-                                                                                                                                                                                                                                                                                                                                </a> -->
+                                                                                                                                                                                                                                                                                                                                                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                                                                                                                                                                                                                                                                                                                                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                                                                                                                                                                                                                                                                                                                                                                            <circle cx="12" cy="12" r="3"/>
+                                                                                                                                                                                                                                                                                                                                                                                        </svg>
+                                                                                                                                                                                                                                                                                                                                                                                    </a> -->
 
                                         {{-- Edit → opens modal --}}
                                         <button type="button" class="action-btn action-btn-edit" title="Edit"
@@ -1093,7 +1149,7 @@
             </div>
 
             @if ($stations->hasPages())
-                <div class="fs-pagination">{{ $stations->links() }}</div>
+                <div class="fs-pagination">{{ $stations->links('pagination::bootstrap-5') }}</div>
             @endif
         </div>
 
@@ -1317,6 +1373,70 @@
 @endsection
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const locationsData = @json($locations['divisions']);
+
+            // ১. Select2 Initialize (Station Search)
+            $('#gsStationSelect').select2({
+                placeholder: "Search Station...",
+                allowClear: true,
+                width: 'resolve'
+            });
+
+            // এলিমেন্ট রেফারেন্স
+            const divEl = document.getElementById('gsDivisionFilter');
+            const distEl = document.getElementById('gsDistrictFilter');
+            const upzEl = document.getElementById('gsUpazilaFilter');
+
+            // ২. ডাইনামিক ফিল্টার লজিক
+            divEl.addEventListener('change', function() {
+                const divName = this.value;
+                distEl.innerHTML = '<option value="">District</option>';
+                upzEl.innerHTML = '<option value="">Upazila</option>';
+
+                if (divName) {
+                    const division = locationsData.find(d => d.name_en === divName);
+                    division?.districts.forEach(d => {
+                        distEl.add(new Option(d.name_en, d.name_en));
+                    });
+                }
+            });
+
+            distEl.addEventListener('change', function() {
+                const divName = divEl.value;
+                const distName = this.value;
+                upzEl.innerHTML = '<option value="">Upazila</option>';
+
+                if (divName && distName) {
+                    const division = locationsData.find(d => d.name_en === divName);
+                    const district = division?.districts.find(dt => dt.name_en === distName);
+                    district?.police_stations.forEach(up => {
+                        upzEl.add(new Option(up.name_en, up.name_en));
+                    });
+                }
+            });
+
+            // ৩. পেজ রিফ্রেশ বা ফিল্টার করার পর ডাটা ধরে রাখা (Persistence)
+            const currentDist = "{{ request('district') }}";
+            const currentUpz = "{{ request('upazila') }}";
+
+            if (divEl.value) {
+                divEl.dispatchEvent(new Event('change'));
+                if (currentDist) {
+                    setTimeout(() => {
+                        distEl.value = currentDist;
+                        distEl.dispatchEvent(new Event('change'));
+                        setTimeout(() => {
+                            if (currentUpz) upzEl.value = currentUpz;
+                        }, 50);
+                    }, 50);
+                }
+            }
+        });
+    </script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
 

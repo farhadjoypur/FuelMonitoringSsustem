@@ -7,6 +7,7 @@ use App\Models\Company;
 use App\Models\Depot;
 use App\Models\FillingStation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 
 class FillingStationController extends Controller
@@ -33,23 +34,33 @@ class FillingStationController extends Controller
         }
 
         $locations = json_decode(file_get_contents($path), true);
-        $stations = FillingStation::with('company')->latest()->paginate(10);
 
-        $totalStations = FillingStation::count();
-        $activeStations = FillingStation::where('status', 'active')->count();
-        $inactiveStations = FillingStation::where('status', 'inactive')->count();
-        $govtStations = FillingStation::where('type', 'government')->count();
-        $privateStations = FillingStation::where('type', 'private')->count();
+        $userProfile = Auth::user()->profile;
+
+        if (! $userProfile || ! $userProfile->upazila) {
+            return back()->with('error', 'Your profile does not have a upazila assigned. Please update your profile.');
+        }
+
+        $unoDivision = $userProfile->division;
+        $unoDistrict = $userProfile->district;
+        $unoUpazila = $userProfile->upazila;
+
+        $baseQuery = FillingStation::with('company')
+            ->where('division', $unoDivision)
+            ->where('district', $unoDistrict)
+            ->where('upazila', $unoUpazila);
+
+        $stations = $baseQuery->latest()->paginate(10)->withQueryString();
 
         $divisions = FillingStation::whereNotNull('division')->distinct()->pluck('division');
         $companies = Company::orderBy('name')->get(['id', 'name']);
-        $allStationNames = FillingStation::orderBy('station_name')->get(['id', 'station_name']);
+        $allStationNames = FillingStation::where('upazila', $unoUpazila)
+            ->orderBy('station_name')
+            ->get(['id', 'station_name']);
         $depots = Depot::orderBy('depot_name')->get(['id', 'depot_name']);
 
         return view('backend.uno.pages.fillingStation.index', compact(
             'stations',
-            'totalStations', 'activeStations', 'inactiveStations',
-            'govtStations', 'privateStations',
             'divisions', 'companies',
             'locations',
             'allStationNames',
