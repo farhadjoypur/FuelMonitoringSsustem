@@ -227,7 +227,7 @@
         }
 
         .btn-apply {
-            background: linear-gradient(135deg, #2563eb, #1e40af);
+            background: #006796;
             color: #fff;
             border: none;
             padding: 10px 28px;
@@ -240,8 +240,10 @@
         }
 
         .btn-apply:hover {
+            background: #004D70;
             transform: translateY(-1px);
             box-shadow: 0 6px 16px rgba(37, 99, 235, .35);
+            color: white;
         }
 
         .btn-reset {
