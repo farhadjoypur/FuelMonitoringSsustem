@@ -28,13 +28,29 @@
                 </a>
             </li> --}}
 
-            {{-- <li class="menu-item">
-                <a href="{{ route('dc.assign-tag-officer.index') }}"
-                    class="menu-link {{ request()->routeIs('dc.assign-tag-officer.*') ? 'active' : '' }}">
+            <li class="menu-item">
+                <a href="{{ route('uno.stations.index') }}"
+                    class="menu-link {{ request()->routeIs('uno.stations.*') ? 'active' : '' }}">
+                    <span class="material-symbols-rounded">local_gas_station</span>
+                    <span class="menu-label">Filling Station</span>
+                </a>
+            </li>
+
+            <li class="menu-item">
+                <a href="{{ route('uno.tag-officer.index') }}"
+                    class="menu-link {{ request()->routeIs('uno.tag-officer.*') ? 'active' : '' }}">
+                    <span class="material-symbols-rounded">assignment_ind</span>
+                    <span class="menu-label">Tag Officer</span>
+                </a>
+            </li>
+
+            <li class="menu-item">
+                <a href="{{ route('uno.assign-tag-officer.index') }}"
+                    class="menu-link {{ request()->routeIs('uno.assign-tag-officer.*') ? 'active' : '' }}">
                     <span class="material-symbols-rounded">assignment_turned_in</span>
                     <span class="menu-label">Assign Tag Officer</span>
                 </a>
-            </li> --}}
+            </li>
 
 
             <li class="menu-item">
