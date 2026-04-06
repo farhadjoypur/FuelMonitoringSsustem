@@ -33,4 +33,10 @@ class FillingStation extends Model
     {
         return $this->belongsTo(Company::class);
     }
+
+    // FillingStation model
+    public function depot()
+    {
+        return $this->belongsTo(Depot::class, 'linked_depot');
+    }
 }

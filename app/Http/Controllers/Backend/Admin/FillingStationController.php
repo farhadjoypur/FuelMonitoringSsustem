@@ -33,7 +33,7 @@ class FillingStationController extends Controller
         }
 
         $locations = json_decode(file_get_contents($path), true);
-        $stations = FillingStation::with('company')->latest()->paginate(10);
+        $stations = FillingStation::with('company', 'depot')->latest()->paginate(10);
 
         $totalStations = FillingStation::count();
         $activeStations = FillingStation::where('status', 'active')->count();
@@ -100,8 +100,9 @@ class FillingStationController extends Controller
     {
         $station = FillingStation::findOrFail($id);
         $companies = Company::all();
+        $depots = Depot::all();
 
-        return view('backend.admin.pages.fillingStation.edit', compact('station', 'companies'));
+        return view('backend.admin.pages.fillingStation.edit', compact('station', 'companies', 'depots'));
     }
 
     public function update(Request $request, $id)
