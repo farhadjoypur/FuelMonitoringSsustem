@@ -175,7 +175,7 @@
         }
 
         .btn-apply:hover {
-            background: #0f4c81;
+            background: #005580;
             transform: translateY(-1px);
         }
 
@@ -603,7 +603,7 @@
 
         /* Filter Buttons */
         .btn-apply {
-            background: linear-gradient(135deg, #2563eb, #1e40af);
+            background: #006796;
             color: white;
             border: none;
             padding: 12px 28px;
@@ -616,8 +616,9 @@
         }
 
         .btn-apply:hover {
+            background: #004D70;
             transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+            box-shadow: 0 6px 16px rgba(0, 103, 150, 0.35);
             color: white;
         }
 
