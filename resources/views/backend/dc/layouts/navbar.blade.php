@@ -29,16 +29,26 @@
                         </small>
                     </div>
                     <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold"
-                        style="width: 42px; height: 42px; background-color: #005580; color: white; border: 2px solid rgba(255,255,255,0.2); font-size: 14px;">
+                        style="width: 42px; height: 42px; background-color: #005580; color: white; border: 2px solid rgba(255,255,255,0.2); font-size: 14px; overflow: hidden;">
+
                         @php
+                            $profilePhoto = Auth::user()->profile->photo ?? null;
                             $name = Auth::user()->profile->name ?? 'User Name';
-                            $words = explode(' ', $name);
-                            $initials =
-                                count($words) >= 2
-                                    ? strtoupper(substr($words[0], 0, 1) . substr(end($words), 0, 1))
-                                    : strtoupper(substr($name, 0, 2));
                         @endphp
-                        {{ $initials }}
+
+                        @if ($profilePhoto && file_exists(public_path($profilePhoto)))
+                            <img src="{{ asset($profilePhoto) }}" alt="Profile"
+                                style="width: 100%; height: 100%; object-fit: cover;">
+                        @else
+                            @php
+                                $words = explode(' ', $name);
+                                $initials =
+                                    count($words) >= 2
+                                        ? strtoupper(substr($words[0], 0, 1) . substr(end($words), 0, 1))
+                                        : strtoupper(substr($name, 0, 2));
+                            @endphp
+                            {{ $initials }}
+                        @endif
                     </div>
                 </div>
 
