@@ -647,6 +647,479 @@
                 grid-column: 1/2
             }
         }
+
+    /* ================= Enhanced Responsive Styles ================= */
+    @media (max-width: 1200px) {
+        .stat-cards {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .filter-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .filter-btn-row {
+            grid-column: 1/4 !important;
+            justify-content: center !important;
+        }
+    }
+
+    @media (max-width: 992px) {
+        .page-title {
+            font-size: 1.4rem;
+        }
+
+        .filter-section {
+            padding: 16px 18px 18px;
+        }
+
+        .filter-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px 14px;
+        }
+
+        .filter-btn-row {
+            grid-column: 1/3 !important;
+            justify-content: center !important;
+            margin-top: 8px;
+        }
+
+        .btn-apply,
+        .btn-reset {
+            padding: 9px 24px;
+            font-size: 0.85rem;
+        }
+
+        .stat-cards {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            padding: 0 18px 18px;
+        }
+
+        .stat-card {
+            padding: 14px 16px;
+            min-height: 88px;
+        }
+
+        .stat-card-value {
+            font-size: 1.35rem;
+        }
+
+        .stat-card-label {
+            font-size: 0.7rem;
+        }
+
+        /* Table responsive wrapper */
+        .table-section {
+            padding: 0 18px 18px;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+            min-width: 900px;
+            font-size: 0.78rem;
+        }
+
+        thead th {
+            padding: 9px 11px;
+            font-size: 0.65rem;
+        }
+
+        tbody td {
+            padding: 8px 11px;
+        }
+
+        /* Scrollbar styling for tables */
+        .table-wrap::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .table-wrap::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+
+        .table-wrap::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .table-wrap::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .export-row {
+            padding: 12px 18px 16px;
+            gap: 8px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .page-title {
+            font-size: 1.25rem;
+            margin-bottom: 18px;
+        }
+
+        .card {
+            border-radius: 10px;
+        }
+
+        /* Tabs */
+        .tabs-bar {
+            padding: 0 14px;
+            gap: 1px;
+        }
+
+        .tab-btn {
+            padding: 12px 14px;
+            font-size: 0.8rem;
+        }
+
+        /* Filter section */
+        .filter-section {
+            padding: 14px 16px 16px;
+        }
+
+        .filter-header {
+            font-size: 0.82rem;
+            margin-bottom: 12px;
+        }
+
+        .filter-grid {
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .filter-group label {
+            font-size: 0.68rem;
+            margin-bottom: 3px;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 8px 10px;
+            font-size: 0.82rem;
+            border-radius: 7px;
+        }
+
+        .station-combobox input {
+            padding-right: 30px;
+        }
+
+        .station-dropdown {
+            max-height: 180px;
+        }
+
+        .station-dropdown-item {
+            padding: 8px 12px;
+            font-size: 0.8rem;
+        }
+
+        .filter-btn-row {
+            grid-column: 1/2 !important;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 6px;
+        }
+
+        .btn-apply,
+        .btn-reset {
+            width: 100%;
+            padding: 10px 20px;
+            font-size: 0.85rem;
+            justify-content: center;
+        }
+
+        /* Stat cards */
+        .stat-cards {
+            grid-template-columns: 1fr;
+            gap: 10px;
+            padding: 0 16px 16px;
+        }
+
+        .stat-card {
+            padding: 12px 14px;
+            min-height: 82px;
+        }
+
+        .stat-card-icon {
+            width: 30px;
+            height: 30px;
+            font-size: 0.85rem;
+        }
+
+        .stat-card-badge {
+            font-size: 0.65rem;
+            padding: 2px 6px;
+        }
+
+        .stat-card-label {
+            font-size: 0.68rem;
+            margin-top: 6px;
+        }
+
+        .stat-card-value {
+            font-size: 1.25rem;
+        }
+
+        /* Table section */
+        .table-section {
+            padding: 0 16px 16px;
+        }
+
+        .table-header-row {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+
+        .table-title {
+            font-size: 0.88rem;
+        }
+
+        .table-meta {
+            font-size: 0.72rem;
+        }
+
+        table {
+            min-width: 800px;
+            font-size: 0.75rem;
+        }
+
+        thead th {
+            padding: 8px 10px;
+            font-size: 0.62rem;
+        }
+
+        tbody td {
+            padding: 7px 10px;
+        }
+
+        .date-cell {
+            font-size: 0.74rem;
+        }
+
+        .company-cell,
+        .station-cell {
+            font-size: 0.76rem;
+        }
+
+        .status-badge {
+            font-size: 0.68rem;
+            padding: 2px 8px;
+        }
+
+        /* Empty state */
+        .empty-state {
+            padding: 40px 16px;
+        }
+
+        .empty-state i {
+            font-size: 1.75rem;
+        }
+
+        .empty-state p {
+            font-size: 0.82rem;
+        }
+
+        .empty-state small {
+            font-size: 0.72rem;
+        }
+
+        /* Export buttons */
+        .export-row {
+            padding: 12px 16px 14px;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .btn-export {
+            width: 100%;
+            justify-content: center;
+            padding: 9px 16px;
+            font-size: 0.78rem;
+        }
+
+        /* Add scroll hint for tables */
+        .table-wrap::after {
+            content: '← Scroll to see more →';
+            display: block;
+            text-align: center;
+            padding: 8px;
+            font-size: 0.7rem;
+            color: #94a3b8;
+            background: #f8fafc;
+            border-top: 1px solid var(--border);
+        }
+    }
+
+    @media (max-width: 600px) {
+        .page-title {
+            font-size: 1.15rem;
+            margin-bottom: 16px;
+        }
+
+        .page-title i {
+            font-size: 1rem;
+            margin-right: 6px;
+        }
+
+        /* Tabs */
+        .tab-btn {
+            padding: 11px 12px;
+            font-size: 0.75rem;
+        }
+
+        .tab-btn i {
+            display: none; /* Hide icons on very small screens */
+        }
+
+        /* Filter section */
+        .filter-section {
+            padding: 12px 14px 14px;
+        }
+
+        .filter-header {
+            font-size: 0.78rem;
+        }
+
+        .filter-group label {
+            font-size: 0.65rem;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 7px 9px;
+            font-size: 0.78rem;
+        }
+
+        /* Stat cards */
+        .stat-cards {
+            padding: 0 14px 14px;
+            gap: 8px;
+        }
+
+        .stat-card {
+            padding: 11px 13px;
+            min-height: 76px;
+        }
+
+        .stat-card-icon {
+            width: 28px;
+            height: 28px;
+            font-size: 0.8rem;
+        }
+
+        .stat-card-label {
+            font-size: 0.65rem;
+        }
+
+        .stat-card-value {
+            font-size: 1.15rem;
+        }
+
+        .stat-card::after {
+            width: 60px;
+            height: 60px;
+        }
+
+        /* Table section */
+        .table-section {
+            padding: 0 14px 14px;
+        }
+
+        table {
+            min-width: 700px;
+            font-size: 0.72rem;
+        }
+
+        thead th {
+            padding: 7px 8px;
+            font-size: 0.6rem;
+        }
+
+        tbody td {
+            padding: 6px 8px;
+        }
+
+        .summary-row td {
+            font-size: 0.75rem;
+        }
+
+        /* Export buttons */
+        .export-row {
+            padding: 10px 14px 12px;
+        }
+
+        .btn-export {
+            padding: 8px 14px;
+            font-size: 0.75rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .page-title {
+            font-size: 1.05rem;
+        }
+
+        .tabs-bar {
+            padding: 0 10px;
+        }
+
+        .tab-btn {
+            padding: 10px 10px;
+            font-size: 0.72rem;
+        }
+
+        .filter-section {
+            padding: 10px 12px 12px;
+        }
+
+        .stat-cards {
+            padding: 0 12px 12px;
+        }
+
+        .stat-card {
+            padding: 10px 12px;
+            min-height: 72px;
+        }
+
+        .stat-card-value {
+            font-size: 1.1rem;
+        }
+
+        .table-section {
+            padding: 0 12px 12px;
+        }
+
+        table {
+            min-width: 650px;
+        }
+
+        .export-row {
+            padding: 10px 12px;
+        }
+    }
+
+    @media (max-width: 360px) {
+        .page-title {
+            font-size: 1rem;
+        }
+
+        .stat-card-value {
+            font-size: 1rem;
+        }
+
+        table {
+            min-width: 600px;
+            font-size: 0.7rem;
+        }
+    }
     </style>
 @endpush
 
