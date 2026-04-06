@@ -30,6 +30,22 @@
             </li>
 
             <li class="menu-item">
+                <a href="{{ route('dc.tag-officer.index') }}"
+                    class="menu-link {{ request()->routeIs('dc.tag-officer.*') ? 'active' : '' }}">
+                    <span class="material-symbols-rounded">assignment_ind</span>
+                    <span class="menu-label">Tag Officer</span>
+                </a>
+            </li>
+
+            <li class="menu-item">
+                <a href="{{ route('dc.stations.index') }}"
+                    class="menu-link {{ request()->routeIs('dc.stations.*') ? 'active' : '' }}">
+                    <span class="material-symbols-rounded">local_gas_station</span>
+                    <span class="menu-label">Filling Station</span>
+                </a>
+            </li>
+
+            <li class="menu-item">
                 <a href="{{ route('dc.assign-tag-officer.index') }}"
                     class="menu-link {{ request()->routeIs('dc.assign-tag-officer.*') ? 'active' : '' }}">
                     <span class="material-symbols-rounded">assignment_turned_in</span>
@@ -45,11 +61,6 @@
                     <span class="menu-label">Profile</span>
                 </a>
             </li>
-
-
-
-
-
         </ul>
     </div>
 

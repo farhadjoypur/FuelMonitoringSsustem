@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Backend\Admin;
+namespace App\Http\Controllers\Backend\DC;
 
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
@@ -66,7 +66,7 @@ class TagOfficerController extends Controller
 
         $locationData = $this->getLocationData();
 
-        return view('backend.admin.pages.tagOfficer.index', compact('tagOfficers', 'locationData', 'search'));
+        return view('backend.dc.pages.tagOfficer.index', compact('tagOfficers', 'locationData', 'search'));
     }
 
     /**
@@ -136,6 +136,9 @@ class TagOfficerController extends Controller
         }
     }
 
+    /**
+     * Display the specified resource.
+     */
     public function show(string $id)
     {
         //
@@ -149,6 +152,9 @@ class TagOfficerController extends Controller
         //
     }
 
+    /**
+     * Update the specified resource in storage.
+     */
     public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
