@@ -1522,7 +1522,7 @@
         //  EDIT MODAL — Open (AJAX দিয়ে data load, তারপর dropdown chain)
         // ═══════════════════════════════════════════════════════════
         let currentEditId = null;
-
+         window.depots = @json($depots);
         function openEditModal(id) {
             currentEditId = id;
 
@@ -1589,10 +1589,18 @@
                                    value="${s.station_code ?? ''}" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Linked Depot</label>
-                            <input type="text" name="linked_depot" class="form-control"
-                                   value="${s.linked_depot ?? ''}">
-                        </div>
+                    <label class="form-label">Linked Depot</label>
+
+                    <select name="linked_depot" class="form-select">
+                        <option value="">— Select Depot —</option>
+
+                        ${depots.map(d => `
+                            <option value="${d.id}" ${d.id == s.linked_depot ? 'selected' : ''}>
+                                ${d.depot_name}
+                            </option>
+                        `).join('')}
+                    </select>
+                </div>
                     </div>
  
                     {{-- Owner Info --}}
