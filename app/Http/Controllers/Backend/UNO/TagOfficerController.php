@@ -6,6 +6,7 @@ use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
@@ -21,8 +22,39 @@ class TagOfficerController extends Controller
         }
 
         $json = File::get($path);
+        $data = json_decode($json, true);
 
-        return json_decode($json, true);
+        $userProfile = Auth::user()->profile;
+        $targetDivision = $userProfile->division;
+        $targetDistrict = $userProfile->district;
+        $targetUpazila = $userProfile->upazila;
+
+        $filteredData = ['divisions' => []];
+
+        foreach ($data['divisions'] as $division) {
+            if ($division['name_en'] === $targetDivision) {
+                $newDivision = $division;
+                $newDivision['districts'] = [];
+
+                foreach ($division['districts'] as $district) {
+                    if ($district['name_en'] === $targetDistrict) {
+                        $newDistrict = $district;
+                        $newDistrict['police_stations'] = [];
+
+                        foreach ($district['police_stations'] as $upazila) {
+                            if ($upazila['name_en'] === $targetUpazila) {
+                                $newDistrict['police_stations'][] = $upazila;
+                            }
+                        }
+
+                        $newDivision['districts'][] = $newDistrict;
+                    }
+                }
+                $filteredData['divisions'][] = $newDivision;
+            }
+        }
+
+        return $filteredData;
     }
 
     public function index(Request $request)
@@ -31,10 +63,16 @@ class TagOfficerController extends Controller
         $division = $request->input('division');
         $district = $request->input('district');
         $upazila = $request->input('upazila');
+        $userProfile = Auth::user()->profile;
 
         $query = User::where('role', UserRole::TAG_OFFICER)
             ->with('profile')
             ->withCount('assignedStations')
+            ->whereHas('profile', function ($q) use ($userProfile) {
+                $q->where('division', $userProfile->division)
+                    ->where('district', $userProfile->district)
+                    ->where('upazila', $userProfile->upazila);
+            })
             ->when($search, function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('phone', 'LIKE', "%{$search}%")
