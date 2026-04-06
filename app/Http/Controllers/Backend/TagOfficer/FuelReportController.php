@@ -141,7 +141,7 @@ class FuelReportController extends Controller
 
         if (! $ctx['stationId']) {
             return redirect()
-                ->route('tag-officer.fuel-reports.index')
+                ->route('fuel-reports.index')
                 ->with('error', 'You do not have any active station assignment.');
         }
 
