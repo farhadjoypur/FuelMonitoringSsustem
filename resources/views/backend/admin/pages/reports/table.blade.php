@@ -62,8 +62,9 @@
     .tbl-wrap {
         border: 1px solid #e2e8f0;
         border-radius: 10px;
-        overflow: hidden;
         overflow-x: auto;
+        overflow-y: visible;
+        max-width: 100%;
     }
 
     .tbl-wrap::-webkit-scrollbar {
@@ -82,8 +83,10 @@
     table {
         width: 100%;
         border-collapse: collapse;
-        font-size: .80rem;
-        min-width: 1340px;
+        font-size: .75rem;
+        /* একটু ছোট */
+        min-width: 900px;
+        /* 1340 থেকে কমিয়ে 900 */
     }
 
     thead tr {
@@ -91,7 +94,7 @@
     }
 
     thead th {
-        padding: 10px 12px;
+        padding: 8px 6px;
         text-align: left;
         font-size: .67rem;
         font-weight: 700;
@@ -100,6 +103,10 @@
         letter-spacing: .55px;
         border-bottom: 1.5px solid #e2e8f0;
         white-space: nowrap;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        box-shadow: 0 1px 0 #e2e8f0;
     }
 
     thead th small {
@@ -594,8 +601,7 @@
                             <td class="">{{ formatNumber($totalRow["{$fuelKey}_prev_stock"] ?? 0) }}</td>
                             <td class="">{{ formatNumber($totalRow["{$fuelKey}_supply"] ?? 0) }}</td>
                             <td class="">{{ formatNumber($totalRow["{$fuelKey}_received"] ?? 0) }}</td>
-                            <td
-                                class=" {{ ($totalRow["{$fuelKey}_difference"] ?? 0) != 0 ? 'text-danger' : '' }}">
+                            <td class=" {{ ($totalRow["{$fuelKey}_difference"] ?? 0) != 0 ? 'text-danger' : '' }}">
                                 {{ formatDifference($totalRow["{$fuelKey}_difference"] ?? 0) }}
                             </td>
                             <td class="">{{ formatNumber($totalRow["{$fuelKey}_sales"] ?? 0) }}</td>
