@@ -256,14 +256,18 @@
     }
 
 
-    /* ── Difference Report Table ── */
+ /* ── Difference Report Table ── */
+
     /* Table Header Row */
     .table-header-row {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 16px;
-        padding: 0 4px;
+        margin-bottom: 0;
+        padding: 16px 20px;
+        background: #fff;
+        border-radius: 8px 8px 0 0;
+        border-bottom: 1px solid #e2e8f0;
     }
 
     .table-title {
@@ -303,56 +307,60 @@
         width: 100%;
         overflow-x: auto;
         overflow-y: hidden;
-        margin-top: 16px;
+        background: #fff;
+        border-radius: 0 0 8px 8px;
     }
 
     .diff-table {
-        width: max-content;   /* KEY FIX */
-        min-width: 100%;      /* keep full width on desktop */
+        width: max-content;
+        min-width: 100%;
         border-collapse: collapse;
         font-size: .775rem;
-        background: var(--surface);
+        background: #fff;
     }
 
     .diff-table thead {
-        background: #f8fafc; 
-        border-bottom: 2px solid var(--border);
+        background: #f8fafc;
+        border-bottom: 2px solid #e2e8f0;
     }
 
     .diff-table th {
-        padding: 10px 6px; 
-        text-align: center; 
+        padding: 12px 8px;
+        text-align: center;
         font-weight: 600;
-        color: #475569; 
-        font-size: .68rem; 
+        color: #1e293b;
+        font-size: .70rem;
         text-transform: uppercase;
-        letter-spacing: .2px; 
-        white-space: nowrap; 
+        letter-spacing: .3px;
+        white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        background: #f8fafc;
     }
 
     .diff-table tbody tr {
-        border-bottom: 2px solid #e2e8f0;
+        border-bottom: 1px solid #e2e8f0;
         transition: background .12s;
+        background: #fff;
     }
 
-    .diff-table tbody tr:hover { 
-        background: #fafbfc; 
+    .diff-table tbody tr:hover {
+        background: #f9fafb;
     }
 
     .diff-table td {
-        padding: 0; 
-        color: var(--text); 
+        padding: 0;
+        color: #1e293b;
         vertical-align: middle;
-        text-align: center; 
+        text-align: center;
         overflow: hidden;
+        background: #fff;
     }
 
     .diff-table td.row-number {
-        font-weight: 600; 
-        color: var(--muted);
-        padding: 0 4px; 
+        font-weight: 600;
+        color: #64748b;
+        padding: 0 8px;
         text-align: center;
     }
 
@@ -363,8 +371,8 @@
     .diff-table td.td-district,
     .diff-table td.td-upazila,
     .diff-table td.td-date {
-        padding: 10px 5px; 
-        vertical-align: middle; 
+        padding: 12px 8px;
+        vertical-align: middle;
         text-align: center;
         word-break: break-word;
     }
@@ -378,117 +386,120 @@
     .td-officer,
     .td-designation {
         white-space: normal;
-    }   
+    }
 
     /* Fuel rows inside cells */
-    .fuel-rows { 
-        display: flex; 
-        flex-direction: column; 
+    .fuel-rows {
+        display: flex;
+        flex-direction: column;
     }
 
     .fuel-row {
-        display: flex; 
-        align-items: center; 
+        display: flex;
+        align-items: center;
         justify-content: center;
-        padding: 7px 4px; 
-        min-height: 38px;
-        border-bottom: 1px dashed #e2e8f0;
+        padding: 8px 6px;
+        min-height: 40px;
+        border-bottom: 1px solid #f1f5f9;
     }
 
-    .fuel-row:last-child { 
-        border-bottom: none; 
+    .fuel-row:last-child {
+        border-bottom: none;
     }
 
-    .fuel-type { 
-        font-size: .70rem; 
-        color: var(--muted); 
-        font-weight: 500; 
+    .fuel-type {
+        font-size: .72rem;
+        color: #64748b;
+        font-weight: 500;
     }
 
-    .fuel-value { 
-        font-weight: 700; 
-        font-size: .78rem; 
+    .fuel-value {
+        font-weight: 700;
+        font-size: .80rem;
+        color: #1e293b;
     }
 
-    .fuel-percent { 
-        font-weight: 700; 
-        font-size: .78rem; 
+    .fuel-percent {
+        font-weight: 700;
+        font-size: .80rem;
+        color: #1e293b;
     }
 
     .alert-text {
-        font-size: .68rem; 
-        color: #64748b; 
-        text-align: center; 
-        line-height: 1.3;
+        font-size: .70rem;
+        color: #64748b;
+        text-align: center;
+        line-height: 1.4;
     }
 
     /* RED DIFFERENCE COLUMNS */
     .diff-table td.diff-column .fuel-value,
     .diff-table td.diff-column .fuel-percent {
-        color: #dc2626 !important; 
+        color: #dc2626 !important;
         font-weight: 700;
     }
 
     /* Action buttons */
     .action-btns {
-        display: flex; 
-        flex-direction: column; 
-        gap: 5px;
-        padding: 8px 4px; 
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        padding: 10px 6px;
         align-items: center;
     }
 
     .action-btn {
-        padding: 5px 6px; 
-        border-radius: 5px; 
-        font-size: .68rem;
-        font-weight: 600; 
-        border: none; 
+        padding: 6px 8px;
+        border-radius: 5px;
+        font-size: .70rem;
+        font-weight: 600;
+        border: none;
         cursor: pointer;
-        transition: all .15s; 
+        transition: all .15s;
         white-space: nowrap;
-        text-align: center; 
-        width: 68px;
+        text-align: center;
+        width: 70px;
     }
 
-    .btn-view { 
-        background: #22c55e; 
-        color: #fff; 
+    .btn-view {
+        background: #22c55e;
+        color: #fff;
     }
 
-    .btn-view:hover { 
-        background: #16a34a; 
+    .btn-view:hover {
+        background: #16a34a;
     }
 
-    .btn-message { 
-        background: #3b82f6; 
-        color: #fff; 
+    .btn-message {
+        background: #3b82f6;
+        color: #fff;
     }
 
-    .btn-message:hover { 
-        background: #2563eb; 
+    .btn-message:hover {
+        background: #2563eb;
     }
 
-    .btn-delete { 
-        background: #ef4444; 
-        color: #fff; 
+    .btn-delete {
+        background: #ef4444;
+        color: #fff;
     }
 
-    .btn-delete:hover { 
-        background: #dc2626; 
+    .btn-delete:hover {
+        background: #dc2626;
     }
 
-    .date-cell { 
-        font-weight: 500; 
-        font-size: .75rem; 
-        line-height: 1.4; 
+    .date-cell {
+        font-weight: 500;
+        font-size: .75rem;
+        line-height: 1.4;
+        color: #1e293b;
     }
 
-    .date-day { 
-        font-size: .65rem; 
-        color: var(--muted); 
-        display: block; 
-        margin-top: 2px; 
+    .date-day {
+        font-size: .65rem;
+        color: #64748b;
+        display: block;
+        margin-top: 2px;
     }
 
     /* Table Footer */
@@ -496,7 +507,9 @@
         display: flex;
         justify-content: center;
         padding: 20px 0;
-        margin-top: 16px;
+        margin-top: 0;
+        background: #fff;
+        border-radius: 0 0 8px 8px;
         border-top: 1px solid #e2e8f0;
     }
 
@@ -506,20 +519,20 @@
         align-items: center;
         gap: 6px;
         padding: 10px 24px;
-        background: #fff;
-        color: #3b82f6;
-        border: 2px solid #3b82f6;
+        background: #16a34a;
+        color: #fff;
+        border: none;
         border-radius: 6px;
         font-size: 0.875rem;
         font-weight: 600;
         cursor: pointer;
         transition: all 0.2s;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
     .see-all-btn:hover {
-        background: #3b82f6;
-        color: #fff;
-        box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);
+        background: #15803d;
+        box-shadow: 0 4px 6px rgba(22, 163, 74, 0.2);
         transform: translateY(-1px);
     }
 
@@ -533,6 +546,14 @@
 
     .see-all-btn:hover svg {
         transform: translateX(3px);
+    }
+
+    /* Table Section Container */
+    .table-section {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
     }
 </style>
 @endpush
