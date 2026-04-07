@@ -21,7 +21,7 @@
         {{-- Station Name --}}
         <td>
             <span class="station-name">{{ $station->station_name }}</span>
-            <span class="station-sub">{{ $station->depot->depot_name ?? '—' }}</span>
+            {{-- <span class="station-sub">{{ $station->depot->depot_name ?? '—' }}</span> --}}
         </td>
 
         {{-- Code --}}
