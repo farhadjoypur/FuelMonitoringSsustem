@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Http\Controllers\Backend\DC;
+namespace App\Http\Controllers\Backend\Dc;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\AssignTagOfficer;
-use App\Models\Company;
 use App\Models\Depot;
 use App\Models\FillingStation;
 use App\Models\Fuelreport;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
@@ -20,298 +20,222 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        $dc        = auth()->user();  // logged-in DC
+        $dc = Auth::user();
+        $dcId = $dc->id;
+        
         $today     = Carbon::today();
         $thisMonth = Carbon::now()->startOfMonth();
-    
+
         // =============================================
-        // DC-এর আন্ডারে যে Station IDs আছে সেগুলো বের করো
-        // AssignTagOfficer টেবিলে dc_id কলাম আছে ধরে নিচ্ছি
-        // যদি না থাকে, নিচের বিকল্প দেখো
+        // DC এর assigned divisions/districts থেকে data filter
+        // (assuming DC profile has division/district fields)
         // =============================================
-        $stationIds = AssignTagOfficer::where('dc_id', $dc->id)
-                        ->pluck('filling_station_id')
-                        ->unique()
-                        ->toArray();
-    
-        // বিকল্প: যদি dc_id না থেকে district দিয়ে link থাকে তাহলে:
-        // $stationIds = FillingStation::where('district', $dc->district)->pluck('id')->toArray();
-    
+        $dcDivision = $dc->profile?->division;
+        $dcDistrict = $dc->profile?->district;
+
         // =============================================
-        // DC-এর আন্ডারে যে Station Names আছে (Fuelreport filter-এর জন্য)
+        // DC এর jurisdiction এর সব stations
         // =============================================
-        $stationNames = FillingStation::whereIn('id', $stationIds)
-                        ->pluck('station_name')
-                        ->toArray();
-    
+        $stationsQuery = FillingStation::query();
+        
+        if ($dcDivision) {
+            $stationsQuery->where('division', $dcDivision);
+        }
+        if ($dcDistrict) {
+            $stationsQuery->where('district', $dcDistrict);
+        }
+        
+        $jurisdictionStations = $stationsQuery->pluck('station_name');
+
         // =============================================
-        // TOP STAT CARDS
+        // TODAY'S REPORTS (DC এর jurisdiction থেকে)
         // =============================================
-    
-        // আজকের রিপোর্ট — শুধু DC-এর stations থেকে
         $todayReports = Fuelreport::whereDate('report_date', $today)
-                        ->whereIn('station_name', $stationNames)
-                        ->get();
-    
-        $totalStockToday = $todayReports->sum(fn($r) =>
-            $r->petrol_closing_stock + $r->diesel_closing_stock + $r->octane_closing_stock
-        );
-        $totalReceivedToday = $todayReports->sum(fn($r) =>
-            $r->petrol_received + $r->diesel_received + $r->octane_received
-        );
-        $totalSoldToday = $todayReports->sum(fn($r) =>
-            $r->petrol_sales + $r->diesel_sales + $r->octane_sales
-        );
-        $totalDiffToday = $todayReports->sum(fn($r) =>
-            $r->petrol_difference + $r->diesel_difference + $r->octane_difference
-        );
-        $totalDiffPct = $totalReceivedToday > 0
-            ? round(abs($totalDiffToday) / $totalReceivedToday * 100, 1)
-            : 0;
-    
-        // গত মাস vs এই মাসের received — DC-এর stations
-        $lastMonthReceived = Fuelreport::whereIn('station_name', $stationNames)
-            ->whereMonth('report_date', Carbon::now()->subMonth()->month)
-            ->sum(DB::raw('petrol_received + diesel_received + octane_received'));
-    
-        $thisMonthReceived = Fuelreport::whereIn('station_name', $stationNames)
-            ->whereMonth('report_date', Carbon::now()->month)
-            ->sum(DB::raw('petrol_received + diesel_received + octane_received'));
-    
-        $receivedChangePct = $lastMonthReceived > 0
-            ? round((($thisMonthReceived - $lastMonthReceived) / $lastMonthReceived) * 100, 1)
-            : 0;
-    
+            ->whereIn('station_name', $jurisdictionStations)
+            ->get();
+
         // =============================================
-        // TODAY'S STOCK & SOLD (per fuel type) — DC scope
+        // TODAY'S CLOSING STOCK (per fuel type)
         // =============================================
         $todayPetrolStock = $todayReports->sum('petrol_closing_stock');
         $todayDieselStock = $todayReports->sum('diesel_closing_stock');
         $todayOctaneStock = $todayReports->sum('octane_closing_stock');
-    
-        $todayPetrolSold  = $todayReports->sum('petrol_sales');
-        $todayDieselSold  = $todayReports->sum('diesel_sales');
-        $todayOctaneSold  = $todayReports->sum('octane_sales');
-    
+
         // =============================================
-        // SUMMARY CARDS — শুধু DC-এর scope
+        // TODAY'S RECEIVED (needed for difference %)
         // =============================================
-        $totalDepots   = Depot::whereHas('fillingStations', fn($q) =>
-                            $q->whereIn('id', $stationIds)
-                         )->count();
-    
-        $totalStations = FillingStation::whereIn('id', $stationIds)->count();
-    
-        // DC-এর আন্ডারে Tag Officers (unique)
-       // ✅ সঠিক:
-        $totalOfficers = AssignTagOfficer::where('dc_id', $dc->id)
+        $todayPetrolReceived = $todayReports->sum('petrol_received');
+        $todayDieselReceived = $todayReports->sum('diesel_received');
+        $todayOctaneReceived = $todayReports->sum('octane_received');
+
+        // =============================================
+        // TODAY'S DIFFERENCE (supply - received)
+        // =============================================
+        $todayPetrolDiff = $todayReports->sum('petrol_difference');
+        $todayDieselDiff = $todayReports->sum('diesel_difference');
+        $todayOctaneDiff = $todayReports->sum('octane_difference');
+
+        // =============================================
+        // TODAY'S SALES (per fuel type)
+        // =============================================
+        $todayPetrolSold = $todayReports->sum('petrol_sales');
+        $todayDieselSold = $todayReports->sum('diesel_sales');
+        $todayOctaneSold = $todayReports->sum('octane_sales');
+
+        // =============================================
+        // TODAY'S DIFFERENCE PERCENTAGE (%)
+        // =============================================
+        $todayPetrolDiffPct = $todayPetrolReceived > 0
+            ? round(($todayPetrolDiff / $todayPetrolReceived) * 100, 1) : 0;
+        $todayDieselDiffPct = $todayDieselReceived > 0
+            ? round(($todayDieselDiff / $todayDieselReceived) * 100, 1) : 0;
+        $todayOctaneDiffPct = $todayOctaneReceived > 0
+            ? round(($todayOctaneDiff / $todayOctaneReceived) * 100, 1) : 0;
+
+        // =============================================
+        // SUMMARY CARDS (DC jurisdiction)
+        // =============================================
+        $totalStationsQuery = FillingStation::query();
+        if ($dcDivision) {
+            $totalStationsQuery->where('division', $dcDivision);
+        }
+        if ($dcDistrict) {
+            $totalStationsQuery->where('district', $dcDistrict);
+        }
+        $totalStations = $totalStationsQuery->count();
+
+        // Total Tag Officers under this DC
+        $totalOfficers = AssignTagOfficer::whereHas('fillingStation', function($q) use ($dcDivision, $dcDistrict) {
+            if ($dcDivision) {
+                $q->where('division', $dcDivision);
+            }
+            if ($dcDistrict) {
+                $q->where('district', $dcDistrict);
+            }
+        })
+        ->where('status', 'active')
         ->distinct('officer_id')
         ->count('officer_id');
 
-        $newOfficers = AssignTagOfficer::where('dc_id', $dc->id)
-        ->where('created_at', '>=', $thisMonth)
-        ->distinct('officer_id')
-        ->count('officer_id');
-    
-        $activeAssignments = AssignTagOfficer::where('dc_id', $dc->id)
-                                ->where('status', 'active')
-                                ->count();
-    
-        // এই মাসের নতুন additions — DC scope
-        $newDepots   = Depot::whereHas('fillingStations', fn($q) =>
-                            $q->whereIn('id', $stationIds)
-                       )->where('created_at', '>=', $thisMonth)->count();
-    
-        $newStations = FillingStation::whereIn('id', $stationIds)
-                        ->where('created_at', '>=', $thisMonth)->count();
-    
-        $newOfficers = AssignTagOfficer::where('dc_id', $dc->id)
-                        ->where('created_at', '>=', $thisMonth)
-                        ->distinct('officer_id')->count('officer_id');
-    
-        $assignChange = AssignTagOfficer::where('dc_id', $dc->id)
-                            ->where('created_at', '>=', $thisMonth)->count()
-                      - AssignTagOfficer::where('dc_id', $dc->id)
-                            ->where('status', 'inactive')
-                            ->where('updated_at', '>=', $thisMonth)->count();
-    
         // =============================================
-        // FUEL TYPE DISTRIBUTION PIE — DC scope
-        // =============================================
-        $latestReports = Fuelreport::select(
-                'station_name',
-                DB::raw('MAX(report_date) as max_date')
-            )
-            ->whereIn('station_name', $stationNames)
-            ->groupBy('station_name');
-    
-        $fuelDistribution = Fuelreport::joinSub($latestReports, 'latest', function ($join) {
-            $join->on('fuelreports.station_name', '=', 'latest.station_name')
-                 ->on('fuelreports.report_date', '=', 'latest.max_date');
-        })
-        ->whereIn('fuelreports.station_name', $stationNames)
-        ->selectRaw('
-            SUM(petrol_closing_stock) as total_petrol,
-            SUM(diesel_closing_stock) as total_diesel,
-            SUM(octane_closing_stock) as total_octane
-        ')
-        ->first();
-    
-        $totalPetrol = $fuelDistribution->total_petrol ?? 0;
-        $totalDiesel = $fuelDistribution->total_diesel ?? 0;
-        $totalOctane = $fuelDistribution->total_octane ?? 0;
-        $totalOthers = 0;
-    
-        // =============================================
-        // COMPANY TYPE DISTRIBUTION — DC scope
-        // =============================================
-        $companyDistribution = FillingStation::select('company_id', DB::raw('count(*) as total'))
-            ->with('company:id,name')
-            ->whereIn('id', $stationIds)
-            ->whereNotNull('company_id')
-            ->groupBy('company_id')
-            ->orderByDesc('total')
-            ->take(5)
-            ->get()
-            ->map(fn($item) => [
-                'name'  => $item->company->name ?? 'Unknown',
-                'total' => $item->total,
-            ]);
-    
-        // =============================================
-        // DIVISION-WISE DISTRIBUTION BAR — DC scope
-        // =============================================
-        $divisionDistribution = FillingStation::select('division', DB::raw('count(*) as total'))
-            ->whereIn('id', $stationIds)
-            ->whereNotNull('division')
-            ->groupBy('division')
-            ->orderByDesc('total')
-            ->get()
-            ->map(fn($item) => [
-                'division' => $item->division,
-                'total'    => $item->total,
-            ]);
-    
-        // =============================================
-        // FUEL SALES TREND (last 12 months) — DC scope
-        // =============================================
-        $salesTrend = Fuelreport::select(
-                DB::raw("DATE_FORMAT(report_date, '%b') as month_label"),
-                DB::raw("DATE_FORMAT(report_date, '%Y-%m') as month_key"),
-                DB::raw('SUM(petrol_sales + diesel_sales + octane_sales) as total_sales')
-            )
-            ->whereIn('station_name', $stationNames)
-            ->where('report_date', '>=', Carbon::now()->subMonths(11)->startOfMonth())
-            ->groupBy('month_key', 'month_label')
-            ->orderBy('month_key')
-            ->get();
-    
-        // =============================================
-        // RECENT DEPOT ENTRIES — DC scope
-        // =============================================
-        $recentDepots = Depot::whereHas('fillingStations', fn($q) =>
-                            $q->whereIn('id', $stationIds)
-                        )
-            ->latest()->take(5)->get()
-            ->map(function ($depot) use ($stationIds) {
-                $stationCount = FillingStation::where('linked_depot', $depot->id)
-                                ->whereIn('id', $stationIds)->count();
-                $utilization  = $depot->capacity > 0
-                    ? min(100, round(($stationCount * 5000 / $depot->capacity) * 100))
-                    : 0;
-    
-                return [
-                    'name'        => $depot->depot_name,
-                    'district'    => $depot->district,
-                    'capacity'    => number_format($depot->capacity) . ' L',
-                    'utilization' => $utilization,
-                    'status'      => $depot->status,
-                ];
-            });
-    
-        // =============================================
-        // RECENT ACTIVITIES — DC scope
+        // RECENT ACTIVITIES (DC jurisdiction)
         // =============================================
         $recentActivities = collect();
-    
-        // নতুন depot (DC-এর stations এর সাথে linked)
-        Depot::whereHas('fillingStations', fn($q) => $q->whereIn('id', $stationIds))
-            ->latest()->take(3)->get()
-            ->each(function ($d) use (&$recentActivities) {
-                $recentActivities->push([
-                    'type'  => 'depot',
-                    'title' => 'New Depot Added',
-                    'sub'   => $d->district . ' — ' . $d->depot_name,
-                    'time'  => $d->created_at,
-                    'color' => 'green',
-                    'icon'  => 'fa-circle-info',
-                ]);
-            });
-    
-        // নতুন assignment — DC scope
-        AssignTagOfficer::with(['fillingStation:id,station_name,district'])
-            ->where('dc_id', $dc->id)
-            ->latest()->take(3)->get()
-            ->each(function ($a) use (&$recentActivities) {
-                $recentActivities->push([
-                    'type'  => 'assign',
-                    'title' => 'Officer Assigned',
-                    'sub'   => ($a->fillingStation->district ?? '') . ' — ' . ($a->fillingStation->station_name ?? ''),
-                    'time'  => $a->created_at,
-                    'color' => 'blue',
-                    'icon'  => 'fa-circle-info',
-                ]);
-            });
-    
-        // Stock alert — DC scope
-        Fuelreport::whereIn('station_name', $stationNames)
-            ->whereRaw('ABS(petrol_difference) + ABS(diesel_difference) + ABS(octane_difference) > 50')
-            ->latest('report_date')->take(2)->get()
+
+        /* Zero Stock Alert */
+        Fuelreport::where(function ($q) {
+            $q->where('petrol_closing_stock', 0)
+                ->orWhere('diesel_closing_stock', 0)
+                ->orWhere('octane_closing_stock', 0);
+        })
+            ->whereIn('station_name', $jurisdictionStations)
+            ->latest('report_date')
+            ->take(3)
+            ->get()
             ->each(function ($r) use (&$recentActivities) {
                 $recentActivities->push([
-                    'type'  => 'alert',
-                    'title' => 'Stock Alert',
-                    'sub'   => $r->district . ' — ' . $r->station_name,
-                    'time'  => $r->updated_at,
-                    'color' => 'yellow',
-                    'icon'  => 'fa-circle-exclamation',
-                ]);
-            });
-    
-        // Operational loss — DC scope
-        Fuelreport::whereIn('station_name', $stationNames)
-            ->where(function ($q) {
-                $q->where('petrol_closing_stock', '<', 0)
-                  ->orWhere('diesel_closing_stock', '<', 0)
-                  ->orWhere('octane_closing_stock', '<', 0);
-            })
-            ->latest('report_date')->take(2)->get()
-            ->each(function ($r) use (&$recentActivities) {
-                $recentActivities->push([
-                    'type'  => 'loss',
-                    'title' => 'Operational Loss Detected',
+                    'title' => 'Zero Stock Alert',
                     'sub'   => $r->district . ' — ' . $r->station_name,
                     'time'  => $r->updated_at,
                     'color' => 'red',
-                    'icon'  => 'fa-circle-xmark',
+                    'icon'  => 'fa-battery-empty',
                 ]);
             });
-    
+
+        /* Low Stock Alert */
+        Fuelreport::where(function ($q) {
+            $q->where('petrol_closing_stock', '<', 100)
+                ->orWhere('diesel_closing_stock', '<', 100)
+                ->orWhere('octane_closing_stock', '<', 100);
+        })
+            ->whereIn('station_name', $jurisdictionStations)
+            ->latest('report_date')
+            ->take(3)
+            ->get()
+            ->each(function ($r) use (&$recentActivities) {
+                $recentActivities->push([
+                    'title' => 'Low Stock Alert',
+                    'sub'   => $r->district . ' — ' . $r->station_name,
+                    'time'  => $r->updated_at,
+                    'color' => 'yellow',
+                    'icon'  => 'fa-triangle-exclamation',
+                ]);
+            });
+
+        /* Difference (L) Alert */
+        Fuelreport::whereRaw('ABS(petrol_difference) + ABS(diesel_difference) + ABS(octane_difference) > 50')
+            ->whereIn('station_name', $jurisdictionStations)
+            ->latest('report_date')
+            ->take(3)
+            ->get()
+            ->each(function ($r) use (&$recentActivities) {
+                $recentActivities->push([
+                    'title' => 'Difference (L) Alert',
+                    'sub'   => $r->district . ' — ' . $r->station_name,
+                    'time'  => $r->updated_at,
+                    'color' => 'orange',
+                    'icon'  => 'fa-scale-balanced',
+                ]);
+            });
+
+        /* Difference (%) Alert */
+        Fuelreport::whereRaw('
+            (ABS(petrol_difference) / NULLIF(petrol_closing_stock,1)) * 100 > 10
+            OR (ABS(diesel_difference) / NULLIF(diesel_closing_stock,1)) * 100 > 10
+            OR (ABS(octane_difference) / NULLIF(octane_closing_stock,1)) * 100 > 10
+        ')
+            ->whereIn('station_name', $jurisdictionStations)
+            ->latest('report_date')
+            ->take(3)
+            ->get()
+            ->each(function ($r) use (&$recentActivities) {
+                $recentActivities->push([
+                    'title' => 'Difference (%) Alert',
+                    'sub'   => $r->district . ' — ' . $r->station_name,
+                    'time'  => $r->updated_at,
+                    'color' => 'blue',
+                    'icon'  => 'fa-percent',
+                ]);
+            });
+
+        /* Final Sort */
         $recentActivities = $recentActivities
             ->sortByDesc('time')
-            ->take(5)
+            ->take(4)
             ->values();
-    
+
         return view('backend.dc.pages.dashboard.index', compact(
-            'totalStockToday', 'totalReceivedToday', 'totalSoldToday',
-            'totalDiffToday',  'totalDiffPct', 'receivedChangePct',
-            'todayPetrolStock', 'todayDieselStock', 'todayOctaneStock',
-            'todayPetrolSold',  'todayDieselSold',  'todayOctaneSold',
-            'totalDepots', 'totalStations', 'totalOfficers', 'activeAssignments',
-            'newDepots', 'newStations', 'newOfficers', 'assignChange',
-            'totalPetrol', 'totalDiesel', 'totalOctane', 'totalOthers',
-            'companyDistribution', 'divisionDistribution', 'salesTrend',
-            'recentDepots', 'recentActivities'
+            // today stock
+            'todayPetrolStock',
+            'todayDieselStock',
+            'todayOctaneStock',
+
+            // today received
+            'todayPetrolReceived',
+            'todayDieselReceived',
+            'todayOctaneReceived',
+
+            // today difference L
+            'todayPetrolDiff',
+            'todayDieselDiff',
+            'todayOctaneDiff',
+
+            // today difference %
+            'todayPetrolDiffPct',
+            'todayDieselDiffPct',
+            'todayOctaneDiffPct',
+
+            // today sold
+            'todayPetrolSold',
+            'todayDieselSold',
+            'todayOctaneSold',
+
+            // summary
+            'totalStations',
+            'totalOfficers',
+
+            // activities
+            'recentActivities'
         ));
     }
 
