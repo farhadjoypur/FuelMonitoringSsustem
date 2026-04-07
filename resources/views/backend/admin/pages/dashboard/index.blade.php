@@ -254,6 +254,307 @@
         .fuel-card { padding: 12px 10px; gap: 10px; }
         .fuel-info .fv { font-size: 17px; }
     }
+
+
+ /* ── Difference Report Table ── */
+
+    /* Table Header Row */
+    .table-header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0;
+        padding: 16px 20px;
+        background: #fff;
+        border-radius: 8px 8px 0 0;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .table-title {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: #dc2626;
+    }
+
+    /* Export PDF Button */
+    .export-pdf-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
+        background: #16a34a;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .export-pdf-btn:hover {
+        background: #15803d;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+        transform: translateY(-1px);
+    }
+
+    .export-pdf-btn:active {
+        transform: translateY(0);
+    }
+
+    .diff-table-wrapper {
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        background: #fff;
+        border-radius: 0 0 8px 8px;
+    }
+
+    .diff-table {
+        width: max-content;
+        min-width: 100%;
+        border-collapse: collapse;
+        font-size: .775rem;
+        background: #fff;
+    }
+
+    .diff-table thead {
+        background: #f8fafc;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .diff-table th {
+        padding: 12px 8px;
+        text-align: center;
+        font-weight: 600;
+        color: #1e293b;
+        font-size: .70rem;
+        text-transform: uppercase;
+        letter-spacing: .3px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        background: #f8fafc;
+    }
+
+    .diff-table tbody tr {
+        border-bottom: 1px solid #e2e8f0;
+        transition: background .12s;
+        background: #fff;
+    }
+
+    .diff-table tbody tr:hover {
+        background: #f9fafb;
+    }
+
+    .diff-table td {
+        padding: 0;
+        color: #1e293b;
+        vertical-align: middle;
+        text-align: center;
+        overflow: hidden;
+        background: #fff;
+    }
+
+    .diff-table td.row-number {
+        font-weight: 600;
+        color: #64748b;
+        padding: 0 8px;
+        text-align: center;
+    }
+
+    .diff-table td.td-station,
+    .diff-table td.td-officer,
+    .diff-table td.td-designation,
+    .diff-table td.td-phone,
+    .diff-table td.td-district,
+    .diff-table td.td-upazila,
+    .diff-table td.td-date {
+        padding: 12px 8px;
+        vertical-align: middle;
+        text-align: center;
+        word-break: break-word;
+    }
+
+    .diff-table th,
+    .diff-table td {
+        white-space: nowrap;
+    }
+
+    .td-station,
+    .td-officer,
+    .td-designation {
+        white-space: normal;
+    }
+
+    /* Fuel rows inside cells */
+    .fuel-rows {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .fuel-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 6px;
+        min-height: 40px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .fuel-row:last-child {
+        border-bottom: none;
+    }
+
+    .fuel-type {
+        font-size: .72rem;
+        color: #64748b;
+        font-weight: 500;
+    }
+
+    .fuel-value {
+        font-weight: 700;
+        font-size: .80rem;
+        color: #1e293b;
+    }
+
+    .fuel-percent {
+        font-weight: 700;
+        font-size: .80rem;
+        color: #1e293b;
+    }
+
+    .alert-text {
+        font-size: .70rem;
+        color: #64748b;
+        text-align: center;
+        line-height: 1.4;
+    }
+
+    /* RED DIFFERENCE COLUMNS */
+    .diff-table td.diff-column .fuel-value,
+    .diff-table td.diff-column .fuel-percent {
+        color: #dc2626 !important;
+        font-weight: 700;
+    }
+
+    /* Action buttons */
+    .action-btns {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        padding: 10px 6px;
+        align-items: center;
+    }
+
+    .action-btn {
+        padding: 6px 8px;
+        border-radius: 5px;
+        font-size: .70rem;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: all .15s;
+        white-space: nowrap;
+        text-align: center;
+        width: 70px;
+    }
+
+    .btn-view {
+        background: #22c55e;
+        color: #fff;
+    }
+
+    .btn-view:hover {
+        background: #16a34a;
+    }
+
+    .btn-message {
+        background: #3b82f6;
+        color: #fff;
+    }
+
+    .btn-message:hover {
+        background: #2563eb;
+    }
+
+    .btn-delete {
+        background: #ef4444;
+        color: #fff;
+    }
+
+    .btn-delete:hover {
+        background: #dc2626;
+    }
+
+    .date-cell {
+        font-weight: 500;
+        font-size: .75rem;
+        line-height: 1.4;
+        color: #1e293b;
+    }
+
+    .date-day {
+        font-size: .65rem;
+        color: #64748b;
+        display: block;
+        margin-top: 2px;
+    }
+
+    /* Table Footer */
+    .table-footer {
+        display: flex;
+        justify-content: center;
+        padding: 20px 0;
+        margin-top: 0;
+        background: #fff;
+        border-radius: 0 0 8px 8px;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    /* See All Button */
+    .see-all-btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 10px 24px;
+        background: #16a34a;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .see-all-btn:hover {
+        background: #15803d;
+        box-shadow: 0 4px 6px rgba(22, 163, 74, 0.2);
+        transform: translateY(-1px);
+    }
+
+    .see-all-btn:active {
+        transform: translateY(0);
+    }
+
+    .see-all-btn svg {
+        transition: transform 0.2s;
+    }
+
+    .see-all-btn:hover svg {
+        transform: translateX(3px);
+    }
+
+    /* Table Section Container */
+    .table-section {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
 </style>
 @endpush
 
@@ -371,7 +672,7 @@
     {{-- ============================================================
          RECENT ACTIVITIES
     ============================================================ --}}
-    <div class="card" style="padding:0">
+    <!-- <div class="card" style="padding:0">
         <div class="ac-head">
             <i class="fa-solid fa-wave-square"></i>
             <span class="ac-title">Recent Activities</span>
@@ -393,7 +694,177 @@
         @empty
             <div class="no-data">No activity found।</div>
         @endforelse
+    </div> -->
+
+    {{-- ============================================================
+        Difference Report Table
+    ============================================================ --}}
+    <div class="tab-panel" :class="{ 'is-active': activeTab === 'difference' }">
+
+    {{-- Table section --}}
+    <div class="table-section">
+        {{-- Header with Title and Export Button --}}
+        <div class="table-header-row">
+            <div class="table-title">Today's Difference Report(20)</div>
+            <button class="export-pdf-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+                Export to PDF
+            </button>
+        </div>
+
+        {{-- Static Difference Report Table --}}
+        <div class="diff-table-wrapper">
+            <table class="diff-table">
+                <thead>
+                    <tr>
+                        <th style="width:28px;">#</th>
+                        <th style="width:62px;">DATE</th>
+                        <th style="width:90px;">STATION</th>
+                        <th style="width:72px;">TAG OFFICER</th>
+                        <th style="width:80px;">DESIGNATION</th>
+                        <th style="width:82px;">PHONE</th>
+                        <th style="width:62px;">DISTRICT</th>
+                        <th style="width:62px;">UPAZILA</th>
+                        <th style="width:50px;">FUEL</th>
+                        <th style="width:72px;">DIFFERENCE(L)</th>
+                        <th style="width:72px;">DIFFERENCE(%)</th>
+                        <th style="width:76px;">ALERT MESSAGE</th>
+                        <th style="width:76px;">ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{-- Row 1 --}}
+                    <tr>
+                        <td class="row-number">1</td>
+                        <td class="td-date">
+                            <div class="date-cell">
+                                08 Jun<br>2026
+                                <span class="date-day">Friday</span>
+                            </div>
+                        </td>
+                        <td class="td-station">Uttara Filling Station</td>
+                        <td class="td-officer">Manik Mia</td>
+                        <td class="td-designation">Live Stock Officer</td>
+                        <td class="td-phone">01628312158</td>
+                        <td class="td-district">Rangpur</td>
+                        <td class="td-upazila">Shatkania</td>
+                        <td>
+                            <div class="fuel-rows">
+                                <div class="fuel-row"><span class="fuel-type">Octane</span></div>
+                                <div class="fuel-row"><span class="fuel-type">Petrol</span></div>
+                                <div class="fuel-row"><span class="fuel-type">Diesel</span></div>
+                                <div class="fuel-row"><span class="fuel-type">Other</span></div>
+                            </div>
+                        </td>
+                        <td class="diff-column">
+                            <div class="fuel-rows">
+                                <div class="fuel-row"><span class="fuel-value">200</span></div>
+                                <div class="fuel-row"><span class="fuel-value">800</span></div>
+                                <div class="fuel-row"><span class="fuel-value">00</span></div>
+                                <div class="fuel-row"><span class="fuel-value">180</span></div>
+                            </div>
+                        </td>
+                        <td class="diff-column">
+                            <div class="fuel-rows">
+                                <div class="fuel-row"><span class="fuel-percent">2%</span></div>
+                                <div class="fuel-row"><span class="fuel-percent">8%</span></div>
+                                <div class="fuel-row"><span class="fuel-percent">00</span></div>
+                                <div class="fuel-row"><span class="fuel-percent">1.8%</span></div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="fuel-rows">
+                                <div class="fuel-row"><span class="alert-text">Stock Zero</span></div>
+                                <div class="fuel-row"><span class="alert-text">Low stock</span></div>
+                                <div class="fuel-row"><span class="alert-text">High Diff</span></div>
+                                <div class="fuel-row"><span class="alert-text">-</span></div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="action-btns">
+                                <button class="action-btn btn-view">View</button>
+                                <button class="action-btn btn-message" @click="openMessageModal(1, 'Uttara Filling Station')">Message</button>
+                                <button class="action-btn btn-delete" @click="openDeleteModal(1, 'Uttara Filling Station')">Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+
+                    {{-- Row 2 --}}
+                    <tr>
+                        <td class="row-number">2</td>
+                        <td class="td-date">
+                            <div class="date-cell">
+                                08 Jun<br>2026
+                                <span class="date-day">Friday</span>
+                            </div>
+                        </td>
+                        <td class="td-station">Uttara Filling Station</td>
+                        <td class="td-officer">Manik Mia</td>
+                        <td class="td-designation">Live Stock Officer</td>
+                        <td class="td-phone">01628312158</td>
+                        <td class="td-district">Rangpur</td>
+                        <td class="td-upazila">Shatkania</td>
+                        <td>
+                            <div class="fuel-rows">
+                                <div class="fuel-row"><span class="fuel-type">Octane</span></div>
+                                <div class="fuel-row"><span class="fuel-type">Petrol</span></div>
+                                <div class="fuel-row"><span class="fuel-type">Diesel</span></div>
+                                <div class="fuel-row"><span class="fuel-type">Other</span></div>
+                            </div>
+                        </td>
+                        <td class="diff-column">
+                            <div class="fuel-rows">
+                                <div class="fuel-row"><span class="fuel-value">200</span></div>
+                                <div class="fuel-row"><span class="fuel-value">800</span></div>
+                                <div class="fuel-row"><span class="fuel-value">00</span></div>
+                                <div class="fuel-row"><span class="fuel-value">180</span></div>
+                            </div>
+                        </td>
+                        <td class="diff-column">
+                            <div class="fuel-rows">
+                                <div class="fuel-row"><span class="fuel-percent">2%</span></div>
+                                <div class="fuel-row"><span class="fuel-percent">8%</span></div>
+                                <div class="fuel-row"><span class="fuel-percent">00</span></div>
+                                <div class="fuel-row"><span class="fuel-percent">1.8%</span></div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="fuel-rows">
+                                <div class="fuel-row"><span class="alert-text">Stock Zero</span></div>
+                                <div class="fuel-row"><span class="alert-text">Low stock</span></div>
+                                <div class="fuel-row"><span class="alert-text">High Diff</span></div>
+                                <div class="fuel-row"><span class="alert-text">-</span></div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="action-btns">
+                                <button class="action-btn btn-view">View</button>
+                                <button class="action-btn btn-message" @click="openMessageModal(2, 'Uttara Filling Station')">Message</button>
+                                <button class="action-btn btn-delete" @click="openDeleteModal(2, 'Uttara Filling Station')">Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        {{-- See All Button --}}
+        <div class="table-footer">
+            <button class="see-all-btn">
+                See All
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </button>
+        </div>
     </div>
+</div>{{-- /tab-difference --}}
 
 </div>
 @endsection

@@ -155,6 +155,103 @@
             text-transform: uppercase;
             letter-spacing: .5px;
         }
+   /* ── Difference Report Table ── */
+   .diff-table-wrapper {
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        margin-top: 16px;
+    }
+    .diff-table {
+        width: max-content;   /* KEY FIX */
+        min-width: 100%;      /* keep full width on desktop */
+        border-collapse: collapse;
+        font-size: .775rem;
+        background: var(--surface);
+    }
+    .diff-table thead {
+        background: #f8fafc; border-bottom: 2px solid var(--border);
+    }
+    .diff-table th {
+        padding: 10px 6px; text-align: center; font-weight: 600;
+        color: #475569; font-size: .68rem; text-transform: uppercase;
+        letter-spacing: .2px; white-space: nowrap; overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .diff-table tbody tr {
+        border-bottom: 2px solid #e2e8f0;
+        transition: background .12s;
+    }
+    .diff-table tbody tr:hover { background: #fafbfc; }
+    .diff-table td {
+        padding: 0; color: var(--text); vertical-align: middle;
+        text-align: center; overflow: hidden;
+    }
+    .diff-table td.row-number {
+        font-weight: 600; color: var(--muted);
+        padding: 0 4px; text-align: center;
+    }
+    .diff-table td.td-station,
+    .diff-table td.td-officer,
+    .diff-table td.td-designation,
+    .diff-table td.td-phone,
+    .diff-table td.td-district,
+    .diff-table td.td-upazila,
+    .diff-table td.td-date {
+        padding: 10px 5px; vertical-align: middle; text-align: center;
+        word-break: break-word;
+    }
+    .diff-table th,
+    .diff-table td {
+        white-space: nowrap;
+    }
+    .td-station,
+    .td-officer,
+    .td-designation {
+            white-space: normal;
+    }   
+    /* Fuel rows inside cells */
+    .fuel-rows { display: flex; flex-direction: column; }
+    .fuel-row {
+        display: flex; align-items: center; justify-content: center;
+        padding: 7px 4px; min-height: 38px;
+        border-bottom: 1px dashed #e2e8f0;
+    }
+    .fuel-row:last-child { border-bottom: none; }
+
+    .fuel-type { font-size: .70rem; color: var(--muted); font-weight: 500; }
+    .fuel-value { font-weight: 700; font-size: .78rem; }
+    .fuel-percent { font-weight: 700; font-size: .78rem; }
+    .alert-text {
+        font-size: .68rem; color: #64748b; text-align: center; line-height: 1.3;
+    }
+
+    /* RED DIFFERENCE COLUMNS */
+    .diff-table td.diff-column .fuel-value,
+    .diff-table td.diff-column .fuel-percent {
+        color: #dc2626 !important; font-weight: 700;
+    }
+
+    /* Action buttons */
+    .action-btns {
+        display: flex; flex-direction: column; gap: 5px;
+        padding: 8px 4px; align-items: center;
+    }
+    .action-btn {
+        padding: 5px 6px; border-radius: 5px; font-size: .68rem;
+        font-weight: 600; border: none; cursor: pointer;
+        transition: all .15s; white-space: nowrap;
+        text-align: center; width: 68px;
+    }
+    .btn-view    { background: #22c55e; color: #fff; }
+    .btn-view:hover { background: #16a34a; }
+    .btn-message { background: #3b82f6; color: #fff; }
+    .btn-message:hover { background: #2563eb; }
+    .btn-delete  { background: #ef4444; color: #fff; }
+    .btn-delete:hover { background: #dc2626; }
+
+    .date-cell { font-weight: 500; font-size: .75rem; line-height: 1.4; }
+    .date-day { font-size: .65rem; color: var(--muted); display: block; margin-top: 2px; }
 
         .form-group input,
         .form-group select {
@@ -1136,13 +1233,140 @@
                 </div>
             </div>
 
-            <div class="export-row">
-                <button class="btn-export btn-export-pdf">
-                    <i class="fa-regular fa-file-pdf"></i> Export to PDF
-                </button>
-                <button class="btn-export btn-export-excel">
-                    <i class="fa-regular fa-file-excel"></i> Export to Excel
-                </button>
+            {{-- Static Difference Report Table --}}
+            <div class="diff-table-wrapper">
+                <table class="diff-table">
+                    <thead>
+                        <tr>
+                            <th style="width:28px;">#</th>
+                            <th style="width:62px;">DATE</th>
+                            <th style="width:90px;">STATION</th>
+                            <th style="width:72px;">TAG OFFICER</th>
+                            <th style="width:80px;">DESIGNATION</th>
+                            <th style="width:82px;">PHONE</th>
+                            <th style="width:62px;">DISTRICT</th>
+                            <th style="width:62px;">UPAZILA</th>
+                            <th style="width:50px;">FUEL</th>
+                            <th style="width:72px;">DIFFERENCE(L)</th>
+                            <th style="width:72px;">DIFFERENCE(%)</th>
+                            <th style="width:76px;">ALERT MESSAGE</th>
+                            <th style="width:76px;">ACTIONS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{-- Row 1 --}}
+                        <tr>
+                            <td class="row-number">1</td>
+                            <td class="td-date">
+                                <div class="date-cell">
+                                    08 Jun<br>2026
+                                    <span class="date-day">Friday</span>
+                                </div>
+                            </td>
+                            <td class="td-station">Uttara Filling Station</td>
+                            <td class="td-officer">Manik Mia</td>
+                            <td class="td-designation">Live Stock Officer</td>
+                            <td class="td-phone">01628312158</td>
+                            <td class="td-district">Rangpur</td>
+                            <td class="td-upazila">Shatkania</td>
+                            <td>
+                                <div class="fuel-rows">
+                                    <div class="fuel-row"><span class="fuel-type">Octane</span></div>
+                                    <div class="fuel-row"><span class="fuel-type">Petrol</span></div>
+                                    <div class="fuel-row"><span class="fuel-type">Diesel</span></div>
+                                    <div class="fuel-row"><span class="fuel-type">Other</span></div>
+                                </div>
+                            </td>
+                            <td class="diff-column">
+                                <div class="fuel-rows">
+                                    <div class="fuel-row"><span class="fuel-value">200</span></div>
+                                    <div class="fuel-row"><span class="fuel-value">800</span></div>
+                                    <div class="fuel-row"><span class="fuel-value">00</span></div>
+                                    <div class="fuel-row"><span class="fuel-value">180</span></div>
+                                </div>
+                            </td>
+                            <td class="diff-column">
+                                <div class="fuel-rows">
+                                    <div class="fuel-row"><span class="fuel-percent">2%</span></div>
+                                    <div class="fuel-row"><span class="fuel-percent">8%</span></div>
+                                    <div class="fuel-row"><span class="fuel-percent">00</span></div>
+                                    <div class="fuel-row"><span class="fuel-percent">1.8%</span></div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="fuel-rows">
+                                    <div class="fuel-row"><span class="alert-text">Stock Zero</span></div>
+                                    <div class="fuel-row"><span class="alert-text">Low stock</span></div>
+                                    <div class="fuel-row"><span class="alert-text">High Diff</span></div>
+                                    <div class="fuel-row"><span class="alert-text">-</span></div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="action-btn btn-view">View</button>
+                                    <button class="action-btn btn-message" @click="openMessageModal(1, 'Uttara Filling Station')">Message</button>
+                                    <button class="action-btn btn-delete" @click="openDeleteModal(1, 'Uttara Filling Station')">Delete</button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        {{-- Row 2 --}}
+                        <tr>
+                            <td class="row-number">2</td>
+                            <td class="td-date">
+                                <div class="date-cell">
+                                    08 Jun<br>2026
+                                    <span class="date-day">Friday</span>
+                                </div>
+                            </td>
+                            <td class="td-station">Uttara Filling Station</td>
+                            <td class="td-officer">Manik Mia</td>
+                            <td class="td-designation">Live Stock Officer</td>
+                            <td class="td-phone">01628312158</td>
+                            <td class="td-district">Rangpur</td>
+                            <td class="td-upazila">Shatkania</td>
+                            <td>
+                                <div class="fuel-rows">
+                                    <div class="fuel-row"><span class="fuel-type">Octane</span></div>
+                                    <div class="fuel-row"><span class="fuel-type">Petrol</span></div>
+                                    <div class="fuel-row"><span class="fuel-type">Diesel</span></div>
+                                    <div class="fuel-row"><span class="fuel-type">Other</span></div>
+                                </div>
+                            </td>
+                            <td class="diff-column">
+                                <div class="fuel-rows">
+                                    <div class="fuel-row"><span class="fuel-value">200</span></div>
+                                    <div class="fuel-row"><span class="fuel-value">800</span></div>
+                                    <div class="fuel-row"><span class="fuel-value">00</span></div>
+                                    <div class="fuel-row"><span class="fuel-value">180</span></div>
+                                </div>
+                            </td>
+                            <td class="diff-column">
+                                <div class="fuel-rows">
+                                    <div class="fuel-row"><span class="fuel-percent">2%</span></div>
+                                    <div class="fuel-row"><span class="fuel-percent">8%</span></div>
+                                    <div class="fuel-row"><span class="fuel-percent">00</span></div>
+                                    <div class="fuel-row"><span class="fuel-percent">1.8%</span></div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="fuel-rows">
+                                    <div class="fuel-row"><span class="alert-text">Stock Zero</span></div>
+                                    <div class="fuel-row"><span class="alert-text">Low stock</span></div>
+                                    <div class="fuel-row"><span class="alert-text">High Diff</span></div>
+                                    <div class="fuel-row"><span class="alert-text">-</span></div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="action-btn btn-view">View</button>
+                                    <button class="action-btn btn-message" @click="openMessageModal(2, 'Uttara Filling Station')">Message</button>
+                                    <button class="action-btn btn-delete" @click="openDeleteModal(2, 'Uttara Filling Station')">Delete</button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
 
         </div>{{-- /tab-difference --}}
