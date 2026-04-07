@@ -119,7 +119,7 @@
 
                         <h4 class="fw-bold mb-1">{{ auth()->user()->profile->name ?? 'User Name' }}</h4>
                         <p class="text-dark mb-3" style="font-size: 13px; letter-spacing: 0.5px;">
-                            Live Stock Officer <br>
+                            {{ auth()->user()->profile->designation ?? 'Tag Officer' }} <br>
                             <span class="text-dark">
                                 {{ auth()->user()->profile->upazila ?? 'Upazila' }},
                                 {{ auth()->user()->profile->district ?? 'District' }}
