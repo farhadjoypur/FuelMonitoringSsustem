@@ -27,18 +27,47 @@
         box-shadow: var(--shadow); border: 1px solid var(--border);
     }
 
-    /* ── Tabs ── */
-    .tabs-bar { display: flex; border-bottom: 1.5px solid var(--border); padding: 0 24px; }
+   /* ── Tabs ── */
+    .tabs-bar {
+        display: flex;
+        border-bottom: 1.5px solid var(--border);
+        padding: 0 24px;
+    }
     .tab-btn {
         background: none; border: none; border-bottom: 2.5px solid transparent;
         padding: 15px 22px; font-size: .875rem; font-weight: 500;
         color: var(--muted); cursor: pointer; white-space: nowrap; margin-bottom: -1.5px;
         transition: color .18s, border-color .18s; display: flex; align-items: center; gap: 7px;
+        flex-shrink: 0; justify-content: flex-start;
     }
     .tab-btn:hover { color: var(--primary); }
     .tab-btn.is-active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
     .tab-panel { display: none; }
     .tab-panel.is-active { display: block; }
+
+    @media (max-width: 600px) {
+        .tabs-bar {
+            flex-direction: column;
+            padding: 0;
+            border-bottom: none;
+        }
+        .tab-btn {
+            border-bottom: none;
+            border-left: 3px solid transparent;
+            margin-bottom: 0;
+            padding: 13px 18px;
+            justify-content: flex-start;
+            border-bottom: 1px solid var(--border);
+            font-size: .85rem;
+            flex: unset;
+            white-space: normal;
+        }
+        .tab-btn.is-active {
+            border-left-color: var(--primary);
+            border-bottom-color: var(--border);
+            background: #f0f6ff;
+        }
+    }
 
     /* ── Filter ── */
     .filter-section { padding: 18px 24px 20px; border-bottom: 1px solid var(--border); }
@@ -87,6 +116,95 @@
         border-radius: 50%; animation: spin .7s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+   /* ── Difference Report Table ── */
+    .diff-table-wrapper { overflow-x: auto; margin-top: 16px; }
+    .diff-table {
+        width: 100%; border-collapse: collapse;
+        font-size: .825rem; background: var(--surface);
+    }
+    .diff-table thead {
+        background: #f8fafc; border-bottom: 2px solid var(--border);
+    }
+    .diff-table th {
+        padding: 10px 8px; text-align: center; font-weight: 600;
+        color: #475569; font-size: .72rem; text-transform: uppercase;
+        letter-spacing: .3px; white-space: nowrap; max-width: 80px;
+        word-break: break-word; white-space: normal; line-height: 1.3;
+    }
+    .diff-table tbody tr {
+        border-bottom: 2px solid #e2e8f0;
+        transition: background .12s;
+    }
+    .diff-table tbody tr:hover { background: #fafbfc; }
+    .diff-table td {
+        padding: 0; color: var(--text); vertical-align: middle;
+        text-align: center;
+    }
+    .diff-table td.row-number {
+        font-weight: 600; color: var(--muted); width: 36px;
+        padding: 0 6px; text-align: center;
+    }
+    .diff-table td.td-station,
+    .diff-table td.td-officer,
+    .diff-table td.td-designation,
+    .diff-table td.td-phone,
+    .diff-table td.td-district,
+    .diff-table td.td-upazila,
+    .diff-table td.td-date {
+        padding: 14px 8px; vertical-align: middle; text-align: center;
+    }
+
+    /* Fuel rows inside cells */
+    .fuel-rows { display: flex; flex-direction: column; }
+    .fuel-row {
+        display: flex; align-items: center; justify-content: center;
+        padding: 10px 8px; min-height: 44px;
+        border-bottom: 1px dashed #e2e8f0;
+    }
+    .fuel-row:last-child { border-bottom: none; }
+
+    .fuel-type {
+        font-size: .75rem; color: var(--muted); font-weight: 500;
+    }
+    .fuel-value {
+        font-weight: 700; font-size: .85rem;
+    }
+    .fuel-percent {
+        font-weight: 700; font-size: .85rem;
+    }
+    .alert-text {
+        font-size: .73rem; color: #64748b; text-align: center;
+        line-height: 1.3;
+    }
+
+    /* RED DIFFERENCE COLUMNS */
+    .diff-table td.diff-column .fuel-value,
+    .diff-table td.diff-column .fuel-percent {
+        color: #dc2626 !important;
+        font-weight: 700;
+    }
+
+    /* Action buttons */
+    .action-btns {
+        display: flex; flex-direction: column; gap: 6px;
+        padding: 10px 8px; align-items: center;
+    }
+    .action-btn {
+        padding: 6px 12px; border-radius: 6px; font-size: .73rem;
+        font-weight: 600; border: none; cursor: pointer;
+        transition: all .15s; white-space: nowrap;
+        text-align: center; width: 80px;
+    }
+    .btn-view    { background: #22c55e; color: #fff; }
+    .btn-view:hover { background: #16a34a; }
+    .btn-message { background: #3b82f6; color: #fff; }
+    .btn-message:hover { background: #2563eb; }
+    .btn-delete  { background: #ef4444; color: #fff; }
+    .btn-delete:hover { background: #dc2626; }
+
+    .date-cell { font-weight: 500; font-size: .82rem; line-height: 1.4; }
+    .date-day { font-size: .68rem; color: var(--muted); display: block; margin-top: 2px; }
 
     /* ── Export ── */
     .export-row { display: flex; justify-content: flex-end; gap: 10px; padding: 14px 24px 20px; border-top: 1px solid var(--border); }
@@ -149,9 +267,9 @@
             <i class="fa-solid fa-chart-line" style="font-size:.78rem;"></i>
             Sales &amp; Stock Report
         </button>
-        <button class="tab-btn" :class="{ 'is-active': activeTab === 'officer' }" @click="switchTab('officer')">
-            <i class="fa-solid fa-user-tie" style="font-size:.78rem;"></i>
-            Officer Report
+        <button class="tab-btn" :class="{ 'is-active': activeTab === 'difference' }" @click="switchTab('difference')">
+            <i class="fa-solid fa-chart-column" style="font-size:.78rem;"></i>
+            Difference Report
         </button>
         <button class="tab-btn" :class="{ 'is-active': activeTab === 'pending' }" @click="switchTab('pending')">
             <i class="fa-solid fa-clock-rotate-left" style="font-size:.78rem;"></i>
@@ -326,15 +444,281 @@
 
 
     {{-- ════════════════════════════════════
-         TAB 2 — OFFICER (placeholder)
+         TAB 2 — DIFFERENCE REPORT
     ════════════════════════════════════ --}}
-    <div class="tab-panel" :class="{ 'is-active': activeTab === 'officer' }">
-        <div class="loading-overlay" style="padding: 80px 20px;">
-            <i class="fa-solid fa-user-tie" style="font-size:2rem; opacity:.2; display:block; margin-bottom:10px;"></i>
-            <p style="font-size:.95rem; font-weight:700; color: var(--muted);">Officer Report</p>
-            <p style="font-size:.80rem; color: #94a3b8; margin-top:4px;">Coming soon</p>
+    <div class="tab-panel" :class="{ 'is-active': activeTab === 'difference' }">
+
+        <div class="filter-section">
+            <div class="filter-title">
+                <i class="fa-solid fa-sliders"></i> Filter Options
+            </div>
+
+            <div class="filter-grid">
+
+                <div class="form-group">
+                    <label>From Date</label>
+                    <input type="date" x-model="differenceFilters.from_date">
+                </div>
+
+                <div class="form-group">
+                    <label>To Date</label>
+                    <input type="date" x-model="differenceFilters.to_date">
+                </div>
+
+                <div class="form-group">
+                    <label>Division</label>
+                    <select x-model="differenceFilters.division" @change="onDifferenceDivisionChange()">
+                        <option value="">All Divisions</option>
+                        @foreach($divisions as $division)
+                            <option value="{{ $division['name_en'] }}">{{ $division['name_en'] }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>District</label>
+                    <select x-model="differenceFilters.district" @change="onDifferenceDistrictChange()" :disabled="!differenceFilters.division">
+                        <option value="">All Districts</option>
+                        <template x-for="district in differenceAvailableDistricts" :key="district.name_en">
+                            <option :value="district.name_en" x-text="district.name_en"></option>
+                        </template>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Upazila</label>
+                    <select x-model="differenceFilters.thana_upazila" :disabled="!differenceFilters.district">
+                        <option value="">All Upazilas</option>
+                        <template x-for="upazila in differenceAvailableUpazilas" :key="upazila.name_en">
+                            <option :value="upazila.name_en" x-text="upazila.name_en"></option>
+                        </template>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Company</label>
+                    <select x-model="differenceFilters.company_id">
+                        <option value="">All Companies</option>
+                        @foreach($companies as $company)
+                            <option value="{{ $company->id }}">{{ $company->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Depot</label>
+                    <select x-model="differenceFilters.depot_id">
+                        <option value="">All Depots</option>
+                        @foreach($depots as $depot)
+                            <option value="{{ $depot->id }}">{{ $depot->depot_name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Filling Station</label>
+                    <select x-model="differenceFilters.station_id">
+                        <option value="">All Stations</option>
+                        @foreach($stations as $station)
+                            <option value="{{ $station->id }}">{{ $station->station_name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Fuel Type</label>
+                    <select x-model="differenceFilters.fuel_type">
+                        <option value="">All Types</option>
+                        <option value="octane">Octane</option>
+                        <option value="petrol">Petrol</option>
+                        <option value="diesel">Diesel</option>
+                        <option value="others">Others</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Stock Status</label>
+                    <select x-model="differenceFilters.stock_status">
+                        <option value="">All Status</option>
+                        <option value="available">Available</option>
+                        <option value="low">Low Stock</option>
+                        <option value="zero">Zero Stock</option>
+                        <option value="highdiff">High Difference</option>
+                    </select>
+                </div>
+
+                <div class="filter-actions">
+                    <button class="btn-apply" @click="applyDifferenceFilter()" :disabled="isDifferenceLoading">
+                        <template x-if="isDifferenceLoading">
+                            <i class="fa-solid fa-spinner fa-spin"></i>
+                        </template>
+                        <template x-if="!isDifferenceLoading">
+                            <i class="fa-solid fa-filter"></i>
+                        </template>
+                        <span x-text="isDifferenceLoading ? 'Loading...' : 'Apply Filters'"></span>
+                    </button>
+                    <button class="btn-reset" @click="resetDifferenceFilter()">
+                        <i class="fa-solid fa-rotate-left"></i> Reset
+                    </button>
+                </div>
+
+            </div>
         </div>
-    </div>
+
+        {{-- Table section --}}
+        <div class="table-section">
+            <div class="table-header-row">
+                <div class="table-title">Difference Report</div>
+                <div class="record-count">2 records found</div>
+            </div>
+
+            {{-- Static Difference Report Table --}}
+            <div class="diff-table-wrapper">
+                <table class="diff-table">
+                    <thead>
+                        <tr>
+                            <th style="width:36px;">#</th>
+                            <th style="width:72px;">DATE</th>
+                            <th style="width:110px;">STATION</th>
+                            <th style="width:90px;">TAG OFFICER</th>
+                            <th style="width:90px;">DESIGNATION</th>
+                            <th style="width:90px;">PHONE</th>
+                            <th style="width:70px;">DISTRICT</th>
+                            <th style="width:70px;">UPAZILA</th>
+                            <th style="width:60px;">FUEL</th>
+                            <th style="width: 80px;">DIFFERENCE(L)</th>
+                            <th style="width:80px;">DIFFERENCE(%)</th>
+                            <th style="width:90px;">ALERT MESSAGE</th>
+                            <th style="width:90px;">ACTIONS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{-- Row 1 --}}
+                        <tr>
+                            <td class="row-number">1</td>
+                            <td class="td-date">
+                                <div class="date-cell">
+                                    08 Jun<br>2026
+                                    <span class="date-day">Friday</span>
+                                </div>
+                            </td>
+                            <td class="td-station">Uttara Filling Station</td>
+                            <td class="td-officer">Manik Mia</td>
+                            <td class="td-designation">Live Stock Officer</td>
+                            <td class="td-phone">01628312158</td>
+                            <td class="td-district">Rangpur</td>
+                            <td class="td-upazila">Shatkania</td>
+                            <td>
+                                <div class="fuel-rows">
+                                    <div class="fuel-row"><span class="fuel-type">Octane</span></div>
+                                    <div class="fuel-row"><span class="fuel-type">Petrol</span></div>
+                                    <div class="fuel-row"><span class="fuel-type">Diesel</span></div>
+                                    <div class="fuel-row"><span class="fuel-type">Other</span></div>
+                                </div>
+                            </td>
+                            <td class="diff-column">
+                                <div class="fuel-rows">
+                                    <div class="fuel-row"><span class="fuel-value">200</span></div>
+                                    <div class="fuel-row"><span class="fuel-value">800</span></div>
+                                    <div class="fuel-row"><span class="fuel-value">00</span></div>
+                                    <div class="fuel-row"><span class="fuel-value">180</span></div>
+                                </div>
+                            </td>
+                            <td class="diff-column">
+                                <div class="fuel-rows">
+                                    <div class="fuel-row"><span class="fuel-percent">2%</span></div>
+                                    <div class="fuel-row"><span class="fuel-percent">8%</span></div>
+                                    <div class="fuel-row"><span class="fuel-percent">00</span></div>
+                                    <div class="fuel-row"><span class="fuel-percent">1.8%</span></div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="fuel-rows">
+                                    <div class="fuel-row"><span class="alert-text">Stock Zero</span></div>
+                                    <div class="fuel-row"><span class="alert-text">Low stock</span></div>
+                                    <div class="fuel-row"><span class="alert-text">High Diff</span></div>
+                                    <div class="fuel-row"><span class="alert-text">-</span></div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="action-btn btn-view">View</button>
+                                    <button class="action-btn btn-message" @click="openMessageModal(1, 'Uttara Filling Station')">Message</button>
+                                    <button class="action-btn btn-delete" @click="openDeleteModal(1, 'Uttara Filling Station')">Delete</button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        {{-- Row 2 --}}
+                        <tr>
+                            <td class="row-number">2</td>
+                            <td class="td-date">
+                                <div class="date-cell">
+                                    08 Jun<br>2026
+                                    <span class="date-day">Friday</span>
+                                </div>
+                            </td>
+                            <td class="td-station">Uttara Filling Station</td>
+                            <td class="td-officer">Manik Mia</td>
+                            <td class="td-designation">Live Stock Officer</td>
+                            <td class="td-phone">01628312158</td>
+                            <td class="td-district">Rangpur</td>
+                            <td class="td-upazila">Shatkania</td>
+                            <td>
+                                <div class="fuel-rows">
+                                    <div class="fuel-row"><span class="fuel-type">Octane</span></div>
+                                    <div class="fuel-row"><span class="fuel-type">Petrol</span></div>
+                                    <div class="fuel-row"><span class="fuel-type">Diesel</span></div>
+                                    <div class="fuel-row"><span class="fuel-type">Other</span></div>
+                                </div>
+                            </td>
+                            <td class="diff-column">
+                                <div class="fuel-rows">
+                                    <div class="fuel-row"><span class="fuel-value">200</span></div>
+                                    <div class="fuel-row"><span class="fuel-value">800</span></div>
+                                    <div class="fuel-row"><span class="fuel-value">00</span></div>
+                                    <div class="fuel-row"><span class="fuel-value">180</span></div>
+                                </div>
+                            </td>
+                            <td class="diff-column">
+                                <div class="fuel-rows">
+                                    <div class="fuel-row"><span class="fuel-percent">2%</span></div>
+                                    <div class="fuel-row"><span class="fuel-percent">8%</span></div>
+                                    <div class="fuel-row"><span class="fuel-percent">00</span></div>
+                                    <div class="fuel-row"><span class="fuel-percent">1.8%</span></div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="fuel-rows">
+                                    <div class="fuel-row"><span class="alert-text">Stock Zero</span></div>
+                                    <div class="fuel-row"><span class="alert-text">Low stock</span></div>
+                                    <div class="fuel-row"><span class="alert-text">High Diff</span></div>
+                                    <div class="fuel-row"><span class="alert-text">-</span></div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="action-btn btn-view">View</button>
+                                    <button class="action-btn btn-message" @click="openMessageModal(2, 'Uttara Filling Station')">Message</button>
+                                    <button class="action-btn btn-delete" @click="openDeleteModal(2, 'Uttara Filling Station')">Delete</button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="export-row">
+            <button class="btn-export btn-export-pdf">
+                <i class="fa-regular fa-file-pdf"></i> Export to PDF
+            </button>
+            <button class="btn-export btn-export-excel">
+                <i class="fa-regular fa-file-excel"></i> Export to Excel
+            </button>
+        </div>
+
+    </div>{{-- /tab-difference --}}
 
 
     {{-- ════════════════════════════════════
@@ -423,6 +807,23 @@ function reportApp() {
         availableUpazilas:  [],
         allDivisions: @json($divisions),
 
+        // Difference Report Filters (separate state)
+        isDifferenceLoading: false,
+        differenceFilters: {
+            from_date:     '',
+            to_date:       '',
+            division:      '',
+            district:      '',
+            thana_upazila: '',
+            company_id:    '',
+            depot_id:      '',
+            station_id:    '',
+            fuel_type:     '',
+            stock_status:  '',
+        },
+        differenceAvailableDistricts: [],
+        differenceAvailableUpazilas:  [],
+
         // Modal states
         messageModal: { isOpen: false, reportId: null, stationName: '', text: '' },
         deleteModal:  { isOpen: false, reportId: null, stationName: '' },
@@ -458,6 +859,25 @@ function reportApp() {
             const division = this.allDivisions.find(d => d.name_en === this.filters.division);
             const district = division?.districts?.find(d => d.name_en === this.filters.district);
             this.availableUpazilas = district?.police_stations ?? [];
+        },
+
+        // ── Difference Report: Division → Districts ─────────
+        onDifferenceDivisionChange() {
+            this.differenceFilters.district      = '';
+            this.differenceFilters.thana_upazila = '';
+            this.differenceAvailableUpazilas     = [];
+
+            const found = this.allDivisions.find(d => d.name_en === this.differenceFilters.division);
+            this.differenceAvailableDistricts = found?.districts ?? [];
+        },
+
+        // ── Difference Report: District → Upazilas ──────────
+        onDifferenceDistrictChange() {
+            this.differenceFilters.thana_upazila = '';
+
+            const division = this.allDivisions.find(d => d.name_en === this.differenceFilters.division);
+            const district = division?.districts?.find(d => d.name_en === this.differenceFilters.district);
+            this.differenceAvailableUpazilas = district?.police_stations ?? [];
         },
 
         // ── Build query params (filters + page) ────────────
@@ -541,6 +961,37 @@ function reportApp() {
             this.currentPage        = 1;
 
             await this.applyFilter(1);
+        },
+
+        // ── Difference Report: Apply Filter (placeholder) ───
+        async applyDifferenceFilter() {
+            this.isDifferenceLoading = true;
+            
+            // TODO: Implement actual AJAX call when backend is ready
+            // For now, just simulate loading
+            setTimeout(() => {
+                this.isDifferenceLoading = false;
+                console.log('Difference filters applied:', this.differenceFilters);
+            }, 500);
+        },
+
+        // ── Difference Report: Reset Filter ─────────────────
+        resetDifferenceFilter() {
+            this.differenceFilters = {
+                from_date:     '',
+                to_date:       '',
+                division:      '',
+                district:      '',
+                thana_upazila: '',
+                company_id:    '',
+                depot_id:      '',
+                station_id:    '',
+                fuel_type:     '',
+                stock_status:  '',
+            };
+
+            this.differenceAvailableDistricts = [];
+            this.differenceAvailableUpazilas  = [];
         },
 
         // ── Message modal ───────────────────────────────────
