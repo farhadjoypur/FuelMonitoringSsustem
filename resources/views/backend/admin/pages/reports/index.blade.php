@@ -121,16 +121,17 @@
     .diff-table-wrapper { overflow-x: auto; margin-top: 16px; }
     .diff-table {
         width: 100%; border-collapse: collapse;
-        font-size: .825rem; background: var(--surface);
+        font-size: .775rem; background: var(--surface);
+        table-layout: fixed;
     }
     .diff-table thead {
         background: #f8fafc; border-bottom: 2px solid var(--border);
     }
     .diff-table th {
-        padding: 10px 8px; text-align: center; font-weight: 600;
-        color: #475569; font-size: .72rem; text-transform: uppercase;
-        letter-spacing: .3px; white-space: nowrap; max-width: 80px;
-        word-break: break-word; white-space: normal; line-height: 1.3;
+        padding: 10px 6px; text-align: center; font-weight: 600;
+        color: #475569; font-size: .68rem; text-transform: uppercase;
+        letter-spacing: .2px; white-space: nowrap; overflow: hidden;
+        text-overflow: ellipsis;
     }
     .diff-table tbody tr {
         border-bottom: 2px solid #e2e8f0;
@@ -139,11 +140,11 @@
     .diff-table tbody tr:hover { background: #fafbfc; }
     .diff-table td {
         padding: 0; color: var(--text); vertical-align: middle;
-        text-align: center;
+        text-align: center; overflow: hidden;
     }
     .diff-table td.row-number {
-        font-weight: 600; color: var(--muted); width: 36px;
-        padding: 0 6px; text-align: center;
+        font-weight: 600; color: var(--muted);
+        padding: 0 4px; text-align: center;
     }
     .diff-table td.td-station,
     .diff-table td.td-officer,
@@ -152,49 +153,42 @@
     .diff-table td.td-district,
     .diff-table td.td-upazila,
     .diff-table td.td-date {
-        padding: 14px 8px; vertical-align: middle; text-align: center;
+        padding: 10px 5px; vertical-align: middle; text-align: center;
+        word-break: break-word;
     }
 
     /* Fuel rows inside cells */
     .fuel-rows { display: flex; flex-direction: column; }
     .fuel-row {
         display: flex; align-items: center; justify-content: center;
-        padding: 10px 8px; min-height: 44px;
+        padding: 7px 4px; min-height: 38px;
         border-bottom: 1px dashed #e2e8f0;
     }
     .fuel-row:last-child { border-bottom: none; }
 
-    .fuel-type {
-        font-size: .75rem; color: var(--muted); font-weight: 500;
-    }
-    .fuel-value {
-        font-weight: 700; font-size: .85rem;
-    }
-    .fuel-percent {
-        font-weight: 700; font-size: .85rem;
-    }
+    .fuel-type { font-size: .70rem; color: var(--muted); font-weight: 500; }
+    .fuel-value { font-weight: 700; font-size: .78rem; }
+    .fuel-percent { font-weight: 700; font-size: .78rem; }
     .alert-text {
-        font-size: .73rem; color: #64748b; text-align: center;
-        line-height: 1.3;
+        font-size: .68rem; color: #64748b; text-align: center; line-height: 1.3;
     }
 
     /* RED DIFFERENCE COLUMNS */
     .diff-table td.diff-column .fuel-value,
     .diff-table td.diff-column .fuel-percent {
-        color: #dc2626 !important;
-        font-weight: 700;
+        color: #dc2626 !important; font-weight: 700;
     }
 
     /* Action buttons */
     .action-btns {
-        display: flex; flex-direction: column; gap: 6px;
-        padding: 10px 8px; align-items: center;
+        display: flex; flex-direction: column; gap: 5px;
+        padding: 8px 4px; align-items: center;
     }
     .action-btn {
-        padding: 6px 12px; border-radius: 6px; font-size: .73rem;
+        padding: 5px 6px; border-radius: 5px; font-size: .68rem;
         font-weight: 600; border: none; cursor: pointer;
         transition: all .15s; white-space: nowrap;
-        text-align: center; width: 80px;
+        text-align: center; width: 68px;
     }
     .btn-view    { background: #22c55e; color: #fff; }
     .btn-view:hover { background: #16a34a; }
@@ -203,8 +197,8 @@
     .btn-delete  { background: #ef4444; color: #fff; }
     .btn-delete:hover { background: #dc2626; }
 
-    .date-cell { font-weight: 500; font-size: .82rem; line-height: 1.4; }
-    .date-day { font-size: .68rem; color: var(--muted); display: block; margin-top: 2px; }
+    .date-cell { font-weight: 500; font-size: .75rem; line-height: 1.4; }
+    .date-day { font-size: .65rem; color: var(--muted); display: block; margin-top: 2px; }
 
     /* ── Export ── */
     .export-row { display: flex; justify-content: flex-end; gap: 10px; padding: 14px 24px 20px; border-top: 1px solid var(--border); }
@@ -577,19 +571,19 @@
                 <table class="diff-table">
                     <thead>
                         <tr>
-                            <th style="width:36px;">#</th>
-                            <th style="width:72px;">DATE</th>
-                            <th style="width:110px;">STATION</th>
-                            <th style="width:90px;">TAG OFFICER</th>
-                            <th style="width:90px;">DESIGNATION</th>
-                            <th style="width:90px;">PHONE</th>
-                            <th style="width:70px;">DISTRICT</th>
-                            <th style="width:70px;">UPAZILA</th>
-                            <th style="width:60px;">FUEL</th>
-                            <th style="width: 80px;">DIFFERENCE(L)</th>
-                            <th style="width:80px;">DIFFERENCE(%)</th>
-                            <th style="width:90px;">ALERT MESSAGE</th>
-                            <th style="width:90px;">ACTIONS</th>
+                            <th style="width:28px;">#</th>
+                            <th style="width:62px;">DATE</th>
+                            <th style="width:90px;">STATION</th>
+                            <th style="width:72px;">TAG OFFICER</th>
+                            <th style="width:80px;">DESIGNATION</th>
+                            <th style="width:82px;">PHONE</th>
+                            <th style="width:62px;">DISTRICT</th>
+                            <th style="width:62px;">UPAZILA</th>
+                            <th style="width:50px;">FUEL</th>
+                            <th style="width:72px;">DIFFERENCE(L)</th>
+                            <th style="width:72px;">DIFFERENCE(%)</th>
+                            <th style="width:76px;">ALERT MESSAGE</th>
+                            <th style="width:76px;">ACTIONS</th>
                         </tr>
                     </thead>
                     <tbody>
