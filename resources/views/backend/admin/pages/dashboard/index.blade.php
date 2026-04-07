@@ -323,7 +323,28 @@
         ];
     @endphp
 
-    <div class="data-section">
+    {{-- ============================================================
+         SUMMARY 3 CARDS
+    ============================================================ --}}
+    <div class="sum-grid">
+        <div class="sum-card blue-c">
+            <div class="sm-icon"><i class="fa-solid fa-building"></i></div>
+            <div class="sm-val">{{ $totalDepots }}</div>
+            <div class="sm-name">Total Depots</div>
+        </div>
+        <div class="sum-card green-c">
+            <div class="sm-icon"><i class="fa-solid fa-gas-pump"></i></div>
+            <div class="sm-val">{{ $totalStations }}</div>
+            <div class="sm-name">Total Filling Stations</div>
+        </div>
+        <div class="sum-card purple-c">
+            <div class="sm-icon"><i class="fa-solid fa-user-group"></i></div>
+            <div class="sm-val">{{ $totalOfficers }}</div>
+            <div class="sm-name">Total Tag Officers</div>
+        </div>
+    </div>
+
+    <div class="data-section pt-3">
         @foreach ($rows as $i => $row)
             @if ($i > 0)
                 <hr class="row-divider">
@@ -345,27 +366,6 @@
                 </div>
             </div>
         @endforeach
-    </div>
-
-    {{-- ============================================================
-         SUMMARY 3 CARDS
-    ============================================================ --}}
-    <div class="sum-grid">
-        <div class="sum-card blue-c">
-            <div class="sm-icon"><i class="fa-solid fa-building"></i></div>
-            <div class="sm-val">{{ $totalDepots }}</div>
-            <div class="sm-name">Total Depots</div>
-        </div>
-        <div class="sum-card green-c">
-            <div class="sm-icon"><i class="fa-solid fa-gas-pump"></i></div>
-            <div class="sm-val">{{ $totalStations }}</div>
-            <div class="sm-name">Total Filling Stations</div>
-        </div>
-        <div class="sum-card purple-c">
-            <div class="sm-icon"><i class="fa-solid fa-user-group"></i></div>
-            <div class="sm-val">{{ $totalOfficers }}</div>
-            <div class="sm-name">Total Tag Officers</div>
-        </div>
     </div>
 
     {{-- ============================================================
