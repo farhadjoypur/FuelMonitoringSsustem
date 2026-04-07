@@ -118,11 +118,18 @@
     @keyframes spin { to { transform: rotate(360deg); } }
 
    /* ── Difference Report Table ── */
-    .diff-table-wrapper { overflow-x: auto; margin-top: 16px; }
+   .diff-table-wrapper {
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        margin-top: 16px;
+    }
     .diff-table {
-        width: 100%; border-collapse: collapse;
-        font-size: .775rem; background: var(--surface);
-        table-layout: fixed;
+        width: max-content;   /* KEY FIX */
+        min-width: 100%;      /* keep full width on desktop */
+        border-collapse: collapse;
+        font-size: .775rem;
+        background: var(--surface);
     }
     .diff-table thead {
         background: #f8fafc; border-bottom: 2px solid var(--border);
@@ -156,7 +163,15 @@
         padding: 10px 5px; vertical-align: middle; text-align: center;
         word-break: break-word;
     }
-
+    .diff-table th,
+    .diff-table td {
+        white-space: nowrap;
+    }
+    .td-station,
+    .td-officer,
+    .td-designation {
+            white-space: normal;
+    }   
     /* Fuel rows inside cells */
     .fuel-rows { display: flex; flex-direction: column; }
     .fuel-row {
