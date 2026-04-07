@@ -190,6 +190,13 @@ class DashboardController extends Controller
             ->take(4)
             ->values();
 
+        $highDifferenceReports = Fuelreport::whereDate('report_date', $today)
+            ->whereRaw('ABS(petrol_difference) + ABS(diesel_difference) + ABS(octane_difference) + ABS(others_difference) > 0')
+            ->orderByRaw('ABS(petrol_difference) + ABS(diesel_difference) + ABS(octane_difference) + ABS(others_difference) DESC')
+            ->with(['tagOfficer.profile', 'fillingStation.company'])
+            ->take(20)
+            ->get();
+
         return view('backend.admin.pages.dashboard.index', compact(
             // today stock
             'todayPetrolStock',
@@ -228,7 +235,9 @@ class DashboardController extends Controller
             'divisionSalesToday',
 
             // activities
-            'recentActivities'
+            'recentActivities',
+
+            'highDifferenceReports',
         ));
     }
 
