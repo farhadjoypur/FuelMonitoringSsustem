@@ -8,30 +8,59 @@ use App\Models\AssignTagOfficer;
 use App\Models\FillingStation;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
 
 class AssignTagOfficerController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    private function getLocationData()
+    {
+        $path = resource_path('data/location.json');
+        if (! File::exists($path)) {
+            return [];
+        }
+        $json = File::get($path);
+
+        return json_decode($json, true);
+    }
+
     public function index(Request $request)
     {
+        $search = $request->input('search');
+        $division = $request->input('division');
+        $district = $request->input('district');
+        $upazila = $request->input('upazila');
+
         $query = AssignTagOfficer::with(['officer.profile', 'fillingStation']);
 
-        if ($request->has('search') && $request->search != '') {
-            $searchTerm = $request->search;
-
-            $query->where(function ($q) use ($searchTerm) {
-
-                $q->whereHas('officer.profile', function ($profileQuery) use ($searchTerm) {
-                    $profileQuery->where('name', 'like', '%'.$searchTerm.'%');
+        $query->when($search, function ($q) use ($search) {
+            $q->where(function ($sub) use ($search) {
+                $sub->whereHas('officer.profile', function ($profileQuery) use ($search) {
+                    $profileQuery->where('name', 'like', '%'.$search.'%');
                 })
-                    ->orWhereHas('fillingStation', function ($stationQuery) use ($searchTerm) {
-                        $stationQuery->where('station_name', 'like', '%'.$searchTerm.'%');
+                    ->orWhereHas('fillingStation', function ($stationQuery) use ($search) {
+                        $stationQuery->where('station_name', 'like', '%'.$search.'%');
                     });
             });
-        }
+        });
+
+        $query->when($division, function ($q) use ($division) {
+            $q->whereHas('fillingStation', function ($sq) use ($division) {
+                $sq->where('division', $division);
+            });
+        });
+
+        $query->when($district, function ($q) use ($district) {
+            $q->whereHas('fillingStation', function ($sq) use ($district) {
+                $sq->where('district', $district);
+            });
+        });
+
+        $query->when($upazila, function ($q) use ($upazila) {
+            $q->whereHas('fillingStation', function ($sq) use ($upazila) {
+                $sq->where('upazila', $upazila);
+            });
+        });
 
         $assignments = $query->latest()->paginate(10)->withQueryString();
 
@@ -40,9 +69,10 @@ class AssignTagOfficerController extends Controller
             ->where('role', UserRole::TAG_OFFICER)
             ->get();
 
-        $stations = FillingStation::select('id', 'station_name', 'upazila')->get();
+        $stations = FillingStation::select('id', 'station_name', 'upazila', 'district', 'division')->get();
+        $locationData = $this->getLocationData();
 
-        return view('backend.admin.pages.assignTagOfficer.index', compact('assignments', 'officers', 'stations'));
+        return view('backend.admin.pages.assignTagOfficer.index', compact('assignments', 'officers', 'stations', 'locationData', 'search'));
     }
 
     /**
