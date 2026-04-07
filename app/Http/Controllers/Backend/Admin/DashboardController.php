@@ -57,6 +57,16 @@ class DashboardController extends Controller
         $todayOctaneSold = $todayReports->sum('octane_sales');
 
         // =============================================
+        // TODAY'S DIFFERENCE PERCENTAGE (%)
+        // =============================================
+        $todayPetrolDiffPct = $todayPetrolReceived > 0
+            ? round(($todayPetrolDiff / $todayPetrolReceived) * 100, 1) : 0;
+        $todayDieselDiffPct = $todayDieselReceived > 0
+            ? round(($todayDieselDiff / $todayDieselReceived) * 100, 1) : 0;
+        $todayOctaneDiffPct = $todayOctaneReceived > 0
+            ? round(($todayOctaneDiff / $todayOctaneReceived) * 100, 1) : 0;
+
+        // =============================================
         // SUMMARY CARDS
         // =============================================
         $totalDepots   = Depot::count();
@@ -186,15 +196,20 @@ class DashboardController extends Controller
             'todayDieselStock',
             'todayOctaneStock',
 
-            // today received (for diff % calc in blade)
+            // today received
             'todayPetrolReceived',
             'todayDieselReceived',
             'todayOctaneReceived',
 
-            // today difference
+            // today difference L
             'todayPetrolDiff',
             'todayDieselDiff',
             'todayOctaneDiff',
+
+            // today difference %
+            'todayPetrolDiffPct',
+            'todayDieselDiffPct',
+            'todayOctaneDiffPct',
 
             // today sold
             'todayPetrolSold',
@@ -216,6 +231,7 @@ class DashboardController extends Controller
             'recentActivities'
         ));
     }
+
     /**
      * Show the form for creating a new resource.
      */
