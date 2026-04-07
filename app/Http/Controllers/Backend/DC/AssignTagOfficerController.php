@@ -9,13 +9,48 @@ use App\Models\FillingStation;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
 
 class AssignTagOfficerController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    private function getLocationData()
+    {
+        $path = resource_path('data/location.json');
+
+        if (! File::exists($path)) {
+            return [];
+        }
+
+        $json = File::get($path);
+        $data = json_decode($json, true);
+
+        $dcProfile = Auth::user()->profile;
+        $dcDistrictName = $dcProfile->district ?? '';
+        $dcDivisionName = $dcProfile->division ?? '';
+
+        $filteredData = ['divisions' => []];
+
+        foreach ($data['divisions'] as $division) {
+            if ($division['name_en'] === $dcDivisionName) {
+
+                $tempDivision = $division;
+                $tempDivision['districts'] = [];
+
+                foreach ($division['districts'] as $district) {
+                    if ($district['name_en'] === $dcDistrictName) {
+                        $tempDivision['districts'][] = $district;
+                    }
+                }
+
+                $filteredData['divisions'][] = $tempDivision;
+                break;
+            }
+        }
+
+        return $filteredData;
+    }
+
     public function index(Request $request)
     {
         $dcProfile = Auth::user()->profile;
@@ -26,37 +61,45 @@ class AssignTagOfficerController extends Controller
                 $q->where('district', $dcDistrict);
             });
 
-        if ($request->has('search') && $request->search != '') {
+        $query->when($request->search, function ($q) use ($request) {
             $searchTerm = $request->search;
-
-            $query->where(function ($q) use ($searchTerm) {
-
-                $q->whereHas('officer.profile', function ($profileQuery) use ($searchTerm) {
+            $q->where(function ($sub) use ($searchTerm) {
+                $sub->whereHas('officer.profile', function ($profileQuery) use ($searchTerm) {
                     $profileQuery->where('name', 'like', '%'.$searchTerm.'%');
                 })
                     ->orWhereHas('fillingStation', function ($stationQuery) use ($searchTerm) {
                         $stationQuery->where('station_name', 'like', '%'.$searchTerm.'%');
                     });
             });
-        }
+        });
+
+        $query->when($request->upazila, function ($q) use ($request) {
+            $q->whereHas('fillingStation', function ($sq) use ($request) {
+                $sq->where('upazila', $request->upazila);
+            });
+        });
 
         $assignments = $query->latest()->paginate(10)->withQueryString();
 
-        $officers = User::select('id')
+        $officers = User::where('role', UserRole::TAG_OFFICER)
             ->whereHas('profile', function ($q) use ($dcDistrict) {
                 $q->where('district', $dcDistrict);
             })
-            ->with(['profile' => function ($q) {
-                $q->select('id', 'user_id', 'name', 'upazila', 'district');
-            }])
-            ->where('role', UserRole::TAG_OFFICER)
+            ->with('profile:id,user_id,name,upazila,district')
             ->get();
 
-        $stations = FillingStation::select('id', 'station_name', 'upazila', 'district')
-            ->where('district', $dcDistrict)
+        $stations = FillingStation::where('district', $dcDistrict)
+            ->select('id', 'station_name', 'upazila', 'district', 'division')
             ->get();
 
-        return view('backend.dc.pages.assignTagOfficer.index', compact('assignments', 'officers', 'stations'));
+        $locationData = $this->getLocationData();
+
+        return view('backend.dc.pages.assignTagOfficer.index', compact(
+            'assignments',
+            'officers',
+            'stations',
+            'locationData'
+        ));
     }
 
     /**

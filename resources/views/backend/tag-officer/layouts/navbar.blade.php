@@ -24,7 +24,7 @@
                             {{ Auth::user()->profile->name ?? 'User Name' }}
                         </h6>
                         <small class="text-white" style="font-size: 10px; display: block; margin-top: 2px;">
-                            Live Stock Officer,
+                            {{ Auth::user()->profile->designation ?? 'Tag Officer' }},
                             {{ Auth::user()->profile->upazila ?? 'Upazila' }},
                             {{ Auth::user()->profile->district ?? 'District' }}
                         </small>

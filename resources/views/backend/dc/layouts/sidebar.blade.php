@@ -38,6 +38,14 @@
             </li>
 
             <li class="menu-item">
+                <a href="{{ route('dc.uno.index') }}"
+                    class="menu-link {{ request()->routeIs('dc.uno.*') ? 'active' : '' }}">
+                    <span class="material-symbols-rounded">badge</span>
+                    <span class="menu-label">UNO Officer</span>
+                </a>
+            </li>
+
+            <li class="menu-item">
                 <a href="{{ route('dc.tag-officer.index') }}"
                     class="menu-link {{ request()->routeIs('dc.tag-officer.*') ? 'active' : '' }}">
                     <span class="material-symbols-rounded">assignment_ind</span>

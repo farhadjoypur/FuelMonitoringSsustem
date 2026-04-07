@@ -1,17 +1,21 @@
 <?php
 
-namespace App\Http\Controllers\Backend\Admin;
+namespace App\Http\Controllers\Backend\DC;
 
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 
-class TagOfficerController extends Controller
+class UnoController extends Controller
 {
+    /**
+     * Display a listing of the resource.
+     */
     private function getLocationData()
     {
         $path = resource_path('data/location.json');
@@ -21,8 +25,32 @@ class TagOfficerController extends Controller
         }
 
         $json = File::get($path);
+        $data = json_decode($json, true);
 
-        return json_decode($json, true);
+        $dcProfile = Auth::user()->profile;
+        $dcDistrictName = $dcProfile->district ?? '';
+        $dcDivisionName = $dcProfile->division ?? '';
+
+        $filteredData = ['divisions' => []];
+
+        foreach ($data['divisions'] as $division) {
+            if ($division['name_en'] === $dcDivisionName) {
+
+                $tempDivision = $division;
+                $tempDivision['districts'] = [];
+
+                foreach ($division['districts'] as $district) {
+                    if ($district['name_en'] === $dcDistrictName) {
+                        $tempDivision['districts'][] = $district;
+                    }
+                }
+
+                $filteredData['divisions'][] = $tempDivision;
+                break;
+            }
+        }
+
+        return $filteredData;
     }
 
     public function index(Request $request)
@@ -31,10 +59,13 @@ class TagOfficerController extends Controller
         $division = $request->input('division');
         $district = $request->input('district');
         $upazila = $request->input('upazila');
+        $dcDistrict = Auth::user()->profile->district;
 
-        $query = User::where('role', UserRole::TAG_OFFICER)
+        $query = User::where('role', UserRole::UNO)
             ->with('profile')
-            ->withCount('assignedStations')
+            ->whereHas('profile', function ($q) use ($dcDistrict) {
+                $q->where('district', $dcDistrict);
+            })
             ->when($search, function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('phone', 'LIKE', "%{$search}%")
@@ -62,19 +93,11 @@ class TagOfficerController extends Controller
                 });
             });
 
-        $tagOfficers = $query->latest()->paginate(10)->withQueryString();
+        $unoOfficers = $query->latest()->paginate(10)->withQueryString();
 
         $locationData = $this->getLocationData();
 
-        return view('backend.admin.pages.tagOfficer.index', compact('tagOfficers', 'locationData', 'search'));
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        return view('backend.dc.pages.uno.index', compact('unoOfficers', 'locationData', 'search'));
     }
 
     /**
@@ -103,7 +126,7 @@ class TagOfficerController extends Controller
                 'phone' => $request->phone,
                 'status' => 'active',
                 'password' => Hash::make($request->password),
-                'role' => UserRole::TAG_OFFICER,
+                'role' => UserRole::UNO,
             ]);
 
             $photoPath = null;
@@ -127,7 +150,7 @@ class TagOfficerController extends Controller
 
             DB::commit();
 
-            return redirect()->back()->with('success', 'Tag Officer added successfully!');
+            return redirect()->back()->with('success', 'UNO Officer added successfully!');
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -136,6 +159,9 @@ class TagOfficerController extends Controller
         }
     }
 
+    /**
+     * Display the specified resource.
+     */
     public function show(string $id)
     {
         //
@@ -149,6 +175,9 @@ class TagOfficerController extends Controller
         //
     }
 
+    /**
+     * Update the specified resource in storage.
+     */
     public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
@@ -157,11 +186,11 @@ class TagOfficerController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'nullable|email|unique:users,email,'.$id,
             'phone' => 'required|string|unique:users,phone,'.$id,
-            'designation' => 'nullable|string',
-            'department' => 'nullable|string',
+            'designation' => 'required|string',
+            'department' => 'required|string',
             'division' => 'required',
             'district' => 'required',
-            'upazila' => 'required',
+            'upazila' => 'nullable',
             'status' => 'required',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'password' => 'nullable|min:6',
@@ -218,6 +247,6 @@ class TagOfficerController extends Controller
         }
         $user->delete();
 
-        return redirect()->back()->with('success', 'Tag Officer deleted successfully!');
+        return redirect()->back()->with('success', 'UNO Officer deleted successfully!');
     }
 }

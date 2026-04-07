@@ -24,26 +24,74 @@ class FillingStationController extends Controller
         return json_decode($json, true);
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $path = resource_path('data/location.json');
+        // ── 1. Base query with eager-loaded relations ──────────────────────
+        $reportQuery = FillingStation::with('company', 'depot')->latest();
 
-        if (! file_exists($path)) {
-            dd('Location file not found at: '.$path);
+        // ── 2. Apply filters only when parameters are present ─────────────
+        if ($request->filled('search')) {
+            $keyword = $request->search;
+            $reportQuery->where(function ($q) use ($keyword) {
+                $q->where('station_name', 'like', "%{$keyword}%")
+                    ->orWhere('station_code', 'like', "%{$keyword}%")
+                    ->orWhere('owner_name',   'like', "%{$keyword}%");
+            });
         }
 
-        $locations = json_decode(file_get_contents($path), true);
-        $stations = FillingStation::with('company', 'depot')->latest()->paginate(10);
+        if ($request->filled('station_name')) {
+            $reportQuery->where('station_name', $request->station_name);
+        }
 
-        $divisions = FillingStation::whereNotNull('division')->distinct()->pluck('division');
-        $companies = Company::orderBy('name')->get(['id', 'name']);
+        if ($request->filled('division')) {
+            $reportQuery->where('division', $request->division);
+        }
+
+        if ($request->filled('district')) {
+            $reportQuery->where('district', $request->district);
+        }
+
+        if ($request->filled('upazila')) {
+            $reportQuery->where('upazila', $request->upazila);
+        }
+
+        if ($request->filled('company_id')) {
+            $reportQuery->where('company_id', $request->company_id);
+        }
+
+        if ($request->filled('status')) {
+            $reportQuery->where('status', $request->status);
+        }
+
+        // ── 3. Paginate results (preserve filter params in pagination links) ─
+        $filteredReports = $reportQuery->paginate(15)->withQueryString();
+
+        // ── 4. AJAX request → return JSON with rendered table HTML ─────────
+        if ($request->ajax()) {
+            $tableHtml = view(
+                'backend.admin.pages.fillingStation.table',
+                compact('filteredReports')
+            )->render();
+
+            return response()->json([
+                'success' => true,
+                'html'    => $tableHtml,
+                'total'   => $filteredReports->total(),
+            ]);
+        }
+
+        // ── 5. Normal request → return full index view with sidebar data ───
+        $path      = resource_path('data/location.json');
+        $locations = file_exists($path) ? json_decode(file_get_contents($path), true) : ['divisions' => []];
+
+        $companies      = Company::orderBy('name')->get(['id', 'name']);
         $allStationNames = FillingStation::orderBy('station_name')->get(['id', 'station_name']);
-        $depots = Depot::orderBy('depot_name')->get(['id', 'depot_name']);
+        $depots         = Depot::orderBy('depot_name')->get(['id', 'depot_name']);
 
         return view('backend.admin.pages.fillingStation.index', compact(
-            'stations',
-            'divisions', 'companies',
+            'filteredReports',
             'locations',
+            'companies',
             'allStationNames',
             'depots'
         ));
