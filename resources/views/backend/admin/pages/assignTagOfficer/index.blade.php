@@ -32,21 +32,6 @@
             color: white;
         }
 
-        .table thead th {
-            background-color: #f8f9fa;
-            color: #555;
-            font-weight: 600;
-            text-transform: capitalize;
-            border-bottom: 1px solid #eee;
-            padding: 15px;
-        }
-
-        .table tbody td {
-            padding: 15px;
-            vertical-align: middle;
-            border-bottom: 1px solid #f1f1f1;
-        }
-
         .status-badge {
             padding: 5px 12px;
             border-radius: 6px;
@@ -81,7 +66,7 @@
         }
 
         .officer-name {
-            font-weight: 700;
+            /* font-weight: 400; */
             color: #333;
         }
 
@@ -89,11 +74,26 @@
             font-size: 0.75rem;
             color: #888;
         }
+
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .search-box {
+            border-radius: 25px;
+            padding-left: 45px;
+            height: 45px;
+            border: 1px solid #ddd;
+        }
     </style>
 @endpush
 
 @section('content')
     <div class="container-fluid p-4">
+
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
             <div>
                 <h4 class="fw-bold">Assign Tag Officer</h4>
@@ -183,70 +183,66 @@
         </form>
 
 
-        <div class="card card-assignment">
-            <div class="card-body p-0">
-
-                <div class="table-responsive">
-                    <table class="table mb-0">
-                        <thead>
+        <div class="table-container">
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead class="text-muted">
+                        <tr style="font-size: 0.85rem; text-transform: uppercase;">
+                            <th>SL</th>
+                            <th>Station Name</th>
+                            <th>Officer</th>
+                            <th>Assign Date</th>
+                            <th>Status</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($assignments as $assignment)
                             <tr>
-                                <th>SL</th>
-                                <th>Station Name</th>
-                                <th>Officer</th>
-                                <th>Assign Date</th>
-                                <th>Status</th>
-                                <th class="text-center">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($assignments as $assignment)
-                                <tr>
-                                    <td class="fw-bold text-muted" style="font-size: 0.85rem;">
-                                        {{ $loop->iteration }}
-                                    </td>
-                                    <td>
-                                        <div class="officer-info">
-                                            <span
-                                                class="officer-name">{{ $assignment->fillingStation->station_name ?? '-' }}</span>
-                                            <span class="officer-subtext">
-                                                {{ $assignment->fillingStation->district ?? '' }},
-                                                {{ $assignment->fillingStation->upazila ?? '' }}
-                                            </span>
-                                        </div>
-                                    </td>
+                                <td class="fw-bold text-muted" style="font-size: 0.85rem;">
+                                    {{ $loop->iteration }}
+                                </td>
+                                <td>
+                                    <div class="officer-info">
+                                        <span
+                                            class="officer-name">{{ $assignment->fillingStation->station_name ?? '-' }}</span>
+                                        <span class="officer-subtext">
+                                            {{ $assignment->fillingStation->district ?? '' }},
+                                            {{ $assignment->fillingStation->upazila ?? '' }}
+                                        </span>
+                                    </div>
+                                </td>
 
-                                    <td>
-                                        <div class="officer-info">
-                                            <span
-                                                class="officer-name">{{ $assignment->officer->profile->name ?? 'N/A' }}</span>
-                                            <span class="officer-subtext">
-                                                {{ $assignment->officer->profile->district ?? 'Officer' }},
-                                                {{ $assignment->officer->profile->upazila ?? '' }}
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td class="text-muted">
-                                        {{ \Carbon\Carbon::parse($assignment->assign_date)->format('d M Y') }}
-                                    </td>
-                                    <td>
-                                        @if ($assignment->status == 'active')
-                                            <span class="status-badge bg-active">Active</span>
-                                        @else
-                                            <span class="status-badge bg-inactive">Inactive</span>
-                                        @endif
-                                    </td>
-                                    <td class="text-center">
-                                        <button class="btn-action edit-btn border-0 bg-transparent me-2"
-                                            data-id="{{ $assignment->id }}"
-                                            data-officer_id="{{ $assignment->officer_id }}"
-                                            data-station_id="{{ $assignment->filling_station_id }}"
-                                            data-date="{{ $assignment->assign_date }}"
-                                            data-status="{{ $assignment->status }}"
-                                            data-url="{{ route('admin.assign-tag-officer.update', $assignment->id) }}">
-                                            <i class="bi bi-pencil-square text-primary"></i>
-                                        </button>
+                                <td>
+                                    <div class="officer-info">
+                                        <span
+                                            class="officer-name">{{ $assignment->officer->profile->name ?? 'N/A' }}</span>
+                                        <span class="officer-subtext">
+                                            {{ $assignment->officer->profile->district ?? 'Officer' }},
+                                            {{ $assignment->officer->profile->upazila ?? '' }}
+                                        </span>
+                                    </div>
+                                </td>
+                                <td class="text-muted">
+                                    {{ \Carbon\Carbon::parse($assignment->assign_date)->format('d M Y') }}
+                                </td>
+                                <td>
+                                    @if ($assignment->status == 'active')
+                                        <span class="status-badge bg-active">Active</span>
+                                    @else
+                                        <span class="status-badge bg-inactive">Inactive</span>
+                                    @endif
+                                </td>
+                                <td class="text-center">
+                                    <button class="btn-action edit-btn border-0 bg-transparent me-2"
+                                        data-id="{{ $assignment->id }}" data-officer_id="{{ $assignment->officer_id }}"
+                                        data-station_id="{{ $assignment->filling_station_id }}"
+                                        data-date="{{ $assignment->assign_date }}" data-status="{{ $assignment->status }}"
+                                        data-url="{{ route('admin.assign-tag-officer.update', $assignment->id) }}">
+                                        <i class="bi bi-pencil-square text-primary"></i>
+                                    </button>
 
-                                        {{-- <form action="{{ route('admin.assign-tag-officer.destroy', $assignment->id) }}"
+                                    {{-- <form action="{{ route('admin.assign-tag-officer.destroy', $assignment->id) }}"
                                             method="POST" class="d-inline"
                                             onsubmit="return confirm('Are you sure you want to delete this assignment?')">
                                             @csrf
@@ -256,30 +252,29 @@
                                             </button>
                                         </form> --}}
 
-                                        <form action="{{ route('admin.assign-tag-officer.destroy', $assignment->id) }}"
-                                            method="POST" class="d-inline delete-form">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="button"
-                                                class="btn-action border-0 bg-transparent text-danger delete-confirm"
-                                                title="Delete">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </form>
+                                    <form action="{{ route('admin.assign-tag-officer.destroy', $assignment->id) }}"
+                                        method="POST" class="d-inline delete-form">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="button"
+                                            class="btn-action border-0 bg-transparent text-danger delete-confirm"
+                                            title="Delete">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
 
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="12" class="text-center py-5 text-muted">
-                                        <i class="bi bi-info-circle d-block mb-2 fs-3"></i>
-                                        No assignments found.
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="12" class="text-center py-5 text-muted">
+                                    <i class="bi bi-info-circle d-block mb-2 fs-3"></i>
+                                    No assignments found.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
         </div>
 
