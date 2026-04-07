@@ -254,6 +254,203 @@
         .fuel-card { padding: 12px 10px; gap: 10px; }
         .fuel-info .fv { font-size: 17px; }
     }
+
+    /* difference report table */
+    /* ─── Card ─── */
+.today-card {
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 2px 8px rgba(0,0,0,.05);
+    padding: 16px 18px;
+}
+
+/* ─── Header ─── */
+.today-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+.today-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #dc2626;
+}
+.btn-export {
+    background: #166534;
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+}
+.btn-export:hover {
+    background: #14532d;
+}
+
+/* ─── Table ─── */
+.today-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+.today-table thead {
+    background: #f3f4f6;
+}
+.today-table th {
+    padding: 10px 6px;
+    text-align: center;
+    font-size: 11px;
+    color: #6b7280;
+    text-transform: uppercase;
+}
+.today-table td {
+    padding: 10px 6px;
+    text-align: center;
+    border-top: 1px solid #e5e7eb;
+}
+
+/* ─── Fuel rows ─── */
+.fuel-box {
+    display: flex;
+    flex-direction: column;
+}
+.fuel-row {
+    padding: 6px 0;
+    border-bottom: 1px dashed #e5e7eb;
+}
+.fuel-row:last-child {
+    border-bottom: none;
+}
+
+.red {
+    color: #dc2626;
+    font-weight: 700;
+}
+
+/* ─── Actions ─── */
+.action-btn {
+    display: block;
+    width: 70px;
+    margin: 4px auto;
+    padding: 5px;
+    border-radius: 4px;
+    font-size: 12px;
+    border: none;
+    cursor: pointer;
+    color: #fff;
+}
+.btn-view { background: #16a34a; }
+.btn-msg { background: #0284c7; }
+.btn-del { background: #ef4444; }
+
+/* ─── Footer ─── */
+.today-footer {
+    text-align: center;
+    margin-top: 12px;
+}
+.btn-see-all {
+    padding: 8px 18px;
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.btn-see-all:hover {
+    background: #e2e8f0;
+}
+
+/* ─── Wrapper for Scroll ─── */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Smooth scrollbar (optional modern UI) */
+.table-responsive::-webkit-scrollbar {
+    height: 6px;
+}
+.table-responsive::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+/* Prevent table break */
+.today-table {
+    min-width: 1100px; /* KEY: forces scroll on small devices */
+}
+
+/* Optional: Sticky header */
+.today-table thead th {
+    position: sticky;
+    top: 0;
+    background: #f3f4f6;
+    z-index: 2;
+}
+
+/* Better mobile text */
+@media (max-width: 768px) {
+    .today-title {
+        font-size: 14px;
+    }
+    .btn-export {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+}
+
+/* Stack header nicely on mobile */
+@media (max-width: 500px) {
+    .today-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .btn-export {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+/* Fix Actions column */
+/* ─── REMOVE Sticky Behavior from Actions Column ─── */
+.today-table td:last-child,
+.today-table th:last-child {
+    position: static;   /* ❌ remove sticky */
+    right: auto;
+    z-index: auto;
+    background: transparent;
+    border-left: none;
+}
+
+/* ─── Actions Button Layout (Clean & Centered) ─── */
+.action-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Buttons full width inside column */
+.action-btn {
+    width: 100%;
+    max-width: 80px;
+    padding: 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    border: none;
+    cursor: pointer;
+    color: #fff;
+    text-align: center;
+}
 </style>
 @endpush
 
@@ -371,7 +568,7 @@
     {{-- ============================================================
          RECENT ACTIVITIES
     ============================================================ --}}
-    <div class="card" style="padding:0">
+    <!-- <div class="card" style="padding:0">
         <div class="ac-head">
             <i class="fa-solid fa-wave-square"></i>
             <span class="ac-title">Recent Activities</span>
@@ -393,7 +590,173 @@
         @empty
             <div class="no-data">No activity found।</div>
         @endforelse
+    </div> -->
+
+    {{-- ============================================================
+        Difference Report Table
+    ============================================================ --}}
+    <div class="today-card">
+
+    <!-- Header -->
+    <div class="today-header">
+        <div class="today-title">Today's Difference Report (20)</div>
+        <button class="btn-export">Export to PDF</button>
     </div>
+
+    <!-- Table -->
+    <div class="table-responsive">
+        <table class="today-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Date</th>
+                    <th>Station</th>
+                    <th>Tag Officer</th>
+                    <th>Designation</th>
+                    <th>Phone</th>
+                    <th>District</th>
+                    <th>Upazila</th>
+                    <th>Fuel</th>
+                    <th>Difference(L)</th>
+                    <th>Difference(%)</th>
+                    <th>Alert</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+            <!-- Row 1 -->
+            <tr>
+                <td>1</td>
+                <td>
+                    08 Jun 2026<br>
+                    <small>Friday</small>
+                </td>
+                <td>Uttara Filling Station</td>
+                <td>Manik Mia</td>
+                <td>Live Stock Officer</td>
+                <td>01628312158</td>
+                <td>Rangpur</td>
+                <td>Shatkania</td>
+
+                <!-- Fuel -->
+                <td>
+                    <div class="fuel-box">
+                        <div class="fuel-row">Octane</div>
+                        <div class="fuel-row">Petrol</div>
+                        <div class="fuel-row">Diesel</div>
+                        <div class="fuel-row">Other</div>
+                    </div>
+                </td>
+
+                <!-- Difference L -->
+                <td>
+                    <div class="fuel-box red">
+                        <div class="fuel-row">200</div>
+                        <div class="fuel-row">800</div>
+                        <div class="fuel-row">00</div>
+                        <div class="fuel-row">180</div>
+                    </div>
+                </td>
+
+                <!-- Difference % -->
+                <td>
+                    <div class="fuel-box red">
+                        <div class="fuel-row">2%</div>
+                        <div class="fuel-row">8%</div>
+                        <div class="fuel-row">00</div>
+                        <div class="fuel-row">1.8%</div>
+                    </div>
+                </td>
+
+                <!-- Alert -->
+                <td>
+                    <div class="fuel-box">
+                        <div class="fuel-row">Stock Zero</div>
+                        <div class="fuel-row">Low stock</div>
+                        <div class="fuel-row">High Diff</div>
+                        <div class="fuel-row">-</div>
+                    </div>
+                </td>
+
+                <!-- Actions -->
+               <td>
+                    <div class="action-wrap">
+                        <button class="action-btn btn-view">View</button>
+                        <button class="action-btn btn-msg">Message</button>
+                        <button class="action-btn btn-del">Delete</button>
+                    </div>
+                </td>
+            </tr>
+
+            <!-- Row 2 -->
+            <tr>
+                <td>2</td>
+                <td>
+                    08 Jun 2026<br>
+                    <small>Friday</small>
+                </td>
+                <td>Uttara Filling Station</td>
+                <td>Manik Mia</td>
+                <td>Live Stock Officer</td>
+                <td>01628312158</td>
+                <td>Rangpur</td>
+                <td>Shatkania</td>
+
+                <td>
+                    <div class="fuel-box">
+                        <div class="fuel-row">Octane</div>
+                        <div class="fuel-row">Petrol</div>
+                        <div class="fuel-row">Diesel</div>
+                        <div class="fuel-row">Other</div>
+                    </div>
+                </td>
+
+                <td>
+                    <div class="fuel-box red">
+                        <div class="fuel-row">200</div>
+                        <div class="fuel-row">800</div>
+                        <div class="fuel-row">00</div>
+                        <div class="fuel-row">180</div>
+                    </div>
+                </td>
+
+                <td>
+                    <div class="fuel-box red">
+                        <div class="fuel-row">2%</div>
+                        <div class="fuel-row">8%</div>
+                        <div class="fuel-row">00</div>
+                        <div class="fuel-row">1.8%</div>
+                    </div>
+                </td>
+
+                <td>
+                    <div class="fuel-box">
+                        <div class="fuel-row">Stock Zero</div>
+                        <div class="fuel-row">Low stock</div>
+                        <div class="fuel-row">High Diff</div>
+                        <div class="fuel-row">-</div>
+                    </div>
+                </td>
+
+                <td>
+                    <button class="action-btn btn-view">View</button>
+                    <button class="action-btn btn-msg">Message</button>
+                    <button class="action-btn btn-del">Delete</button>
+                </td>
+            </tr>
+
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Footer -->
+    <div class="today-footer">
+        <button class="btn-see-all">See All</button>
+    </div>
+
+</div>
 
 </div>
 @endsection
