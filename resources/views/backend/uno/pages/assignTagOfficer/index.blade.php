@@ -66,7 +66,7 @@
         }
 
         .officer-name {
-            /* font-weight: 400; */
+            font-weight: bold;
             color: #333;
         }
 

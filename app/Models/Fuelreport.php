@@ -47,6 +47,7 @@ class Fuelreport extends Model
         'diesel_status',
         'octane_status',
         'others_status',
+        'division',
     ];
 
     protected $casts = [
