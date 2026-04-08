@@ -269,7 +269,7 @@
                         <tr style="font-size: 0.85rem; text-transform: uppercase;">
                             <th>SL</th>
                             <th class="text-nowrap">Station Name</th>
-                            <th>Code</th>
+                            {{-- <th>Code</th> --}}
                             <th>Division</th>
                             <th>District</th>
                             <th>Upazila</th>
@@ -286,7 +286,7 @@
                             <tr>
                                 <td>{{ $stations->firstItem() + $key }}</td>
                                 <td>{{ $station->station_name }}</td>
-                                <td class="text-info fw-bold">{{ $station->station_code }}</td>
+                                {{-- <td class="text-info fw-bold">{{ $station->station_code }}</td> --}}
                                 <td>{{ $station->division ?? '-' }}</td>
                                 <td>{{ $station->district ?? '-' }}</td>
                                 <td>{{ $station->upazila ?? '-' }}</td>
