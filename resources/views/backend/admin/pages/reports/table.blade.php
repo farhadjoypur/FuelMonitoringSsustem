@@ -63,12 +63,14 @@
     .tbl-wrap {
         border: 1px solid #e2e8f0;
         border-radius: 10px;
-        overflow: hidden;
-        overflow-x: auto;
+        overflow: auto;
+        max-height: 600px;
+        position: relative;
     }
 
     .tbl-wrap::-webkit-scrollbar {
         height: 6px;
+        width: 6px;
     }
 
     .tbl-wrap::-webkit-scrollbar-track {
@@ -84,7 +86,8 @@
         width: 100%;
         border-collapse: collapse;
         font-size: .80rem;
-         min-width: 900px;
+        min-width: 900px;
+        position: relative;
     }
 
     thead tr {
@@ -101,6 +104,11 @@
         letter-spacing: .55px;
         border-bottom: 1.5px solid #e2e8f0;
         white-space: nowrap;
+        position: sticky;
+        top: 0;
+        background: #f8fafc;
+        z-index: 10;
+        box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
     }
 
     thead th small {
