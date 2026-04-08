@@ -36,6 +36,10 @@ class DcReportsController extends Controller
     {
         $dcDistrict = $this->getDcDistrict();
 
+        // dd(Auth::user(), $dcDistrict);
+
+        $upazilas = $this->getDistrictUpazilas($dcDistrict);
+
         // DC officer এর district দিয়ে request কে force করা হচ্ছে।
         // ফলে filter এ যাই থাকুক, সে শুধু নিজের district এর data দেখবে।
         $request->merge(['district' => $dcDistrict]);
@@ -119,6 +123,7 @@ class DcReportsController extends Controller
             'stations'    => $stations,
             'divisions'   => $this->loadDivisions(),
             'dc_district' => $dcDistrict,
+            'upazilas'    => $upazilas,
         ]);
     }
 
@@ -416,5 +421,22 @@ class DcReportsController extends Controller
 
         $report->delete();
         return response()->json(['success' => true, 'message' => 'Report deleted successfully.']);
+    }
+
+    private function getDistrictUpazilas(string $district): array
+    {
+        $filePath = resource_path('data/location.json');
+        if (! file_exists($filePath)) return [];
+
+        $divisions = json_decode(file_get_contents($filePath), true)['divisions'] ?? [];
+
+        foreach ($divisions as $div) {
+            foreach ($div['districts'] ?? [] as $dist) {
+                if (strtolower($dist['name_en']) === strtolower($district)) {
+                    return $dist['upazilas'] ?? [];
+                }
+            }
+        }
+        return [];
     }
 }
