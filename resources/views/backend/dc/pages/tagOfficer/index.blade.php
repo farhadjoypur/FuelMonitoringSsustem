@@ -208,11 +208,11 @@
                             {{-- <th>Designation</th>
                             <th>Department</th> --}}
                             <th>Division</th>
-                            <th class="text-nowrap">District / City Corporation</th>
-                            <th class="text-nowrap">Thana / Upazila</th>
+                            <th>District / City Corporation</th>
+                            <th>Thana / Upazila</th>
                             {{-- <th>Email</th> --}}
                             <th>Phone</th>
-                            <th class="text-nowrap">Assigned Station</th>
+                            <th>Assigned Station</th>
                             <th>Status</th>
                             <th class="text-center">Actions</th>
                         </tr>
