@@ -224,7 +224,15 @@
                                     {{ $loop->iteration }}
                                 </td>
                                 <td>
-                                    {{ $officer->profile->name ?? '-' }}
+                                    <div class="fw-bold">{{ $officer->profile->name ?? '-' }}
+                                    </div>
+                                    <small class="text-muted" style="font-size: 11px; display: block; line-height: 1.5;">
+                                        {{ $officer->profile->designation ?? '' }}
+                                        @if ($officer->profile->designation && $officer->profile->department)
+                                            ,
+                                        @endif
+                                        {{ $officer->profile->department ?? '' }}
+                                    </small>
                                 </td>
 
                                 {{-- <td>

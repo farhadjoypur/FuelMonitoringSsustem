@@ -326,7 +326,8 @@
                             <label class="form-label small fw-bold">Designation *</label>
                             <input type="text" name="designation"
                                 class="form-control bg-light border-0 py-2 @error('designation') is-invalid @enderror"
-                                placeholder="Enter Designation" value="{{ old('designation') }}">
+                                placeholder="Enter Designation"
+                                value="{{ old('designation', 'Upazila Nirbahi Officer') }}">
                             @error('designation')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -404,7 +405,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label small fw-bold">upazila *</label>
+                            <label class="form-label small fw-bold">Upazila *</label>
                             <select name="upazila" id="add_upazila"
                                 class="form-select bg-light border-0 py-2 @error('upazila') is-invalid @enderror" disabled>
                                 <option value="">Select upazila</option>
