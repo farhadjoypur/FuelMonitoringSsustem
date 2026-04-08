@@ -500,7 +500,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label small fw-bold">Department *</label>
+                            <label class="form-label small fw-bold">Department/ Agency*</label>
                             <input type="text" name="department" id="edit_department"
                                 class="form-control bg-light border-0 py-2 @error('department') is-invalid @enderror"
                                 value="{{ old('department') }}">

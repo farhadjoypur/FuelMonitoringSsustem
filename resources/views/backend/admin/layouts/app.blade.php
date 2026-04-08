@@ -134,7 +134,7 @@
         (function() {
             const sidebarState = localStorage.getItem("sidebar-state");
             const isMobile = window.innerWidth < 768;
-            if (sidebarState === "collapsed" || (!sidebarState && isMobile)) {
+            if (isMobile || sidebarState === "collapsed") {
                 document.documentElement.classList.add('sidebar-is-collapsed');
             }
         })();

@@ -107,10 +107,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const sidebarState = localStorage.getItem("sidebar-state");
     const isMobile = window.innerWidth < 768;
 
-    if (sidebarState === "collapsed" || (!sidebarState && isMobile)) {
-        sidebar.classList.add("collapsed");
+    if (isMobile) {
+        sidebar.classList.add("collapsed"); // mobile always collapsed
     } else {
-        sidebar.classList.remove("collapsed");
+        sidebar.classList.toggle("collapsed", sidebarState === "collapsed");
     }
 
     requestAnimationFrame(() => {
