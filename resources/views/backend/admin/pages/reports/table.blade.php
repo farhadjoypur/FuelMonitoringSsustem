@@ -58,6 +58,7 @@
     $total = $total ?? 0;
 @endphp
 
+
 <style>
     .tbl-wrap {
         border: 1px solid #e2e8f0;
@@ -83,7 +84,7 @@
         width: 100%;
         border-collapse: collapse;
         font-size: .80rem;
-        min-width: 1340px;
+         min-width: 900px;
     }
 
     thead tr {
@@ -91,7 +92,7 @@
     }
 
     thead th {
-        padding: 10px 12px;
+        padding: 8px 6px;
         text-align: left;
         font-size: .67rem;
         font-weight: 700;
@@ -594,8 +595,7 @@
                             <td class="">{{ formatNumber($totalRow["{$fuelKey}_prev_stock"] ?? 0) }}</td>
                             <td class="">{{ formatNumber($totalRow["{$fuelKey}_supply"] ?? 0) }}</td>
                             <td class="">{{ formatNumber($totalRow["{$fuelKey}_received"] ?? 0) }}</td>
-                            <td
-                                class=" {{ ($totalRow["{$fuelKey}_difference"] ?? 0) != 0 ? 'text-danger' : '' }}">
+                            <td class=" {{ ($totalRow["{$fuelKey}_difference"] ?? 0) != 0 ? 'text-danger' : '' }}">
                                 {{ formatDifference($totalRow["{$fuelKey}_difference"] ?? 0) }}
                             </td>
                             <td class="">{{ formatNumber($totalRow["{$fuelKey}_sales"] ?? 0) }}</td>
