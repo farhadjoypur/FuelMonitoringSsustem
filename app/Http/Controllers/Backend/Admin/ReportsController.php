@@ -207,10 +207,10 @@ class ReportsController extends Controller
                 $diffTotal    = array_sum(array_map(fn($f) => abs($row["{$f}_difference"]), $fuelKeys));
 
                 return match ($status) {
-                    'available' => $closingTotal >= 2000,
-                    'low'       => $closingTotal > 0 && $closingTotal < 2000,
+                    'available' => $closingTotal >= 1000,
+                    'low'       => $closingTotal > 0 && $closingTotal < 1000,
                     'zero'      => $closingTotal <= 0,
-                    'highdiff'  => $diffTotal > 50,
+                    // 'highdiff'  => $diffTotal > 50,
                     default     => true,
                 };
             });
@@ -243,9 +243,9 @@ class ReportsController extends Controller
         $totalDiff    = array_sum(array_map(fn($f) => abs($stationData["{$f}_difference"]), $fuelKeys));
 
         $overallStatus = match (true) {
-            $totalDiff > 50      => ['label' => 'High Difference', 'css' => 'status-highdiff'],
+            // $totalDiff > 50      => ['label' => 'High Difference', 'css' => 'status-highdiff'],
             $totalClosing <= 0   => ['label' => 'Zero Stock',      'css' => 'status-zero'],
-            $totalClosing < 2000 => ['label' => 'Low Stock',       'css' => 'status-low'],
+            $totalClosing < 1000 => ['label' => 'Low Stock',       'css' => 'status-low'],
             default              => ['label' => 'Available',       'css' => 'status-available'],
         };
 
@@ -298,8 +298,8 @@ class ReportsController extends Controller
     {
         $absDiff = abs($difference);
         if ($closingStock <= 0)   return ['label' => 'Zero',      'css' => 'status-zero'];
-        if ($absDiff > 50)        return ['label' => 'High Diff', 'css' => 'status-highdiff'];
-        if ($closingStock < 2000) return ['label' => 'Low',       'css' => 'status-low'];
+        // if ($absDiff > 50)        return ['label' => 'High Diff', 'css' => 'status-highdiff'];
+        if ($closingStock < 1000) return ['label' => 'Low',       'css' => 'status-low'];
         return ['label' => 'Available', 'css' => 'status-available'];
     }
 
