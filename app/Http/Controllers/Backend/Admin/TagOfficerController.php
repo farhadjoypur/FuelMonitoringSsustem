@@ -84,8 +84,8 @@ class TagOfficerController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:150',
-            'designation' => 'nullable|string|max:150',
-            'department' => 'nullable|string|max:150',
+            'designation' => 'required|string|max:150',
+            'department' => 'required|string|max:150',
             'phone' => 'required|unique:users,phone',
             'email' => 'nullable|email|unique:users,email',
             'division' => 'required',
@@ -157,8 +157,8 @@ class TagOfficerController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'nullable|email|unique:users,email,'.$id,
             'phone' => 'required|string|unique:users,phone,'.$id,
-            'designation' => 'nullable|string',
-            'department' => 'nullable|string',
+            'designation' => 'required|string',
+            'department' => 'required|string',
             'division' => 'required',
             'district' => 'required',
             'upazila' => 'required',

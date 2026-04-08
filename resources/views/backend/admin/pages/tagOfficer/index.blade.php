@@ -205,7 +205,7 @@
                     <thead class="text-muted">
                         <tr style="font-size: 0.85rem; text-transform: uppercase;">
                             <th>SL</th>
-                            <th>Name</th>
+                            <th>Officer</th>
                             {{-- <th>Designation</th>
                             <th>Department</th> --}}
                             <th>Division</th>
@@ -225,7 +225,15 @@
                                     {{ $loop->iteration }}
                                 </td>
                                 <td>
-                                    {{ $officer->profile->name ?? '-' }}
+                                    <div class="fw-bold">{{ $officer->profile->name ?? '-' }}
+                                    </div>
+                                    <small class="text-muted" style="font-size: 11px; display: block; line-height: 1.5;">
+                                        {{ $officer->profile->designation ?? '' }}
+                                        @if ($officer->profile->designation && $officer->profile->department)
+                                            ,
+                                        @endif
+                                        {{ $officer->profile->department ?? '' }}
+                                    </small>
                                 </td>
 
                                 {{-- <td>
@@ -261,6 +269,7 @@
                                         </span>
                                     @endif
                                 </td>
+
                                 <td>
                                     @if (strtolower($officer->status) == 'active')
                                         <span
