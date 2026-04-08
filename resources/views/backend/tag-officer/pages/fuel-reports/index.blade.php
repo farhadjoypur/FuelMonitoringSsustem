@@ -321,7 +321,7 @@
         }
 
         .auto-val.close {
-            color: #2563eb;
+            color: #2563eb !important;
         }
 
         .auto-note {
@@ -528,7 +528,7 @@
             padding: 10px 12px;
             font-size: 10px;
             font-weight: 700;
-            color: #64748b;
+            color: #1e293b;
             text-transform: uppercase;
             letter-spacing: .4px;
             background: #f8fafc;
@@ -956,7 +956,7 @@
         <div class="saved-section">
             <div class="saved-header">
                 <h5>Saved Reports</h5>
-                <div class="export-btns">
+                <!-- <div class="export-btns">
                     @if (Route::has('fuel-reports.export.pdf'))
                         <a href="{{ route('fuel-reports.export.pdf') }}" class="btn-export-pdf">
                         @else
@@ -971,7 +971,7 @@
                     @endif
                     <i class="fa-solid fa-file-excel"></i> Export to Excel
                     </a>
-                </div>
+                </div> -->
             </div>
         <div class="table-responsive">
             <table class="reports-table">
