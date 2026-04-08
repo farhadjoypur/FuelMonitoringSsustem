@@ -64,7 +64,7 @@ class FillingStationController extends Controller
             $userProfile = Auth::user()->profile;
 
             if (! $userProfile || ! $userProfile->division || ! $userProfile->district || ! $userProfile->upazila) {
-                return redirect()->back()->with('error', 'Location information is missing in your profile. Please contact admin.');
+                return redirect()->back()->with('error', 'Location information is missing from your profile. Please contact the administrator.');
             }
 
             $unoDivision = $userProfile->division;

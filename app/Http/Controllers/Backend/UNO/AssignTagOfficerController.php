@@ -60,63 +60,67 @@ class AssignTagOfficerController extends Controller
 
     public function index(Request $request)
     {
-        $unoProfile = Auth::user()->profile;
+        try {
+            $unoProfile = Auth::user()->profile;
 
-        if (! $unoProfile || ! $unoProfile->district || ! $unoProfile->upazila) {
-            return redirect()->back()->with('error', 'Upazila is not set to your profile. please contact with admin!');
-        }
+            if (! $unoProfile || ! $unoProfile->division || ! $unoProfile->district || ! $unoProfile->upazila) {
+                return redirect()->back()->with('error', 'Location information is missing from your profile. Please contact the administrator.');
+            }
 
-        $unoDistrict = $unoProfile->district;
-        $unoUpazila = $unoProfile->upazila;
-        $search = $request->input('search');
+            $unoDistrict = $unoProfile->district;
+            $unoUpazila = $unoProfile->upazila;
+            $search = $request->input('search');
 
-        $query = AssignTagOfficer::with(['officer.profile', 'fillingStation'])
-            ->whereHas('fillingStation', function ($q) use ($unoDistrict, $unoUpazila) {
-                $q->where('district', $unoDistrict)
-                    ->where('upazila', $unoUpazila); 
+            $query = AssignTagOfficer::with(['officer.profile', 'fillingStation'])
+                ->whereHas('fillingStation', function ($q) use ($unoDistrict, $unoUpazila) {
+                    $q->where('district', $unoDistrict)
+                        ->where('upazila', $unoUpazila);
+                });
+
+            $query->when($search, function ($q) use ($search) {
+                $q->where(function ($sub) use ($search) {
+                    $sub->whereHas('officer.profile', function ($profileQuery) use ($search) {
+                        $profileQuery->where('name', 'like', '%'.$search.'%');
+                    })
+                        ->orWhereHas('fillingStation', function ($stationQuery) use ($search) {
+                            $stationQuery->where('station_name', 'like', '%'.$search.'%');
+                        });
+                });
             });
 
-        $query->when($search, function ($q) use ($search) {
-            $q->where(function ($sub) use ($search) {
-                $sub->whereHas('officer.profile', function ($profileQuery) use ($search) {
-                    $profileQuery->where('name', 'like', '%'.$search.'%');
+            $query->when($request->upazila, function ($q) use ($request) {
+                $q->whereHas('fillingStation', function ($sq) use ($request) {
+                    $sq->where('upazila', $request->upazila);
+                });
+            });
+
+            $assignments = $query->latest()->paginate(10)->withQueryString();
+
+            $officers = User::where('role', UserRole::TAG_OFFICER)
+                ->whereHas('profile', function ($q) use ($unoDistrict, $unoUpazila) {
+                    $q->where('district', $unoDistrict)
+                        ->where('upazila', $unoUpazila);
                 })
-                    ->orWhereHas('fillingStation', function ($stationQuery) use ($search) {
-                        $stationQuery->where('station_name', 'like', '%'.$search.'%');
-                    });
-            });
-        });
+                ->with('profile:id,user_id,name,upazila,district')
+                ->get();
 
-        $query->when($request->upazila, function ($q) use ($request) {
-            $q->whereHas('fillingStation', function ($sq) use ($request) {
-                $sq->where('upazila', $request->upazila);
-            });
-        });
+            $stations = FillingStation::where('district', $unoDistrict)
+                ->where('upazila', $unoUpazila)
+                ->select('id', 'station_name', 'upazila', 'district', 'division')
+                ->get();
 
-        $assignments = $query->latest()->paginate(10)->withQueryString();
+            $locationData = $this->getLocationData();
 
-        $officers = User::where('role', UserRole::TAG_OFFICER)
-            ->whereHas('profile', function ($q) use ($unoDistrict, $unoUpazila) {
-                $q->where('district', $unoDistrict)
-                    ->where('upazila', $unoUpazila);
-            })
-            ->with('profile:id,user_id,name,upazila,district')
-            ->get();
-
-        $stations = FillingStation::where('district', $unoDistrict)
-            ->where('upazila', $unoUpazila) 
-            ->select('id', 'station_name', 'upazila', 'district', 'division')
-            ->get();
-
-        $locationData = $this->getLocationData();
-
-        return view('backend.uno.pages.assignTagOfficer.index', compact(
-            'assignments',
-            'officers',
-            'stations',
-            'locationData',
-            'search' // সার্চ ভ্যালু পাস করা হলো
-        ));
+            return view('backend.uno.pages.assignTagOfficer.index', compact(
+                'assignments',
+                'officers',
+                'stations',
+                'locationData',
+                'search'
+            ));
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'An error occurred while loading data. Please try again later.');
+        }
     }
 
     /**
