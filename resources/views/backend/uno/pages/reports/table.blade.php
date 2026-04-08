@@ -595,7 +595,7 @@
                             <td class="">{{ formatNumber($totalRow["{$fuelKey}_prev_stock"] ?? 0) }}</td>
                             <td class="">{{ formatNumber($totalRow["{$fuelKey}_supply"] ?? 0) }}</td>
                             <td class="">{{ formatNumber($totalRow["{$fuelKey}_received"] ?? 0) }}</td>
-                            <td class=" {{ ($totalRow["{$fuelKey}_difference"] ?? 0) != 0 ? 'text-danger' : '' }}">
+                            <td class=" {{ ($totalRow["{$fuelKey}_difference"] ?? 0) != 0 ? 'text-warning' : '' }}">
                                 {{ formatDifference($totalRow["{$fuelKey}_difference"] ?? 0) }}
                             </td>
                             <td class="">{{ formatNumber($totalRow["{$fuelKey}_sales"] ?? 0) }}</td>
