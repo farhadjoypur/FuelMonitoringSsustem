@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Controllers\Backend\Dc;
+namespace App\Http\Controllers\Backend\DC;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\AssignTagOfficer;
+use App\Models\Company;
 use App\Models\Depot;
 use App\Models\FillingStation;
 use App\Models\Fuelreport;
@@ -15,43 +16,31 @@ use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    // ─────────────────────────────────────────────────────────────
+    // DC OFFICER এর নিজের DISTRICT বের করা
+    // ─────────────────────────────────────────────────────────────
+
+    private function getDcDistrict(): ?string
+    {
+        return Auth::user()?->profile?->district;
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // INDEX
+    // ─────────────────────────────────────────────────────────────
+
     public function index()
     {
-        $dc = Auth::user();
-        $dcId = $dc->id;
-        
+        $dcDistrict = $this->getDcDistrict();
+
         $today     = Carbon::today();
         $thisMonth = Carbon::now()->startOfMonth();
 
         // =============================================
-        // DC এর assigned divisions/districts থেকে data filter
-        // (assuming DC profile has division/district fields)
-        // =============================================
-        $dcDivision = $dc->profile?->division;
-        $dcDistrict = $dc->profile?->district;
-
-        // =============================================
-        // DC এর jurisdiction এর সব stations
-        // =============================================
-        $stationsQuery = FillingStation::query();
-        
-        if ($dcDivision) {
-            $stationsQuery->where('division', $dcDivision);
-        }
-        if ($dcDistrict) {
-            $stationsQuery->where('district', $dcDistrict);
-        }
-        
-        $jurisdictionStations = $stationsQuery->pluck('station_name');
-
-        // =============================================
-        // TODAY'S REPORTS (DC এর jurisdiction থেকে)
+        // TODAY'S REPORTS — শুধু DC এর district
         // =============================================
         $todayReports = Fuelreport::whereDate('report_date', $today)
-            ->whereIn('station_name', $jurisdictionStations)
+            ->where('district', $dcDistrict)  // ★ district restrict
             ->get();
 
         // =============================================
@@ -62,14 +51,14 @@ class DashboardController extends Controller
         $todayOctaneStock = $todayReports->sum('octane_closing_stock');
 
         // =============================================
-        // TODAY'S RECEIVED (needed for difference %)
+        // TODAY'S RECEIVED
         // =============================================
         $todayPetrolReceived = $todayReports->sum('petrol_received');
         $todayDieselReceived = $todayReports->sum('diesel_received');
         $todayOctaneReceived = $todayReports->sum('octane_received');
 
         // =============================================
-        // TODAY'S DIFFERENCE (supply - received)
+        // TODAY'S DIFFERENCE
         // =============================================
         $todayPetrolDiff = $todayReports->sum('petrol_difference');
         $todayDieselDiff = $todayReports->sum('diesel_difference');
@@ -93,42 +82,71 @@ class DashboardController extends Controller
             ? round(($todayOctaneDiff / $todayOctaneReceived) * 100, 1) : 0;
 
         // =============================================
-        // SUMMARY CARDS (DC jurisdiction)
+        // SUMMARY CARDS — শুধু DC এর district এর data
         // =============================================
-        $totalStationsQuery = FillingStation::query();
-        if ($dcDivision) {
-            $totalStationsQuery->where('division', $dcDivision);
-        }
-        if ($dcDistrict) {
-            $totalStationsQuery->where('district', $dcDistrict);
-        }
-        $totalStations = $totalStationsQuery->count();
 
-        // Total Tag Officers under this DC
-        $totalOfficers = AssignTagOfficer::whereHas('fillingStation', function($q) use ($dcDivision, $dcDistrict) {
-            if ($dcDivision) {
-                $q->where('division', $dcDivision);
-            }
-            if ($dcDistrict) {
-                $q->where('district', $dcDistrict);
-            }
-        })
-        ->where('status', 'active')
-        ->distinct('officer_id')
-        ->count('officer_id');
+        // DC এর district এর filling_stations এর id গুলো
+        $districtStationIds = FillingStation::where('district', $dcDistrict)
+            ->pluck('id');
+
+        $totalDepots = Depot::whereHas('fillingStations', fn($q) => $q->where('district', $dcDistrict))->count();
+
+        $totalStations = FillingStation::where('district', $dcDistrict)->count();
+
+        // DC এর district এ assigned active tag officers
+        $totalOfficers = AssignTagOfficer::where('status', 'active')
+            ->whereIn('filling_station_id', $districtStationIds)
+            ->distinct('officer_id')
+            ->count('officer_id');
+
+        $newDepots = Depot::where('created_at', '>=', $thisMonth)
+            ->whereHas('fillingStations', fn($q) => $q->where('district', $dcDistrict))
+            ->count();
+
+        $newStations = FillingStation::where('district', $dcDistrict)
+            ->where('created_at', '>=', $thisMonth)
+            ->count();
+
+        $newOfficers = AssignTagOfficer::where('status', 'active')
+            ->whereIn('filling_station_id', $districtStationIds)
+            ->where('created_at', '>=', $thisMonth)
+            ->distinct('officer_id')
+            ->count('officer_id');
 
         // =============================================
-        // RECENT ACTIVITIES (DC jurisdiction)
+        // THANA/UPAZILA-WISE FUEL SALES TODAY — Bar Chart
+        // Admin এ division ছিল, DC এর জন্য thana_upazila দিয়ে group করা হচ্ছে
+        // কারণ DC একটাই district দেখে
+        // =============================================
+        $divisionSalesToday = Fuelreport::whereDate('report_date', $today)
+            ->where('district', $dcDistrict)  // ★ district restrict
+            ->select(
+                'thana_upazila as division',
+                DB::raw('COUNT(DISTINCT station_name) as total_stations'),
+                DB::raw('SUM(petrol_sales + diesel_sales + octane_sales) as total_fuel_liters')
+            )
+            ->whereNotNull('thana_upazila')
+            ->groupBy('thana_upazila')
+            ->orderByDesc('total_fuel_liters')
+            ->get()
+            ->map(fn($item) => [
+                'division'          => $item->division,
+                'total_stations'    => (int) $item->total_stations,
+                'total_fuel_liters' => round($item->total_fuel_liters / 1000, 1),
+            ]);
+
+        // =============================================
+        // RECENT ACTIVITIES — শুধু DC এর district
         // =============================================
         $recentActivities = collect();
 
-        /* Zero Stock Alert */
-        Fuelreport::where(function ($q) {
-            $q->where('petrol_closing_stock', 0)
-                ->orWhere('diesel_closing_stock', 0)
-                ->orWhere('octane_closing_stock', 0);
-        })
-            ->whereIn('station_name', $jurisdictionStations)
+        /* 1. ZERO STOCK ALERT */
+        Fuelreport::where('district', $dcDistrict)  // ★
+            ->where(function ($q) {
+                $q->where('petrol_closing_stock', 0)
+                    ->orWhere('diesel_closing_stock', 0)
+                    ->orWhere('octane_closing_stock', 0);
+            })
             ->latest('report_date')
             ->take(3)
             ->get()
@@ -142,13 +160,13 @@ class DashboardController extends Controller
                 ]);
             });
 
-        /* Low Stock Alert */
-        Fuelreport::where(function ($q) {
-            $q->where('petrol_closing_stock', '<', 100)
-                ->orWhere('diesel_closing_stock', '<', 100)
-                ->orWhere('octane_closing_stock', '<', 100);
-        })
-            ->whereIn('station_name', $jurisdictionStations)
+        /* 2. LOW STOCK ALERT */
+        Fuelreport::where('district', $dcDistrict)  // ★
+            ->where(function ($q) {
+                $q->where('petrol_closing_stock', '<', 100)
+                    ->orWhere('diesel_closing_stock', '<', 100)
+                    ->orWhere('octane_closing_stock', '<', 100);
+            })
             ->latest('report_date')
             ->take(3)
             ->get()
@@ -162,9 +180,9 @@ class DashboardController extends Controller
                 ]);
             });
 
-        /* Difference (L) Alert */
-        Fuelreport::whereRaw('ABS(petrol_difference) + ABS(diesel_difference) + ABS(octane_difference) > 50')
-            ->whereIn('station_name', $jurisdictionStations)
+        /* 3. DIFFERENCE (L) ALERT */
+        Fuelreport::where('district', $dcDistrict)  // ★
+            ->whereRaw('ABS(petrol_difference) + ABS(diesel_difference) + ABS(octane_difference) > 50')
             ->latest('report_date')
             ->take(3)
             ->get()
@@ -178,13 +196,13 @@ class DashboardController extends Controller
                 ]);
             });
 
-        /* Difference (%) Alert */
-        Fuelreport::whereRaw('
-            (ABS(petrol_difference) / NULLIF(petrol_closing_stock,1)) * 100 > 10
-            OR (ABS(diesel_difference) / NULLIF(diesel_closing_stock,1)) * 100 > 10
-            OR (ABS(octane_difference) / NULLIF(octane_closing_stock,1)) * 100 > 10
-        ')
-            ->whereIn('station_name', $jurisdictionStations)
+        /* 4. DIFFERENCE (%) ALERT */
+        Fuelreport::where('district', $dcDistrict)  // ★
+            ->whereRaw('
+                (ABS(petrol_difference) / NULLIF(petrol_closing_stock,1)) * 100 > 10
+                OR (ABS(diesel_difference) / NULLIF(diesel_closing_stock,1)) * 100 > 10
+                OR (ABS(octane_difference) / NULLIF(octane_closing_stock,1)) * 100 > 10
+            ')
             ->latest('report_date')
             ->take(3)
             ->get()
@@ -198,11 +216,21 @@ class DashboardController extends Controller
                 ]);
             });
 
-        /* Final Sort */
         $recentActivities = $recentActivities
             ->sortByDesc('time')
             ->take(4)
             ->values();
+
+        // =============================================
+        // HIGH DIFFERENCE REPORTS — শুধু DC এর district
+        // =============================================
+        $highDifferenceReports = Fuelreport::whereDate('report_date', $today)
+            ->where('district', $dcDistrict)  // ★ district restrict
+            ->whereRaw('ABS(petrol_difference) + ABS(diesel_difference) + ABS(octane_difference) + ABS(others_difference) > 0')
+            ->orderByRaw('ABS(petrol_difference) + ABS(diesel_difference) + ABS(octane_difference) + ABS(others_difference) DESC')
+            ->with(['tagOfficer.profile', 'fillingStation.company'])
+            ->take(20)
+            ->get();
 
         return view('backend.dc.pages.dashboard.index', compact(
             // today stock
@@ -231,59 +259,23 @@ class DashboardController extends Controller
             'todayOctaneSold',
 
             // summary
+            'totalDepots',
             'totalStations',
             'totalOfficers',
+            'newDepots',
+            'newStations',
+            'newOfficers',
+
+            // chart — thana/upazila grouped (district এর ভেতরে)
+            'divisionSalesToday',
 
             // activities
-            'recentActivities'
+            'recentActivities',
+
+            'highDifferenceReports',
+
+            // blade এ DC এর district দেখানোর জন্য
+            'dcDistrict',
         ));
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
     }
 }
