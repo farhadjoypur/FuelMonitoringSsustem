@@ -439,14 +439,14 @@
                 </div>
             </div>
 
-            <div class="export-row">
+            <!-- <div class="export-row">
                 <button class="btn-export btn-export-pdf">
                     <i class="fa-regular fa-file-pdf"></i> Export PDF
                 </button>
                 <button class="btn-export btn-export-excel">
                     <i class="fa-regular fa-file-excel"></i> Export Excel
                 </button>
-            </div>
+            </div> -->
 
         </div>{{-- /tab-stock --}}
 
