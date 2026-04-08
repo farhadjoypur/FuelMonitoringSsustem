@@ -298,7 +298,8 @@
                             <label class="form-label small fw-bold">Department/ Agency*</label>
                             <input type="text" name="department"
                                 class="form-control bg-light border-0 py-2 @error('department') is-invalid @enderror"
-                                placeholder="Enter department" value="{{ old('department') }}">
+                                placeholder="Enter department"
+                                value="{{ old('department', 'Office of the Deputy Commissioner') }}">
                             @error('department')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror

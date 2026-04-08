@@ -208,11 +208,11 @@
                             {{-- <th>Designation</th>
                             <th>Department</th> --}}
                             <th>Division</th>
-                            <th class="text-nowrap">District / City Corporation</th>
-                            <th class="text-nowrap">Thana / Upazila</th>
+                            <th>District / City Corporation</th>
+                            <th>Thana / Upazila</th>
                             {{-- <th>Email</th> --}}
                             <th>Phone</th>
-                            <th class="text-nowrap">Assigned Station</th>
+                            <th>Assigned Station</th>
                             <th>Status</th>
                             <th class="text-center">Actions</th>
                         </tr>
@@ -224,7 +224,15 @@
                                     {{ $loop->iteration }}
                                 </td>
                                 <td>
-                                    {{ $officer->profile->name ?? '-' }}
+                                    <div class="fw-bold">{{ $officer->profile->name ?? '-' }}
+                                    </div>
+                                    <small class="text-muted" style="font-size: 11px; display: block; line-height: 1.5;">
+                                        {{ $officer->profile->designation ?? '' }}
+                                        @if ($officer->profile->designation && $officer->profile->department)
+                                            ,
+                                        @endif
+                                        {{ $officer->profile->department ?? '' }}
+                                    </small>
                                 </td>
 
                                 {{-- <td>
