@@ -53,53 +53,62 @@ class AssignTagOfficerController extends Controller
 
     public function index(Request $request)
     {
-        $dcProfile = Auth::user()->profile;
-        $dcDistrict = $dcProfile->district ?? null;
+        try {
+            $user = Auth::user();
+            if (! $user || ! $user->profile || ! $user->profile->district) {
+                return redirect()->back()
+                    ->with('error', 'Location information is missing in your profile. Please contact administrator.');
+            }
 
-        $query = AssignTagOfficer::with(['officer.profile', 'fillingStation'])
-            ->whereHas('officer.profile', function ($q) use ($dcDistrict) {
-                $q->where('district', $dcDistrict);
+            $dcDistrict = $user->profile->district;
+
+            $query = AssignTagOfficer::with(['officer.profile', 'fillingStation'])
+                ->whereHas('officer.profile', function ($q) use ($dcDistrict) {
+                    $q->where('district', $dcDistrict);
+                });
+
+            $query->when($request->search, function ($q) use ($request) {
+                $searchTerm = $request->search;
+                $q->where(function ($sub) use ($searchTerm) {
+                    $sub->whereHas('officer.profile', function ($profileQuery) use ($searchTerm) {
+                        $profileQuery->where('name', 'like', '%'.$searchTerm.'%');
+                    })
+                        ->orWhereHas('fillingStation', function ($stationQuery) use ($searchTerm) {
+                            $stationQuery->where('station_name', 'like', '%'.$searchTerm.'%');
+                        });
+                });
             });
 
-        $query->when($request->search, function ($q) use ($request) {
-            $searchTerm = $request->search;
-            $q->where(function ($sub) use ($searchTerm) {
-                $sub->whereHas('officer.profile', function ($profileQuery) use ($searchTerm) {
-                    $profileQuery->where('name', 'like', '%'.$searchTerm.'%');
+            $query->when($request->upazila, function ($q) use ($request) {
+                $q->whereHas('fillingStation', function ($sq) use ($request) {
+                    $sq->where('upazila', $request->upazila);
+                });
+            });
+
+            $assignments = $query->latest()->paginate(10)->withQueryString();
+
+            $officers = User::where('role', UserRole::TAG_OFFICER)
+                ->whereHas('profile', function ($q) use ($dcDistrict) {
+                    $q->where('district', $dcDistrict);
                 })
-                    ->orWhereHas('fillingStation', function ($stationQuery) use ($searchTerm) {
-                        $stationQuery->where('station_name', 'like', '%'.$searchTerm.'%');
-                    });
-            });
-        });
+                ->with('profile:id,user_id,name,upazila,district')
+                ->get();
 
-        $query->when($request->upazila, function ($q) use ($request) {
-            $q->whereHas('fillingStation', function ($sq) use ($request) {
-                $sq->where('upazila', $request->upazila);
-            });
-        });
+            $stations = FillingStation::where('district', $dcDistrict)
+                ->select('id', 'station_name', 'upazila', 'district', 'division')
+                ->get();
 
-        $assignments = $query->latest()->paginate(10)->withQueryString();
+            $locationData = $this->getLocationData();
 
-        $officers = User::where('role', UserRole::TAG_OFFICER)
-            ->whereHas('profile', function ($q) use ($dcDistrict) {
-                $q->where('district', $dcDistrict);
-            })
-            ->with('profile:id,user_id,name,upazila,district')
-            ->get();
-
-        $stations = FillingStation::where('district', $dcDistrict)
-            ->select('id', 'station_name', 'upazila', 'district', 'division')
-            ->get();
-
-        $locationData = $this->getLocationData();
-
-        return view('backend.dc.pages.assignTagOfficer.index', compact(
-            'assignments',
-            'officers',
-            'stations',
-            'locationData'
-        ));
+            return view('backend.dc.pages.assignTagOfficer.index', compact(
+                'assignments',
+                'officers',
+                'stations',
+                'locationData'
+            ));
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'An error occurred while fetching data. Please try again.');
+        }
     }
 
     /**

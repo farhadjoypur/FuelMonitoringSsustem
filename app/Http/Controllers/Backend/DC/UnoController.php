@@ -55,49 +55,59 @@ class UnoController extends Controller
 
     public function index(Request $request)
     {
-        $search = $request->input('search');
-        $division = $request->input('division');
-        $district = $request->input('district');
-        $upazila = $request->input('upazila');
-        $dcDistrict = Auth::user()->profile->district;
+        try {
+            $user = Auth::user();
+            if (! $user || ! $user->profile || ! $user->profile->district) {
+                return redirect()->back()->with('error', 'Location information is missing in your profile. Please contact administrator.');
+            }
 
-        $query = User::where('role', UserRole::UNO)
-            ->with('profile')
-            ->whereHas('profile', function ($q) use ($dcDistrict) {
-                $q->where('district', $dcDistrict);
-            })
-            ->when($search, function ($query) use ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('phone', 'LIKE', "%{$search}%")
-                        ->orWhere('email', 'LIKE', "%{$search}%")
-                        ->orWhereHas('profile', function ($pq) use ($search) {
-                            $pq->where('name', 'LIKE', "%{$search}%")
-                                ->orWhere('department', 'LIKE', "%{$search}%")
-                                ->orWhere('designation', 'LIKE', "%{$search}%");
-                        });
-                });
-            })
-            ->when($division, function ($query) use ($division) {
-                $query->whereHas('profile', function ($q) use ($division) {
-                    $q->where('division', $division);
-                });
-            })
-            ->when($district, function ($query) use ($district) {
-                $query->whereHas('profile', function ($q) use ($district) {
-                    $q->where('district', $district);
-                });
-            })
-            ->when($upazila, function ($query) use ($upazila) {
-                $query->whereHas('profile', function ($q) use ($upazila) {
-                    $q->where('upazila', $upazila);
-                });
-            });
+            $dcDistrict = $user->profile->district;
 
-        $unoOfficers = $query->latest()->paginate(10)->withQueryString();
+            $search = $request->input('search');
+            $division = $request->input('division');
+            $district = $request->input('district');
+            $upazila = $request->input('upazila');
 
-        $locationData = $this->getLocationData();
+            $query = User::where('role', UserRole::UNO)
+                ->with('profile')
+                ->whereHas('profile', function ($q) use ($dcDistrict) {
+                    $q->where('district', $dcDistrict);
+                })
+                ->when($search, function ($query) use ($search) {
+                    $query->where(function ($q) use ($search) {
+                        $q->where('phone', 'LIKE', "%{$search}%")
+                            ->orWhere('email', 'LIKE', "%{$search}%")
+                            ->orWhereHas('profile', function ($pq) use ($search) {
+                                $pq->where('name', 'LIKE', "%{$search}%")
+                                    ->orWhere('department', 'LIKE', "%{$search}%")
+                                    ->orWhere('designation', 'LIKE', "%{$search}%");
+                            });
+                    });
+                })
+                ->when($division, function ($query) use ($division) {
+                    $query->whereHas('profile', function ($q) use ($division) {
+                        $q->where('division', $division);
+                    });
+                })
+                ->when($district, function ($query) use ($district) {
+                    $query->whereHas('profile', function ($q) use ($district) {
+                        $q->where('district', $district);
+                    });
+                })
+                ->when($upazila, function ($query) use ($upazila) {
+                    $query->whereHas('profile', function ($q) use ($upazila) {
+                        $q->where('upazila', $upazila);
+                    });
+                });
 
-        return view('backend.dc.pages.uno.index', compact('unoOfficers', 'locationData', 'search'));
+            $unoOfficers = $query->latest()->paginate(10)->withQueryString();
+
+            $locationData = $this->getLocationData();
+
+            return view('backend.dc.pages.uno.index', compact('unoOfficers', 'locationData', 'search'));
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Something went wrong! Unable to load UNO list.');
+        }
     }
 
     /**

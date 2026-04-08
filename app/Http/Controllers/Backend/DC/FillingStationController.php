@@ -60,7 +60,7 @@ class FillingStationController extends Controller
             $dcProfile = Auth::user()->profile;
             if (! $dcProfile || ! $dcProfile->district || ! $dcProfile->division) {
                 return redirect()->back()
-                    ->with('error', 'District or Division information is missing from your profile. Please contact the administrator.');
+                    ->with('error', 'Location information is missing in your profile. Please contact administrator.');
             }
 
             $dcDistrict = $dcProfile->district;
