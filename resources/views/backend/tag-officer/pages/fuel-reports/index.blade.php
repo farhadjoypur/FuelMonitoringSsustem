@@ -102,7 +102,7 @@
         /* ── Station Info Row ── */
         .station-row {
             display: grid;
-            grid-template-columns: 2fr 1.5fr 1.5fr 1.2fr;
+            grid-template-columns: 2fr 1.5fr 1.5fr 1.2fr 1.2fr;
             padding: 18px 20px;
             gap: 16px;
             border-bottom: 1px solid #f1f5f9;
@@ -798,15 +798,22 @@
                             <option value="{{ $stationName }}">{{ $stationName }}</option>
                         </select>
                     </div>
+                    {{-- Division --}}
                     <div class="field-group">
-                        <label><i class="fa-solid fa-map-pin fa-xs"></i> Thana / Upazila</label>
-                        <input type="text" name="thana_upazila" class="field-control"
-                            value="{{ $stationInfo->upazila ?? '' }}" readonly>
+                        <label><i class="fa-solid fa-building fa-xs"></i> Division</label>
+                        <input type="text" name="division" class="field-control"
+                            value="{{ $stationInfo->division ?? '' }}" readonly>
                     </div>
+
                     <div class="field-group">
                         <label><i class="fa-solid fa-location-dot fa-xs"></i> District</label>
                         <input type="text" name="district" class="field-control"
                             value="{{ $stationInfo->district ?? '' }}" readonly>
+                    </div>
+                     <div class="field-group">
+                        <label><i class="fa-solid fa-map-pin fa-xs"></i> Thana / Upazila</label>
+                        <input type="text" name="thana_upazila" class="field-control"
+                            value="{{ $stationInfo->upazila ?? '' }}" readonly>
                     </div>
                     <div class="field-group">
                         <label><i class="fa-regular fa-calendar fa-xs"></i> Report Date</label>

@@ -115,7 +115,6 @@ class FuelReportController extends Controller
 
         // আজকের তারিখ default
         $defaultDate = Carbon::today()->format('Y-m-d');
-
         // Saved reports for the same page (latest 15)
         $reports = Fuelreport::where('tag_officer_id', $ctx['officerId'])
             ->where('station_id', $ctx['stationId'])
@@ -138,7 +137,6 @@ class FuelReportController extends Controller
     public function store(Request $request)
     {
         $ctx = $this->getOfficerAssignment();
-
         if (! $ctx['stationId']) {
             return redirect()
                 ->route('fuel-reports.index')
@@ -225,6 +223,7 @@ class FuelReportController extends Controller
 
             // ── Station info ─────────────────────────────
             'station_name'  => $ctx['stationName'],
+            'division'      => $ctx['stationInfo']?->division  ?? '',
             'thana_upazila' => $ctx['stationInfo']?->upazila  ?? '',
             'district'      => $ctx['stationInfo']?->district ?? '',
             'report_date'   => $request->report_date,

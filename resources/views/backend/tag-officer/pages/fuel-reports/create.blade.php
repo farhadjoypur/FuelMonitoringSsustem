@@ -291,8 +291,8 @@
 
 
         /* ================================================
-                                                                                                                           RESPONSIVE DESIGN (Mobile Friendly)
-                                                                                                                           ================================================ */
+                                                                                                                                   RESPONSIVE DESIGN (Mobile Friendly)
+                                                                                                                                   ================================================ */
 
         /* ১০২৪ পিক্সেলের নিচে (ট্যাবলেট ও ল্যাপটপ) */
         @media (max-width: 1024px) {
@@ -408,16 +408,6 @@
                             </select>
                         </div>
 
-                        {{-- Thana / Upazila --}}
-                        <div class="col-md-3">
-                            <label class="form-label-custom">
-                                <i class="fa-solid fa-map-pin fa-xs"></i>
-                                Thana / Upazila
-                            </label>
-                            <input type="text" name="thana_upazila" class="form-control-custom"
-                                value="{{ $stationInfo->upazila ?? '' }}" readonly>
-                        </div>
-
                         {{-- District --}}
                         <div class="col-md-3">
                             <label class="form-label-custom">
@@ -428,6 +418,18 @@
                             <input type="text" name="district" class="form-control-custom"
                                 value="{{ $stationInfo->district ?? '' }}" readonly>
                         </div>
+
+
+                        {{-- Thana / Upazila --}}
+                        <div class="col-md-3">
+                            <label class="form-label-custom">
+                                <i class="fa-solid fa-map-pin fa-xs"></i>
+                                Thana / Upazila
+                            </label>
+                            <input type="text" name="thana_upazila" class="form-control-custom"
+                                value="{{ $stationInfo->upazila ?? '' }}" readonly>
+                        </div>
+
 
                         {{-- Date --}}
                         <div class="col-md-2">
@@ -649,11 +651,11 @@
          * Restriction: Sales cannot exceed available stock (prev + received)
          */
         function calcRow(fuel) {
-            const prev     = parseFloat(document.getElementById(fuel + '_prev_stock')?.value)  || 0;
-            const supply   = parseFloat(document.getElementById(fuel + '_supply')?.value)       || 0;
-            const received = parseFloat(document.getElementById(fuel + '_received')?.value)     || 0;
-            const salesEl  = document.getElementById(fuel + '_sales');
-            let   sales    = parseFloat(salesEl?.value) || 0;
+            const prev = parseFloat(document.getElementById(fuel + '_prev_stock')?.value) || 0;
+            const supply = parseFloat(document.getElementById(fuel + '_supply')?.value) || 0;
+            const received = parseFloat(document.getElementById(fuel + '_received')?.value) || 0;
+            const salesEl = document.getElementById(fuel + '_sales');
+            let sales = parseFloat(salesEl?.value) || 0;
 
             // ─── MAX SELLABLE = prev_stock + received ───────────────────────
             const maxSellable = prev + received;
@@ -666,22 +668,22 @@
                         `⚠ Sales cannot exceed available stock (${maxSellable.toFixed(2)} L). Adjusted automatically.`;
                     salesWarnEl.style.display = 'block';
                 }
-                sales = maxSellable;          // clamp
+                sales = maxSellable; // clamp
                 if (salesEl) salesEl.value = sales.toFixed(2);
                 if (salesEl) salesEl.classList.add('is-invalid');
             } else {
                 if (salesWarnEl) salesWarnEl.style.display = 'none';
-                if (salesEl)     salesEl.classList.remove('is-invalid');
+                if (salesEl) salesEl.classList.remove('is-invalid');
             }
 
-            const diff    = supply - received;              // supply – received
-            const closing = prev + received - sales;        // prev + received – sales
+            const diff = supply - received; // supply – received
+            const closing = prev + received - sales; // prev + received – sales
 
             // ─── Difference display ──────────────────────────────────────────
             const diffEl = document.getElementById(fuel + '_difference_display');
             if (diffEl) {
-                diffEl.textContent  = diff.toFixed(2);
-                diffEl.style.color  = diff !== 0 ? '#dc2626' : '#16a34a';
+                diffEl.textContent = diff.toFixed(2);
+                diffEl.style.color = diff !== 0 ? '#dc2626' : '#16a34a';
             }
 
             // ─── Closing stock display ───────────────────────────────────────
@@ -709,20 +711,23 @@
             });
 
             // Final guard on submit
-            document.querySelector('form').addEventListener('submit', function (e) {
+            document.querySelector('form').addEventListener('submit', function(e) {
                 let blocked = false;
 
                 ['petrol', 'diesel', 'octane'].forEach(fuel => {
-                    const prev      = parseFloat(document.getElementById(fuel + '_prev_stock')?.value)  || 0;
-                    const received  = parseFloat(document.getElementById(fuel + '_received')?.value)    || 0;
-                    const sales     = parseFloat(document.getElementById(fuel + '_sales')?.value)       || 0;
-                    const maxSell   = prev + received;
+                    const prev = parseFloat(document.getElementById(fuel + '_prev_stock')?.value) ||
+                        0;
+                    const received = parseFloat(document.getElementById(fuel + '_received')
+                        ?.value) || 0;
+                    const sales = parseFloat(document.getElementById(fuel + '_sales')?.value) || 0;
+                    const maxSell = prev + received;
 
                     if (sales > maxSell) {
                         blocked = true;
                         const warnEl = document.getElementById(fuel + '_sales_warn');
                         if (warnEl) {
-                            warnEl.textContent  = `⚠ ${fuel.charAt(0).toUpperCase() + fuel.slice(1)} sales (${sales.toFixed(2)} L) exceeds available stock (${maxSell.toFixed(2)} L).`;
+                            warnEl.textContent =
+                                `⚠ ${fuel.charAt(0).toUpperCase() + fuel.slice(1)} sales (${sales.toFixed(2)} L) exceeds available stock (${maxSell.toFixed(2)} L).`;
                             warnEl.style.display = 'block';
                         }
                         document.getElementById(fuel + '_sales')?.classList.add('is-invalid');
@@ -732,7 +737,10 @@
                 if (blocked) {
                     e.preventDefault();
                     // Scroll to first error
-                    document.querySelector('.is-invalid')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    document.querySelector('.is-invalid')?.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
                 }
             });
         });
