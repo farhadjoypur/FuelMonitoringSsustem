@@ -403,7 +403,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="modal-label required">Station Code</label>
+                            <label class="modal-label">Station Code</label>
                             <input type="text" class="form-control @error('station_code') is-invalid @enderror"
                                 name="station_code" value="{{ old('station_code') }}">
                             @error('station_code')
