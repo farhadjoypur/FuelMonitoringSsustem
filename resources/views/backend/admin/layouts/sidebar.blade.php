@@ -38,9 +38,17 @@
             </li>
 
             {{-- FILLING STATION (SIMPLE MENU) --}}
-            <li class="menu-item">
+            {{-- <li class="menu-item">
                 <a href="{{ route('admin.stations.index') }}"
                     class="menu-link {{ request()->routeIs('admin.stations.*') ? 'active' : '' }}">
+                    <span class="material-symbols-rounded">local_gas_station</span>
+                    <span class="menu-label">Filling Station</span>
+                </a>
+            </li> --}}
+
+            <li class="menu-item">
+                <a href="{{ route('admin.filling-station.index') }}"
+                    class="menu-link {{ request()->routeIs('admin.filling-station.*') ? 'active' : '' }}">
                     <span class="material-symbols-rounded">local_gas_station</span>
                     <span class="menu-label">Filling Station</span>
                 </a>

@@ -8,7 +8,9 @@ use App\Models\Depot;
 use App\Models\FillingStation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Validator;
 
 class FillingStationController extends Controller
 {
@@ -24,128 +26,217 @@ class FillingStationController extends Controller
         }
 
         $json = File::get($path);
+        $data = json_decode($json, true);
 
-        return json_decode($json, true);
+        $dcProfile = Auth::user()->profile;
+        $dcDistrictName = $dcProfile->district ?? '';
+        $dcDivisionName = $dcProfile->division ?? '';
+
+        $filteredData = ['divisions' => []];
+
+        foreach ($data['divisions'] as $division) {
+            if ($division['name_en'] === $dcDivisionName) {
+
+                $tempDivision = $division;
+                $tempDivision['districts'] = [];
+
+                foreach ($division['districts'] as $district) {
+                    if ($district['name_en'] === $dcDistrictName) {
+                        $tempDivision['districts'][] = $district;
+                    }
+                }
+
+                $filteredData['divisions'][] = $tempDivision;
+                break;
+            }
+        }
+
+        return $filteredData;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $path = resource_path('data/location.json');
+        try {
+            $dcProfile = Auth::user()->profile;
+            if (! $dcProfile || ! $dcProfile->district || ! $dcProfile->division) {
+                return redirect()->back()
+                    ->with('error', 'Location information is missing in your profile. Please contact administrator.');
+            }
 
-        if (! file_exists($path)) {
-            dd('Location file not found at: '.$path);
+            $dcDistrict = $dcProfile->district;
+            $dcDivision = $dcProfile->division;
+
+            $query = FillingStation::with('company', 'depot')
+                ->where('division', $dcDivision)
+                ->where('district', $dcDistrict);
+
+            if ($request->filled('search')) {
+                $searchTerm = $request->search;
+                $query->where(function ($q) use ($searchTerm) {
+                    $q->where('station_name', 'like', '%'.$searchTerm.'%')
+                        ->orWhere('station_code', 'like', '%'.$searchTerm.'%')
+                        ->orWhere('owner_phone', 'like', '%'.$searchTerm.'%');
+                });
+            }
+
+            if ($request->filled('station_name')) {
+                $query->where('station_name', $request->station_name);
+            }
+
+            if ($request->filled('upazila')) {
+                $query->where('upazila', $request->upazila);
+            }
+
+            $stations = $query->latest()->paginate(10)->withQueryString();
+            $companies = Company::orderBy('name', 'desc')->get(['id', 'name']);
+            $allStationNames = FillingStation::where('district', $dcDistrict)
+                ->orderBy('station_name')
+                ->get(['id', 'station_name']);
+
+            $depots = Depot::orderBy('depot_name')->get(['id', 'depot_name']);
+            $locationData = $this->getLocationData();
+
+            return view('backend.dc.pages.fillingStation.index', compact(
+                'stations',
+                'locationData',
+                'companies',
+                'depots',
+                'allStationNames'
+            ));
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'An error occurred while loading data. Please try again later.');
         }
-        $locations = json_decode(file_get_contents($path), true);
-
-        $userProfile = Auth::user()->profile;
-        if (! $userProfile || ! $userProfile->district) {
-            return back()->with('error', 'Your profile does not have a district assigned. Please update your profile.');
-        }
-        $dcDistrict = $userProfile->district;
-        $dcDivision = $userProfile->division;
-
-        $baseQuery = FillingStation::with('company')
-            ->where('district', $dcDistrict)
-            ->where('division', $dcDivision);
-
-        $stations = $baseQuery->latest()->paginate(10)->withQueryString();
-        $divisions = FillingStation::whereNotNull('division')->distinct()->pluck('division');
-        $companies = Company::orderBy('name')->get(['id', 'name']);
-
-        $allStationNames = FillingStation::where('district', $dcDistrict)
-            ->orderBy('station_name')
-            ->get(['id', 'station_name']);
-
-        $depots = Depot::orderBy('depot_name')->get(['id', 'depot_name']);
-
-        return view('backend.dc.pages.fillingStation.index', compact(
-            'stations',
-            'divisions', 'companies',
-            'locations',
-            'allStationNames',
-            'depots'
-        ));
     }
 
     public function create()
     {
-        $companies = Company::all();
-
-        return view('backend.dc.pages.fillingStation.create', compact('companies'));
+        //
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'company_id' => 'required',
-            'station_name' => 'required|unique:filling_stations,station_name',
-            'station_code' => 'required|unique:filling_stations,station_code',
+        $validator = Validator::make($request->all(), [
+            'company_id' => 'required|exists:companies,id',
+            'station_name' => 'required|string|max:255|unique:filling_stations,station_name',
+            'station_code' => 'required|string|max:50|unique:filling_stations,station_code',
+            'owner_phone' => 'nullable|string|max:20',
+            'division' => 'required|string',
+            'district' => 'required|string',
+            'upazila' => 'required|string',
+            'address' => 'nullable|string',
+            'linked_depot' => 'nullable|exists:depots,id',
+            'tank_capacity' => 'nullable|string',
+            'fuel_types' => 'nullable|array',
+            'license_file' => 'nullable|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
 
-        $data = $request->all();
-        $data['fuel_types'] = $request->fuel_types ?? [];
-
-        if ($request->hasFile('license_file')) {
-            $data['license_file'] = $request->file('license_file')
-                ->store('licenses', 'public');
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput()
+                ->with('error', 'Please fill up all required fields correctly.');
         }
 
-        FillingStation::create($data);
+        DB::beginTransaction();
+        try {
+            $data = $request->except('license_file');
+            if ($request->hasFile('license_file')) {
+                $file = $request->file('license_file');
+                $fileName = time().'_'.$file->getClientOriginalName();
+                $file->move(public_path('uploads/licenses'), $fileName);
+                $data['license_file'] = 'uploads/licenses/'.$fileName;
+            }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Created successfully',
-        ]);
-    }
+            FillingStation::create($data);
 
-    // ── NEW: return station JSON for edit modal ──
-    public function getStation($id)
-    {
-        $station = FillingStation::findOrFail($id);
+            DB::commit();
 
-        return response()->json($station);
+            return redirect()->back()->with('success', 'Filling Station added successfully!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return redirect()->back()->with('error', 'Something went wrong! Please try again.')->withInput();
+        }
     }
 
     public function edit($id)
     {
-        $station = FillingStation::findOrFail($id);
-        $companies = Company::all();
-
-        return view('backend.dc.pages.fillingStation.edit', compact('station', 'companies'));
+        //
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, string $id)
     {
         $station = FillingStation::findOrFail($id);
 
-        $request->validate([
-            'station_name' => 'required',
-            'station_code' => 'required|unique:filling_stations,station_code,'.$id,
+        $validator = Validator::make($request->all(), [
+            'company_id' => 'required|exists:companies,id',
+            'station_name' => 'required|string|max:255|unique:filling_stations,station_name,'.$station->id,
+            'station_code' => 'required|string|max:50|unique:filling_stations,station_code,'.$station->id,
+            'owner_phone' => 'nullable|string|max:20',
+            'division' => 'required|string',
+            'district' => 'required|string',
+            'upazila' => 'required|string',
+            'address' => 'nullable|string',
+            'linked_depot' => 'nullable|exists:depots,id',
+            'tank_capacity' => 'nullable|string',
+            'fuel_types' => 'nullable|array',
+            'license_file' => 'nullable|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
 
-        $data = $request->all();
-        $data['fuel_types'] = $request->fuel_types ?? [];
-
-        if ($request->hasFile('license_file')) {
-            $data['license_file'] = $request->file('license_file')
-                ->store('licenses', 'public');
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput()
+                ->with('error', 'Please fill up all required fields correctly.');
         }
 
-        $station->update($data);
+        DB::beginTransaction();
+        try {
+            $data = $request->except('license_file');
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Updated successfully',
-        ]);
+            if ($request->hasFile('license_file')) {
+                if ($station->license_file && file_exists(public_path($station->license_file))) {
+                    unlink(public_path($station->license_file));
+                }
+                $file = $request->file('license_file');
+                $fileName = time().'_'.$file->getClientOriginalName();
+                $file->move(public_path('uploads/licenses'), $fileName);
+                $data['license_file'] = 'uploads/licenses/'.$fileName;
+            }
+
+            $station->update($data);
+
+            DB::commit();
+
+            return redirect()->back()->with('success', 'Filling Station updated successfully!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return redirect()->back()->with('error', 'Something went wrong! Please try again.')->withInput();
+        }
     }
 
-    public function destroy($id)
+    public function destroy(string $id)
     {
-        FillingStation::findOrFail($id)->delete();
+        DB::beginTransaction();
+        try {
+            $station = FillingStation::findOrFail($id);
+            if ($station->license_file && file_exists(public_path($station->license_file))) {
+                File::delete(public_path($station->license_file));
+            }
+            $station->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Deleted successfully',
-        ]);
+            DB::commit();
+
+            return redirect()->back()->with('success', 'Filling Station deleted successfully!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return redirect()->back()->with('error', 'Something went wrong! Could not delete the station.');
+        }
     }
 }

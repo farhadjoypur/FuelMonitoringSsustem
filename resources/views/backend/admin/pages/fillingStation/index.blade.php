@@ -1,1102 +1,932 @@
 @extends('backend.admin.layouts.app')
 
+@section('title', 'Filling Station Management')
+
 @push('styles')
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
-        *, *::before, *::after { box-sizing: border-box; }
-
-        body, .main-content {
-            background-color: #f0f4f8 !important;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-
-        .fs-wrapper { padding: 32px 36px; }
-
-        /* ── Header ── */
-        .fs-header {
+        .select2-container--default .select2-selection--single {
+            background-color: #f8f9fa !important;
+            border: none !important;
+            border-radius: 8px !important;
+            height: 38px !important;
             display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            margin-bottom: 28px;
-        }
-        .fs-header-left h2 {
-            font-size: 1.65rem; font-weight: 800;
-            color: #0f172a; margin: 0 0 4px; letter-spacing: -0.4px;
-        }
-        .fs-header-left p { font-size: 0.85rem; color: #64748b; margin: 0; }
-
-        .btn-add {
-            display: inline-flex; align-items: center; gap: 8px;
-            background: #006796; color: #fff; border: none;
-            border-radius: 12px; padding: 12px 22px;
-            font-size: 0.875rem; font-weight: 700;
-            text-decoration: none; white-space: nowrap;
-            box-shadow: 0 4px 14px rgba(0,103,150,.35);
-            transition: transform .15s, box-shadow .15s;
-        }
-        .btn-add:hover {
-            color: #fff; text-decoration: none;
-            transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(0,103,150,.45);
-        }
-        .btn-add svg { width: 15px; height: 15px; }
-
-        /* ── Filter Card ── */
-        .fs-filter-card {
-            background: #fff; border-radius: 14px;
-            border: 1px solid #e2e8f0; padding: 16px 20px;
-            margin-bottom: 20px; box-shadow: 0 1px 4px rgba(0,0,0,.04);
+            align-items: center;
         }
 
-        .fs-input {
-            border: 1.5px solid #e2e8f0; border-radius: 9px;
-            padding: 9px 13px; font-size: 0.875rem;
-            color: #1e293b; background: #f8fafc; outline: none;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            transition: border-color .15s, box-shadow .15s;
-            min-width: 140px;
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 36px !important;
+            right: 8px !important;
         }
-        .fs-input:focus {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37,99,235,.1);
-            background: #fff;
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: #212529 !important;
+            padding-left: 12px !important;
+            font-size: 0.9rem !important;
+            line-height: 38px !important;
         }
-        .fs-input::placeholder { color: #94a3b8; }
+
+        .select2-container--default.select2-container--focus .select2-selection--single {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+        .select2-dropdown {
+            border: 1px solid #eee !important;
+            border-radius: 8px !important;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Search & Filters */
+        .form-control,
+        .form-select {
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            height: 38px;
+        }
 
         .btn-filter {
-            display: inline-flex; align-items: center; gap: 6px;
-            background: #006796; color: #fff; border: none;
-            border-radius: 9px; padding: 9px 18px;
-            font-size: 0.82rem; font-weight: 700;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            cursor: pointer; white-space: nowrap;
-            transition: background .15s;
-        }
-        .btn-filter:hover { background: #005580; }
-        .btn-filter:disabled { opacity: .65; cursor: not-allowed; }
-
-        .btn-clear {
-            display: inline-flex; align-items: center; gap: 6px;
-            background: #f1f5f9; color: #475569;
-            border: 1.5px solid #e2e8f0; border-radius: 9px;
-            padding: 9px 16px; font-size: 0.82rem; font-weight: 600;
-            cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif;
-            transition: background .15s; white-space: nowrap;
-        }
-        .btn-clear:hover { background: #e2e8f0; color: #1e293b; }
-
-        /* ── Result count badge ── */
-        .result-badge {
-            display: inline-flex; align-items: center;
-            background: #eff6ff; color: #1d4ed8;
-            border: 1.5px solid #bfdbfe; border-radius: 20px;
-            padding: 4px 12px; font-size: 0.75rem; font-weight: 700;
+            background-color: #006699;
+            color: white;
+            border: none;
+            padding: 0 25px;
         }
 
-        /* ── Table Card ── */
-        .fs-table-card {
-            background: #fff; border-radius: 16px;
-            border: 1px solid #e2e8f0; overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,.05);
+        .btn-filter:hover {
+            background-color: #004d73;
+            color: white;
         }
 
-        .fs-table { width: 100%; border-collapse: collapse; }
-
-        .fs-table thead tr {
-            background: #f8fafc;
-            border-bottom: 2px solid #e2e8f0;
-        }
-        .fs-table thead th {
-            font-size: 0.70rem; font-weight: 800;
-            color: #64748b; letter-spacing: .08em;
-            text-transform: uppercase; padding: 13px 16px; white-space: nowrap;
-        }
-        .fs-table tbody tr {
-            border-bottom: 1px solid #f1f5f9;
-            transition: background .12s;
-        }
-        .fs-table tbody tr:last-child { border-bottom: none; }
-        .fs-table tbody tr:hover { background: #f8fafc; }
-        .fs-table tbody td {
-            padding: 14px 16px; font-size: 0.875rem;
-            color: #334155; vertical-align: middle;
+        .btn-add {
+            background-color: #006699;
+            border-radius: 6px;
+            padding: 8px 20px;
+            font-weight: 500;
+            border: none;
         }
 
-        /* ── Skeleton loader ── */
-        .skeleton-row td { padding: 14px 16px; }
-        .skeleton-cell {
-            height: 16px; border-radius: 6px;
-            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.4s infinite;
-        }
-        @keyframes shimmer {
-            0%   { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-
-        /* ── Shared badge / name styles ── */
-        .row-index {
-            width: 28px; height: 28px; border-radius: 8px;
-            background: #f1f5f9; color: #64748b;
-            font-size: .75rem; font-weight: 700;
-            display: inline-flex; align-items: center; justify-content: center;
-        }
-        .station-name { font-weight: 700; color: #0f172a; display: block; margin-bottom: 2px; font-size: .9rem; }
-        .station-sub  { font-size: .76rem; color: #94a3b8; }
-
-        .badge-code {
-            display: inline-block; padding: 4px 10px; border-radius: 7px;
-            border: 1.5px solid #bfdbfe; background: #eff6ff;
-            color: #1d4ed8; font-size: .72rem; font-weight: 800; letter-spacing: .04em;
-        }
+        /* Status & Tags */
         .badge-status {
-            display: inline-flex; align-items: center; gap: 5px;
-            padding: 5px 12px; border-radius: 20px;
-            font-size: .76rem; font-weight: 700; white-space: nowrap;
+            background-color: #e6f7ef;
+            color: #28a745;
+            border-radius: 20px;
+            padding: 5px 15px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
         }
+
         .badge-status::before {
-            content: ''; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
-        }
-        .badge-active   { background: #f0fdf4; color: #16a34a; border: 1.5px solid #86efac; }
-        .badge-active::before   { background: #22c55e; }
-        .badge-inactive { background: #fff1f2; color: #e11d48; border: 1.5px solid #fda4af; }
-        .badge-inactive::before { background: #f43f5e; }
-
-        .badge-fuel {
-            display: inline-block; width: 50px; padding: 5px 0;
-            text-align: center; border-radius: 4px;
-            background-color: #e9ecef; font-size: 10px; font-weight: 500;
-            border: 1px solid #dee2e6;
+            content: "";
+            width: 8px;
+            height: 8px;
+            background: #28a745;
+            border-radius: 50%;
         }
 
-        /* ── Actions ── */
-        .actions-cell { display: flex; align-items: center; gap: 4px; }
-        .action-btn {
-            display: inline-flex; align-items: center; justify-content: center;
-            width: 34px; height: 34px; border-radius: 9px;
-            border: none; cursor: pointer; background: transparent;
-            transition: background .15s; text-decoration: none;
-        }
-        .action-btn svg { width: 16px; height: 16px; }
-        .action-btn-edit  { color: #64748b; }
-        .action-btn-edit:hover  { background: #f1f5f9; color: #334155; }
-        .action-btn-delete { color: #ef4444; }
-        .action-btn-delete:hover { background: #fff1f2; color: #dc2626; }
-
-        /* ── Alerts ── */
-        .fs-alert {
-            border-radius: 11px; padding: 12px 18px;
-            margin-bottom: 18px; font-size: .875rem;
-            display: flex; align-items: center; gap: 10px;
-        }
-        .fs-alert-success { background: #f0fdf4; border: 1px solid #86efac; color: #166534; }
-        .fs-alert-danger  { background: #fff1f2; border: 1px solid #fda4af; color: #be123c; }
-        .fs-alert svg     { width: 16px; height: 16px; flex-shrink: 0; }
-
-        /* ── Modals ── */
-        .fs-modal .modal-content {
-            border-radius: 18px; border: none;
-            box-shadow: 0 24px 60px rgba(0,0,0,.18);
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-        .fs-modal .modal-header {
-            background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
-            border-radius: 18px 18px 0 0; padding: 20px 28px; border-bottom: none;
-        }
-        .fs-modal .modal-title { color: #fff; font-weight: 800; font-size: 1.05rem; letter-spacing: -.2px; }
-        .fs-modal .btn-close { filter: brightness(0) invert(1); opacity: .8; }
-        .fs-modal .modal-body  { padding: 28px; }
-        .fs-modal .modal-footer { padding: 16px 28px 24px; border-top: 1px solid #f1f5f9; }
-        .fs-modal .section-title {
-            font-size: .68rem; font-weight: 800; letter-spacing: .08em;
-            text-transform: uppercase; color: #94a3b8;
-            padding-bottom: 10px; margin-bottom: 18px; border-bottom: 1px solid #f1f5f9;
-        }
-        .fs-modal .form-label { font-size: .8rem; font-weight: 600; color: #374151; margin-bottom: 5px; }
-        .fs-modal .form-label .req { color: #ef4444; margin-left: 2px; }
-        .fs-modal .form-control,
-        .fs-modal .form-select {
-            border: 1.5px solid #e2e8f0; border-radius: 9px;
-            padding: 9px 13px; font-size: .875rem; color: #1e293b;
-            background: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif;
-            transition: border-color .15s, box-shadow .15s;
-        }
-        .fs-modal .form-control:focus,
-        .fs-modal .form-select:focus {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37,99,235,.1);
-            background: #fff;
+        .fuel-tag {
+            background: #f1f3f5;
+            color: #495057;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            display: inline-block;
+            margin-bottom: 2px;
         }
 
-        .fuel-options { display: flex; gap: 10px; flex-wrap: wrap; }
-        .fuel-check {
-            display: inline-flex; align-items: center; gap: 7px;
-            padding: 7px 14px; border-radius: 8px;
-            border: 1.5px solid #e2e8f0; cursor: pointer;
-            font-size: .83rem; font-weight: 600; color: #374151;
-            transition: border-color .15s, background .15s; user-select: none;
+        /* Modal Styles */
+        .modal-label {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 14px;
         }
-        .fuel-check input { display: none; }
-        .fuel-check.checked { border-color: #2563eb; background: #eff6ff; color: #1d4ed8; }
+
+        .required::after {
+            content: " *";
+            color: red;
+        }
 
         .btn-save {
-            display: inline-flex; align-items: center; gap: 6px;
-            background: linear-gradient(135deg, #1e3a5f, #2563eb);
-            color: #fff; border: none; border-radius: 10px;
-            padding: 10px 24px; font-size: .875rem; font-weight: 700;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            box-shadow: 0 4px 14px rgba(37,99,235,.3);
-            transition: opacity .15s;
+            background-color: #006699;
+            color: white;
+            border: none;
+            padding: 8px 25px;
+            border-radius: 6px;
         }
-        .btn-save:hover { opacity: .9; }
 
-        .btn-cancel-modal {
-            background: #f1f5f9; color: #475569;
-            border: 1.5px solid #e2e8f0; border-radius: 10px;
-            padding: 10px 20px; font-size: .875rem; font-weight: 600;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            transition: background .15s;
+        .btn-cancel {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 8px 25px;
+            border-radius: 6px;
+            color: #333;
         }
-        .btn-cancel-modal:hover { background: #e2e8f0; }
 
-        .modal-loading { text-align: center; padding: 48px 0; color: #94a3b8; font-size: .9rem; }
-
-        /* ── Select2 override ── */
-        .select2-container--default .select2-selection--single {
-            height: 40px !important; border: 1.5px solid #e2e8f0 !important;
-            border-radius: 9px !important; display: flex; align-items: center;
-            padding: 0 10px; background-color: #f8fafc !important;
+        .action-btn {
+            color: #adb5bd;
+            transition: 0.3s;
+            margin: 0 5px;
+            text-decoration: none;
         }
-        .select2-selection__rendered { line-height: normal !important; padding-left: 0 !important; font-size: 14px; color: #495057; }
-        .select2-selection__arrow   { height: 100% !important; right: 8px !important; }
-        .select2-container--default.select2-container--focus .select2-selection--single {
-            border-color: #2563eb !important;
-            box-shadow: 0 0 0 3px rgba(37,99,235,.1);
-        }
-        .select2-dropdown { border-radius: 9px !important; }
 
-        @media (max-width: 700px) {
-            .fs-wrapper { padding: 20px 16px; }
-            .fs-header   { flex-direction: column; gap: 14px; }
+        .action-btn:hover {
+            color: #006699;
+        }
+
+        .btn-action {
+            border: none;
+            background: transparent;
+            font-size: 1.1rem;
+        }
+
+        .btn-edit {
+            color: #03a9f4;
+        }
+
+        .btn-delete {
+            color: #f44336;
+        }
+
+        .table tbody td {
+            vertical-align: middle;
+            font-size: 14px;
         }
     </style>
 @endpush
 
 @section('content')
-<div class="container-fluid p-4" x-data="reportApp()">
+    <div class="container-fluid p-4">
 
-    {{-- ── Header ── --}}
-    <div class="fs-header">
-        <div class="fs-header-left">
-            <h2>Filling Station Management</h2>
-            <p>Manage and organize all filling station information</p>
-        </div>
-        <a href="javascript:void(0)" class="btn-add" onclick="openCreateModal()">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-            </svg>
-            Add Filling Station
-        </a>
-    </div>
-
-    {{-- ── Flash Alerts ── --}}
-    @if (session('success'))
-        <div class="fs-alert fs-alert-success">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            {{ session('success') }}
-        </div>
-    @endif
-    @if (session('error'))
-        <div class="fs-alert fs-alert-danger">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            {{ session('error') }}
-        </div>
-    @endif
-
-    {{-- ══════════════════════════════════════════════════════
-         FILTER CARD  (Alpine.js bound)
-    ══════════════════════════════════════════════════════ --}}
-    <div class="fs-filter-card">
-        <div class="d-flex align-items-center gap-2 flex-wrap">
-
-            {{-- Free-text search --}}
-            <input
-                type="text"
-                class="fs-input"
-                placeholder="Search name, code, owner…"
-                x-model="filters.search"
-                @keyup.enter="applyFilter()"
-                style="min-width:200px;"
-            >
-
-            {{-- Station Name (Select2 — wired via $watch) --}}
-            <select id="stationNameFilter" style="min-width:180px;">
-                <option value="">All Stations</option>
-                @foreach ($allStationNames as $s)
-                    <option value="{{ $s->station_name }}">{{ $s->station_name }}</option>
-                @endforeach
-            </select>
-
-            {{-- Division --}}
-            <select class="fs-input" x-model="filters.division" @change="onDivisionChange()">
-                <option value="">Select Division</option>
-                @foreach ($locations['divisions'] as $div)
-                    <option value="{{ $div['name_en'] }}">{{ $div['name_en'] }}</option>
-                @endforeach
-            </select>
-
-            {{-- District (populated by Alpine) --}}
-            <select class="fs-input" x-model="filters.district" @change="onDistrictChange()">
-                <option value="">Select District</option>
-                <template x-for="d in districts" :key="d.name_en">
-                    <option :value="d.name_en" x-text="d.name_en"></option>
-                </template>
-            </select>
-
-            {{-- Upazila (populated by Alpine) --}}
-            <select class="fs-input" x-model="filters.upazila">
-                <option value="">Select Upazila</option>
-                <template x-for="u in upazilas" :key="u.name_en">
-                    <option :value="u.name_en" x-text="u.name_en"></option>
-                </template>
-            </select>
-
-            {{-- Company --}}
-            <select class="fs-input" x-model="filters.company_id">
-                <option value="">All Companies</option>
-                @foreach ($companies as $company)
-                    <option value="{{ $company->id }}">{{ explode(' ', trim($company->name))[0] }}</option>
-                @endforeach
-            </select>
-
-            {{-- Status --}}
-            {{-- <select class="fs-input" x-model="filters.status">
-                <option value="">All Status</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-            </select> --}}
-
-            {{-- Apply button --}}
-            <button class="btn-filter" @click="applyFilter()" :disabled="loading">
-                <template x-if="loading">
-                    <span class="spinner-border spinner-border-sm" role="status"></span>
-                </template>
-                <template x-if="!loading">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                         stroke="currentColor" stroke-width="2.2" style="width:14px;height:14px;">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                              d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"/>
-                    </svg>
-                </template>
-                <span x-text="loading ? 'Filtering…' : 'Apply Filter'"></span>
-            </button>
-
-            {{-- Clear --}}
-            <button class="btn-clear" @click="resetFilter()">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                     stroke="currentColor" stroke-width="2.2" style="width:14px;height:14px;">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-                Clear
-            </button>
-
-            {{-- Result count --}}
-            <span class="result-badge ms-auto" x-show="totalResults !== null">
-                <span x-text="totalResults"></span>&nbsp;result<span x-text="totalResults === 1 ? '' : 's'"></span>
-            </span>
-
-        </div>
-    </div>
-
-    {{-- ══════════════════════════════════════════════════════
-         TABLE CARD
-    ══════════════════════════════════════════════════ --}}
-    <div class="fs-table-card">
-        <div class="table-responsive">
-            <table class="fs-table">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Station Name</th>
-                        <th>Code</th>
-                        <th>Division</th>
-                        <th>District</th>
-                        <th>Upazila</th>
-                        <th>Owner</th>
-                        <th>Company</th>
-                        <th>Capacity</th>
-                        <th>Fuel Types</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-
-                {{-- tbody: Alpine x-html controls this. Initial HTML set via init() --}}
-                <tbody id="tableContainer" x-html="tableHtml">
-                    @include('backend.admin.pages.fillingStation.table', [
-                        'filteredReports' => $filteredReports
-                    ])
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-</div>
-
-{{-- ══════════════════════════════════════════════════════
-     CREATE MODAL
-══════════════════════════════════════════════════ --}}
-<div class="modal fade fs-modal" id="createStationModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content">
-
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                         stroke="currentColor" stroke-width="2"
-                         style="width:18px;height:18px;margin-right:8px;vertical-align:-3px;">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-                    </svg>
-                    Add Filling Station
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+            <div>
+                <h4 class="fw-bold">Filling Station Management</h4>
+                <p class="text-muted small">Manage and organize all filling station information</p>
             </div>
 
-            <div class="modal-body">
-                <form id="createStationForm" enctype="multipart/form-data">
-                    @csrf
+            <button class="btn btn-primary px-4 py-2 w-sm-100 w-auto" data-bs-toggle="modal" data-bs-target="#addStationModal"
+                style="background-color: #006699; border-radius: 8px; border: none;">
+                <i class="bi bi-plus-lg me-2"></i> Add Filling Station
+            </button>
+        </div>
 
-                    <div class="section-title">Basic Information</div>
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-6">
-                            <label class="form-label">Company <span class="req">*</span></label>
-                            <select name="company_id" class="form-select" required>
-                                <option value="">— Select Company —</option>
+        <form action="{{ route('admin.filling-station.index') }}" method="GET"
+            class="bg-white p-3 rounded shadow-sm border mb-4">
+            <div class="row g-2 align-items-end">
+                {{-- Search Field --}}
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold text-muted">Search</label>
+                    <div class="input-group">
+                        <input type="text" name="search" id="searchInput" class="form-control border-0 bg-light"
+                            style="border-radius: 8px 0 0 8px; font-size: 0.9rem;" value="{{ request('search') }}"
+                            placeholder="Search here...">
+                        <button class="btn btn-dark border-0 px-3" type="submit"
+                            style="border-radius: 0 8px 8px 0; background-color: #006699;">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold text-muted">Stations</label>
+                    <select name="station_name" id="stationNameFilter"
+                        class="form-select border-0 bg-light searchable-select" style="border-radius: 8px;">
+                        <option value="">All Stations</option>
+                        @foreach ($allStationNames as $s)
+                            <option value="{{ $s->station_name }}"
+                                {{ request('station_name') == $s->station_name ? 'selected' : '' }}>
+                                {{ $s->station_name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- Division Field --}}
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold text-muted">Division</label>
+                    <select name="division" id="filter_division" class="form-select border-0 bg-light"
+                        style="border-radius: 8px;">
+                        <option value="">All Division</option>
+                        @foreach ($locationData['divisions'] as $div)
+                            <option value="{{ $div['name_en'] }}"
+                                {{ request('division') == $div['name_en'] ? 'selected' : '' }}>
+                                {{ $div['name_en'] }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- District Field --}}
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold text-muted">District</label>
+                    <select name="district" id="filter_district" class="form-select border-0 bg-light"
+                        style="border-radius: 8px;">
+                        <option value="">All District</option>
+                    </select>
+                </div>
+
+                {{-- Upazila Field --}}
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold text-muted">Upazila</label>
+                    <select name="upazila" id="filter_upazila" class="form-select border-0 bg-light"
+                        style="border-radius: 8px;">
+                        <option value="">All Upazila</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-grow-1 shadow-sm"
+                        style="background-color: #006699; border: none; border-radius: 8px; height: 38px;">
+                        <i class="bi bi-funnel-fill me-1"></i> Filter
+                    </button>
+                    <a href="{{ route('admin.filling-station.index') }}"
+                        class="btn btn-outline-secondary shadow-sm d-flex align-items-center justify-content-center"
+                        style="border-radius: 8px; height: 38px;">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </a>
+                </div>
+            </div>
+        </form>
+
+        <div class="table-container">
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead class="text-muted">
+                        <tr style="font-size: 0.85rem; text-transform: uppercase;">
+                            <th>SL</th>
+                            <th class="text-nowrap">Station Name</th>
+                            <th>Code</th>
+                            <th>Division</th>
+                            <th>District</th>
+                            <th>Upazila</th>
+                            {{-- <th>Owner</th> --}}
+                            <th>Company</th>
+                            {{-- <th>Capacity</th> --}}
+                            <th class="text-nowrap">Fuel Types</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($stations as $key => $station)
+                            <tr>
+                                <td>{{ $stations->firstItem() + $key }}</td>
+                                <td>{{ $station->station_name }}</td>
+                                <td class="text-info fw-bold">{{ $station->station_code }}</td>
+                                <td>{{ $station->division ?? '-' }}</td>
+                                <td>{{ $station->district ?? '-' }}</td>
+                                <td>{{ $station->upazila ?? '-' }}</td>
+                                {{-- <td>{{ $station->owner_name ?? '—' }}</td> --}}
+                                <td>{{ $station->company ? explode(' ', $station->company->name)[0] : '-' }}</td>
+                                {{-- <td>{{ $station->tank_capacity ? number_format($station->tank_capacity) . ' L' : '—' }} --}}
+                                </td>
+                                <td>
+                                    @if ($station->fuel_types)
+                                        @foreach ($station->fuel_types as $fuel)
+                                            <span class="fuel-tag">{{ $fuel }}</span>
+                                        @endforeach
+                                    @else
+                                        —
+                                    @endif
+                                </td>
+                                <td>
+                                    @if (strtolower($station->status) == 'active')
+                                        <span
+                                            style="background-color: #e6fffa; color: #38a169; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-block;">
+                                            Active
+                                        </span>
+                                    @else
+                                        <span
+                                            style="background-color: #fff5f5; color: #e53e3e; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-block;">
+                                            Inactive
+                                        </span>
+                                    @endif
+                                </td>
+                                <td class="text-center">
+                                    <div class="d-flex justify-content-center">
+                                        <button class="btn-action btn-edit me-2 edit-btn" data-id="{{ $station->id }}"
+                                            data-company_id="{{ $station->company_id }}"
+                                            data-station_name="{{ $station->station_name }}"
+                                            data-station_code="{{ $station->station_code }}"
+                                            data-owner_name="{{ $station->owner_name }}"
+                                            data-owner_phone="{{ $station->owner_phone }}"
+                                            data-division="{{ $station->division }}"
+                                            data-district="{{ $station->district }}"
+                                            data-upazila="{{ $station->upazila }}" data-address="{{ $station->address }}"
+                                            data-linked_depot="{{ $station->linked_depot }}"
+                                            data-tank_capacity="{{ $station->tank_capacity }}"
+                                            data-fuel_types="{{ json_encode($station->fuel_types ?? []) }}"
+                                            data-status="{{ $station->status }}"
+                                            data-url="{{ route('admin.filling-station.update', $station->id) }}"
+                                            title="Edit">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </button>
+
+                                        <form action="{{ route('admin.filling-station.destroy', $station->id) }}"
+                                            method="POST" class="d-inline delete-form">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="button" class="btn-action btn-delete delete-confirm"
+                                                title="Delete">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="12" class="text-center py-5 text-muted">No Filling Stations Found.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="my-4">
+            {{ $stations->links('pagination::bootstrap-5') }}
+        </div>
+    </div>
+
+    <div class="modal fade" id="addStationModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-md">
+            <div class="modal-content" style="border-radius: 12px; border: none;">
+                <div class="modal-header border-bottom px-4">
+                    <h5 class="modal-title fw-bold" style="font-size: 1.1rem;">Add Filling Station</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form action="{{ route('admin.filling-station.store') }}" method="POST"
+                        enctype="multipart/form-data">
+                        @csrf
+
+                        <input type="hidden" name="form_type" value="create">
+
+                        <div class="mb-3">
+                            <label class="modal-label required">Company</label>
+                            <select name="company_id" class="form-select @error('company_id') is-invalid @enderror">
+                                <option value="">Select Company</option>
                                 @foreach ($companies as $company)
-                                    <option value="{{ $company->id }}">{{ $company->name }}</option>
+                                    <option value="{{ $company->id }}"
+                                        {{ old('company_id') == $company->id ? 'selected' : '' }}>
+                                        {{ $company->name ? explode(' ', trim($company->name))[0] : 'Not Found' }}
+                                    </option>
                                 @endforeach
                             </select>
+                            @error('company_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Station Name <span class="req">*</span></label>
-                            <input type="text" name="station_name" class="form-control" required>
+
+                        <div class="mb-3">
+                            <label class="modal-label required">Station Name</label>
+                            <input type="text" class="form-control @error('station_name') is-invalid @enderror"
+                                name="station_name" value="{{ old('station_name') }}">
+                            @error('station_name')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Station Code <span class="req">*</span></label>
-                            <input type="text" name="station_code" class="form-control" required>
+
+                        <div class="mb-3">
+                            <label class="modal-label required">Station Code</label>
+                            <input type="text" class="form-control @error('station_code') is-invalid @enderror"
+                                name="station_code" value="{{ old('station_code') }}">
+                            @error('station_code')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Linked Depot <span class="req">*</span></label>
-                            <select name="linked_depot" id="depotSelect" class="form-select">
-                                <option value="">— Select Depot —</option>
+
+                        <div class="mb-3">
+                            <label class="modal-label">Owner Name</label>
+                            <input type="text" class="form-control" name="owner_name"
+                                value="{{ old('owner_name') }}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="modal-label">Owner Phone</label>
+                            <input type="text" class="form-control @error('owner_phone') is-invalid @enderror"
+                                name="owner_phone" value="{{ old('owner_phone') }}">
+                            @error('owner_phone')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="modal-label required">Division</label>
+                            <select class="form-select @error('division') is-invalid @enderror" name="division"
+                                id="add_division">
+                                <option value="">Select Division</option>
+                                @foreach ($locationData['divisions'] as $div)
+                                    <option value="{{ $div['name_en'] }}"
+                                        {{ old('division') == $div['name_en'] ? 'selected' : '' }}>
+                                        {{ $div['name_en'] }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('division')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="modal-label required">District</label>
+                            <select class="form-select @error('district') is-invalid @enderror" name="district"
+                                id="add_district">
+                                <option value="">Select District</option>
+                            </select>
+                            @error('district')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="modal-label required">Upazila</label>
+                            <select class="form-select @error('upazila') is-invalid @enderror" name="upazila"
+                                id="add_upazila">
+                                <option value="">Select Upazila</option>
+                            </select>
+                            @error('upazila')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="modal-label">Full Address</label>
+                            <input type="text" class="form-control @error('address') is-invalid @enderror"
+                                name="address" value="{{ old('address') }}">
+                            @error('address')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="modal-label">Linked Depot</label>
+                            <select name="linked_depot" class="form-select @error('linked_depot') is-invalid @enderror">
+                                <option value="">Select Linked Depot</option>
+                                @foreach ($depots as $depot)
+                                    <option value="{{ $depot->id }}"
+                                        {{ old('linked_depot') == $depot->id ? 'selected' : '' }}>
+                                        {{ $depot->depot_name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('linked_depot')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="modal-label">Tank Capacity</label>
+                            <input type="text" class="form-control @error('tank_capacity') is-invalid @enderror"
+                                name="tank_capacity" placeholder="e.g., 10,000" value="{{ old('tank_capacity') }}">
+                            @error('tank_capacity')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="modal-label">Fuel Types</label>
+                            <div class="d-flex flex-column gap-2 mt-1">
+                                @php $oldFuels = old('fuel_types', []); @endphp
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="fuel_types[]" value="Petrol"
+                                        id="petrol" {{ in_array('Petrol', $oldFuels) ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="petrol">Petrol</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="fuel_types[]" value="Diesel"
+                                        id="diesel" {{ in_array('Diesel', $oldFuels) ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="diesel">Diesel</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="fuel_types[]" value="Octane"
+                                        id="octane" {{ in_array('Octane', $oldFuels) ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="octane">Octane</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="fuel_types[]" value="Others"
+                                        id="others" {{ in_array('Others', $oldFuels) ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="others">Others</label>
+                                </div>
+                            </div>
+                            @error('fuel_types')
+                                <small class="text-danger">{{ $message }}</small>
+                            @enderror
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="modal-label">Upload License</label>
+                            <input type="file" class="form-control @error('license_file') is-invalid @enderror"
+                                name="license_file">
+                            @error('license_file')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="modal-footer border-0 px-0 pb-4">
+                            <button type="button" class="btn btn-outline-secondary px-4 py-2"
+                                data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary px-5 py-2"
+                                style="background-color: #006699; border: none;">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="editStationModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-md">
+            <div class="modal-content" style="border-radius: 12px; border: none;">
+                <div class="modal-header border-bottom px-4">
+                    <h5 class="modal-title fw-bold" style="font-size: 1.1rem;">Edit Filling Station</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="editStationForm" action="" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        @method('PUT')
+
+                        <input type="hidden" name="form_type" value="edit">
+                        <input type="hidden" name="edit_url_handler" id="edit_url_handler"
+                            value="{{ old('edit_url_handler') }}">
+
+                        <div class="mb-3">
+                            <label class="modal-label required">Company</label>
+                            <select name="company_id" id="edit_company_id"
+                                class="form-select @error('company_id') is-invalid @enderror">
+                                <option value="">Select Company</option>
+                                @foreach ($companies as $company)
+                                    <option value="{{ $company->id }}">
+                                        {{ $company->name ? explode(' ', trim($company->name))[0] : 'Not Found' }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('company_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="modal-label required">Station Name</label>
+                            <input type="text" class="form-control @error('station_name') is-invalid @enderror"
+                                name="station_name" id="edit_station_name">
+                            @error('station_name')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="modal-label">Station Code</label>
+                            <input type="text" class="form-control @error('station_code') is-invalid @enderror"
+                                name="station_code" id="edit_station_code">
+                            @error('station_code')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="modal-label">Owner Name</label>
+                            <input type="text" class="form-control" name="owner_name" id="edit_owner_name">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="modal-label">Owner Phone</label>
+                            <input type="text" class="form-control @error('owner_phone') is-invalid @enderror"
+                                name="owner_phone" id="edit_owner_phone">
+                            @error('owner_phone')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="modal-label required">Division</label>
+                            <select class="form-select @error('division') is-invalid @enderror" name="division"
+                                id="edit_division">
+                                <option value="">Select Division</option>
+                            </select>
+                            @error('division')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="modal-label required">District</label>
+                            <select class="form-select @error('district') is-invalid @enderror" name="district"
+                                id="edit_district">
+                                <option value="">Select District</option>
+                            </select>
+                            @error('district')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="modal-label required">Upazila</label>
+                            <select class="form-select @error('upazila') is-invalid @enderror" name="upazila"
+                                id="edit_upazila">
+                                <option value="">Select Upazila</option>
+                            </select>
+                            @error('upazila')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="modal-label">Full Address</label>
+                            <input type="text" class="form-control" name="address" id="edit_address">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="modal-label">Linked Depot</label>
+                            <select name="linked_depot" id="edit_linked_depot"
+                                class="form-select @error('linked_depot') is-invalid @enderror">
+                                <option value="">Select Linked Depot</option>
                                 @foreach ($depots as $depot)
                                     <option value="{{ $depot->id }}">{{ $depot->depot_name }}</option>
                                 @endforeach
                             </select>
                         </div>
-                    </div>
 
-                    <div class="section-title">Owner Information</div>
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-6">
-                            <label class="form-label">Owner Name</label>
-                            <input type="text" name="owner_name" class="form-control">
+                        <div class="mb-3">
+                            <label class="modal-label">Tank Capacity</label>
+                            <input type="text" class="form-control" name="tank_capacity" id="edit_tank_capacity">
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Owner Phone</label>
-                            <input type="text" name="owner_phone" class="form-control">
-                        </div>
-                    </div>
 
-                    <div class="section-title">Location</div>
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-4">
-                            <label class="form-label">Division <span class="req">*</span></label>
-                            <select id="division" name="division" class="form-select" required>
-                                <option value="">— Select Division —</option>
-                                @foreach ($locations['divisions'] as $division)
-                                    <option value="{{ $division['name_en'] }}">{{ $division['name_en'] }}</option>
-                                @endforeach
-                            </select>
+                        <div class="mb-3">
+                            <label class="modal-label">Fuel Types</label>
+                            <div class="d-flex flex-column gap-2 mt-1">
+                                <div class="form-check">
+                                    <input class="form-check-input edit-fuel-checkbox" type="checkbox"
+                                        name="fuel_types[]" value="Petrol" id="edit_petrol">
+                                    <label class="form-check-label" for="edit_petrol">Petrol</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input edit-fuel-checkbox" type="checkbox"
+                                        name="fuel_types[]" value="Diesel" id="edit_diesel">
+                                    <label class="form-check-label" for="edit_diesel">Diesel</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input edit-fuel-checkbox" type="checkbox"
+                                        name="fuel_types[]" value="Octane" id="edit_octane">
+                                    <label class="form-check-label" for="edit_octane">Octane</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input edit-fuel-checkbox" type="checkbox"
+                                        name="fuel_types[]" value="Others" id="edit_others">
+                                    <label class="form-check-label" for="edit_others">Others</label>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label">District</label>
-                            <select id="district" name="district" class="form-select">
-                                <option value="">— Select District —</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Upazila</label>
-                            <select id="upazila" name="upazila" class="form-select">
-                                <option value="">— Select Upazila —</option>
-                            </select>
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label">Full Address</label>
-                            <textarea name="address" class="form-control" rows="2"></textarea>
-                        </div>
-                    </div>
 
-                    <div class="section-title">Technical Details</div>
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Tank Capacity (Litres)</label>
-                            <input type="number" name="tank_capacity" class="form-control">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Status</label>
-                            <select name="status" class="form-select">
+                        <div class="mb-3">
+                            <label class="modal-label">Status</label>
+                            <select name="status" id="edit_status" class="form-select">
                                 <option value="active">Active</option>
                                 <option value="inactive">Inactive</option>
                             </select>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Fuel Types</label>
-                            <div class="fuel-options">
-                                @foreach (['Petrol','Diesel','Octane','Others'] as $fuel)
-                                    <label>
-                                        <input type="checkbox" name="fuel_types[]" value="{{ $fuel }}">
-                                        {{ $fuel }}
-                                    </label>
-                                @endforeach
-                            </div>
+
+                        <div class="mb-4">
+                            <label class="modal-label">Upload New License</label>
+                            <input type="file" class="form-control @error('license_file') is-invalid @enderror"
+                                name="license_file">
+                            @error('license_file')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Upload License (Optional)</label>
-                            <input type="file" name="license_file" class="form-control"
-                                   accept=".pdf,.jpg,.jpeg,.png">
+
+                        <div class="modal-footer border-0 px-0 pb-4">
+                            <button type="button" class="btn btn-outline-secondary px-4 py-2"
+                                data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary px-5 py-2"
+                                style="background-color: #006699; border: none;">Update</button>
                         </div>
-                    </div>
-                </form>
-            </div>
-
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary btn-save" onclick="submitCreateForm()">
-                    Save Station
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-{{-- ══════════════════════════════════════════════════════
-     EDIT MODAL
-══════════════════════════════════════════════════ --}}
-<div class="modal fade fs-modal" id="editStationModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editModalLabel">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                         stroke="currentColor" stroke-width="2"
-                         style="width:18px;height:18px;margin-right:8px;vertical-align:-3px;">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                              d="M16.862 4.487a2.1 2.1 0 1 1 2.97 2.97L7.5 19.79l-4 1 1-4 12.362-12.303z"/>
-                    </svg>
-                    Edit Filling Station
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-
-            <div class="modal-body" id="editModalBody">
-                <div class="modal-loading">
-                    <div class="spinner-border text-primary mb-3" role="status" style="width:2rem;height:2rem;"></div>
-                    <div>Loading station data…</div>
+                    </form>
                 </div>
             </div>
-
-            <div class="modal-footer" id="editModalFooter" style="display:none;">
-                <button type="button" class="btn btn-cancel-modal" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-save" onclick="submitEditForm()">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                         stroke="currentColor" stroke-width="2.2" style="width:15px;height:15px;">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                    </svg>
-                    Save Changes
-                </button>
-            </div>
         </div>
     </div>
-</div>
+
 @endsection
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<script>
-// ═══════════════════════════════════════════════════════════
-//  LOCATION DATA (injected once from server)
-// ═══════════════════════════════════════════════════════════
-const locationData = @json($locations['divisions']);
-window.depots      = @json($depots);
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-// ═══════════════════════════════════════════════════════════
-//  ALPINE.JS — reportApp()
-// ═══════════════════════════════════════════════════════════
-function reportApp() {
-    return {
-        // ── Filter state ────────────────────────────────────────
-        filters: {
-            search:       '',
-            station_name: '',
-            division:     '',
-            district:     '',
-            upazila:      '',
-            company_id:   '',
-            status:       '',
-        },
+    <script>
+        const locationData = @json($locationData);
+        const divisions = locationData.divisions || [];
 
-        // ── Dependent dropdowns ──────────────────────────────────
-        districts: [],
-        upazilas:  [],
+        $(document).ready(function() {
 
-        // ── Table state ──────────────────────────────────────────
-        tableHtml:        document.getElementById('tableContainer').innerHTML,  // server-rendered HTML সংরক্ষণ
-        initialTableHtml: '',   // init() এ set হবে
-        loading:          false,
-        totalResults:     null,
+            // ===================================
+            // 🔹 INITIALIZE SELECT2 (সার্চযোগ্য করার জন্য)
+            // ===================================
+            function initSelect2(selector, placeholder) {
+                $(selector).select2({
+                    placeholder: placeholder,
+                    allowClear: true,
+                    width: '100%',
 
-        init() {
-            // Page load এর server-rendered HTML টা save করে রাখি reset এর জন্য
-            this.initialTableHtml = document.getElementById('tableContainer').innerHTML;
-        },
-
-        // ── Division → populate districts ───────────────────────
-        onDivisionChange() {
-            this.filters.district = '';
-            this.filters.upazila  = '';
-            this.upazilas = [];
-
-            const division = locationData.find(d => d.name_en === this.filters.division);
-            this.districts = division ? division.districts : [];
-        },
-
-        // ── District → populate upazilas ────────────────────────
-        onDistrictChange() {
-            this.filters.upazila = '';
-
-            const division = locationData.find(d => d.name_en === this.filters.division);
-            if (!division) { this.upazilas = []; return; }
-
-            const district = division.districts.find(d => d.name_en === this.filters.district);
-            this.upazilas = district ? district.police_stations : [];
-        },
-
-        // ── Apply Filter (AJAX) ──────────────────────────────────
-        async applyFilter() {
-            // Sync Select2 station_name value into Alpine filters
-            this.filters.station_name = document.getElementById('stationNameFilter').value;
-
-            this.loading = true;
-
-            // Build query string from non-empty filter values
-            const params = new URLSearchParams();
-            Object.entries(this.filters).forEach(([key, val]) => {
-                if (val && val.trim() !== '') params.append(key, val.trim());
-            });
-
-            try {
-                const response = await fetch(`{{ route('admin.stations.index') }}?${params.toString()}`, {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Accept':           'application/json',
-                    }
                 });
+            }
 
-                if (!response.ok) throw new Error('Network error');
+            initSelect2('#stationNameFilter', 'Select Station');
 
-                const data = await response.json();
+            // ===============================
+            // 🔹 COMMON FUNCTIONS
+            // ===============================
 
-                if (data.success) {
-                    this.tableHtml    = data.html;
-                    this.totalResults = data.total;
+            function populateDivisions(selectedDiv, target) {
+                let options = '<option value="">Select Division</option>';
+                divisions.forEach(div => {
+                    const selected = div.name_en === selectedDiv ? 'selected' : '';
+                    options += `<option value="${div.name_en}" ${selected}>${div.name_en}</option>`;
+                });
+                $(target).html(options);
+            }
+
+            function loadDistricts(divName, selectedDist, target) {
+                const div = divisions.find(d => d.name_en === divName);
+                let options = '<option value="">Select District</option>';
+
+                if (div?.districts) {
+                    div.districts.forEach(dist => {
+                        const selected = dist.name_en === selectedDist ? 'selected' : '';
+                        options += `<option value="${dist.name_en}" ${selected}>${dist.name_en}</option>`;
+                    });
+                    $(target).html(options).prop('disabled', false);
+                } else {
+                    $(target).html(options).prop('disabled', true);
                 }
-            } catch (err) {
-                console.error('Filter error:', err);
-                alert('Failed to apply filters. Please try again.');
-            } finally {
-                this.loading = false;
             }
-        },
 
-        // ── Reset Filter ─────────────────────────────────────────
-        resetFilter() {
-            // সব filter clear করি
-            this.filters = {
-                search: '', station_name: '', division: '',
-                district: '', upazila: '', company_id: '', status: '',
-            };
-            this.districts    = [];
-            this.upazilas     = [];
-            this.totalResults = null;
+            function loadUpazilas(divName, distName, selectedUpz, target) {
+                const div = divisions.find(d => d.name_en === divName);
+                const dist = div?.districts?.find(d => d.name_en === distName);
 
-            // Select2 reset
-            $('#stationNameFilter').val(null).trigger('change');
+                let options = '<option value="">Select Upazila</option>';
 
-            // Server-rendered initial HTML restore করি — কোনো AJAX দরকার নেই
-            this.tableHtml = this.initialTableHtml;
-        },
-    };
-}
+                if (dist?.police_stations) {
+                    dist.police_stations.forEach(ps => {
+                        const selected = ps.name_en === selectedUpz ? 'selected' : '';
+                        options += `<option value="${ps.name_en}" ${selected}>${ps.name_en}</option>`;
+                    });
+                    $(target).html(options).prop('disabled', false);
+                } else {
+                    $(target).html(options).prop('disabled', true);
+                }
+            }
 
-// ═══════════════════════════════════════════════════════════
-//  SELECT2 INIT
-// ═══════════════════════════════════════════════════════════
-document.addEventListener('DOMContentLoaded', function () {
+            // ===============================
+            // 🔹 FILTER (PERSISTENCE LOGIC)
+            // ===============================
 
-    // Station name filter (Select2)
-    $('#stationNameFilter').select2({
-        placeholder:  'Search station…',
-        allowClear:   true,
-        width:        '200px',
-    });
+            // ফিল্টার করার পর পেজ রিলোড হলে সিলেক্টেড ভ্যালু অনুযায়ী জেলা/উপজেলা লোড করা
+            const currentDivision = "{{ request('division') }}";
+            const currentDistrict = "{{ request('district') }}";
+            const currentUpazila = "{{ request('upazila') }}";
 
-    // Depot select inside Create Modal (reinit on modal open)
-    $('#createStationModal').on('shown.bs.modal', function () {
-        const $depot = $('#depotSelect');
-        if ($depot.hasClass('select2-hidden-accessible')) $depot.select2('destroy');
-        $depot.select2({
-            placeholder:        'Search Depot…',
-            allowClear:         true,
-            width:              '100%',
-            dropdownParent:     $('#createStationModal'),
-            minimumResultsForSearch: 0,
-        });
-    });
-});
+            if (currentDivision) {
+                loadDistricts(currentDivision, currentDistrict, '#filter_district');
+                if (currentDistrict) {
+                    loadUpazilas(currentDivision, currentDistrict, currentUpazila, '#filter_upazila');
+                }
+            }
 
-// ═══════════════════════════════════════════════════════════
-//  LOCATION HELPERS (used by Edit Modal)
-// ═══════════════════════════════════════════════════════════
-function populateDistricts(divisionName, districtEl, selected = null) {
-    districtEl.innerHTML = '<option value="">— Select District —</option>';
-    const division = locationData.find(d => d.name_en === divisionName);
-    if (!division) return;
-    division.districts.forEach(dist => {
-        const opt = document.createElement('option');
-        opt.value = dist.name_en;
-        opt.textContent = dist.name_en;
-        if (selected === dist.name_en) opt.selected = true;
-        districtEl.appendChild(opt);
-    });
-}
-
-function populateUpazilas(divisionName, districtName, upazilaEl, selected = null) {
-    upazilaEl.innerHTML = '<option value="">— Select Upazila —</option>';
-    const division = locationData.find(d => d.name_en === divisionName);
-    if (!division) return;
-    const district = division.districts.find(d => d.name_en === districtName);
-    if (!district) return;
-    district.police_stations.forEach(up => {
-        const opt = document.createElement('option');
-        opt.value = up.name_en;
-        opt.textContent = up.name_en;
-        if (selected === up.name_en) opt.selected = true;
-        upazilaEl.appendChild(opt);
-    });
-}
-
-// ═══════════════════════════════════════════════════════════
-//  CREATE MODAL
-// ═══════════════════════════════════════════════════════════
-function openCreateModal() {
-    new bootstrap.Modal(document.getElementById('createStationModal')).show();
-}
-
-// Create modal — division → district chain
-document.getElementById('division')?.addEventListener('change', function () {
-    populateDistricts(this.value, document.getElementById('district'));
-    document.getElementById('upazila').innerHTML = '<option value="">— Select Upazila —</option>';
-});
-document.getElementById('district')?.addEventListener('change', function () {
-    populateUpazilas(
-        document.getElementById('division').value,
-        this.value,
-        document.getElementById('upazila')
-    );
-});
-
-function submitCreateForm() {
-    const form = document.getElementById('createStationForm');
-    const formData = new FormData(form);
-    const btn = document.querySelector('#createStationModal .btn-save');
-
-    btn.disabled = true;
-    btn.innerHTML = 'Saving…';
-
-    fetch(`{{ route('admin.stations.store') }}`, {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            'Accept':       'application/json',
-        },
-        body: formData,
-    })
-    .then(async res => {
-        const data = await res.json().catch(() => null);
-        if (!res.ok) throw data || { message: 'Server Error' };
-        return data;
-    })
-    .then(data => {
-        if (data.success) location.reload();
-        else alert(data.message || 'Failed');
-    })
-    .catch(err => alert(err?.message || 'Something went wrong'))
-    .finally(() => {
-        btn.disabled = false;
-        btn.innerHTML = 'Save Station';
-    });
-}
-
-// ═══════════════════════════════════════════════════════════
-//  EDIT MODAL
-// ═══════════════════════════════════════════════════════════
-let currentEditId = null;
-
-function openEditModal(id) {
-    currentEditId = id;
-
-    const body   = document.getElementById('editModalBody');
-    const footer = document.getElementById('editModalFooter');
-
-    body.innerHTML = `
-        <div class="modal-loading">
-            <div class="spinner-border text-primary mb-3" role="status" style="width:2rem;height:2rem;"></div>
-            <div>Loading station data…</div>
-        </div>`;
-    footer.style.display = 'none';
-
-    new bootstrap.Modal(document.getElementById('editStationModal')).show();
-
-    fetch(`/admin/stations/${id}/get`)
-        .then(r => r.json())
-        .then(s => {
-            const fuels    = s.fuel_types || [];
-            const companies = @json($companies);
-
-            const companyOptions = companies.map(c =>
-                `<option value="${c.id}" ${s.company_id == c.id ? 'selected' : ''}>${c.name}</option>`
-            ).join('');
-
-            const fuelHtml = ['Petrol','Diesel','Octane','Others'].map(f => `
-                <label class="fuel-check ${fuels.includes(f) ? 'checked' : ''}" data-fuel="${f}">
-                    <input type="checkbox" name="fuel_types[]" value="${f}" ${fuels.includes(f) ? 'checked' : ''}>
-                    ${f}
-                </label>`).join('');
-
-            const divisionOptions = locationData.map(d =>
-                `<option value="${d.name_en}" ${s.division === d.name_en ? 'selected' : ''}>${d.name_en}</option>`
-            ).join('');
-
-            body.innerHTML = `
-                <form id="editStationForm" enctype="multipart/form-data">
-                    @csrf
-                    @method('PUT')
-
-                    <div class="section-title">Basic Information</div>
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-6">
-                            <label class="form-label">Company <span class="req">*</span></label>
-                            <select name="company_id" class="form-select" required>
-                                <option value="">— Select Company —</option>${companyOptions}
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Station Name <span class="req">*</span></label>
-                            <input type="text" name="station_name" class="form-control" value="${s.station_name ?? ''}" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Station Code <span class="req">*</span></label>
-                            <input type="text" name="station_code" class="form-control" value="${s.station_code ?? ''}" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Linked Depot</label>
-                            <select name="linked_depot" class="form-select">
-                                <option value="">— Select Depot —</option>
-                                ${window.depots.map(d =>
-                                    `<option value="${d.id}" ${d.id == s.linked_depot ? 'selected' : ''}>${d.depot_name}</option>`
-                                ).join('')}
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="section-title">Owner Information</div>
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-6">
-                            <label class="form-label">Owner Name</label>
-                            <input type="text" name="owner_name" class="form-control" value="${s.owner_name ?? ''}">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Owner Phone</label>
-                            <input type="text" name="owner_phone" class="form-control" value="${s.owner_phone ?? ''}">
-                        </div>
-                    </div>
-
-                    <div class="section-title">Location</div>
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-4">
-                            <label class="form-label">Division <span class="req">*</span></label>
-                            <select id="edit_division" name="division" class="form-select" required>
-                                <option value="">— Select Division —</option>${divisionOptions}
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">District</label>
-                            <select id="edit_district" name="district" class="form-select">
-                                <option value="">— Select District —</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Upazila</label>
-                            <select id="edit_upazila" name="upazila" class="form-select">
-                                <option value="">— Select Upazila —</option>
-                            </select>
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label">Address</label>
-                            <input type="text" name="address" class="form-control" value="${s.address ?? ''}">
-                        </div>
-                    </div>
-
-                    <div class="section-title">Technical Details</div>
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Tank Capacity (Litres)</label>
-                            <input type="number" name="tank_capacity" class="form-control" value="${s.tank_capacity ?? ''}">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Status</label>
-                            <select name="status" class="form-select">
-                                <option value="active"   ${(s.status ?? 'active') === 'active'   ? 'selected' : ''}>Active</option>
-                                <option value="inactive" ${s.status === 'inactive' ? 'selected' : ''}>Inactive</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Fuel Types</label>
-                            <div class="fuel-options" id="editFuelOptions">${fuelHtml}</div>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Replace License File</label>
-                            <input type="file" name="license_file" class="form-control"
-                                   accept=".pdf,.jpg,.jpeg,.png">
-                        </div>
-                    </div>
-                </form>`;
-
-            // Wire dropdown chain for edit form
-            const editDivisionEl = document.getElementById('edit_division');
-            const editDistrictEl = document.getElementById('edit_district');
-            const editUpazilaEl  = document.getElementById('edit_upazila');
-
-            if (s.division) populateDistricts(s.division, editDistrictEl, s.district);
-            if (s.division && s.district) populateUpazilas(s.division, s.district, editUpazilaEl, s.upazila);
-
-            editDivisionEl.addEventListener('change', function () {
-                populateDistricts(this.value, editDistrictEl);
-                editUpazilaEl.innerHTML = '<option value="">— Select Upazila —</option>';
-            });
-            editDistrictEl.addEventListener('change', function () {
-                populateUpazilas(editDivisionEl.value, this.value, editUpazilaEl);
+            $('#filter_division').on('change', function() {
+                loadDistricts($(this).val(), '', '#filter_district');
+                $('#filter_upazila').html('<option value="">All Upazila</option>').prop('disabled', true);
             });
 
-            // Fuel toggle
-            document.querySelectorAll('#editFuelOptions .fuel-check').forEach(label => {
-                label.addEventListener('click', function () {
-                    const cb = this.querySelector('input');
-                    cb.checked = !cb.checked;
-                    this.classList.toggle('checked', cb.checked);
+            $('#filter_district').on('change', function() {
+                loadUpazilas($('#filter_division').val(), $(this).val(), '', '#filter_upazila');
+            });
+
+            // ===============================
+            // 🔹 ADD MODAL
+            // ===============================
+            populateDivisions('', '#add_division');
+
+            $('#add_division').on('change', function() {
+                loadDistricts($(this).val(), '', '#add_district');
+                $('#add_upazila').html('<option value="">Select Upazila</option>').prop('disabled', true);
+            });
+
+            $('#add_district').on('change', function() {
+                loadUpazilas($('#add_division').val(), $(this).val(), '', '#add_upazila');
+            });
+
+            // ===============================
+            // 🔹 EDIT MODAL
+            // ===============================
+            $(document).on('click', '.edit-btn', function() {
+                const data = $(this).data();
+
+                $('#editStationForm').attr('action', data.url);
+                $('#edit_url_handler').val(data.url);
+
+                $('#edit_company_id').val(data.company_id);
+                $('#edit_station_name').val(data.station_name);
+                $('#edit_station_code').val(data.station_code);
+                $('#edit_owner_name').val(data.owner_name);
+                $('#edit_owner_phone').val(data.owner_phone);
+                $('#edit_address').val(data.address);
+                $('#edit_tank_capacity').val(data.tank_capacity);
+                $('#edit_linked_depot').val(data.linked_depot);
+                $('#edit_status').val(data.status);
+
+                populateDivisions(data.division, '#edit_division');
+                loadDistricts(data.division, data.district, '#edit_district');
+                loadUpazilas(data.division, data.district, data.upazila, '#edit_upazila');
+
+                // fuel
+                $('.edit-fuel-checkbox').prop('checked', false);
+                let fuels = typeof data.fuel_types === 'string' ? JSON.parse(data.fuel_types) : data
+                    .fuel_types;
+
+                if (Array.isArray(fuels)) {
+                    fuels.forEach(f => {
+                        $(`.edit-fuel-checkbox[value="${f}"]`).prop('checked', true);
+                    });
+                }
+
+                $('#editStationModal').modal('show');
+            });
+
+            $('#edit_division').on('change', function() {
+                loadDistricts($(this).val(), '', '#edit_district');
+                $('#edit_upazila').html('<option value="">Select Upazila</option>').prop('disabled', true);
+            });
+
+            $('#edit_district').on('change', function() {
+                loadUpazilas($('#edit_division').val(), $(this).val(), '', '#edit_upazila');
+            });
+
+            // ===============================
+            // 🔹 DELETE
+            // ===============================
+            $(document).on('click', '.delete-confirm', function() {
+                let form = $(this).closest('form');
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) form.submit();
                 });
             });
 
-            footer.style.display = 'flex';
-        })
-        .catch(() => {
-            body.innerHTML = `<div class="text-center text-danger py-4">Failed to load station data. Please try again.</div>`;
+            // ===============================
+            // 🔹 VALIDATION ERROR FIX (MAIN)
+            // ===============================
+            @if ($errors->any())
+                let oldAction = "{{ old('edit_url_handler') }}";
+                let oldDiv = "{{ old('division') }}";
+                let oldDist = "{{ old('district') }}";
+                let oldUpz = "{{ old('upazila') }}";
+
+                if (oldAction) {
+                    $('#editStationForm').attr('action', oldAction);
+                    populateDivisions(oldDiv, '#edit_division');
+                    if (oldDiv) {
+                        loadDistricts(oldDiv, oldDist, '#edit_district');
+                        if (oldDist) {
+                            loadUpazilas(oldDiv, oldDist, oldUpz, '#edit_upazila');
+                        }
+                    }
+                    $('#editStationModal').modal('show');
+                } else {
+                    populateDivisions(oldDiv, '#add_division');
+                    if (oldDiv) {
+                        loadDistricts(oldDiv, oldDist, '#add_district');
+                        if (oldDist) {
+                            loadUpazilas(oldDiv, oldDist, oldUpz, '#add_upazila');
+                        }
+                    }
+                    $('#addStationModal').modal('show');
+                }
+            @endif
+
         });
-}
-
-function submitEditForm() {
-    const form = document.getElementById('editStationForm');
-    if (!form) return;
-
-    const formData = new FormData(form);
-    formData.append('_method', 'PUT');
-
-    const saveBtn = document.querySelector('#editModalFooter .btn-save');
-    saveBtn.disabled = true;
-    saveBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Saving…`;
-
-    fetch(`/admin/stations/${currentEditId}`, {
-        method:  'POST',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-        },
-        body: formData,
-    })
-    .then(r => {
-        if (r.redirected) { window.location.href = r.url; return; }
-        return r.json().then(data => {
-            if (data.success) window.location.reload();
-            else alert(data.message || 'Update failed.');
-        });
-    })
-    .catch(() => alert('Something went wrong. Please try again.'))
-    .finally(() => {
-        saveBtn.disabled = false;
-        saveBtn.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                 stroke="currentColor" stroke-width="2.2" style="width:15px;height:15px;">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-            </svg> Save Changes`;
-    });
-}
-
-// ═══════════════════════════════════════════════════════════
-//  DELETE
-// ═══════════════════════════════════════════════════════════
-function deleteStation(id) {
-    if (!confirm('Are you sure you want to delete this station?')) return;
-
-    const btn = event.currentTarget;
-    const originalHTML = btn.innerHTML;
-    btn.disabled = true;
-    btn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status"></span>`;
-
-    fetch(`/admin/stations/${id}`, {
-        method:  'DELETE',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            'Accept':       'application/json',
-        },
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.success) {
-            const row = btn.closest('tr');
-            if (row) {
-                row.style.transition = 'opacity 0.3s';
-                row.style.opacity    = '0';
-                setTimeout(() => location.reload(), 300);
-            } else {
-                location.reload();
-            }
-        } else {
-            alert(data.message || 'Delete failed.');
-            btn.disabled = false;
-            btn.innerHTML = originalHTML;
-        }
-    })
-    .catch(() => {
-        alert('Something went wrong. Please try again.');
-        btn.disabled = false;
-        btn.innerHTML = originalHTML;
-    });
-}
-</script>
+    </script>
 @endpush

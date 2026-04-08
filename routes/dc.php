@@ -13,8 +13,7 @@ use App\Http\Controllers\Backend\DC\DcReportsController;
 Route::prefix('dc')->middleware(['role:' . UserRole::DC])->as('dc.')->group(function () {
     Route::resource('dashboard', DashboardController::class);
     Route::resource('profile', ProfileController::class);
-    Route::resource('stations', FillingStationController::class)->names('stations');
-    Route::get('/stations/{station}/get', [FillingStationController::class, 'getStation']);
+    Route::resource('filling-station', FillingStationController::class);
     Route::resource('uno', UnoController::class);
     Route::resource('tag-officer', TagOfficerController::class);
     Route::resource('assign-tag-officer', AssignTagOfficerController::class);

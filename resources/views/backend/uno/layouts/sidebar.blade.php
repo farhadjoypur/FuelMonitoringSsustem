@@ -29,8 +29,8 @@
             </li> --}}
 
             <li class="menu-item">
-                <a href="{{ route('uno.stations.index') }}"
-                    class="menu-link {{ request()->routeIs('uno.stations.*') ? 'active' : '' }}">
+                <a href="{{ route('uno.filling-station.index') }}"
+                    class="menu-link {{ request()->routeIs('uno.filling-station.*') ? 'active' : '' }}">
                     <span class="material-symbols-rounded">local_gas_station</span>
                     <span class="menu-label">Filling Station</span>
                 </a>

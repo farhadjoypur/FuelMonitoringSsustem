@@ -59,52 +59,62 @@ class TagOfficerController extends Controller
 
     public function index(Request $request)
     {
-        $search = $request->input('search');
-        $division = $request->input('division');
-        $district = $request->input('district');
-        $upazila = $request->input('upazila');
-        $userProfile = Auth::user()->profile;
+        try {
+            $user = Auth::user();
+            if (! $user || ! $user->profile || ! $user->profile->division || ! $user->profile->district || ! $user->profile->upazila) {
+                return redirect()->back()->with('error', 'Location information is missing from your profile. Please contact the administrator.');
+            }
 
-        $query = User::where('role', UserRole::TAG_OFFICER)
-            ->with('profile')
-            ->withCount('assignedStations')
-            ->whereHas('profile', function ($q) use ($userProfile) {
-                $q->where('division', $userProfile->division)
-                    ->where('district', $userProfile->district)
-                    ->where('upazila', $userProfile->upazila);
-            })
-            ->when($search, function ($query) use ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('phone', 'LIKE', "%{$search}%")
-                        ->orWhere('email', 'LIKE', "%{$search}%")
-                        ->orWhereHas('profile', function ($pq) use ($search) {
-                            $pq->where('name', 'LIKE', "%{$search}%")
-                                ->orWhere('department', 'LIKE', "%{$search}%")
-                                ->orWhere('designation', 'LIKE', "%{$search}%");
-                        });
-                });
-            })
-            ->when($division, function ($query) use ($division) {
-                $query->whereHas('profile', function ($q) use ($division) {
-                    $q->where('division', $division);
-                });
-            })
-            ->when($district, function ($query) use ($district) {
-                $query->whereHas('profile', function ($q) use ($district) {
-                    $q->where('district', $district);
-                });
-            })
-            ->when($upazila, function ($query) use ($upazila) {
-                $query->whereHas('profile', function ($q) use ($upazila) {
-                    $q->where('upazila', $upazila);
-                });
-            });
+            $userProfile = $user->profile;
 
-        $tagOfficers = $query->latest()->paginate(10)->withQueryString();
+            $search = $request->input('search');
+            $division = $request->input('division');
+            $district = $request->input('district');
+            $upazila = $request->input('upazila');
 
-        $locationData = $this->getLocationData();
+            $query = User::where('role', UserRole::TAG_OFFICER)
+                ->with('profile')
+                ->withCount('assignedStations')
+                ->whereHas('profile', function ($q) use ($userProfile) {
+                    $q->where('division', $userProfile->division)
+                        ->where('district', $userProfile->district)
+                        ->where('upazila', $userProfile->upazila);
+                })
+                ->when($search, function ($query) use ($search) {
+                    $query->where(function ($q) use ($search) {
+                        $q->where('phone', 'LIKE', "%{$search}%")
+                            ->orWhere('email', 'LIKE', "%{$search}%")
+                            ->orWhereHas('profile', function ($pq) use ($search) {
+                                $pq->where('name', 'LIKE', "%{$search}%")
+                                    ->orWhere('department', 'LIKE', "%{$search}%")
+                                    ->orWhere('designation', 'LIKE', "%{$search}%");
+                            });
+                    });
+                })
+                ->when($division, function ($query) use ($division) {
+                    $query->whereHas('profile', function ($q) use ($division) {
+                        $q->where('division', $division);
+                    });
+                })
+                ->when($district, function ($query) use ($district) {
+                    $query->whereHas('profile', function ($q) use ($district) {
+                        $q->where('district', $district);
+                    });
+                })
+                ->when($upazila, function ($query) use ($upazila) {
+                    $query->whereHas('profile', function ($q) use ($upazila) {
+                        $q->where('upazila', $upazila);
+                    });
+                });
 
-        return view('backend.uno.pages.tagOfficer.index', compact('tagOfficers', 'locationData', 'search'));
+            $tagOfficers = $query->latest()->paginate(10)->withQueryString();
+
+            $locationData = $this->getLocationData();
+
+            return view('backend.uno.pages.tagOfficer.index', compact('tagOfficers', 'locationData', 'search'));
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'An error occurred while loading data. Please try again later.');
+        }
     }
 
     /**
