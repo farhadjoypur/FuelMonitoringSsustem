@@ -83,24 +83,19 @@
             <div class="row">
                 <div class="col-lg-4 mb-4">
                     <div class="card profile-card h-100 p-5 text-center shadow-sm">
+
                         <div class="avatar-circle mb-3 mx-auto" style="position: relative; overflow: hidden;">
                             @php
                                 $profilePhoto = auth()->user()->profile->photo ?? null;
-                                $nameParts = explode(' ', auth()->user()->profile->name ?? 'User');
-                                $initials =
-                                    count($nameParts) > 1
-                                        ? substr($nameParts[0], 0, 1) . substr(end($nameParts), 0, 1)
-                                        : substr($nameParts[0], 0, 2);
+                                $defaultPhoto = asset('backend/assets/images/default-avatar.png');
                             @endphp
 
                             @if ($profilePhoto && file_exists(public_path($profilePhoto)))
                                 <img src="{{ asset($profilePhoto) }}" id="profilePreview" alt="Profile Photo"
                                     class="rounded-circle w-100 h-100" style="object-fit: cover;">
                             @else
-                                <div id="initialsPreview"
-                                    class="d-flex align-items-center justify-content-center w-100 h-100">
-                                    {{ strtoupper($initials) }}
-                                </div>
+                                <img src="{{ $defaultPhoto }}" id="profilePreview" alt="Default Profile Photo"
+                                    class="rounded-circle w-100 h-100" style="object-fit: cover;">
                             @endif
                         </div>
 
