@@ -64,6 +64,7 @@
             </li>
 
 
+
             <li class="menu-item">
                 <a href="{{ route('dc.profile.index') }}"
                     class="menu-link {{ request()->routeIs('dc.profile.*') ? 'active' : '' }}">
