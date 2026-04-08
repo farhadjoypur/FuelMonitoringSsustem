@@ -460,9 +460,9 @@
                         <th>Filling Station</th>
                         <th>Fuel</th>
                         <th>Prev. Stock (L)</th>
-                        <th>Supply (L)</th>
-                        <th>Received (L)</th>
-                        <th>Diff (L)</th>
+                        <th>Supply From Depot (L)</th>
+                        <th>Received At Station (L)</th>
+                        <th>Difference (L)</th>
                         <th>Sales (L)</th>
                         <th>Closing Stock (L)</th>
                         <th>Status</th>
