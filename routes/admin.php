@@ -15,13 +15,16 @@ use App\Http\Controllers\Backend\Admin\UnoController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')->middleware(['role:'.UserRole::ADMIN])->as('admin.')->group(function () {
-    Route::resource('dashboard', DashboardController::class);
-    Route::resource('profile', ProfileController::class);
     Route::resource('companies', CompanyController::class)->names('companies');
-    Route::resource('stations', FillingStationController::class)->names('stations');
-    Route::get('/stations/{station}/get', [FillingStationController::class, 'getStation']);
+    // Route::resource('stations', FillingStationController::class)->names('stations');
+    //  Route::get('/stations/{station}/get', [FillingStationController::class, 'getStation']);
     Route::resource('depots', DepotController::class);
     Route::get('depots/{id}/get', [DepotController::class, 'getDepot'])->name('depots.get');
+
+    // KB UTSHO
+    Route::resource('dashboard', DashboardController::class);
+    Route::resource('profile', ProfileController::class);
+    Route::resource('filling-station', FillingStationController::class);
     Route::resource('tag-officer', TagOfficerController::class);
     Route::resource('dc-officer', DcOfficerController::class);
     Route::resource('uno', UnoController::class);
