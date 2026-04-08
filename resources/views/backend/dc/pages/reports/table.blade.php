@@ -96,7 +96,7 @@
         text-align: left;
         font-size: .67rem;
         font-weight: 700;
-        color: #94a3b8;
+        color: #1e293b;
         text-transform: uppercase;
         letter-spacing: .55px;
         border-bottom: 1.5px solid #e2e8f0;
@@ -106,7 +106,7 @@
     thead th small {
         display: block;
         font-size: .60rem;
-        color: #b0bec5;
+        color: #1e293b;
         font-weight: 500;
         letter-spacing: 0;
         text-transform: none;
@@ -595,7 +595,7 @@
                             <td class="">{{ formatNumber($totalRow["{$fuelKey}_prev_stock"] ?? 0) }}</td>
                             <td class="">{{ formatNumber($totalRow["{$fuelKey}_supply"] ?? 0) }}</td>
                             <td class="">{{ formatNumber($totalRow["{$fuelKey}_received"] ?? 0) }}</td>
-                            <td class=" {{ ($totalRow["{$fuelKey}_difference"] ?? 0) != 0 ? 'text-danger' : '' }}">
+                            <td class=" {{ ($totalRow["{$fuelKey}_difference"] ?? 0) != 0 ? 'text-warning' : '' }}">
                                 {{ formatDifference($totalRow["{$fuelKey}_difference"] ?? 0) }}
                             </td>
                             <td class="">{{ formatNumber($totalRow["{$fuelKey}_sales"] ?? 0) }}</td>
