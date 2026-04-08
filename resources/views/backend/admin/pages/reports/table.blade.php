@@ -58,13 +58,13 @@
     $total = $total ?? 0;
 @endphp
 
+
 <style>
     .tbl-wrap {
         border: 1px solid #e2e8f0;
         border-radius: 10px;
+        overflow: hidden;
         overflow-x: auto;
-        overflow-y: visible;
-        max-width: 100%;
     }
 
     .tbl-wrap::-webkit-scrollbar {
@@ -83,10 +83,8 @@
     table {
         width: 100%;
         border-collapse: collapse;
-        font-size: .75rem;
-        /* একটু ছোট */
-        min-width: 900px;
-        /* 1340 থেকে কমিয়ে 900 */
+        font-size: .80rem;
+         min-width: 900px;
     }
 
     thead tr {
@@ -103,10 +101,6 @@
         letter-spacing: .55px;
         border-bottom: 1.5px solid #e2e8f0;
         white-space: nowrap;
-        position: sticky;
-        top: 0;
-        z-index: 10;
-        box-shadow: 0 1px 0 #e2e8f0;
     }
 
     thead th small {
