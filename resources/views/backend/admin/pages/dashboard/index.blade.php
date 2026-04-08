@@ -677,7 +677,7 @@
             align-items: center;
             gap: 6px;
             padding: 10px 24px;
-            background: #16a34a;
+            background: #006796;
             color: #fff;
             border: none;
             border-radius: 6px;
@@ -689,7 +689,7 @@
         }
 
         .see-all-btn:hover {
-            background: #15803d;
+            background: #196080;
             box-shadow: 0 4px 6px rgba(22, 163, 74, 0.2);
             transform: translateY(-1px);
         }
