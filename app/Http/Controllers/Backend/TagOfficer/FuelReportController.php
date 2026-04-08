@@ -488,11 +488,11 @@ class FuelReportController extends Controller
             return 'Zero Stock';
         }
 
-        if ($closing < 1000) {
+        if ($closing < 2000) {
             return 'Low Stock';
         }
 
-        if ($supply > 0 && abs($difference) > ($supply * 0.30)) {
+        if ($supply > 0 && abs($difference) > ($supply * 0.50)) {
             return 'High Difference';
         }
 
