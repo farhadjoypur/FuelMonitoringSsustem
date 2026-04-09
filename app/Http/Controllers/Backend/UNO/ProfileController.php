@@ -56,7 +56,13 @@ class ProfileController extends Controller
     public function update(Request $request, string $id)
     {
         $request->validate([
-            'name' => 'required|string|max:150',
+            'name' => [
+                'required',
+                'string',
+                'min:2',
+                'max:150',
+                'regex:/^[^0-9!@#$%^&*()_+={}\[\]:;\"\'<>,?\/\\|`~]+$/u',
+            ],
             'phone' => [
                 'required',
                 'string',
