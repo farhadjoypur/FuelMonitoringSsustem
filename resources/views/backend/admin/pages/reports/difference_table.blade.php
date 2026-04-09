@@ -134,9 +134,9 @@
                 x-show="diffTotalRecords > 0"
                 x-text="diffTotalRecords + ' records found'">
             </span>
-            <button class="btn-diff-export-pdf" @click="exportDiffPdf()">
+            {{-- <button class="btn-diff-export-pdf" @click="exportDiffPdf()">
                 <i class="fa-solid fa-file-pdf"></i> Export to PDF
-            </button>
+            </button> --}}
         </div>
     </div>
 

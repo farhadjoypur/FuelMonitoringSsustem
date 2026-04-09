@@ -120,9 +120,9 @@
         <div style="display:flex; align-items:center; gap:12px;">
             <span class="record-count" x-show="submitTotalRecords > 0" x-text="submitTotalRecords + ' records found'">
             </span>
-            <button class="btn-submit-export-pdf" @click="exportSubmitPdf()">
+            {{-- <button class="btn-submit-export-pdf" @click="exportSubmitPdf()">
                 <i class="fa-solid fa-file-pdf"></i> Export to PDF
-            </button>
+            </button> --}}
         </div>
     </div>
 

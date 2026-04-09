@@ -448,11 +448,13 @@
                 </tr>
             </thead>
             <tbody>
-
+                @php $serialCounter = ($currentPage - 1) * 10; @endphp
                 @foreach ($reports as $serialOffset => $report)
                     @php
                         // Serial number accounts for pagination offset
-                        $serialNumber = ($currentPage - 1) * 10 + $serialOffset + 1;
+                        // $serialNumber = ($currentPage - 1) * 10 + $serialOffset + 1;
+                        $serialCounter++;
+                        $serialNumber = $serialCounter;
 
                         $fuelCount = count($fuelTypes);
                         $fuelIndex = 0;
