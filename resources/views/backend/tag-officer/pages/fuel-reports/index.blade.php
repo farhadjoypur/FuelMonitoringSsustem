@@ -105,7 +105,7 @@
         /* Table */
         .table-responsive { width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; }
         .reports-table { width:100%; border-collapse:collapse; min-width:1100px; }
-        .reports-table thead th { padding:10px 12px; font-size:10px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:.4px; background:#f8fafc; border-bottom:1px solid #e2e8f0; text-align:left; white-space:nowrap; }
+        .reports-table thead th { padding:10px 12px; font-size:10px; font-weight:700; color:#1e293b; text-transform:uppercase; letter-spacing:.4px; background:#f8fafc; border-bottom:1px solid #e2e8f0; text-align:left; white-space:nowrap; }
         .reports-table tbody tr { border-bottom:1px solid #f1f5f9; }
         .reports-table tbody tr:last-child { border-bottom:none; }
         .reports-table td { padding:9px 12px; font-size:12px; color:var(--dark); vertical-align:middle; }
@@ -432,7 +432,7 @@
     <div class="saved-section">
         <div class="saved-header">
             <h5>Saved Reports</h5>
-            <div class="export-btns">
+            <!-- <div class="export-btns">
                 @if (Route::has('fuel-reports.export.pdf'))
                     <a href="{{ route('fuel-reports.export.pdf') }}" class="btn-export-pdf">
                 @else
@@ -448,7 +448,7 @@
                 @endif
                     <i class="fa-solid fa-file-excel"></i> Export to Excel
                 </a>
-            </div>
+            </div> -->
         </div>
 
         <div class="table-responsive">
