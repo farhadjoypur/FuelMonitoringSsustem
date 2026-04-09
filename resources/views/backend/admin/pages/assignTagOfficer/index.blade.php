@@ -197,11 +197,9 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($assignments as $assignment)
+                        @forelse($assignments as $key => $assignment)
                             <tr>
-                                <td class="fw-bold text-muted" style="font-size: 0.85rem;">
-                                    {{ $loop->iteration }}
-                                </td>
+                                <td>{{ $assignments->firstItem() + $key }}</td>
                                 <td>
                                     <div class="officer-info">
                                         <span

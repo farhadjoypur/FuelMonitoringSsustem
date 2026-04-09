@@ -218,11 +218,9 @@
                         </tr>
                     </thead>
                     <tbody id="dcTableBody">
-                        @forelse($tagOfficers as $officer)
+                        @forelse($tagOfficers as $key => $officer)
                             <tr>
-                                <td class="fw-bold text-muted" style="font-size: 0.85rem;">
-                                    {{ $loop->iteration }}
-                                </td>
+                                <td>{{ $tagOfficers->firstItem() + $key }}</td>
                                 <td>
                                     <div class="fw-bold">{{ $officer->profile->name ?? '-' }}
                                     </div>
