@@ -1,4 +1,4 @@
-@extends('backend.dc.layouts.app')
+@extends('backend.uno.layouts.app')
 
 @push('styles')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -825,7 +825,7 @@
 
                 <div id="tableContainer" x-show="!isLoading" x-html="tableHtml"
                     style="flex:1; min-height:0; overflow-x:auto; overflow-y:auto;">
-                    @include('backend.dc.pages.reports.table', [
+                    @include('backend.uno.pages.reports.table', [
                         'reports' => $reports,
                         'totalRow' => null,
                         'currentPage' => 1,
@@ -1442,7 +1442,7 @@
  
             try {
                 const response = await fetch(
-                    `{{ route('dc.reports.index') }}?${this.buildQueryParams(page).toString()}`,
+                    `{{ route('uno.reports.index') }}?${this.buildQueryParams(page).toString()}`,
                     {
                         headers: {
                             'X-Requested-With': 'XMLHttpRequest',
@@ -1532,7 +1532,7 @@
             }
             try {
                 const csrf     = document.querySelector('meta[name="csrf-token"]').content;
-                const response = await fetch('{{ route('dc.reports.message') }}', {
+                const response = await fetch('{{ route('uno.reports.message') }}', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf },
                     body: JSON.stringify({ report_id: this.messageModal.reportId, message: this.messageModal.text }),
@@ -1553,7 +1553,7 @@
         async submitDelete() {
             try {
                 const csrf      = document.querySelector('meta[name="csrf-token"]').content;
-                const deleteUrl = '{{ route('dc.reports.destroy', ':id') }}'.replace(':id', this.deleteModal.reportId);
+                const deleteUrl = '{{ route('uno.reports.destroy', ':id') }}'.replace(':id', this.deleteModal.reportId);
                 const response  = await fetch(deleteUrl, {
                     method: 'DELETE',
                     headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
