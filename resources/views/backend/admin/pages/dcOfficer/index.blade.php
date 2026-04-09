@@ -179,13 +179,12 @@
                         </tr>
                     </thead>
                     <tbody id="dcTableBody">
-                        @forelse($dcOfficers as $officer)
+                        @forelse($dcOfficers as $key => $officer)
                             <tr>
-                                <td class="fw-bold text-muted" style="font-size: 0.85rem;">
-                                    {{ $loop->iteration }}
+                                <td>{{ $dcOfficers->firstItem() + $key }}</td>
                                 </td>
                                 <td>
-                                    {{ $officer->profile->name ?? 'N/A' }}
+                                    {{ $officer->profile->name ?? '-' }}
                                 </td>
 
                                 {{-- <td>

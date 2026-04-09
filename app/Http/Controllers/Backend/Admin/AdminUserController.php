@@ -68,7 +68,11 @@ class AdminUserController extends Controller
             'name' => 'required|string|max:150',
             'designation' => 'nullable|string|max:150',
             'department' => 'nullable|string|max:150',
-            'phone' => 'required|unique:users,phone',
+            'phone' => [
+                'required',
+                'unique:users,phone',
+                'regex:/^(?:\+88|88)?(01[3-9]\d{8})$/',
+            ],
             'email' => 'nullable|email|unique:users,email',
             'password' => 'required',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
@@ -138,7 +142,14 @@ class AdminUserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'nullable|email|unique:users,email,'.$id,
-            'phone' => 'required|string|unique:users,phone,'.$id,
+            // 'phone' => 'required|string|unique:users,phone,'.$id,
+            'phone' => [
+                'required',
+                'string',
+                'digits:11',
+                'regex:/^(01[3-9]\d{8})$/',
+                'unique:users,phone,'.$id,
+            ],
             'designation' => 'nullable|string',
             'department' => 'nullable|string',
             'status' => 'required|string',

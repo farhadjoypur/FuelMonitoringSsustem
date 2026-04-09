@@ -56,9 +56,21 @@ class ProfileController extends Controller
     public function update(Request $request, string $id)
     {
         $request->validate([
-            'name' => 'required|string|max:150',
-            'phone' => 'required|string|max:20|unique:users,phone,'.$id,
-            'email' => 'required|email|unique:users,email,'.$id,
+            'name' => [
+                'required',
+                'string',
+                'min:2',
+                'max:150',
+                'regex:/^[^0-9!@#$%^&*()_+={}\[\]:;\"\'<>,?\/\\|`~]+$/u',
+            ],
+            'phone' => [
+                'required',
+                'string',
+                'digits:11',
+                'regex:/^(01[3-9]\d{8})$/',
+                'unique:users,phone,'.$id,
+            ],
+            'email' => 'required|email:rfc,dns|max:255|unique:users,email,'.$id,
             'password' => 'nullable|min:6|confirmed',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
