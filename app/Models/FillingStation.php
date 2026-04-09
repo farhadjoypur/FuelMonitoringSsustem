@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\AssignTagOfficer;
 use Illuminate\Database\Eloquent\Model;
 
 
@@ -38,5 +39,11 @@ class FillingStation extends Model
     public function depot()
     {
         return $this->belongsTo(Depot::class, 'linked_depot');
+    }
+    public function assignedOfficer()
+    {
+        return $this->hasOne(AssignTagOfficer::class, 'filling_station_id')
+            ->where('status', 'active')
+            ->with('user');
     }
 }

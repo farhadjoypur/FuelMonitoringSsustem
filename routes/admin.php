@@ -36,4 +36,23 @@ Route::prefix('admin')->middleware(['role:'.UserRole::ADMIN])->as('admin.')->gro
     Route::get('reports/sales', [ReportsController::class, 'index'])->name('reports.index');
     Route::delete('reports/{id}', [ReportsController::class, 'destroy'])->name('reports.destroy');
     Route::post('reports/message', [ReportsController::class, 'sendMessage'])->name('reports.message');
+
+    Route::get('admin/reports/difference', [ReportsController::class, 'differenceReport'])
+        ->name('reports.difference');
+    Route::get('admin/reports/difference/export-pdf', [ReportsController::class, 'exportDifferenceReportPdf'])
+        ->name('reports.difference.export-pdf');
+
+    Route::get('admin/reports/missing',   [ReportsController::class, 'missingReport'])
+        ->name('reports.missing');
+
+    Route::get('admin/reports/submitted', [ReportsController::class, 'submittedReport'])
+        ->name('reports.submitted');
+
+    // admin . reports . missing . export - pdf
+    Route::get('admin/reports/missing/export-pdf', [ReportsController::class, 'exportMissingReportPdf'])
+        ->name('reports.missing.export-pdf');
+    // admin . reports . submitted . export - pdf
+    Route::get('admin/reports/submitted/export-pdf', [ReportsController::class, 'exportSubmittedReportPdf'])
+        ->name('reports.submitted.export-pdf');
+
 });
