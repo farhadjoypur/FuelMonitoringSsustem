@@ -53,7 +53,7 @@ class UnoReportsController extends Controller
 
         if (! $hasAnyFilter) {
             if (! $request->ajax()) {
-                return view('backend.dc.pages.reports.index', [
+                return view('backend.uno.pages.reports.index', [
                     'reports'     => collect(),
                     'companies'   => Company::orderBy('name')->get(['id', 'name']),
                     'depots'      => Depot::orderBy('depot_name')->get(['id', 'depot_name']),
