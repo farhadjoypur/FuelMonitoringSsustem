@@ -748,7 +748,12 @@
                             'val' => number_format($todayDieselStock) . ' L',
                             'name' => 'Diesel',
                         ],
-                        ['theme' => 'others', 'icon' => 'fa-industry', 'val' => '0 L', 'name' => 'Others'],
+                        [
+                            'theme' => 'others',
+                            'icon' => 'fa-industry',
+                            'val' => number_format($todayOthersStock) . ' L',
+                            'name' => 'Others',
+                        ],
                     ],
                 ],
                 [
@@ -772,7 +777,12 @@
                             'val' => number_format($todayDieselReceived) . ' L',
                             'name' => 'Diesel',
                         ],
-                        ['theme' => 'others', 'icon' => 'fa-industry', 'val' => '0 L', 'name' => 'Others'],
+                        [
+                            'theme' => 'others',
+                            'icon' => 'fa-industry',
+                            'val' => number_format($todayOthersReceived) . ' L',
+                            'name' => 'Others',
+                        ],
                     ],
                 ],
                 [
@@ -796,7 +806,12 @@
                             'val' => number_format($todayDieselSold) . ' L',
                             'name' => 'Diesel',
                         ],
-                        ['theme' => 'others', 'icon' => 'fa-industry', 'val' => '0 L', 'name' => 'Others'],
+                        [
+                            'theme' => 'others',
+                            'icon' => 'fa-industry',
+                            'val' => number_format($todayOthersSold) . ' L',
+                            'name' => 'Others',
+                        ],
                     ],
                 ],
                 [
@@ -820,7 +835,12 @@
                             'val' => number_format(abs($todayDieselDiff)) . ' L',
                             'name' => 'Diesel',
                         ],
-                        ['theme' => 'others', 'icon' => 'fa-industry', 'val' => '0 L', 'name' => 'Others'],
+                        [
+                            'theme' => 'others',
+                            'icon' => 'fa-industry',
+                            'val' => number_format(abs($todayOthersDiff)) . ' L',
+                            'name' => 'Others',
+                        ],
                     ],
                 ],
                 [
@@ -844,7 +864,12 @@
                             'val' => $todayDieselDiffPct . '%',
                             'name' => 'Diesel',
                         ],
-                        ['theme' => 'others', 'icon' => 'fa-industry', 'val' => '0%', 'name' => 'Others'],
+                        [
+                            'theme' => 'others',
+                            'icon' => 'fa-industry',
+                            'val' => $todayOthersDiffPct . '%',
+                            'name' => 'Others',
+                        ],
                     ],
                 ],
             ];
@@ -1150,8 +1175,8 @@
             </div>
 
             <div class="table-footer">
-                <a href="{{ route('admin.reports.index') }}" class="see-all-btn">
-                    See All Reports
+                <a href="{{ url('admin/reports/sales') }}?seeall=difference" class="see-all-btn">
+                     View All Differences
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2">
                         <polyline points="9 18 15 12 9 6" />

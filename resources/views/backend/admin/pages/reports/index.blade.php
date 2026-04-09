@@ -682,7 +682,11 @@
         Reports &amp; Analytics
     </h1>
 
-    <div class="rpt-card" x-data="reportApp()" x-init="init()">
+    <div class="rpt-card" x-data="reportApp()" x-init="init(
+        '{{ request('seeall') }}',
+        '{{ request('from_date') }}',
+        '{{ request('to_date') }}'
+    )">
 
         {{-- ── TABS ── --}}
         <div class="tabs-bar">
@@ -861,13 +865,13 @@
             </div>
 
             <!-- <div class="export-row">
-                        <button class="btn-export btn-export-pdf">
-                            <i class="fa-regular fa-file-pdf"></i> Export PDF
-                        </button>
-                        <button class="btn-export btn-export-excel">
-                            <i class="fa-regular fa-file-excel"></i> Export Excel
-                        </button>
-                    </div> -->
+                                            <button class="btn-export btn-export-pdf">
+                                                <i class="fa-regular fa-file-pdf"></i> Export PDF
+                                            </button>
+                                            <button class="btn-export btn-export-excel">
+                                                <i class="fa-regular fa-file-excel"></i> Export Excel
+                                            </button>
+                                        </div> -->
 
         </div>{{-- /tab-stock --}}
 
@@ -907,7 +911,7 @@
 
 
         {{-- ── MESSAGE MODAL ── --}}
-        <div class="modal-backdrop" x-show="messageModal.isOpen" x-transition @click.self="messageModal.isOpen = false">
+        {{-- <div class="modal-backdrop" x-show="messageModal.isOpen" x-transition @click.self="messageModal.isOpen = false">
             <div class="modal-box">
                 <div class="modal-title">
                     <i class="fa-solid fa-paper-plane" style="color:#22c55e;"></i>
@@ -922,10 +926,10 @@
                     </button>
                 </div>
             </div>
-        </div>
+        </div> --}}
 
         {{-- ── DELETE MODAL ── --}}
-        <div class="modal-backdrop" x-show="deleteModal.isOpen" x-transition @click.self="deleteModal.isOpen = false">
+        {{-- <div class="modal-backdrop" x-show="deleteModal.isOpen" x-transition @click.self="deleteModal.isOpen = false">
             <div class="modal-box">
                 <div class="confirm-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
                 <div class="confirm-message">
@@ -940,7 +944,7 @@
                     </button>
                 </div>
             </div>
-        </div>
+        </div> --}}
 
     </div>{{-- /rpt-card --}}
 @endsection
@@ -1034,19 +1038,52 @@
                 },
 
                 // ── Init ───────────────────────────────────────────────────
-                init() {
-                    // Keep server-rendered HTML for stock tab on first load
-                    const container = document.getElementById('tableContainer');
-                    if (container) {
-                        this.tableHtml = container.innerHTML;
+                // init() {
+                //     // Keep server-rendered HTML for stock tab on first load
+                //     const container = document.getElementById('tableContainer');
+                //     if (container) {
+                //         this.tableHtml = container.innerHTML;
+                //     }
+                // },
+                init(seeall = '', fromDate = '', toDate = '') {
+
+                    if (seeall === 'difference') {
+                        // ✅ diffFilter (s নেই)
+                        if (fromDate) this.diffFilter.fromDate = fromDate;
+                        if (toDate) this.diffFilter.toDate = toDate;
+                        if (fromDate && !toDate) this.diffFilter.toDate = fromDate;
+
+                        this.activeTab = 'difference';
+                        this.$nextTick(() => this.applyDiffFilter()); // ✅ this. দিয়ে call
+
+                    } else if (seeall === 'missing') {
+                        this.activeTab = 'missing';
+                        this.$nextTick(() => this.applyMissingFilter());
+
+                    } else if (seeall === 'submitted') {
+                        this.activeTab = 'submitted';
+                        this.$nextTick(() => this.applySubmitFilter());
+
+                    } else {
+                        this.activeTab = 'stock';
+                        // stock tab server-side render হয়, তাই load লাগবে না
                     }
                 },
 
                 // ── Tab Switch ─────────────────────────────────────────────
-                switchTab(tabName) {
-                    this.activeTab = tabName;
-                },
+                switchTab(tab) {
+                    this.activeTab = tab;
 
+                    if (tab === 'difference' && this.diffReportRows.length === 0) {
+                        // this.applyDiffFilter();
+                    }
+                    if (tab === 'missing' && this.missingReportRows.length === 0) {
+                        // this.applyMissingFilter();
+                    }
+                    if (tab === 'submitted' && this.submitReportRows.length === 0) {
+                        // this.applySubmitFilter();
+                    }
+                },
                 // ═══════════════════════════════════════════════════════════
                 // TAB 1 — STOCK METHODS
                 // ═══════════════════════════════════════════════════════════

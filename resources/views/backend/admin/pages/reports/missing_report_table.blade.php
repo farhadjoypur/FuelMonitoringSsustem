@@ -246,25 +246,66 @@
 
     </div>{{-- /table scroll wrapper --}}
 
-    {{-- ── Pagination ── --}}
-    <div x-show="missingTotalPages > 1"
-        style="display:flex; align-items:center; justify-content:space-between;
-               padding:14px 20px; border-top:1px solid #e2e8f0;
-               font-size:12px; color:#64748b;">
-        <span x-text="`Page ${missingCurrentPage} of ${missingTotalPages} — ${missingTotalRecords} records`"></span>
-        <div style="display:flex; gap:6px;">
-            <button class="btn-page"
-                :disabled="missingCurrentPage <= 1"
-                @click="changeMissingPage(missingCurrentPage - 1)">
-                <i class="fa-solid fa-chevron-left fa-xs"></i> Prev
-            </button>
-            <button class="btn-page"
-                :disabled="missingCurrentPage >= missingTotalPages"
-                @click="changeMissingPage(missingCurrentPage + 1)">
-                Next <i class="fa-solid fa-chevron-right fa-xs"></i>
-            </button>
-        </div>
+   {{-- ── Pagination ── --}}
+<div x-show="missingTotalPages > 1" style="display:none;">
+    <div style="display:flex; align-items:center; justify-content:space-between;
+                padding:14px 20px; border-top:1px solid #e2e8f0;
+                font-size:12px; color:#64748b; flex-wrap:wrap; gap:10px;">
+
+        {{-- Records info --}}
+        <span x-text="`Showing page ${missingCurrentPage} of ${missingTotalPages} — ${missingTotalRecords} records`"></span>
+
+        {{-- Pagination numbers --}}
+        <nav>
+            <ul class="pagination pagination-sm mb-0">
+
+                {{-- First --}}
+                <li class="page-item" :class="{ disabled: missingCurrentPage <= 1 }">
+                    <button class="page-link" @click="changeMissingPage(1)" :disabled="missingCurrentPage <= 1">
+                        <i class="fa-solid fa-angles-left fa-xs"></i>
+                    </button>
+                </li>
+
+                {{-- Prev --}}
+                <li class="page-item" :class="{ disabled: missingCurrentPage <= 1 }">
+                    <button class="page-link" @click="changeMissingPage(missingCurrentPage - 1)" :disabled="missingCurrentPage <= 1">
+                        <i class="fa-solid fa-chevron-left fa-xs"></i>
+                    </button>
+                </li>
+
+                {{-- Page Numbers (window of 5) --}}
+                <template x-for="page in (() => {
+                    let pages = [];
+                    let start = Math.max(1, missingCurrentPage - 2);
+                    let end   = Math.min(missingTotalPages, start + 4);
+                    start     = Math.max(1, end - 4);
+                    for (let i = start; i <= end; i++) pages.push(i);
+                    return pages;
+                })()" :key="page">
+                    <li class="page-item" :class="{ active: page === missingCurrentPage }">
+                        <button class="page-link" @click="changeMissingPage(page)" x-text="page"></button>
+                    </li>
+                </template>
+
+                {{-- Next --}}
+                <li class="page-item" :class="{ disabled: missingCurrentPage >= missingTotalPages }">
+                    <button class="page-link" @click="changeMissingPage(missingCurrentPage + 1)" :disabled="missingCurrentPage >= missingTotalPages">
+                        <i class="fa-solid fa-chevron-right fa-xs"></i>
+                    </button>
+                </li>
+
+                {{-- Last --}}
+                <li class="page-item" :class="{ disabled: missingCurrentPage >= missingTotalPages }">
+                    <button class="page-link" @click="changeMissingPage(missingTotalPages)" :disabled="missingCurrentPage >= missingTotalPages">
+                        <i class="fa-solid fa-angles-right fa-xs"></i>
+                    </button>
+                </li>
+
+            </ul>
+        </nav>
+
     </div>
+</div>
 
 </div>{{-- /table-section --}}
 

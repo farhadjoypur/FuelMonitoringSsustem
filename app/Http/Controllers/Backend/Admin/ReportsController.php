@@ -375,19 +375,20 @@ class ReportsController extends Controller
     {
         // ── Validation ───────────────────────────────────────────────
         $validated = $request->validate([
-            'from_date'    => 'nullable|date',
-            'to_date'      => 'nullable|date|after_or_equal:from_date',
-            'division'     => 'nullable|string|max:100',
-            'district'     => 'nullable|string|max:100',
+            'from_date'     => 'nullable|date',
+            'to_date'       => 'nullable|date|after_or_equal:from_date',
+            'division'      => 'nullable|string|max:100',
+            'district'      => 'nullable|string|max:100',
             'thana_upazila' => 'nullable|string|max:100',
-            'company_id'   => 'nullable|integer|exists:companies,id',
-            'station_id'   => 'nullable|integer|exists:filling_stations,id',
-            'tag_officer'  => 'nullable|string|max:100',
-            'diff_status'  => 'nullable|in:high,low,normal',
-            'min_diff_l'   => 'nullable|numeric|min:0',
-            'min_diff_pct' => 'nullable|numeric|min:0',
-            'page'         => 'nullable|integer|min:1',
+            'company_id'    => 'nullable|integer|exists:companies,id',
+            'station_id'    => 'nullable|integer|exists:filling_stations,id',
+            'tag_officer'   => 'nullable|string|max:100',
+            'diff_status'   => 'nullable|in:high,low,normal',
+            'min_diff_l'    => 'nullable|numeric|min:0',
+            'min_diff_pct'  => 'nullable|numeric|min:0',
+            'page'          => 'nullable|integer|min:1',
         ]);
+
         // ── Build base query ─────────────────────────────────────────
         $query = Fuelreport::query()
             ->with([
@@ -407,8 +408,7 @@ class ReportsController extends Controller
         if (! empty($validated['division'])) {
             $query->whereHas(
                 'fillingStation',
-                fn($q) =>
-                $q->where('division', $validated['division'])
+                fn($q) => $q->where('division', $validated['division'])
             );
         }
         if (! empty($validated['district'])) {
@@ -422,8 +422,7 @@ class ReportsController extends Controller
         if (! empty($validated['company_id'])) {
             $query->whereHas(
                 'fillingStation',
-                fn($q) =>
-                $q->where('company_id', $validated['company_id'])
+                fn($q) => $q->where('company_id', $validated['company_id'])
             );
         }
 
@@ -432,24 +431,23 @@ class ReportsController extends Controller
             $query->where('station_id', $validated['station_id']);
         }
 
-        // Tag officer name search (profile name দিয়ে)
+        // Tag officer name search
         if (! empty($validated['tag_officer'])) {
             $officerName = $validated['tag_officer'];
             $query->whereHas(
                 'fillingStation.assignedOfficer.officer.profile',
-                fn($q) =>
-                $q->where('name', 'like', "%{$officerName}%")
+                fn($q) => $q->where('name', 'like', "%{$officerName}%")
             );
         }
 
         // ── Load & aggregate per station ─────────────────────────────
-        $fuelTypes  = ['octane', 'petrol', 'diesel', 'others'];
-        $perPage    = 10;
+        $fuelTypes   = ['octane', 'petrol', 'diesel', 'others'];
+        $perPage     = 10;
         $currentPage = (int) ($validated['page'] ?? 1);
 
         $allRawReports = $query
+            ->orderBy('report_date', 'desc')
             ->orderBy('station_id')
-            ->orderBy('report_date')
             ->get();
 
         // Officer map: station_id → officer info
@@ -458,7 +456,7 @@ class ReportsController extends Controller
             ->get()
             ->keyBy('filling_station_id');
 
-        // Aggregate by station — sum supply & received across date range
+        // Aggregate by station
         $aggregatedRows = $allRawReports
             ->groupBy('station_id')
             ->map(function ($stationReports) use ($fuelTypes, $officerMap) {
@@ -468,13 +466,13 @@ class ReportsController extends Controller
                 $stationId   = $firstReport->station_id;
 
                 // Officer info
-                $assignment       = $officerMap->get($stationId);
-                $officerProfile   = $assignment?->officer?->profile;
-                $tagOfficerName   = $officerProfile?->name
+                $assignment          = $officerMap->get($stationId);
+                $officerProfile      = $assignment?->officer?->profile;
+                $tagOfficerName      = $officerProfile?->name
                     ?? $assignment?->officer?->name
                     ?? '—';
-                $officerDesignation = $officerProfile?->designation ?? '—';
-                $officerPhone       = $officerProfile?->phone
+                $officerDesignation  = $officerProfile?->designation ?? '—';
+                $officerPhone        = $officerProfile?->phone
                     ?? $assignment?->officer?->phone
                     ?? '—';
 
@@ -485,16 +483,14 @@ class ReportsController extends Controller
                     $totalReceived = (float) $stationReports->sum("{$fuel}_received");
                     $differenceL   = $totalSupply - $totalReceived;
 
-                    // Percentage: difference ÷ supply × 100
                     $differencePercent = $totalSupply > 0
                         ? round(($differenceL / $totalSupply) * 100, 2)
                         : 0;
 
-                    // Status logic
                     $diffStatus = match (true) {
-                        abs($differencePercent) >= 5  => 'High',
-                        abs($differencePercent) >= 1  => 'Low',
-                        default                       => 'Normal',
+                        abs($differencePercent) >= 5 => 'High',
+                        abs($differencePercent) >= 1 => 'Low',
+                        default                      => 'Normal',
                     };
 
                     $fuelBreakdown[] = [
@@ -506,27 +502,28 @@ class ReportsController extends Controller
                 }
 
                 return [
-                    'reportId'          => $lastReport->id,
-                    'stationId'         => $stationId,
-                    'stationName'       => $firstReport->station_name
+                    'reportId'           => $lastReport->id,
+                    'stationId'          => $stationId,
+                    'reportDate'         => $firstReport->report_date, // ← raw date for sorting
+                    'stationName'        => $firstReport->station_name
                         ?? $firstReport->fillingStation?->station_name
                         ?? '—',
-                    'companyName'       => $firstReport->fillingStation?->company?->code ?? '—',
-                    'tagOfficerName'    => $tagOfficerName,
+                    'companyName'        => $firstReport->fillingStation?->company?->code ?? '—',
+                    'tagOfficerName'     => $tagOfficerName,
                     'officerDesignation' => $officerDesignation,
-                    'officerPhone'      => $officerPhone,
-                    'district'          => $firstReport->district ?? '—',
-                    'thanaUpazila'      => $firstReport->thana_upazila ?? '—',
-                    'dateFormatted'     => \Carbon\Carbon::parse($firstReport->report_date)->format('d M Y'),
-                    'dayName'           => \Carbon\Carbon::parse($firstReport->report_date)->format('l'),
-                    'fuelBreakdown'     => $fuelBreakdown,
+                    'officerPhone'       => $officerPhone,
+                    'district'           => $firstReport->district ?? '—',
+                    'thanaUpazila'       => $firstReport->thana_upazila ?? '—',
+                    'dateFormatted'      => \Carbon\Carbon::parse($firstReport->report_date)->format('d M Y'),
+                    'dayName'            => \Carbon\Carbon::parse($firstReport->report_date)->format('l'),
+                    'fuelBreakdown'      => $fuelBreakdown,
                 ];
             })
             ->values();
 
         // ── Post-aggregate filters ───────────────────────────────────
 
-        // Minimum difference (L) filter — যেকোনো fuel এ এই পরিমাণ diff থাকলেই দেখাবে
+        // Minimum difference (L) filter
         if (! empty($validated['min_diff_l'])) {
             $minL = (float) $validated['min_diff_l'];
             $aggregatedRows = $aggregatedRows->filter(function ($row) use ($minL) {
@@ -546,9 +543,9 @@ class ReportsController extends Controller
             })->values();
         }
 
-        // Diff status filter — যেকোনো fuel এ এই status থাকলেই দেখাবে
+        // Diff status filter
         if (! empty($validated['diff_status'])) {
-            $targetStatus = ucfirst($validated['diff_status']);
+            $targetStatus   = ucfirst($validated['diff_status']);
             $aggregatedRows = $aggregatedRows->filter(function ($row) use ($targetStatus) {
                 return collect($row['fuelBreakdown'])->contains(
                     fn($fuelRow) => $fuelRow['diffStatus'] === $targetStatus
@@ -556,10 +553,13 @@ class ReportsController extends Controller
             })->values();
         }
 
+        // ── Sort by date DESC (নতুন আগে) ────────────────────────────
+        $aggregatedRows = $aggregatedRows->sortByDesc('reportDate')->values();
+
         // ── Paginate ─────────────────────────────────────────────────
-        $totalRecords    = $aggregatedRows->count();
-        $totalPages      = (int) ceil($totalRecords / $perPage) ?: 1;
-        $paginatedRows   = $aggregatedRows->forPage($currentPage, $perPage)->values();
+        $totalRecords  = $aggregatedRows->count();
+        $totalPages    = (int) ceil($totalRecords / $perPage) ?: 1;
+        $paginatedRows = $aggregatedRows->forPage($currentPage, $perPage)->values();
 
         return response()->json([
             'success'     => true,
