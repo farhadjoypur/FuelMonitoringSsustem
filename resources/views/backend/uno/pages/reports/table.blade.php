@@ -177,7 +177,7 @@
 
     .cell-officer {
         font-size: .80rem;
-        color: #2563eb;
+        /* color: #2563eb; */
         font-weight: 600;
     }
 
@@ -217,7 +217,7 @@
     }
 
     .diff-negative {
-        color: #2563eb;
+        color: #dc2626;
         font-weight: 700;
     }
 

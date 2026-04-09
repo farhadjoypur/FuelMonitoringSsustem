@@ -20,13 +20,13 @@
                 </a>
             </li>
 
-            {{-- <li class="menu-item">
-                <a href="{{ route('dc.reports.index') }}"
-                    class="menu-link {{ request()->routeIs('dc.reports.*') ? 'active' : '' }}">
+            <li class="menu-item">
+                <a href="{{ route('uno.reports.index') }}"
+                    class="menu-link {{ request()->routeIs('uno.reports.*') ? 'active' : '' }}">
                     <span class="material-symbols-rounded">description</span>
                     <span class="menu-label">Reports</span>
                 </a>
-            </li> --}}
+            </li>
 
             <li class="menu-item">
                 <a href="{{ route('uno.filling-station.index') }}"
