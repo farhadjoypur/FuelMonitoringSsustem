@@ -492,10 +492,6 @@ class FuelReportController extends Controller
             return 'Low Stock';
         }
 
-        if ($supply > 0 && abs($difference) > ($supply * 0.30)) {
-            return 'High Difference';
-        }
-
         return 'Normal';
     }
 }
