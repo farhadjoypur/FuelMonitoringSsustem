@@ -5,23 +5,42 @@ namespace App\Http\Controllers\Backend\UNO;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\AssignTagOfficer;
+use App\Models\Company;
+use App\Models\Depot;
 use App\Models\FillingStation;
 use App\Models\Fuelreport;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
+    // ─────────────────────────────────────────────────────────────
+    // UNO OFFICER এর নিজের UPAZILA/DISTRICT বের করা
+    // ─────────────────────────────────────────────────────────────
+
+    private function getUnoJurisdiction(): array
+    {
+        $uno = Auth::user();
+        return [
+            'upazila' => $uno->profile?->upazila,
+            'district' => $uno->profile?->district,
+        ];
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // INDEX
+    // ─────────────────────────────────────────────────────────────
+
     public function index()
     {
-        $uno   = Auth::user();
-        $today = Carbon::today();
+        $jurisdiction = $this->getUnoJurisdiction();
+        $unoUpazila = $jurisdiction['upazila'];
+        $unoDistrict = $jurisdiction['district'];
 
-        // =============================================
-        // UNO-এর jurisdiction — profile থেকে upazila/district
-        // =============================================
-        $unoUpazila = $uno->profile?->upazila;   // adjust field name if different
-        $unoDistrict = $uno->profile?->district;  // adjust field name if different
+        $today     = Carbon::today();
+        $thisMonth = Carbon::now()->startOfMonth();
 
         // =============================================
         // UNO-এর jurisdiction এর সব stations
@@ -39,7 +58,7 @@ class DashboardController extends Controller
         $stationNames = $stationsQuery->pluck('station_name')->toArray();
 
         // =============================================
-        // TODAY'S REPORTS
+        // TODAY'S REPORTS — শুধু UNO এর jurisdiction
         // =============================================
         $todayReports = Fuelreport::whereDate('report_date', $today)
             ->whereIn('station_name', $stationNames)
@@ -60,7 +79,7 @@ class DashboardController extends Controller
         $todayOctaneReceived = $todayReports->sum('octane_received');
 
         // =============================================
-        // TODAY'S DIFFERENCE (L)
+        // TODAY'S DIFFERENCE
         // =============================================
         $todayPetrolDiff = $todayReports->sum('petrol_difference');
         $todayDieselDiff = $todayReports->sum('diesel_difference');
@@ -84,27 +103,59 @@ class DashboardController extends Controller
             ? round(($todayOctaneDiff / $todayOctaneReceived) * 100, 1) : 0;
 
         // =============================================
-        // SUMMARY CARDS
+        // SUMMARY CARDS — শুধু UNO এর jurisdiction এর data
         // =============================================
+        $totalDepots = Depot::whereHas('fillingStations', function($q) use ($unoUpazila, $unoDistrict) {
+            if ($unoUpazila) {
+                $q->where('upazila', $unoUpazila);
+            }
+            if ($unoDistrict) {
+                $q->where('district', $unoDistrict);
+            }
+        })->count();
+
         $totalStations = count($stationIds);
 
-        $totalOfficers = AssignTagOfficer::whereIn('filling_station_id', $stationIds)
-            ->where('status', 'active')
+        // UNO এর jurisdiction এ assigned active tag officers
+        $totalOfficers = AssignTagOfficer::where('status', 'active')
+            ->whereIn('filling_station_id', $stationIds)
+            ->distinct('officer_id')
+            ->count('officer_id');
+
+        $newDepots = Depot::where('created_at', '>=', $thisMonth)
+            ->whereHas('fillingStations', function($q) use ($unoUpazila, $unoDistrict) {
+                if ($unoUpazila) {
+                    $q->where('upazila', $unoUpazila);
+                }
+                if ($unoDistrict) {
+                    $q->where('district', $unoDistrict);
+                }
+            })
+            ->count();
+
+        $newStations = FillingStation::where('created_at', '>=', $thisMonth)
+            ->when($unoUpazila, fn($q) => $q->where('upazila', $unoUpazila))
+            ->when($unoDistrict, fn($q) => $q->where('district', $unoDistrict))
+            ->count();
+
+        $newOfficers = AssignTagOfficer::where('status', 'active')
+            ->whereIn('filling_station_id', $stationIds)
+            ->where('created_at', '>=', $thisMonth)
             ->distinct('officer_id')
             ->count('officer_id');
 
         // =============================================
-        // RECENT ACTIVITIES
+        // RECENT ACTIVITIES — শুধু UNO এর jurisdiction
         // =============================================
         $recentActivities = collect();
 
-        /* Zero Stock Alert */
-        Fuelreport::where(function ($q) {
-            $q->where('petrol_closing_stock', 0)
-                ->orWhere('diesel_closing_stock', 0)
-                ->orWhere('octane_closing_stock', 0);
-        })
-            ->whereIn('station_name', $stationNames)
+        /* 1. ZERO STOCK ALERT */
+        Fuelreport::whereIn('station_name', $stationNames)
+            ->where(function ($q) {
+                $q->where('petrol_closing_stock', 0)
+                    ->orWhere('diesel_closing_stock', 0)
+                    ->orWhere('octane_closing_stock', 0);
+            })
             ->latest('report_date')
             ->take(3)
             ->get()
@@ -118,13 +169,13 @@ class DashboardController extends Controller
                 ]);
             });
 
-        /* Low Stock Alert */
-        Fuelreport::where(function ($q) {
-            $q->where('petrol_closing_stock', '<', 100)
-                ->orWhere('diesel_closing_stock', '<', 100)
-                ->orWhere('octane_closing_stock', '<', 100);
-        })
-            ->whereIn('station_name', $stationNames)
+        /* 2. LOW STOCK ALERT */
+        Fuelreport::whereIn('station_name', $stationNames)
+            ->where(function ($q) {
+                $q->where('petrol_closing_stock', '<', 100)
+                    ->orWhere('diesel_closing_stock', '<', 100)
+                    ->orWhere('octane_closing_stock', '<', 100);
+            })
             ->latest('report_date')
             ->take(3)
             ->get()
@@ -138,11 +189,9 @@ class DashboardController extends Controller
                 ]);
             });
 
-        /* Difference (L) Alert */
-        Fuelreport::whereRaw(
-            'ABS(petrol_difference) + ABS(diesel_difference) + ABS(octane_difference) > 50'
-        )
-            ->whereIn('station_name', $stationNames)
+        /* 3. DIFFERENCE (L) ALERT */
+        Fuelreport::whereIn('station_name', $stationNames)
+            ->whereRaw('ABS(petrol_difference) + ABS(diesel_difference) + ABS(octane_difference) > 50')
             ->latest('report_date')
             ->take(3)
             ->get()
@@ -156,13 +205,13 @@ class DashboardController extends Controller
                 ]);
             });
 
-        /* Difference (%) Alert */
-        Fuelreport::whereRaw('
-            (ABS(petrol_difference) / NULLIF(petrol_closing_stock,1)) * 100 > 10
-            OR (ABS(diesel_difference) / NULLIF(diesel_closing_stock,1)) * 100 > 10
-            OR (ABS(octane_difference) / NULLIF(octane_closing_stock,1)) * 100 > 10
-        ')
-            ->whereIn('station_name', $stationNames)
+        /* 4. DIFFERENCE (%) ALERT */
+        Fuelreport::whereIn('station_name', $stationNames)
+            ->whereRaw('
+                (ABS(petrol_difference) / NULLIF(petrol_closing_stock,1)) * 100 > 10
+                OR (ABS(diesel_difference) / NULLIF(diesel_closing_stock,1)) * 100 > 10
+                OR (ABS(octane_difference) / NULLIF(octane_closing_stock,1)) * 100 > 10
+            ')
             ->latest('report_date')
             ->take(3)
             ->get()
@@ -176,31 +225,64 @@ class DashboardController extends Controller
                 ]);
             });
 
-        /* Final Sort */
         $recentActivities = $recentActivities
             ->sortByDesc('time')
             ->take(4)
             ->values();
 
+        // =============================================
+        // HIGH DIFFERENCE REPORTS — শুধু UNO এর jurisdiction
+        // =============================================
+        $highDifferenceReports = Fuelreport::whereDate('report_date', $today)
+            ->whereIn('station_name', $stationNames)
+            ->whereRaw('ABS(petrol_difference) + ABS(diesel_difference) + ABS(octane_difference) + ABS(others_difference) > 0')
+            ->orderByRaw('ABS(petrol_difference) + ABS(diesel_difference) + ABS(octane_difference) + ABS(others_difference) DESC')
+            ->with(['tagOfficer.profile', 'fillingStation.company'])
+            ->take(20)
+            ->get();
+
         return view('backend.uno.pages.dashboard.index', compact(
+            // today stock
             'todayPetrolStock',
             'todayDieselStock',
             'todayOctaneStock',
+
+            // today received
             'todayPetrolReceived',
             'todayDieselReceived',
             'todayOctaneReceived',
+
+            // today difference L
             'todayPetrolDiff',
             'todayDieselDiff',
             'todayOctaneDiff',
+
+            // today difference %
             'todayPetrolDiffPct',
             'todayDieselDiffPct',
             'todayOctaneDiffPct',
+
+            // today sold
             'todayPetrolSold',
             'todayDieselSold',
             'todayOctaneSold',
+
+            // summary
+            'totalDepots',
             'totalStations',
             'totalOfficers',
-            'recentActivities'
+            'newDepots',
+            'newStations',
+            'newOfficers',
+
+            // activities
+            'recentActivities',
+
+            'highDifferenceReports',
+
+            // blade এ UNO এর jurisdiction দেখানোর জন্য
+            'unoUpazila',
+            'unoDistrict',
         ));
     }
 
