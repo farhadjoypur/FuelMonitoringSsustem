@@ -16,16 +16,20 @@ use Illuminate\Support\Facades\Auth;
 class UnoReportsController extends Controller
 {
     // ─────────────────────────────────────────────────────────────
-    // DC OFFICER'S OWN DISTRICT (from profile)
+    // UNO OFFICER'S OWN UPAZILA/DISTRICT (from profile)
     // ─────────────────────────────────────────────────────────────
 
     /**
-     * Currently logged-in DC officer এর district বের করে।
-     * Profile table এ district কলাম থেকে নেওয়া হচ্ছে।
+     * Currently logged-in UNO officer এর upazila/district বের করে।
+     * Profile table এ upazila এবং district কলাম থেকে নেওয়া হচ্ছে।
      */
-    private function getDcDistrict(): ?string
+    private function getUnoJurisdiction(): array
     {
-        return Auth::user()?->profile?->district;
+        $uno = Auth::user();
+        return [
+            'upazila' => $uno->profile?->upazila,
+            'district' => $uno->profile?->district,
+        ];
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -34,32 +38,44 @@ class UnoReportsController extends Controller
 
     public function index(Request $request)
     {
-        $dcDistrict = $this->getDcDistrict();
+        $jurisdiction = $this->getUnoJurisdiction();
+        $unoUpazila = $jurisdiction['upazila'];
+        $unoDistrict = $jurisdiction['district'];
 
-        // dd(Auth::user(), $dcDistrict);
+        $upazilas = $this->getDistrictUpazilas($unoDistrict);
 
-        $upazilas = $this->getDistrictUpazilas($dcDistrict);
-
-        // DC officer এর district দিয়ে request কে force করা হচ্ছে।
-        // ফলে filter এ যাই থাকুক, সে শুধু নিজের district এর data দেখবে।
-        $request->merge(['district' => $dcDistrict]);
+        // UNO officer এর upazila/district দিয়ে request কে force করা হচ্ছে।
+        // ফলে filter এ যাই থাকুক, সে শুধু নিজের jurisdiction এর data দেখবে।
+        if ($unoUpazila) {
+            $request->merge(['thana_upazila' => $unoUpazila]);
+        }
+        if ($unoDistrict) {
+            $request->merge(['district' => $unoDistrict]);
+        }
 
         $hasAnyFilter = $this->hasAnyFilterApplied($request);
 
-        // শুধু নিজের district এর stations দেখাবে
-        $stations = FillingStation::orderBy('station_name')
-            ->where('district', $dcDistrict)
-            ->get(['id', 'station_name', 'district']);
+        // শুধু নিজের jurisdiction এর stations দেখাবে
+        $stationsQuery = FillingStation::orderBy('station_name');
+        if ($unoUpazila) {
+            $stationsQuery->where('upazila', $unoUpazila);
+        }
+        if ($unoDistrict) {
+            $stationsQuery->where('district', $unoDistrict);
+        }
+        $stations = $stationsQuery->get(['id', 'station_name', 'district', 'upazila']);
 
         if (! $hasAnyFilter) {
             if (! $request->ajax()) {
                 return view('backend.uno.pages.reports.index', [
-                    'reports'     => collect(),
-                    'companies'   => Company::orderBy('name')->get(['id', 'name']),
-                    'depots'      => Depot::orderBy('depot_name')->get(['id', 'depot_name']),
-                    'stations'    => $stations,
-                    'divisions'   => $this->loadDivisions(),
-                    'dc_district' => $dcDistrict, // blade এ locked district দেখানোর জন্য
+                    'reports'      => collect(),
+                    'companies'    => Company::orderBy('name')->get(['id', 'name']),
+                    'depots'       => Depot::orderBy('depot_name')->get(['id', 'depot_name']),
+                    'stations'     => $stations,
+                    'divisions'    => $this->loadDivisions(),
+                    'uno_upazila'  => $unoUpazila,   // blade এ locked upazila দেখানোর জন্য
+                    'uno_district' => $unoDistrict,  // blade এ locked district দেখানোর জন্য
+                    'upazilas'     => $upazilas,
                 ]);
             }
 
@@ -79,7 +95,7 @@ class UnoReportsController extends Controller
             ->orderBy('report_date')
             ->get();
 
-        $officerMap = $this->loadOfficerMap($dcDistrict);
+        $officerMap = $this->loadOfficerMap($unoUpazila, $unoDistrict);
 
         $aggregatedReports = $this->aggregateByStation($rawReports, $request);
 
@@ -117,13 +133,14 @@ class UnoReportsController extends Controller
         }
 
         return view('backend.uno.pages.reports.index', [
-            'reports'     => collect(),
-            'companies'   => Company::orderBy('name')->get(['id', 'name']),
-            'depots'      => Depot::orderBy('depot_name')->get(['id', 'depot_name']),
-            'stations'    => $stations,
-            'divisions'   => $this->loadDivisions(),
-            'dc_district' => $dcDistrict,
-            'upazilas'    => $upazilas,
+            'reports'      => collect(),
+            'companies'    => Company::orderBy('name')->get(['id', 'name']),
+            'depots'       => Depot::orderBy('depot_name')->get(['id', 'depot_name']),
+            'stations'     => $stations,
+            'divisions'    => $this->loadDivisions(),
+            'uno_upazila'  => $unoUpazila,
+            'uno_district' => $unoDistrict,
+            'upazilas'     => $upazilas,
         ]);
     }
 
@@ -133,12 +150,20 @@ class UnoReportsController extends Controller
 
     private function buildFilteredQuery(Request $request)
     {
-        $dcDistrict = $this->getDcDistrict();
+        $jurisdiction = $this->getUnoJurisdiction();
+        $unoUpazila = $jurisdiction['upazila'];
+        $unoDistrict = $jurisdiction['district'];
 
         $query = Fuelreport::query()
-            ->with(['fillingStation.company', 'fillingStation.depot'])
-            // ★ সবসময় DC এর নিজের district এ restrict করা — এটা override হবে না
-            ->where('district', $dcDistrict);
+            ->with(['fillingStation.company', 'fillingStation.depot']);
+
+        // ★ সবসময় UNO এর নিজের jurisdiction এ restrict করা — এটা override হবে না
+        if ($unoUpazila) {
+            $query->where('thana_upazila', $unoUpazila);
+        }
+        if ($unoDistrict) {
+            $query->where('district', $unoDistrict);
+        }
 
         if ($request->filled('from_date')) {
             $query->whereDate('report_date', '>=', $request->from_date);
@@ -149,10 +174,8 @@ class UnoReportsController extends Controller
         if ($request->filled('division')) {
             $query->whereHas('fillingStation', fn($q) => $q->where('division', $request->division));
         }
-        // district filter এখানে আর নেই — উপরে hard-coded আছে
-        if ($request->filled('thana_upazila')) {
-            $query->where('thana_upazila', $request->thana_upazila);
-        }
+        // district/upazila filter এখানে আর নেই — উপরে hard-coded আছে
+        
         if ($request->filled('company_id')) {
             $query->whereHas('fillingStation', fn($q) => $q->where('company_id', $request->company_id));
         }
@@ -160,15 +183,20 @@ class UnoReportsController extends Controller
             $query->whereHas('fillingStation.depot', fn($q) => $q->where('id', $request->depot_id));
         }
         if ($request->filled('station_id')) {
-            // station টা DC এর district এর মধ্যে আছে কিনা verify
-            $stationExists = FillingStation::where('id', $request->station_id)
-                ->where('district', $dcDistrict)
-                ->exists();
+            // station টা UNO এর jurisdiction এর মধ্যে আছে কিনা verify
+            $stationQuery = FillingStation::where('id', $request->station_id);
+            if ($unoUpazila) {
+                $stationQuery->where('upazila', $unoUpazila);
+            }
+            if ($unoDistrict) {
+                $stationQuery->where('district', $unoDistrict);
+            }
+            $stationExists = $stationQuery->exists();
 
             if ($stationExists) {
                 $query->where('station_id', $request->station_id);
             }
-            // district এর বাইরের station হলে কোনো result আসবে না (উপরের ->where('district') দিয়ে already blocked)
+            // jurisdiction এর বাইরের station হলে কোনো result আসবে না
         }
         if ($request->filled('fuel_type')) {
             $fuelType = strtolower(trim($request->fuel_type));
@@ -191,15 +219,23 @@ class UnoReportsController extends Controller
     // ─────────────────────────────────────────────────────────────
 
     /**
-     * শুধু DC এর নিজের district এর tag officers লোড করা হচ্ছে।
+     * শুধু UNO এর নিজের jurisdiction এর tag officers লোড করা হচ্ছে।
      * station_id → officer name
      */
-    private function loadOfficerMap(?string $dcDistrict): Collection
+    private function loadOfficerMap(?string $unoUpazila, ?string $unoDistrict): Collection
     {
-        return AssignTagOfficer::with(['officer.profile', 'fillingStation'])
+        $query = AssignTagOfficer::with(['officer.profile', 'fillingStation'])
             ->where('status', 'active')
-            ->whereHas('fillingStation', fn($q) => $q->where('district', $dcDistrict))
-            ->get()
+            ->whereHas('fillingStation', function($q) use ($unoUpazila, $unoDistrict) {
+                if ($unoUpazila) {
+                    $q->where('upazila', $unoUpazila);
+                }
+                if ($unoDistrict) {
+                    $q->where('district', $unoDistrict);
+                }
+            });
+
+        return $query->get()
             ->keyBy('filling_station_id')
             ->map(function ($assignment) {
                 return $assignment->officer?->profile?->name
@@ -410,12 +446,23 @@ class UnoReportsController extends Controller
 
     public function destroy(int $id)
     {
-        // ★ DC শুধু নিজের district এর report delete করতে পারবে
-        $dcDistrict = $this->getDcDistrict();
+        // ★ UNO শুধু নিজের jurisdiction এর report delete করতে পারবে
+        $jurisdiction = $this->getUnoJurisdiction();
+        $unoUpazila = $jurisdiction['upazila'];
+        $unoDistrict = $jurisdiction['district'];
 
         $report = Fuelreport::findOrFail($id);
 
-        if ($report->district !== $dcDistrict) {
+        // Verify jurisdiction
+        $authorized = true;
+        if ($unoUpazila && $report->thana_upazila !== $unoUpazila) {
+            $authorized = false;
+        }
+        if ($unoDistrict && $report->district !== $unoDistrict) {
+            $authorized = false;
+        }
+
+        if (!$authorized) {
             return response()->json(['success' => false, 'message' => 'Unauthorized.'], 403);
         }
 
