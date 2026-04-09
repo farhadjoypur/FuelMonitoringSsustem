@@ -10,6 +10,7 @@ use App\Models\FillingStation;
 use App\Models\Fuelreport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 
 class ReportsController extends Controller
 {
@@ -93,10 +94,14 @@ class ReportsController extends Controller
     // ─────────────────────────────────────────────────────────────
     // QUERY BUILDING
     // ─────────────────────────────────────────────────────────────
-
+    private function getDcDistrict(): ?string
+    {
+        return Auth::user()?->profile?->district;
+    }
     private function buildFilteredQuery(Request $request)
     {
         $query = Fuelreport::query()
+            ->where('district', $this->getDcDistrict())
             ->with(['fillingStation.company', 'fillingStation.depot']);
 
         if ($request->filled('from_date')) {

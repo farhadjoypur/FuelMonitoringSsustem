@@ -21,4 +21,28 @@ Route::prefix('dc')->middleware(['role:' . UserRole::DC])->as('dc.')->group(func
     Route::get('reports/sales', [DcReportsController::class, 'index'])->name('reports.index');
     Route::delete('reports/{id}', [DcReportsController::class, 'destroy'])->name('reports.destroy');
     Route::post('reports/message', [DcReportsController::class, 'sendMessage'])->name('reports.message');
+
+    // reports
+
+    Route::get('reports/sales', [DcReportsController::class, 'index'])->name('reports.index');
+    Route::delete('reports/{id}', [DcReportsController::class, 'destroy'])->name('reports.destroy');
+    Route::post('reports/message', [DcReportsController::class, 'sendMessage'])->name('reports.message');
+
+    Route::get('dc/reports/difference', [DcReportsController::class, 'differenceReport'])
+        ->name('reports.difference');
+    Route::get('dc/reports/difference/export-pdf', [DcReportsController::class, 'exportDifferenceReportPdf'])
+        ->name('reports.difference.export-pdf');
+
+    Route::get('dc/reports/missing',   [DcReportsController::class, 'missingReport'])
+        ->name('reports.missing');
+
+    Route::get('dc/reports/submitted', [DcReportsController::class, 'submittedReport'])
+        ->name('reports.submitted');
+
+    //  . reports . missing . export - pdf
+    Route::get('dc/reports/missing/export-pdf', [DcReportsController::class, 'exportMissingReportPdf'])
+        ->name('reports.missing.export-pdf');
+    //  . reports . submitted . export - pdf
+    Route::get('dc/reports/submitted/export-pdf', [DcReportsController::class, 'exportSubmittedReportPdf'])
+        ->name('reports.submitted.export-pdf');
 });

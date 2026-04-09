@@ -682,7 +682,11 @@
         Reports &amp; Analytics
     </h1>
 
-    <div class="rpt-card" x-data="reportApp()" x-init="init()">
+    <div class="rpt-card" x-data="reportApp()" x-init="init(
+        '{{ request('seeall') }}',
+        '{{ request('from_date') }}',
+        '{{ request('to_date') }}'
+    )">
 
         {{-- ── TABS ── --}}
         <div class="tabs-bar">
@@ -694,16 +698,21 @@
                 <i class="fa-solid fa-chart-column" style="font-size:.78rem;"></i>
                 Difference Report
             </button>
-            <button class="tab-btn" :class="{ 'is-active': activeTab === 'pending' }" @click="switchTab('pending')">
+            <button class="tab-btn" :class="{ 'is-active': activeTab === 'missing' }" @click="switchTab('missing')">
                 <i class="fa-solid fa-clock-rotate-left" style="font-size:.78rem;"></i>
-                Pending Reports
+                Tag Officers Missing Reports
+            </button>
+
+            <button class="tab-btn" :class="{ 'is-active': activeTab === 'submitted' }" @click="switchTab('submitted')">
+                <i class="fa-solid fa-circle-check" style="font-size:.78rem;"></i>
+                Tag Officers Submit Reports
             </button>
         </div>
 
 
         {{-- ════════════════════════════════════
-     TAB 1 — SALES & STOCK
-════════════════════════════════════ --}}
+         TAB 1 — SALES & STOCK
+    ════════════════════════════════════ --}}
         <div class="tab-panel" :class="{ 'is-active': activeTab === 'stock' }">
 
             <div class="filter-section">
@@ -723,24 +732,36 @@
                         <input type="date" x-model="filters.to_date">
                     </div>
 
-                    {{-- ★ DISTRICT — DC এর নিজের district, locked, read-only --}}
+                    <div class="form-group">
+                        <label>Division</label>
+                        <select x-model="filters.division" @change="onDivisionChange()">
+                            <option value="">All Divisions</option>
+                            @foreach ($divisions as $division)
+                                <option value="{{ $division['name_en'] }}">{{ $division['name_en'] }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
                     <div class="form-group">
                         <label>District</label>
-                        <input type="text" value="{{ $dc_district }}" readonly
-                            style="background:#f0f0f0; cursor:not-allowed;">
-                        {{-- hidden input দিয়ে filter এ district value পাঠানো হচ্ছে --}}
-                        <input type="hidden" x-model="filters.district">
+                        <select x-model="filters.district" @change="onDistrictChange()" :disabled="!filters.division">
+                            <option value="">All Districts</option>
+                            <template x-for="district in availableDistricts" :key="district.name_en">
+                                <option :value="district.name_en" x-text="district.name_en"></option>
+                            </template>
+                        </select>
                     </div>
 
                     <div class="form-group">
                         <label>Upazila</label>
-                        <select x-model="filters.thana_upazila">
+                        <select x-model="filters.thana_upazila" :disabled="!filters.district">
                             <option value="">All Upazilas</option>
                             <template x-for="upazila in availableUpazilas" :key="upazila.name_en">
                                 <option :value="upazila.name_en" x-text="upazila.name_en"></option>
                             </template>
                         </select>
                     </div>
+
                     <div class="form-group">
                         <label>Company</label>
                         <select x-model="filters.company_id">
@@ -818,11 +839,18 @@
                     <div class="record-count" x-text="recordCountText"></div>
                 </div>
 
+                {{-- Loading overlay --}}
                 <div class="loading-overlay" x-show="isLoading" style="display:none;">
                     <div class="loading-spinner"></div>
                     <p style="font-size:.85rem;">Loading data...</p>
                 </div>
 
+                {{--
+                Table container.
+                Initial load: @include renders server-side empty state.
+                After filter:  Alpine replaces via x-html="tableHtml".
+                x-show hides container while loading.
+            --}}
                 <div id="tableContainer" x-show="!isLoading" x-html="tableHtml"
                     style="flex:1; min-height:0; overflow-x:auto; overflow-y:auto;">
                     @include('backend.dc.pages.reports.table', [
@@ -837,13 +865,13 @@
             </div>
 
             <!-- <div class="export-row">
-                <button class="btn-export btn-export-pdf">
-                    <i class="fa-regular fa-file-pdf"></i> Export PDF
-                </button>
-                <button class="btn-export btn-export-excel">
-                    <i class="fa-regular fa-file-excel"></i> Export Excel
-                </button>
-            </div> -->
+                                                    <button class="btn-export btn-export-pdf">
+                                                        <i class="fa-regular fa-file-pdf"></i> Export PDF
+                                                    </button>
+                                                    <button class="btn-export btn-export-excel">
+                                                        <i class="fa-regular fa-file-excel"></i> Export Excel
+                                                    </button>
+                                                </div> -->
 
         </div>{{-- /tab-stock --}}
 
@@ -853,432 +881,37 @@
     ════════════════════════════════════ --}}
         <div class="tab-panel" :class="{ 'is-active': activeTab === 'difference' }">
 
-            <div class="filter-section">
-                <div class="filter-title">
-                    <i class="fa-solid fa-sliders"></i> Filter Options
-                </div>
-
-                <div class="filter-grid">
-
-                    <div class="form-group">
-                        <label>From Date</label>
-                        <input type="date" x-model="differenceFilters.from_date">
-                    </div>
-
-                    <div class="form-group">
-                        <label>To Date</label>
-                        <input type="date" x-model="differenceFilters.to_date">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Division</label>
-                        <select x-model="differenceFilters.division" @change="onDifferenceDivisionChange()">
-                            <option value="">All Divisions</option>
-                            @foreach ($divisions as $division)
-                                <option value="{{ $division['name_en'] }}">{{ $division['name_en'] }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>District</label>
-                        <select x-model="differenceFilters.district" @change="onDifferenceDistrictChange()"
-                            :disabled="!differenceFilters.division">
-                            <option value="">All Districts</option>
-                            <template x-for="district in differenceAvailableDistricts" :key="district.name_en">
-                                <option :value="district.name_en" x-text="district.name_en"></option>
-                            </template>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Upazila</label>
-                        <select x-model="differenceFilters.thana_upazila" :disabled="!differenceFilters.district">
-                            <option value="">All Upazilas</option>
-                            <template x-for="upazila in differenceAvailableUpazilas" :key="upazila.name_en">
-                                <option :value="upazila.name_en" x-text="upazila.name_en"></option>
-                            </template>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Company</label>
-                        <select x-model="differenceFilters.company_id">
-                            <option value="">All Companies</option>
-                            @foreach ($companies as $company)
-                                <option value="{{ $company->id }}">{{ $company->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Depot</label>
-                        <select x-model="differenceFilters.depot_id">
-                            <option value="">All Depots</option>
-                            @foreach ($depots as $depot)
-                                <option value="{{ $depot->id }}">{{ $depot->depot_name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Filling Station</label>
-                        <select x-model="differenceFilters.station_id">
-                            <option value="">All Stations</option>
-                            @foreach ($stations as $station)
-                                <option value="{{ $station->id }}">{{ $station->station_name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Fuel Type</label>
-                        <select x-model="differenceFilters.fuel_type">
-                            <option value="">All Types</option>
-                            <option value="octane">Octane</option>
-                            <option value="petrol">Petrol</option>
-                            <option value="diesel">Diesel</option>
-                            <option value="others">Others</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Stock Status</label>
-                        <select x-model="differenceFilters.stock_status">
-                            <option value="">All Status</option>
-                            <option value="available">Available</option>
-                            <option value="low">Low Stock</option>
-                            <option value="zero">Zero Stock</option>
-                            <option value="highdiff">High Difference</option>
-                        </select>
-                    </div>
-
-                    <div class="filter-actions">
-                        <button class="btn-apply" @click="applyDifferenceFilter()" :disabled="isDifferenceLoading">
-                            <template x-if="isDifferenceLoading">
-                                <i class="fa-solid fa-spinner fa-spin"></i>
-                            </template>
-                            <template x-if="!isDifferenceLoading">
-                                <i class="fa-solid fa-filter"></i>
-                            </template>
-                            <span x-text="isDifferenceLoading ? 'Loading...' : 'Apply Filters'"></span>
-                        </button>
-                        <button class="btn-reset" @click="resetDifferenceFilter()">
-                            <i class="fa-solid fa-rotate-left"></i> Reset
-                        </button>
-                    </div>
-
-                </div>
-            </div>
-
-            {{-- Table section --}}
-            <div class="table-section">
-                <div class="table-header-row">
-                    <div class="table-title">Difference Report</div>
-                    <div class="record-count">2 records found</div>
-                </div>
-
-                {{-- Static Difference Report Table --}}
-                <div class="diff-table-wrapper"
-                    style="overflow-y: auto; overflow-x: auto; flex: 1; min-height: 0; max-height: 100%;">
-                    <table class="diff-table">
-                        <thead>
-                            <tr>
-                                <th style="width:36px;">#</th>
-                                <th style="width:72px;">DATE</th>
-                                <th style="width:110px;">STATION</th>
-                                <th style="width:90px;">TAG OFFICER</th>
-                                <th style="width:90px;">DESIGNATION</th>
-                                <th style="width:90px;">PHONE</th>
-                                <th style="width:70px;">DISTRICT</th>
-                                <th style="width:70px;">UPAZILA</th>
-                                <th style="width:60px;">FUEL</th>
-                                <th style="width: 80px;">DIFFERENCE(L)</th>
-                                <th style="width:80px;">DIFFERENCE(%)</th>
-                                <th style="width:90px;">ALERT MESSAGE</th>
-                                <th style="width:90px;">ACTIONS</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {{-- Row 1 --}}
-                            <tr>
-                                <td class="row-number">1</td>
-                                <td class="td-date">
-                                    <div class="date-cell">
-                                        08 Jun<br>2026
-                                        <span class="date-day">Friday</span>
-                                    </div>
-                                </td>
-                                <td class="td-station">Uttara Filling Station</td>
-                                <td class="td-officer">Manik Mia</td>
-                                <td class="td-designation">Live Stock Officer</td>
-                                <td class="td-phone">01628312158</td>
-                                <td class="td-district">Rangpur</td>
-                                <td class="td-upazila">Shatkania</td>
-                                <td>
-                                    <div class="fuel-rows">
-                                        <div class="fuel-row"><span class="fuel-type">Octane</span></div>
-                                        <div class="fuel-row"><span class="fuel-type">Petrol</span></div>
-                                        <div class="fuel-row"><span class="fuel-type">Diesel</span></div>
-                                        <div class="fuel-row"><span class="fuel-type">Other</span></div>
-                                    </div>
-                                </td>
-                                <td class="diff-column">
-                                    <div class="fuel-rows">
-                                        <div class="fuel-row"><span class="fuel-value">200</span></div>
-                                        <div class="fuel-row"><span class="fuel-value">800</span></div>
-                                        <div class="fuel-row"><span class="fuel-value">00</span></div>
-                                        <div class="fuel-row"><span class="fuel-value">180</span></div>
-                                    </div>
-                                </td>
-                                <td class="diff-column">
-                                    <div class="fuel-rows">
-                                        <div class="fuel-row"><span class="fuel-percent">2%</span></div>
-                                        <div class="fuel-row"><span class="fuel-percent">8%</span></div>
-                                        <div class="fuel-row"><span class="fuel-percent">00</span></div>
-                                        <div class="fuel-row"><span class="fuel-percent">1.8%</span></div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="fuel-rows">
-                                        <div class="fuel-row"><span class="alert-text">Stock Zero</span></div>
-                                        <div class="fuel-row"><span class="alert-text">Low stock</span></div>
-                                        <div class="fuel-row"><span class="alert-text">High Diff</span></div>
-                                        <div class="fuel-row"><span class="alert-text">-</span></div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="action-btns">
-                                        <button class="action-btn btn-view">View</button>
-                                        <button class="action-btn btn-message"
-                                            @click="openMessageModal(1, 'Uttara Filling Station')">Message</button>
-                                        <button class="action-btn btn-delete"
-                                            @click="openDeleteModal(1, 'Uttara Filling Station')">Delete</button>
-                                    </div>
-                                </td>
-                            </tr>
-
-                            {{-- Row 2 --}}
-                            <tr>
-                                <td class="row-number">2</td>
-                                <td class="td-date">
-                                    <div class="date-cell">
-                                        08 Jun<br>2026
-                                        <span class="date-day">Friday</span>
-                                    </div>
-                                </td>
-                                <td class="td-station">Uttara Filling Station</td>
-                                <td class="td-officer">Manik Mia</td>
-                                <td class="td-designation">Live Stock Officer</td>
-                                <td class="td-phone">01628312158</td>
-                                <td class="td-district">Rangpur</td>
-                                <td class="td-upazila">Shatkania</td>
-                                <td>
-                                    <div class="fuel-rows">
-                                        <div class="fuel-row"><span class="fuel-type">Octane</span></div>
-                                        <div class="fuel-row"><span class="fuel-type">Petrol</span></div>
-                                        <div class="fuel-row"><span class="fuel-type">Diesel</span></div>
-                                        <div class="fuel-row"><span class="fuel-type">Other</span></div>
-                                    </div>
-                                </td>
-                                <td class="diff-column">
-                                    <div class="fuel-rows">
-                                        <div class="fuel-row"><span class="fuel-value">200</span></div>
-                                        <div class="fuel-row"><span class="fuel-value">800</span></div>
-                                        <div class="fuel-row"><span class="fuel-value">00</span></div>
-                                        <div class="fuel-row"><span class="fuel-value">180</span></div>
-                                    </div>
-                                </td>
-                                <td class="diff-column">
-                                    <div class="fuel-rows">
-                                        <div class="fuel-row"><span class="fuel-percent">2%</span></div>
-                                        <div class="fuel-row"><span class="fuel-percent">8%</span></div>
-                                        <div class="fuel-row"><span class="fuel-percent">00</span></div>
-                                        <div class="fuel-row"><span class="fuel-percent">1.8%</span></div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="fuel-rows">
-                                        <div class="fuel-row"><span class="alert-text">Stock Zero</span></div>
-                                        <div class="fuel-row"><span class="alert-text">Low stock</span></div>
-                                        <div class="fuel-row"><span class="alert-text">High Diff</span></div>
-                                        <div class="fuel-row"><span class="alert-text">-</span></div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="action-btns">
-                                        <button class="action-btn btn-view">View</button>
-                                        <button class="action-btn btn-message"
-                                            @click="openMessageModal(2, 'Uttara Filling Station')">Message</button>
-                                        <button class="action-btn btn-delete"
-                                            @click="openDeleteModal(2, 'Uttara Filling Station')">Delete</button>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            {{-- Static Difference Report Table --}}
-            <div class="diff-table-wrapper">
-                <table class="diff-table">
-                    <thead>
-                        <tr>
-                            <th style="width:28px;">#</th>
-                            <th style="width:62px;">DATE</th>
-                            <th style="width:90px;">STATION</th>
-                            <th style="width:72px;">TAG OFFICER</th>
-                            <th style="width:80px;">DESIGNATION</th>
-                            <th style="width:82px;">PHONE</th>
-                            <th style="width:62px;">DISTRICT</th>
-                            <th style="width:62px;">UPAZILA</th>
-                            <th style="width:50px;">FUEL</th>
-                            <th style="width:72px;">DIFFERENCE(L)</th>
-                            <th style="width:72px;">DIFFERENCE(%)</th>
-                            <th style="width:76px;">ALERT MESSAGE</th>
-                            <th style="width:76px;">ACTIONS</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {{-- Row 1 --}}
-                        <tr>
-                            <td class="row-number">1</td>
-                            <td class="td-date">
-                                <div class="date-cell">
-                                    08 Jun<br>2026
-                                    <span class="date-day">Friday</span>
-                                </div>
-                            </td>
-                            <td class="td-station">Uttara Filling Station</td>
-                            <td class="td-officer">Manik Mia</td>
-                            <td class="td-designation">Live Stock Officer</td>
-                            <td class="td-phone">01628312158</td>
-                            <td class="td-district">Rangpur</td>
-                            <td class="td-upazila">Shatkania</td>
-                            <td>
-                                <div class="fuel-rows">
-                                    <div class="fuel-row"><span class="fuel-type">Octane</span></div>
-                                    <div class="fuel-row"><span class="fuel-type">Petrol</span></div>
-                                    <div class="fuel-row"><span class="fuel-type">Diesel</span></div>
-                                    <div class="fuel-row"><span class="fuel-type">Other</span></div>
-                                </div>
-                            </td>
-                            <td class="diff-column">
-                                <div class="fuel-rows">
-                                    <div class="fuel-row"><span class="fuel-value">200</span></div>
-                                    <div class="fuel-row"><span class="fuel-value">800</span></div>
-                                    <div class="fuel-row"><span class="fuel-value">00</span></div>
-                                    <div class="fuel-row"><span class="fuel-value">180</span></div>
-                                </div>
-                            </td>
-                            <td class="diff-column">
-                                <div class="fuel-rows">
-                                    <div class="fuel-row"><span class="fuel-percent">2%</span></div>
-                                    <div class="fuel-row"><span class="fuel-percent">8%</span></div>
-                                    <div class="fuel-row"><span class="fuel-percent">00</span></div>
-                                    <div class="fuel-row"><span class="fuel-percent">1.8%</span></div>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="fuel-rows">
-                                    <div class="fuel-row"><span class="alert-text">Stock Zero</span></div>
-                                    <div class="fuel-row"><span class="alert-text">Low stock</span></div>
-                                    <div class="fuel-row"><span class="alert-text">High Diff</span></div>
-                                    <div class="fuel-row"><span class="alert-text">-</span></div>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="action-btns">
-                                    <button class="action-btn btn-view">View</button>
-                                    <button class="action-btn btn-message"
-                                        @click="openMessageModal(1, 'Uttara Filling Station')">Message</button>
-                                    <button class="action-btn btn-delete"
-                                        @click="openDeleteModal(1, 'Uttara Filling Station')">Delete</button>
-                                </div>
-                            </td>
-                        </tr>
-
-                        {{-- Row 2 --}}
-                        <tr>
-                            <td class="row-number">2</td>
-                            <td class="td-date">
-                                <div class="date-cell">
-                                    08 Jun<br>2026
-                                    <span class="date-day">Friday</span>
-                                </div>
-                            </td>
-                            <td class="td-station">Uttara Filling Station</td>
-                            <td class="td-officer">Manik Mia</td>
-                            <td class="td-designation">Live Stock Officer</td>
-                            <td class="td-phone">01628312158</td>
-                            <td class="td-district">Rangpur</td>
-                            <td class="td-upazila">Shatkania</td>
-                            <td>
-                                <div class="fuel-rows">
-                                    <div class="fuel-row"><span class="fuel-type">Octane</span></div>
-                                    <div class="fuel-row"><span class="fuel-type">Petrol</span></div>
-                                    <div class="fuel-row"><span class="fuel-type">Diesel</span></div>
-                                    <div class="fuel-row"><span class="fuel-type">Other</span></div>
-                                </div>
-                            </td>
-                            <td class="diff-column">
-                                <div class="fuel-rows">
-                                    <div class="fuel-row"><span class="fuel-value">200</span></div>
-                                    <div class="fuel-row"><span class="fuel-value">800</span></div>
-                                    <div class="fuel-row"><span class="fuel-value">00</span></div>
-                                    <div class="fuel-row"><span class="fuel-value">180</span></div>
-                                </div>
-                            </td>
-                            <td class="diff-column">
-                                <div class="fuel-rows">
-                                    <div class="fuel-row"><span class="fuel-percent">2%</span></div>
-                                    <div class="fuel-row"><span class="fuel-percent">8%</span></div>
-                                    <div class="fuel-row"><span class="fuel-percent">00</span></div>
-                                    <div class="fuel-row"><span class="fuel-percent">1.8%</span></div>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="fuel-rows">
-                                    <div class="fuel-row"><span class="alert-text">Stock Zero</span></div>
-                                    <div class="fuel-row"><span class="alert-text">Low stock</span></div>
-                                    <div class="fuel-row"><span class="alert-text">High Diff</span></div>
-                                    <div class="fuel-row"><span class="alert-text">-</span></div>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="action-btns">
-                                    <button class="action-btn btn-view">View</button>
-                                    <button class="action-btn btn-message"
-                                        @click="openMessageModal(2, 'Uttara Filling Station')">Message</button>
-                                    <button class="action-btn btn-delete"
-                                        @click="openDeleteModal(2, 'Uttara Filling Station')">Delete</button>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
+            {{-- difference_table includes --}}
+            @include('backend.dc.pages.reports.difference_table', [
+                'divisions' => $divisions,
+            ])
         </div>{{-- /tab-difference --}}
 
 
         {{-- ════════════════════════════════════
          TAB 3 — PENDING (placeholder)
     ════════════════════════════════════ --}}
-        <div class="tab-panel" :class="{ 'is-active': activeTab === 'pending' }">
-            <div class="loading-overlay" style="padding: 80px 20px;">
-                <i class="fa-solid fa-clock-rotate-left"
-                    style="font-size:2rem; opacity:.2; display:block; margin-bottom:10px;"></i>
-                <p style="font-size:.95rem; font-weight:700; color: var(--muted);">Pending Sales Reports</p>
-                <p style="font-size:.80rem; color: #94a3b8; margin-top:4px;">Pending sales will be shown here once
-                    configured</p>
-            </div>
+        <div class="tab-panel" :class="{ 'is-active': activeTab === 'missing' }">
+            @include('backend.dc.pages.reports.missing_report_table', [
+                'divisions' => $divisions,
+                'companies' => $companies,
+                'depots' => $depots,
+                'stations' => $stations,
+            ])
+        </div>
+
+        <div class="tab-panel" :class="{ 'is-active': activeTab === 'submitted' }">
+            @include('backend.dc.pages.reports.submit_report_table', [
+                'divisions' => $divisions,
+                'companies' => $companies,
+                'depots' => $depots,
+                'stations' => $stations,
+            ])
         </div>
 
 
         {{-- ── MESSAGE MODAL ── --}}
-        <div class="modal-backdrop" x-show="messageModal.isOpen" x-transition @click.self="messageModal.isOpen = false">
+        {{-- <div class="modal-backdrop" x-show="messageModal.isOpen" x-transition @click.self="messageModal.isOpen = false">
             <div class="modal-box">
                 <div class="modal-title">
                     <i class="fa-solid fa-paper-plane" style="color:#22c55e;"></i>
@@ -1293,10 +926,10 @@
                     </button>
                 </div>
             </div>
-        </div>
+        </div> --}}
 
         {{-- ── DELETE MODAL ── --}}
-        <div class="modal-backdrop" x-show="deleteModal.isOpen" x-transition @click.self="deleteModal.isOpen = false">
+        {{-- <div class="modal-backdrop" x-show="deleteModal.isOpen" x-transition @click.self="deleteModal.isOpen = false">
             <div class="modal-box">
                 <div class="confirm-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
                 <div class="confirm-message">
@@ -1311,266 +944,744 @@
                     </button>
                 </div>
             </div>
-        </div>
+        </div> --}}
 
     </div>{{-- /rpt-card --}}
 @endsection
-
+{{-- ═══════════════════════════════════════════════════════════════
+     Replace the entire @push('scripts') block in index.blade.php
+═══════════════════════════════════════════════════════════════ --}}
 @push('scripts')
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>
-       function reportApp() {
-    return {
- 
-        // ── State ──────────────────────────────────────────
-        activeTab: 'stock',
-        isLoading: false,
-        tableHtml: '',
-        recordCountText: '',
- 
-        filters: {
-            from_date: '',
-            to_date: '',
-            division: '',
-            district: '',       // ★ init() এ DC district দিয়ে set হবে
-            thana_upazila: '',
-            company_id: '',
-            depot_id: '',
-            station_id: '',
-            fuel_type: '',
-            stock_status: '',
-        },
- 
-        currentPage: 1,
- 
-        availableDistricts: [],
-        availableUpazilas: [],  // ★ init() এ DC district এর upazilas দিয়ে fill হবে
-        allDivisions: @json($divisions),
- 
-        // ★ DC এর district — blade থেকে একবার নেওয়া, পরে সবসময় এটাই ব্যবহার হবে
-        dcDistrict: '{{ $dc_district }}',
- 
-        // Difference Report Filters
-        isDifferenceLoading: false,
-        differenceFilters: {
-            from_date: '',
-            to_date: '',
-            division: '',
-            district: '',
-            thana_upazila: '',
-            company_id: '',
-            depot_id: '',
-            station_id: '',
-            fuel_type: '',
-            stock_status: '',
-        },
-        differenceAvailableDistricts: [],
-        differenceAvailableUpazilas: [],
- 
-        // Modal states
-        messageModal: { isOpen: false, reportId: null, stationName: '', text: '' },
-        deleteModal:  { isOpen: false, reportId: null, stationName: '' },
- 
-        // ── Init (একটাই) ───────────────────────────────────
-        init() {
-            // 1. Initial server-rendered HTML capture
-            const container = document.getElementById('tableContainer');
-            if (container) {
-                this.tableHtml = container.innerHTML;
-            }
- 
-            // 2. ★ DC এর district সবসময় locked
-            this.filters.district = this.dcDistrict;
- 
-            // 3. ★ DC district এর upazilas বের করে availableUpazilas এ set করো
-            for (const div of this.allDivisions) {
-                const found = (div.districts ?? []).find(
-                    d => d.name_en.toLowerCase() === this.dcDistrict.toLowerCase()
-                );
-                if (found) {
-                    // location.json এ key হলো 'upazilas' অথবা 'police_stations' — দুটোই চেক
-                    this.availableUpazilas = found.upazilas ?? found.police_stations ?? [];
-                    break;
-                }
-            }
-        },
- 
-        // ── Tab switch ─────────────────────────────────────
-        switchTab(tabName) {
-            this.activeTab = tabName;
-        },
- 
-        // ── DC তে division/district cascade দরকার নেই ──────
-        onDivisionChange() {},
-        onDistrictChange() {},
- 
-        // ── Difference Report: Division → Districts ─────────
-        onDifferenceDivisionChange() {
-            this.differenceFilters.district      = '';
-            this.differenceFilters.thana_upazila = '';
-            this.differenceAvailableUpazilas     = [];
- 
-            const found = this.allDivisions.find(d => d.name_en === this.differenceFilters.division);
-            this.differenceAvailableDistricts = found?.districts ?? [];
-        },
- 
-        // ── Difference Report: District → Upazilas ──────────
-        onDifferenceDistrictChange() {
-            this.differenceFilters.thana_upazila = '';
- 
-            const division = this.allDivisions.find(d => d.name_en === this.differenceFilters.division);
-            const district = division?.districts?.find(d => d.name_en === this.differenceFilters.district);
-            this.differenceAvailableUpazilas = district?.upazilas ?? district?.police_stations ?? [];
-        },
- 
-        // ── Build query params ──────────────────────────────
-        buildQueryParams(page = 1) {
-            const params = new URLSearchParams();
-            Object.entries(this.filters).forEach(([key, value]) => {
-                if (value !== '' && value !== null) {
-                    params.append(key, value);
-                }
-            });
-            params.append('page', page);
-            return params;
-        },
- 
-        // ── Apply Filter (AJAX) ─────────────────────────────
-        async applyFilter(page = 1) {
-            this.isLoading    = true;
-            this.currentPage  = page;
- 
-            try {
-                const response = await fetch(
-                    `{{ route('dc.reports.index') }}?${this.buildQueryParams(page).toString()}`,
-                    {
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'Accept': 'application/json',
-                        },
+        function reportApp() {
+            return {
+
+                // ── Active Tab ──────────────────────────────────────────────
+                activeTab: 'stock',
+
+                // ═══════════════════════════════════════════════════════════
+                // TAB 1 — SALES & STOCK STATE
+                // ═══════════════════════════════════════════════════════════
+
+                isLoading: false,
+                tableHtml: '',
+                recordCountText: '',
+                currentPage: 1,
+
+                // Stock tab filters
+                filters: {
+                    from_date: '',
+                    to_date: '',
+                    division: '',
+                    district: '',
+                    thana_upazila: '',
+                    company_id: '',
+                    depot_id: '',
+                    station_id: '',
+                    fuel_type: '',
+                    stock_status: '',
+                },
+
+                // Stock tab cascade dropdowns
+                availableDistricts: [],
+                availableUpazilas: [],
+
+                // ═══════════════════════════════════════════════════════════
+                // TAB 2 — DIFFERENCE REPORT STATE
+                // ═══════════════════════════════════════════════════════════
+
+                isDiffLoading: false,
+                diffReportRows: [],
+                diffTotalRecords: 0,
+                diffCurrentPage: 1,
+                diffPerPage: 10,
+                diffTotalPages: 1,
+
+                // Difference tab filters
+                diffFilter: {
+                    fromDate: '',
+                    toDate: '',
+                    minDifferenceL: '',
+                    minDifferencePercent: '',
+                    division: '',
+                    district: '',
+                    thanaUpazila: '',
+                    companyId: '',
+                    stationId: '',
+                    tagOfficer: '',
+                    diffStatus: '',
+                },
+
+                // Difference tab cascade dropdowns
+                diffAvailableDistricts: [],
+                diffAvailableUpazilas: [],
+
+                // ═══════════════════════════════════════════════════════════
+                // SHARED
+                // ═══════════════════════════════════════════════════════════
+
+                // Full location JSON (shared by both tabs)
+                allDivisions: @json($divisions),
+
+                // Modal states (shared by both tabs)
+                messageModal: {
+                    isOpen: false,
+                    reportId: null,
+                    stationName: '',
+                    text: '',
+                },
+                deleteModal: {
+                    isOpen: false,
+                    reportId: null,
+                    stationName: '',
+                },
+
+                // ── Init ───────────────────────────────────────────────────
+                // init() {
+                //     // Keep server-rendered HTML for stock tab on first load
+                //     const container = document.getElementById('tableContainer');
+                //     if (container) {
+                //         this.tableHtml = container.innerHTML;
+                //     }
+                // },
+                init(seeall = '', fromDate = '', toDate = '') {
+
+                    if (seeall === 'difference') {
+                        // ✅ diffFilter (s নেই)
+                        if (fromDate) this.diffFilter.fromDate = fromDate;
+                        if (toDate) this.diffFilter.toDate = toDate;
+                        if (fromDate && !toDate) this.diffFilter.toDate = fromDate;
+
+                        this.activeTab = 'difference';
+                        this.$nextTick(() => this.applyDiffFilter()); // ✅ this. দিয়ে call
+
+                    } else if (seeall === 'missing') {
+                        this.activeTab = 'missing';
+                        this.$nextTick(() => this.applyMissingFilter());
+
+                    } else if (seeall === 'submitted') {
+                        this.activeTab = 'submitted';
+                        this.$nextTick(() => this.applySubmitFilter());
+
+                    } else {
+                        this.activeTab = 'stock';
+                        // stock tab server-side render হয়, তাই load লাগবে না
                     }
-                );
- 
-                if (!response.ok) throw new Error(`Server error ${response.status}`);
- 
-                const data = await response.json();
- 
-                if (data.success) {
-                    this.tableHtml       = data.html;
-                    this.recordCountText = data.total > 0 ? `${data.total} station(s) found` : '';
-                }
- 
-            } catch (error) {
-                this.tableHtml = `
-                    <div style="padding:40px; text-align:center; color:#ef4444;">
-                        <i class="fa-solid fa-circle-exclamation" style="font-size:1.5rem; margin-bottom:8px; display:block;"></i>
-                        <p>Failed to load data. Please try again.</p>
-                        <small style="color:#94a3b8;">${error.message}</small>
-                    </div>
-                `;
-            } finally {
-                this.isLoading = false;
-            }
-        },
- 
-        goToPage(page) {
-            if (page < 1) return;
-            this.applyFilter(page);
-        },
- 
-        // ── Reset Filter ────────────────────────────────────
-        // ★ district reset করলেও dcDistrict দিয়ে আবার set হচ্ছে
-        async resetFilter() {
-            this.filters = {
-                from_date:     '',
-                to_date:       '',
-                division:      '',
-                district:      this.dcDistrict,  // ★ সবসময় DC এর district
-                thana_upazila: '',
-                company_id:    '',
-                depot_id:      '',
-                station_id:    '',
-                fuel_type:     '',
-                stock_status:  '',
-            };
- 
-            this.recordCountText = '';
-            this.currentPage     = 1;
-            // availableUpazilas reset করতে হবে না — DC এর district fixed তাই list same থাকবে
- 
-            await this.applyFilter(1);
-        },
- 
-        // ── Difference Report: Apply Filter ─────────────────
-        async applyDifferenceFilter() {
-            this.isDifferenceLoading = true;
-            setTimeout(() => {
-                this.isDifferenceLoading = false;
-                console.log('Difference filters applied:', this.differenceFilters);
-            }, 500);
-        },
- 
-        resetDifferenceFilter() {
-            this.differenceFilters = {
-                from_date: '', to_date: '', division: '', district: '',
-                thana_upazila: '', company_id: '', depot_id: '',
-                station_id: '', fuel_type: '', stock_status: '',
-            };
-            this.differenceAvailableDistricts = [];
-            this.differenceAvailableUpazilas  = [];
-        },
- 
-        // ── Message modal ───────────────────────────────────
-        openMessageModal(reportId, stationName) {
-            this.messageModal = { isOpen: true, reportId, stationName, text: '' };
-        },
- 
-        async submitMessage() {
-            if (!this.messageModal.text.trim()) {
-                alert('Please enter a message.');
-                return;
-            }
-            try {
-                const csrf     = document.querySelector('meta[name="csrf-token"]').content;
-                const response = await fetch('{{ route('dc.reports.message') }}', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf },
-                    body: JSON.stringify({ report_id: this.messageModal.reportId, message: this.messageModal.text }),
-                });
-                const data = await response.json();
-                this.messageModal.isOpen = false;
-                alert(data.success ? 'Message sent successfully!' : 'Failed to send message.');
-            } catch {
-                alert('Network error. Please try again.');
-            }
-        },
- 
-        // ── Delete modal ────────────────────────────────────
-        openDeleteModal(reportId, stationName) {
-            this.deleteModal = { isOpen: true, reportId, stationName };
-        },
- 
-        async submitDelete() {
-            try {
-                const csrf      = document.querySelector('meta[name="csrf-token"]').content;
-                const deleteUrl = '{{ route('dc.reports.destroy', ':id') }}'.replace(':id', this.deleteModal.reportId);
-                const response  = await fetch(deleteUrl, {
-                    method: 'DELETE',
-                    headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
-                });
-                const data = await response.json();
-                if (data.success) {
-                    this.deleteModal.isOpen = false;
-                    await this.applyFilter(this.currentPage);
-                } else {
-                    alert('Failed to delete report.');
-                }
-            } catch {
-                alert('Network error. Please try again.');
-            }
-        },
- 
-    };
-}
+                },
+
+                // ── Tab Switch ─────────────────────────────────────────────
+                switchTab(tab) {
+                    this.activeTab = tab;
+
+                    if (tab === 'difference' && this.diffReportRows.length === 0) {
+                        // this.applyDiffFilter();
+                    }
+                    if (tab === 'missing' && this.missingReportRows.length === 0) {
+                        // this.applyMissingFilter();
+                    }
+                    if (tab === 'submitted' && this.submitReportRows.length === 0) {
+                        // this.applySubmitFilter();
+                    }
+                },
+                // ═══════════════════════════════════════════════════════════
+                // TAB 1 — STOCK METHODS
+                // ═══════════════════════════════════════════════════════════
+
+                onDivisionChange() {
+                    this.filters.district = '';
+                    this.filters.thana_upazila = '';
+                    this.availableUpazilas = [];
+
+                    const found = this.allDivisions.find(d => d.name_en === this.filters.division);
+                    this.availableDistricts = found?.districts ?? [];
+                },
+
+                onDistrictChange() {
+                    this.filters.thana_upazila = '';
+
+                    const division = this.allDivisions.find(d => d.name_en === this.filters.division);
+                    const district = division?.districts?.find(d => d.name_en === this.filters.district);
+                    this.availableUpazilas = district?.police_stations ?? [];
+                },
+
+                buildStockQueryParams(page = 1) {
+                    const params = new URLSearchParams();
+                    Object.entries(this.filters).forEach(([key, value]) => {
+                        if (value !== '' && value !== null) params.append(key, value);
+                    });
+                    params.append('page', page);
+                    return params;
+                },
+
+                async applyFilter(page = 1) {
+                    this.isLoading = true;
+                    this.currentPage = page;
+
+                    try {
+                        const response = await fetch(
+                            `{{ route('dc.reports.index') }}?${this.buildStockQueryParams(page)}`, {
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'Accept': 'application/json',
+                                },
+                            }
+                        );
+
+                        if (!response.ok) throw new Error(`Server error ${response.status}`);
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            this.tableHtml = data.html;
+                            this.recordCountText = data.total > 0 ?
+                                `${data.total} station(s) found` :
+                                '';
+                        }
+
+                    } catch (error) {
+                        this.tableHtml = `
+                            <div style="padding:40px; text-align:center; color:#ef4444;">
+                                <i class="fa-solid fa-circle-exclamation"
+                                   style="font-size:1.5rem; margin-bottom:8px; display:block;"></i>
+                                <p>Failed to load data. Please try again.</p>
+                                <small style="color:#94a3b8;">${error.message}</small>
+                            </div>`;
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+
+                goToPage(page) {
+                    if (page < 1) return;
+                    this.applyFilter(page);
+                },
+
+                async resetFilter() {
+                    this.filters = {
+                        from_date: '',
+                        to_date: '',
+                        division: '',
+                        district: '',
+                        thana_upazila: '',
+                        company_id: '',
+                        depot_id: '',
+                        station_id: '',
+                        fuel_type: '',
+                        stock_status: '',
+                    };
+                    this.availableDistricts = [];
+                    this.availableUpazilas = [];
+                    this.recordCountText = '';
+                    this.currentPage = 1;
+                    await this.applyFilter(1);
+                },
+
+                // ═══════════════════════════════════════════════════════════
+                // TAB 2 — DIFFERENCE REPORT METHODS
+                // ═══════════════════════════════════════════════════════════
+
+                // Cascade: Division → Districts
+                onDiffDivisionChange() {
+                    this.diffFilter.district = '';
+                    this.diffFilter.thanaUpazila = '';
+                    this.diffAvailableDistricts = [];
+                    this.diffAvailableUpazilas = [];
+
+                    const found = this.allDivisions.find(d => d.name_en === this.diffFilter.division);
+                    this.diffAvailableDistricts = found?.districts ?? [];
+                },
+
+                // Cascade: District → Upazilas
+                onDiffDistrictChange() {
+                    this.diffFilter.thanaUpazila = '';
+                    this.diffAvailableUpazilas = [];
+
+                    const division = this.allDivisions.find(d => d.name_en === this.diffFilter.division);
+                    const district = division?.districts?.find(d => d.name_en === this.diffFilter.district);
+                    // location.json key — police_stations or upazilas
+                    this.diffAvailableUpazilas = district?.upazilas ?? district?.police_stations ?? [];
+                },
+
+                // Apply difference filter — AJAX to differenceReport()
+                async applyDiffFilter(page = 1) {
+                    this.isDiffLoading = true;
+                    this.diffCurrentPage = page;
+
+                    const params = new URLSearchParams();
+
+                    // Only append non-empty values to keep URL clean
+                    const filterMap = {
+                        page: page,
+                        from_date: this.diffFilter.fromDate,
+                        to_date: this.diffFilter.toDate,
+                        division: this.diffFilter.division,
+                        district: this.diffFilter.district,
+                        thana_upazila: this.diffFilter.thanaUpazila,
+                        company_id: this.diffFilter.companyId,
+                        station_id: this.diffFilter.stationId,
+                        tag_officer: this.diffFilter.tagOfficer,
+                        diff_status: this.diffFilter.diffStatus,
+                        min_diff_l: this.diffFilter.minDifferenceL,
+                        min_diff_pct: this.diffFilter.minDifferencePercent,
+                    };
+
+                    Object.entries(filterMap).forEach(([key, value]) => {
+                        if (value !== '' && value !== null && value !== undefined) {
+                            params.append(key, value);
+                        }
+                    });
+
+                    try {
+                        const response = await fetch(
+                            `{{ route('dc.reports.difference') }}?${params}`, {
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'Accept': 'application/json',
+                                },
+                            }
+                        );
+
+                        if (!response.ok) throw new Error(`Server error ${response.status}`);
+
+                        const json = await response.json();
+
+                        if (json.success) {
+                            this.diffReportRows = json.rows;
+                            this.diffTotalRecords = json.total;
+                            this.diffTotalPages = json.lastPage;
+                            this.diffCurrentPage = json.currentPage;
+                        }
+
+                    } catch (error) {
+                        console.error('Difference report fetch failed:', error);
+                        this.diffReportRows = [];
+                        this.diffTotalRecords = 0;
+                    } finally {
+                        this.isDiffLoading = false;
+                    }
+                },
+
+                // Reset difference filters & clear table
+                resetDiffFilter() {
+                    this.diffFilter = {
+                        fromDate: '',
+                        toDate: '',
+                        minDifferenceL: '',
+                        minDifferencePercent: '',
+                        division: '',
+                        district: '',
+                        thanaUpazila: '',
+                        companyId: '',
+                        stationId: '',
+                        tagOfficer: '',
+                        diffStatus: '',
+                    };
+                    this.diffAvailableDistricts = [];
+                    this.diffAvailableUpazilas = [];
+                    this.diffReportRows = [];
+                    this.diffTotalRecords = 0;
+                    this.diffCurrentPage = 1;
+                    this.diffTotalPages = 1;
+                },
+
+                // Pagination for difference tab
+                changeDiffPage(newPage) {
+                    if (newPage < 1 || newPage > this.diffTotalPages) return;
+                    this.applyDiffFilter(newPage);
+                },
+
+                // View single report
+                viewDiffReport(reportId) {
+                    window.location.href = `/admin/reports/${reportId}`;
+                },
+
+                // Export difference report as PDF
+                exportDiffPdf() {
+                    const params = new URLSearchParams();
+                    const exportFields = {
+                        from_date: this.diffFilter.fromDate,
+                        to_date: this.diffFilter.toDate,
+                        division: this.diffFilter.division,
+                        district: this.diffFilter.district,
+                        company_id: this.diffFilter.companyId,
+                        station_id: this.diffFilter.stationId,
+                    };
+                    Object.entries(exportFields).forEach(([k, v]) => {
+                        if (v) params.append(k, v);
+                    });
+                    window.open(`{{ route('dc.reports.difference.export-pdf') }}?${params}`, '_blank');
+                },
+
+                // ═══════════════════════════════════════════════════════════
+                // SHARED MODAL METHODS
+                // ═══════════════════════════════════════════════════════════
+
+                openMessageModal(reportId, stationName) {
+                    this.messageModal = {
+                        isOpen: true,
+                        reportId,
+                        stationName,
+                        text: '',
+                    };
+                },
+
+                async submitMessage() {
+                    if (!this.messageModal.text.trim()) {
+                        alert('Please enter a message.');
+                        return;
+                    }
+                    try {
+                        const csrf = document.querySelector('meta[name="csrf-token"]').content;
+                        const response = await fetch('{{ route('dc.reports.message') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': csrf,
+                            },
+                            body: JSON.stringify({
+                                report_id: this.messageModal.reportId,
+                                message: this.messageModal.text,
+                            }),
+                        });
+                        const data = await response.json();
+                        this.messageModal.isOpen = false;
+                        alert(data.success ? 'Message sent successfully!' : 'Failed to send message.');
+                    } catch {
+                        alert('Network error. Please try again.');
+                    }
+                },
+
+                openDeleteModal(reportId, stationName) {
+                    this.deleteModal = {
+                        isOpen: true,
+                        reportId,
+                        stationName
+                    };
+                },
+
+                async submitDelete() {
+                    try {
+                        const csrf = document.querySelector('meta[name="csrf-token"]').content;
+                        const deleteUrl = '{{ route('dc.reports.destroy', ':id') }}'
+                            .replace(':id', this.deleteModal.reportId);
+
+                        const response = await fetch(deleteUrl, {
+                            method: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': csrf,
+                                'Accept': 'application/json',
+                            },
+                        });
+                        const data = await response.json();
+
+                        if (data.success) {
+                            this.deleteModal.isOpen = false;
+
+                            // Refresh whichever tab triggered the delete
+                            if (this.activeTab === 'stock') {
+                                await this.applyFilter(this.currentPage);
+                            } else {
+                                await this.applyDiffFilter(this.diffCurrentPage);
+                            }
+                        } else {
+                            alert('Failed to delete report.');
+                        }
+                    } catch {
+                        alert('Network error. Please try again.');
+                    }
+                },
+
+
+                isMissingLoading: false,
+                missingReportRows: [],
+                missingTotalRecords: 0,
+                missingCurrentPage: 1,
+                missingPerPage: 10,
+                missingTotalPages: 1,
+
+                missingFilter: {
+                    fromDate: '',
+                    toDate: '',
+                    division: '',
+                    district: '',
+                    thanaUpazila: '',
+                    companyId: '',
+                    depotId: '',
+                    stationId: '',
+                },
+
+                missingAvailableDistricts: [],
+                missingAvailableUpazilas: [],
+
+                // ═══════════════════════════════════════════════════════════════
+                // TAB 4 — TAG OFFICERS SUBMITTED REPORT STATE
+                // ═══════════════════════════════════════════════════════════════
+
+                isSubmitLoading: false,
+                submitReportRows: [],
+                submitTotalRecords: 0,
+                submitCurrentPage: 1,
+                submitPerPage: 10,
+                submitTotalPages: 1,
+
+                submitFilter: {
+                    fromDate: '',
+                    toDate: '',
+                    division: '',
+                    district: '',
+                    thanaUpazila: '',
+                    companyId: '',
+                    depotId: '',
+                    stationId: '',
+                },
+
+                submitAvailableDistricts: [],
+                submitAvailableUpazilas: [],
+
+
+                // ═══════════════════════════════════════════════════════════════
+                // TAB 3 — MISSING REPORT METHODS
+                // ═══════════════════════════════════════════════════════════════
+
+                // Cascade: Division → Districts
+                onMissingDivisionChange() {
+                    this.missingFilter.district = '';
+                    this.missingFilter.thanaUpazila = '';
+                    this.missingAvailableDistricts = [];
+                    this.missingAvailableUpazilas = [];
+
+                    const found = this.allDivisions.find(d => d.name_en === this.missingFilter.division);
+                    this.missingAvailableDistricts = found?.districts ?? [];
+                },
+
+                // Cascade: District → Upazilas
+                onMissingDistrictChange() {
+                    this.missingFilter.thanaUpazila = '';
+                    this.missingAvailableUpazilas = [];
+
+                    const division = this.allDivisions.find(d => d.name_en === this.missingFilter.division);
+                    const district = division?.districts?.find(d => d.name_en === this.missingFilter.district);
+                    this.missingAvailableUpazilas = district?.upazilas ?? district?.police_stations ?? [];
+                },
+
+                // Apply missing filter — AJAX
+                async applyMissingFilter(page = 1) {
+                    this.isMissingLoading = true;
+                    this.missingCurrentPage = page;
+
+                    const params = new URLSearchParams();
+                    const filterMap = {
+                        page: page,
+                        from_date: this.missingFilter.fromDate,
+                        to_date: this.missingFilter.toDate,
+                        division: this.missingFilter.division,
+                        district: this.missingFilter.district,
+                        thana_upazila: this.missingFilter.thanaUpazila,
+                        company_id: this.missingFilter.companyId,
+                        depot_id: this.missingFilter.depotId,
+                        station_id: this.missingFilter.stationId,
+                    };
+
+                    Object.entries(filterMap).forEach(([key, value]) => {
+                        if (value !== '' && value !== null && value !== undefined) {
+                            params.append(key, value);
+                        }
+                    });
+
+                    try {
+                        const response = await fetch(`{{ route('dc.reports.missing') }}?${params}`, {
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Accept': 'application/json',
+                            },
+                        });
+
+                        if (!response.ok) throw new Error(`Server error ${response.status}`);
+
+                        const json = await response.json();
+
+                        if (json.success) {
+                            this.missingReportRows = json.rows;
+                            this.missingTotalRecords = json.total;
+                            this.missingTotalPages = json.lastPage;
+                            this.missingCurrentPage = json.currentPage;
+                        }
+
+                    } catch (error) {
+                        console.error('Missing report fetch failed:', error);
+                        this.missingReportRows = [];
+                        this.missingTotalRecords = 0;
+                    } finally {
+                        this.isMissingLoading = false;
+                    }
+                },
+
+                // Reset missing filters
+                resetMissingFilter() {
+                    this.missingFilter = {
+                        fromDate: '',
+                        toDate: '',
+                        division: '',
+                        district: '',
+                        thanaUpazila: '',
+                        companyId: '',
+                        depotId: '',
+                        stationId: '',
+                    };
+                    this.missingAvailableDistricts = [];
+                    this.missingAvailableUpazilas = [];
+                    this.missingReportRows = [];
+                    this.missingTotalRecords = 0;
+                    this.missingCurrentPage = 1;
+                    this.missingTotalPages = 1;
+                },
+
+                // Pagination
+                changeMissingPage(newPage) {
+                    if (newPage < 1 || newPage > this.missingTotalPages) return;
+                    this.applyMissingFilter(newPage);
+                },
+
+                // Export
+                exportMissingPdf() {
+                    const params = new URLSearchParams();
+                    const fields = {
+                        from_date: this.missingFilter.fromDate,
+                        to_date: this.missingFilter.toDate,
+                        division: this.missingFilter.division,
+                        district: this.missingFilter.district,
+                        company_id: this.missingFilter.companyId,
+                        station_id: this.missingFilter.stationId,
+                    };
+                    Object.entries(fields).forEach(([k, v]) => {
+                        if (v) params.append(k, v);
+                    });
+                    window.open(`{{ route('dc.reports.missing.export-pdf') }}?${params}`, '_blank');
+                },
+
+
+                // ═══════════════════════════════════════════════════════════════
+                // TAB 4 — SUBMITTED REPORT METHODS
+                // ═══════════════════════════════════════════════════════════════
+
+                // Cascade: Division → Districts
+                onSubmitDivisionChange() {
+                    this.submitFilter.district = '';
+                    this.submitFilter.thanaUpazila = '';
+                    this.submitAvailableDistricts = [];
+                    this.submitAvailableUpazilas = [];
+
+                    const found = this.allDivisions.find(d => d.name_en === this.submitFilter.division);
+                    this.submitAvailableDistricts = found?.districts ?? [];
+                },
+
+                // Cascade: District → Upazilas
+                onSubmitDistrictChange() {
+                    this.submitFilter.thanaUpazila = '';
+                    this.submitAvailableUpazilas = [];
+
+                    const division = this.allDivisions.find(d => d.name_en === this.submitFilter.division);
+                    const district = division?.districts?.find(d => d.name_en === this.submitFilter.district);
+                    this.submitAvailableUpazilas = district?.upazilas ?? district?.police_stations ?? [];
+                },
+
+                // Apply submit filter — AJAX
+                async applySubmitFilter(page = 1) {
+                    this.isSubmitLoading = true;
+                    this.submitCurrentPage = page;
+
+                    const params = new URLSearchParams();
+                    const filterMap = {
+                        page: page,
+                        from_date: this.submitFilter.fromDate,
+                        to_date: this.submitFilter.toDate,
+                        division: this.submitFilter.division,
+                        district: this.submitFilter.district,
+                        thana_upazila: this.submitFilter.thanaUpazila,
+                        company_id: this.submitFilter.companyId,
+                        depot_id: this.submitFilter.depotId,
+                        station_id: this.submitFilter.stationId,
+                    };
+
+                    Object.entries(filterMap).forEach(([key, value]) => {
+                        if (value !== '' && value !== null && value !== undefined) {
+                            params.append(key, value);
+                        }
+                    });
+
+                    try {
+                        const response = await fetch(`{{ route('dc.reports.submitted') }}?${params}`, {
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Accept': 'application/json',
+                            },
+                        });
+
+                        if (!response.ok) throw new Error(`Server error ${response.status}`);
+
+                        const json = await response.json();
+
+                        if (json.success) {
+                            this.submitReportRows = json.rows;
+                            this.submitTotalRecords = json.total;
+                            this.submitTotalPages = json.lastPage;
+                            this.submitCurrentPage = json.currentPage;
+                        }
+
+                    } catch (error) {
+                        console.error('Submit report fetch failed:', error);
+                        this.submitReportRows = [];
+                        this.submitTotalRecords = 0;
+                    } finally {
+                        this.isSubmitLoading = false;
+                    }
+                },
+
+                // Reset submit filters
+                resetSubmitFilter() {
+                    this.submitFilter = {
+                        fromDate: '',
+                        toDate: '',
+                        division: '',
+                        district: '',
+                        thanaUpazila: '',
+                        companyId: '',
+                        depotId: '',
+                        stationId: '',
+                    };
+                    this.submitAvailableDistricts = [];
+                    this.submitAvailableUpazilas = [];
+                    this.submitReportRows = [];
+                    this.submitTotalRecords = 0;
+                    this.submitCurrentPage = 1;
+                    this.submitTotalPages = 1;
+                },
+
+                // Pagination
+                changeSubmitPage(newPage) {
+                    if (newPage < 1 || newPage > this.submitTotalPages) return;
+                    this.applySubmitFilter(newPage);
+                },
+
+                // Export
+                exportSubmitPdf() {
+                    const params = new URLSearchParams();
+                    const fields = {
+                        from_date: this.submitFilter.fromDate,
+                        to_date: this.submitFilter.toDate,
+                        division: this.submitFilter.division,
+                        district: this.submitFilter.district,
+                        company_id: this.submitFilter.companyId,
+                        station_id: this.submitFilter.stationId,
+                    };
+                    Object.entries(fields).forEach(([k, v]) => {
+                        if (v) params.append(k, v);
+                    });
+                    window.open(`{{ route('dc.reports.submitted.export-pdf') }}?${params}`, '_blank');
+                },
+
+            }; // end return
+        } // end reportApp
     </script>
 @endpush
