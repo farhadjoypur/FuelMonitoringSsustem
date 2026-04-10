@@ -1,7 +1,8 @@
 {{-- ════════════════════════════════════════════════════════════════
      difference_table.blade.php
-     @include('backend.admin.pages.reports.difference_table', ['divisions' => $divisions])
-     Alpine state lives in parent reportApp() — see index_scripts_block.blade.php
+     diffFilter keys: from_date, to_date, division, district,
+                      thana_upazila, company_id, station_id,
+                      tag_officer, diff_status, min_diff_l, min_diff_pct
 ════════════════════════════════════════════════════════════════ --}}
 
 {{-- ── Filter Section ──────────────────────────────────────────── --}}
@@ -14,27 +15,28 @@
 
         <div class="form-group">
             <label>From Date</label>
-            <input type="date" x-model="diffFilter.fromDate">
+            <input type="date" x-model="diffFilter.from_date">
         </div>
 
         <div class="form-group">
             <label>To Date</label>
-            <input type="date" x-model="diffFilter.toDate">
+            <input type="date" x-model="diffFilter.to_date">
         </div>
 
         <div class="form-group">
             <label>Difference (L)</label>
-            <input type="number" min="0" placeholder="e.g. 100" x-model="diffFilter.minDifferenceL">
+            <input type="number" min="0" placeholder="e.g. 100"
+                x-model="diffFilter.min_diff_l">
         </div>
 
         <div class="form-group">
             <label>Difference (%)</label>
             <input type="number" min="0" max="100" step="0.1" placeholder="e.g. 5"
-                x-model="diffFilter.minDifferencePercent"
-                @input="diffFilter.minDifferencePercent = Math.min(100, Math.max(0, diffFilter.minDifferencePercent))">
+                x-model="diffFilter.min_diff_pct">
         </div>
 
-        <div class="form-group">
+        {{-- Division — DC panel এ hidden/disabled, admin panel এ open --}}
+        <div class="form-group" x-show="!dcDistrict">
             <label>Division</label>
             <select x-model="diffFilter.division" @change="onDiffDivisionChange()">
                 <option value="">All Divisions</option>
@@ -44,19 +46,35 @@
             </select>
         </div>
 
+        {{-- District --}}
+        {{-- DC panel: locked (read-only text), admin panel: cascade select --}}
         <div class="form-group">
             <label>District</label>
-            <select x-model="diffFilter.district" @change="onDiffDistrictChange()" :disabled="!diffFilter.division">
-                <option value="">All Districts</option>
-                <template x-for="district in diffAvailableDistricts" :key="district.name_en">
-                    <option :value="district.name_en" x-text="district.name_en"></option>
-                </template>
-            </select>
+            <template x-if="dcDistrict">
+                {{-- DC: district locked --}}
+                <input type="text" :value="dcDistrict" readonly
+                    style="background:#f0f6ff; border:1.5px solid #bfdbfe; color:#1d4ed8;
+                           border-radius:7px; padding:8px 10px; font-size:.845rem;
+                           cursor:not-allowed; width:100%;">
+            </template>
+            <template x-if="!dcDistrict">
+                {{-- Admin: cascade select --}}
+                <select x-model="diffFilter.district"
+                    @change="onDiffDistrictChange()"
+                    :disabled="!diffFilter.division">
+                    <option value="">All Districts</option>
+                    <template x-for="district in diffAvailableDistricts" :key="district.name_en">
+                        <option :value="district.name_en" x-text="district.name_en"></option>
+                    </template>
+                </select>
+            </template>
         </div>
 
+        {{-- Upazila — সবার জন্য open, DC এর upazilas init এ load হয়ে থাকে --}}
         <div class="form-group">
             <label>Upazila</label>
-            <select x-model="diffFilter.thanaUpazila" :disabled="!diffFilter.district">
+            <select x-model="diffFilter.thana_upazila"
+                :disabled="diffAvailableUpazilas.length === 0">
                 <option value="">All Upazilas</option>
                 <template x-for="upazila in diffAvailableUpazilas" :key="upazila.name_en">
                     <option :value="upazila.name_en" x-text="upazila.name_en"></option>
@@ -66,7 +84,7 @@
 
         <div class="form-group">
             <label>Company</label>
-            <select x-model="diffFilter.companyId">
+            <select x-model="diffFilter.company_id">
                 <option value="">All Companies</option>
                 @foreach ($companies as $company)
                     <option value="{{ $company->id }}">{{ $company->name }}</option>
@@ -76,7 +94,7 @@
 
         <div class="form-group">
             <label>Filling Station</label>
-            <select x-model="diffFilter.stationId">
+            <select x-model="diffFilter.station_id">
                 <option value="">All Stations</option>
                 @foreach ($stations as $station)
                     <option value="{{ $station->id }}">{{ $station->station_name }}</option>
@@ -86,12 +104,13 @@
 
         <div class="form-group">
             <label>Tag Officer</label>
-            <input type="text" placeholder="Officer name..." x-model="diffFilter.tagOfficer">
+            <input type="text" placeholder="Officer name..."
+                x-model="diffFilter.tag_officer">
         </div>
 
         <div class="form-group">
             <label>Difference Status</label>
-            <select x-model="diffFilter.diffStatus">
+            <select x-model="diffFilter.diff_status">
                 <option value="">All Status</option>
                 <option value="high">High</option>
                 <option value="low">Low</option>
@@ -121,32 +140,32 @@
 {{-- ── Table Section ────────────────────────────────────────────── --}}
 <div class="table-section">
 
-    {{-- Header: title + record count + export button --}}
     <div class="table-header-row">
         <div class="table-title">Difference Report</div>
         <div style="display:flex; align-items:center; gap:12px;">
-            <span class="record-count" x-show="diffTotalRecords > 0" x-text="diffTotalRecords + ' records found'">
+            <span class="record-count"
+                x-show="diffTotalRecords > 0"
+                x-text="diffTotalRecords + ' records found'">
             </span>
-            {{-- <button class="btn-diff-export-pdf" @click="exportDiffPdf()">
-                <i class="fa-solid fa-file-pdf"></i> Export to PDF
-            </button> --}}
         </div>
     </div>
 
-    {{-- Empty / prompt state --}}
+    {{-- Empty state --}}
     <div x-show="!isDiffLoading && diffTotalRecords === 0"
         style="text-align:center; padding:60px 24px; color:#94a3b8; font-size:13px;">
-        <i class="fa-solid fa-inbox fa-2x" style="display:block; margin-bottom:12px; opacity:.4;"></i>
+        <i class="fa-solid fa-inbox fa-2x"
+            style="display:block; margin-bottom:12px; opacity:.4;"></i>
         Apply filters to see the difference report.
     </div>
 
     {{-- Loading state --}}
-    <div x-show="isDiffLoading" style="text-align:center; padding:60px; color:#64748b; font-size:13px;">
+    <div x-show="isDiffLoading"
+        style="text-align:center; padding:60px; color:#64748b; font-size:13px;">
         <div class="loading-spinner" style="margin:0 auto 14px;"></div>
         Loading data...
     </div>
 
-    {{-- ── Data Table ────────────────────────────────────────────── --}}
+    {{-- ── Data Table ── --}}
     <div x-show="!isDiffLoading && diffTotalRecords > 0" class="diff-table-wrapper">
 
         <table class="diff-table">
@@ -168,45 +187,27 @@
                     <th style="width:110px;">ACTIONS</th>
                 </tr>
             </thead>
-
             <tbody>
                 <template x-for="(row, rowIndex) in diffReportRows" :key="row.reportId">
                     <tr>
-
-                        {{-- Row number --}}
-                        <td class="row-number" x-text="(diffCurrentPage - 1) * diffPerPage + rowIndex + 1">
+                        <td class="row-number"
+                            x-text="(diffCurrentPage - 1) * diffPerPage + rowIndex + 1">
                         </td>
-
-                        {{-- Date --}}
                         <td class="td-date">
                             <div class="date-cell">
                                 <span x-text="row.dateFormatted"></span>
                                 <span class="date-day" x-text="row.dayName"></span>
                             </div>
                         </td>
-
-                        {{-- Station --}}
                         <td class="td-station" x-text="row.stationName"></td>
-
-                        {{-- Company --}}
                         <td x-text="row.companyName"></td>
-
-                        {{-- Tag Officer --}}
                         <td class="td-officer" x-text="row.tagOfficerName"></td>
-
-                        {{-- Designation --}}
                         <td class="td-designation" x-text="row.officerDesignation || '—'"></td>
-
-                        {{-- Phone --}}
                         <td class="td-phone" x-text="row.officerPhone || '—'"></td>
+                        <td x-text="row.district"></td>
+                        <td x-text="row.thanaUpazila"></td>
 
-                        {{-- District --}}
-                        <td class="td-district" x-text="row.district"></td>
-
-                        {{-- Upazila --}}
-                        <td class="td-upazila" x-text="row.thanaUpazila"></td>
-
-                        {{-- Fuel type labels (4 sub-rows) --}}
+                        {{-- Fuel type labels --}}
                         <td>
                             <div class="fuel-rows">
                                 <template x-for="fuelRow in row.fuelBreakdown" :key="fuelRow.fuelType">
@@ -248,15 +249,15 @@
                             </div>
                         </td>
 
-                        {{-- Difference Status badge --}}
+                        {{-- Diff Status --}}
                         <td>
                             <div class="fuel-rows">
                                 <template x-for="fuelRow in row.fuelBreakdown" :key="fuelRow.fuelType">
                                     <div class="fuel-row">
                                         <span class="diff-status-badge"
                                             :class="{
-                                                'diff-status-high': fuelRow.diffStatus === 'High',
-                                                'diff-status-low': fuelRow.diffStatus === 'Low',
+                                                'diff-status-high':   fuelRow.diffStatus === 'High',
+                                                'diff-status-low':    fuelRow.diffStatus === 'Low',
                                                 'diff-status-normal': fuelRow.diffStatus === 'Normal'
                                             }"
                                             x-text="fuelRow.diffStatus">
@@ -269,7 +270,8 @@
                         {{-- Actions --}}
                         <td>
                             <div class="action-btns">
-                                <button class="action-btn btn-view" @click="viewDiffReport(row.reportId)">
+                                <button class="action-btn btn-view"
+                                    @click="viewDiffReport(row.reportId)">
                                     <i class="fa-solid fa-eye fa-xs"></i> View
                                 </button>
                                 <button class="action-btn btn-message"
@@ -282,7 +284,6 @@
                                 </button>
                             </div>
                         </td>
-
                     </tr>
                 </template>
             </tbody>
@@ -290,162 +291,48 @@
 
     </div>{{-- /diff-table-wrapper --}}
 
-    {{-- ── Pagination ────────────────────────────────────────────── --}}
-    <div x-show="diffTotalPages > 1" style="display:none;">
-        <div
-            style="display:flex; align-items:center; justify-content:space-between;
-                padding:14px 20px; border-top:1px solid #e2e8f0;
-                font-size:12px; color:#64748b; flex-wrap:wrap; gap:10px;">
-
-            {{-- Records info --}}
+    {{-- Pagination --}}
+    <div x-show="diffTotalPages > 1">
+        <div style="display:flex; align-items:center; justify-content:space-between;
+                    padding:14px 20px; border-top:1px solid #e2e8f0;
+                    font-size:12px; color:#64748b; flex-wrap:wrap; gap:10px;">
             <span x-text="`Showing page ${diffCurrentPage} of ${diffTotalPages} — ${diffTotalRecords} records`"></span>
-
-            {{-- Pagination numbers --}}
             <nav>
                 <ul class="pagination pagination-sm mb-0">
-
-                    {{-- First --}}
                     <li class="page-item" :class="{ disabled: diffCurrentPage <= 1 }">
-                        <button class="page-link" @click="changeDiffPage(1)" :disabled="diffCurrentPage <= 1">
+                        <button class="page-link" @click="changeDiffPage(1)">
                             <i class="fa-solid fa-angles-left fa-xs"></i>
                         </button>
                     </li>
-
-                    {{-- Prev --}}
                     <li class="page-item" :class="{ disabled: diffCurrentPage <= 1 }">
-                        <button class="page-link" @click="changeDiffPage(diffCurrentPage - 1)"
-                            :disabled="diffCurrentPage <= 1">
+                        <button class="page-link" @click="changeDiffPage(diffCurrentPage - 1)">
                             <i class="fa-solid fa-chevron-left fa-xs"></i>
                         </button>
                     </li>
-
-                    {{-- Page Numbers (window of 5) --}}
-                    <template
-                        x-for="page in (() => {
-                    let pages = [];
-                    let start = Math.max(1, diffCurrentPage - 2);
-                    let end   = Math.min(diffTotalPages, start + 4);
-                    start     = Math.max(1, end - 4);
-                    for (let i = start; i <= end; i++) pages.push(i);
-                    return pages;
-                })()"
-                        :key="page">
+                    <template x-for="page in (() => {
+                        let pages = [], start = Math.max(1, diffCurrentPage - 2);
+                        let end = Math.min(diffTotalPages, start + 4);
+                        start = Math.max(1, end - 4);
+                        for (let i = start; i <= end; i++) pages.push(i);
+                        return pages;
+                    })()" :key="page">
                         <li class="page-item" :class="{ active: page === diffCurrentPage }">
                             <button class="page-link" @click="changeDiffPage(page)" x-text="page"></button>
                         </li>
                     </template>
-
-                    {{-- Next --}}
                     <li class="page-item" :class="{ disabled: diffCurrentPage >= diffTotalPages }">
-                        <button class="page-link" @click="changeDiffPage(diffCurrentPage + 1)"
-                            :disabled="diffCurrentPage >= diffTotalPages">
+                        <button class="page-link" @click="changeDiffPage(diffCurrentPage + 1)">
                             <i class="fa-solid fa-chevron-right fa-xs"></i>
                         </button>
                     </li>
-
-                    {{-- Last --}}
                     <li class="page-item" :class="{ disabled: diffCurrentPage >= diffTotalPages }">
-                        <button class="page-link" @click="changeDiffPage(diffTotalPages)"
-                            :disabled="diffCurrentPage >= diffTotalPages">
+                        <button class="page-link" @click="changeDiffPage(diffTotalPages)">
                             <i class="fa-solid fa-angles-right fa-xs"></i>
                         </button>
                     </li>
-
                 </ul>
             </nav>
-
         </div>
     </div>
 
 </div>{{-- /table-section --}}
-
-
-{{-- ── Difference-tab-specific styles ─────────────────────────── --}}
-{{-- Add these inside the existing <style> block in index.blade.php --}}
-<style>
-    /* Export PDF button — scoped name to avoid conflict with stock tab */
-    .btn-diff-export-pdf {
-        background: #307c32;
-        color: #fff;
-        border: none;
-        border-radius: 7px;
-        padding: 8px 16px;
-        font-size: 12px;
-        font-weight: 600;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        transition: background .2s;
-    }
-
-    .btn-diff-export-pdf:hover {
-        background: #dc2626;
-    }
-
-    /* Difference value colours */
-    .diff-value-nonzero {
-        color: #dc2626;
-        font-weight: 700;
-    }
-
-    .diff-percent-negative {
-        color: #dc2626;
-        font-weight: 700;
-    }
-
-    .diff-percent-positive {
-        color: #f59e0b;
-        font-weight: 700;
-    }
-
-    /* Status badges */
-    .diff-status-badge {
-        font-size: 11px;
-        padding: 2px 8px;
-        border-radius: 20px;
-        font-weight: 600;
-        white-space: nowrap;
-        display: inline-block;
-    }
-
-    .diff-status-high {
-        background: #fef2f2;
-        color: #991b1b;
-    }
-
-    .diff-status-low {
-        background: #fff7ed;
-        color: #c2410c;
-    }
-
-    .diff-status-normal {
-        background: #f0fdf4;
-        color: #15803d;
-    }
-
-    /* Pagination buttons (reused from stock tab via .btn-page) */
-    .btn-page {
-        background: #fff;
-        border: 1px solid #e2e8f0;
-        border-radius: 6px;
-        padding: 6px 14px;
-        font-size: 12px;
-        font-weight: 600;
-        cursor: pointer;
-        color: #475569;
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        transition: background .15s;
-    }
-
-    .btn-page:hover:not(:disabled) {
-        background: #f1f5f9;
-    }
-
-    .btn-page:disabled {
-        opacity: .4;
-        cursor: not-allowed;
-    }
-</style>

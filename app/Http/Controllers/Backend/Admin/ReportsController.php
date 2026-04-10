@@ -16,6 +16,7 @@ class ReportsController extends Controller
 {
     public function index(Request $request)
     {
+        
         $hasAnyFilter = $this->hasAnyFilterApplied($request);
 
         if (! $hasAnyFilter) {
@@ -79,6 +80,7 @@ class ReportsController extends Controller
                 ]),
             ])->render();
 
+
             return response()->json(['success' => true, 'html' => $tableHtml, 'total' => $total]);
         }
 
@@ -101,7 +103,6 @@ class ReportsController extends Controller
     private function buildFilteredQuery(Request $request)
     {
         $query = Fuelreport::query()
-            ->where('district', $this->getDcDistrict())
             ->with(['fillingStation.company', 'fillingStation.depot']);
 
         if ($request->filled('from_date')) {

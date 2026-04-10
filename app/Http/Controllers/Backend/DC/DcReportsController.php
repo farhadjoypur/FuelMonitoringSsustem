@@ -30,6 +30,7 @@ class DcReportsController extends Controller
     public function index(Request $request)
     {
         $hasAnyFilter = $this->hasAnyFilterApplied($request);
+        $upazilas = $this->getDistrictUpazilas($this->dcDistrict);
 
         if (! $hasAnyFilter) {
             if (! $request->ajax()) {
@@ -39,6 +40,8 @@ class DcReportsController extends Controller
                     'depots'    => Depot::orderBy('depot_name')->get(['id', 'depot_name']),
                     'stations'  => FillingStation::orderBy('station_name')->get(['id', 'station_name', 'district']),
                     'divisions' => $this->loadDivisions(),
+                    'upazilas'  => $upazilas,
+                    'dc_district'  => $this->dcDistrict,
                 ]);
             }
 
@@ -101,7 +104,27 @@ class DcReportsController extends Controller
             'depots'    => Depot::orderBy('depot_name')->get(['id', 'depot_name']),
             'stations'  => FillingStation::orderBy('station_name')->get(['id', 'station_name', 'district']),
             'divisions' => $this->loadDivisions(),
+            'upazilas'  => $upazilas,
+            'dc_district' => $this->dcDistrict
+
         ]);
+    }
+
+    private function getDistrictUpazilas(string $district): array
+    {
+        $filePath = resource_path('data/location.json');
+        if (! file_exists($filePath)) return [];
+
+        $divisions = json_decode(file_get_contents($filePath), true)['divisions'] ?? [];
+
+        foreach ($divisions as $div) {
+            foreach ($div['districts'] ?? [] as $dist) {
+                if (strtolower($dist['name_en']) === strtolower($district)) {
+                    return $dist['upazilas'] ?? [];
+                }
+            }
+        }
+        return [];
     }
 
     // ─────────────────────────────────────────────────────────────

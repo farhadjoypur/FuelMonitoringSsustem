@@ -38,22 +38,71 @@ class DashboardController extends Controller
         $yesterday = Carbon::yesterday();
 
         // =============================================
-        // TODAY'S REPORTS — শুধু DC এর district
+        // TODAY'S STOCK
+        // Last closing stock − আজকের sales পর্যন্ত
         // =============================================
+
+        // সর্বশেষ report date (আজকের আগে)
+        $lastReportDate = Fuelreport::where('district', $dcDistrict)
+            ->whereDate('report_date', '<', today())
+            ->max('report_date');
+
+        $lastAvailableReports = $lastReportDate
+            ? Fuelreport::where('district', $dcDistrict)
+            ->whereDate('report_date', $lastReportDate)
+            ->get()
+            : collect();
+
+        // আজকের sales (যেসব station report submit করেছে)
         $todayReports = Fuelreport::whereDate('report_date', $today)
-            ->where('district', $dcDistrict)  // ★ district restrict
+            ->where('district', $dcDistrict)
             ->get();
 
-        // =============================================
-        // TODAY'S CLOSING STOCK (per fuel type)
-        // =============================================
-        $yesterdayReports = Fuelreport::whereDate('report_date', $yesterday)->where('district', $dcDistrict)->get();
+        // Last closing stock
+        $lastOctaneClosing = $lastAvailableReports->sum('octane_closing_stock');
+        $lastPetrolClosing = $lastAvailableReports->sum('petrol_closing_stock');
+        $lastDieselClosing = $lastAvailableReports->sum('diesel_closing_stock');
+        $lastOthersClosing = $lastAvailableReports->sum('others_closing_stock');
 
-        $todayOctaneStock = $yesterdayReports->sum('octane_closing_stock');
-        $todayPetrolStock = $yesterdayReports->sum('petrol_closing_stock');
-        $todayDieselStock = $yesterdayReports->sum('diesel_closing_stock');
-        // others stock added if needed in future
-        $todayOthersStock = $yesterdayReports->sum('others_closing_stock');
+        // আজকের sales
+        $todayOctaneSold = $todayReports->sum('octane_sales');
+        $todayPetrolSold = $todayReports->sum('petrol_sales');
+        $todayDieselSold = $todayReports->sum('diesel_sales');
+        $todayOthersSold = $todayReports->sum('others_sales');
+
+        // Today Stock = Last Closing − Today Sales
+        $todayOctaneStock = $lastOctaneClosing - $todayOctaneSold;
+        $todayPetrolStock = $lastPetrolClosing - $todayPetrolSold;
+        $todayDieselStock = $lastDieselClosing - $todayDieselSold;
+        $todayOthersStock = $lastOthersClosing - $todayOthersSold;
+
+        // =============================================
+        // TODAY'S RECEIVED
+        // =============================================
+        $todayPetrolReceived = $todayReports->sum('petrol_received');
+        $todayDieselReceived = $todayReports->sum('diesel_received');
+        $todayOctaneReceived = $todayReports->sum('octane_received');
+        $todayOthersReceived = $todayReports->sum('others_received');
+
+        // =============================================
+        // TODAY'S DIFFERENCE
+        // =============================================
+        $todayPetrolDiff = $todayReports->sum('petrol_difference');
+        $todayDieselDiff = $todayReports->sum('diesel_difference');
+        $todayOctaneDiff = $todayReports->sum('octane_difference');
+        $todayOthersDiff = $todayReports->sum('others_difference');
+
+        // =============================================
+        // TODAY'S DIFFERENCE PERCENTAGE (%)
+        // =============================================
+        $todayPetrolDiffPct = $todayPetrolReceived > 0
+            ? round(($todayPetrolDiff / $todayPetrolReceived) * 100, 1) : 0;
+        $todayDieselDiffPct = $todayDieselReceived > 0
+            ? round(($todayDieselDiff / $todayDieselReceived) * 100, 1) : 0;
+        $todayOctaneDiffPct = $todayOctaneReceived > 0
+            ? round(($todayOctaneDiff / $todayOctaneReceived) * 100, 1) : 0;
+        $todayOthersDiffPct = $todayOthersReceived > 0
+            ? round(($todayOthersDiff / $todayOthersReceived) * 100, 1) : 0;
 
         // =============================================
         // TODAY'S RECEIVED

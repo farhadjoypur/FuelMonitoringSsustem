@@ -702,7 +702,6 @@
                 <i class="fa-solid fa-clock-rotate-left" style="font-size:.78rem;"></i>
                 Tag Officers Missing Reports
             </button>
-
             <button class="tab-btn" :class="{ 'is-active': activeTab === 'submitted' }" @click="switchTab('submitted')">
                 <i class="fa-solid fa-circle-check" style="font-size:.78rem;"></i>
                 Tag Officers Submit Reports
@@ -711,15 +710,14 @@
 
 
         {{-- ════════════════════════════════════
-         TAB 1 — SALES & STOCK
-    ════════════════════════════════════ --}}
+             TAB 1 — SALES & STOCK
+        ════════════════════════════════════ --}}
         <div class="tab-panel" :class="{ 'is-active': activeTab === 'stock' }">
 
             <div class="filter-section">
                 <div class="filter-title">
                     <i class="fa-solid fa-sliders"></i> Filter Options
                 </div>
-
                 <div class="filter-grid">
 
                     <div class="form-group">
@@ -732,29 +730,18 @@
                         <input type="date" x-model="filters.to_date">
                     </div>
 
-                    <div class="form-group">
-                        <label>Division</label>
-                        <select x-model="filters.division" @change="onDivisionChange()">
-                            <option value="">All Divisions</option>
-                            @foreach ($divisions as $division)
-                                <option value="{{ $division['name_en'] }}">{{ $division['name_en'] }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
+                    {{-- District — DC এর নিজের district, locked --}}
                     <div class="form-group">
                         <label>District</label>
-                        <select x-model="filters.district" @change="onDistrictChange()" :disabled="!filters.division">
-                            <option value="">All Districts</option>
-                            <template x-for="district in availableDistricts" :key="district.name_en">
-                                <option :value="district.name_en" x-text="district.name_en"></option>
-                            </template>
-                        </select>
+                        <input type="text" :value="dcDistrict" readonly
+                            style="background:#f0f0f0; cursor:not-allowed;">
+                        <input type="hidden" x-model="filters.district">
                     </div>
 
+                    {{-- Upazila — district থেকে cascade --}}
                     <div class="form-group">
                         <label>Upazila</label>
-                        <select x-model="filters.thana_upazila" :disabled="!filters.district">
+                        <select x-model="filters.thana_upazila">
                             <option value="">All Upazilas</option>
                             <template x-for="upazila in availableUpazilas" :key="upazila.name_en">
                                 <option :value="upazila.name_en" x-text="upazila.name_en"></option>
@@ -810,7 +797,6 @@
                             <option value="available">Available</option>
                             <option value="low">Low Stock</option>
                             <option value="zero">Zero Stock</option>
-                            <option value="highdiff">High Difference</option>
                         </select>
                     </div>
 
@@ -832,25 +818,17 @@
                 </div>
             </div>
 
-            {{-- Table section --}}
             <div class="table-section">
                 <div class="table-header-row">
                     <div class="table-title">Stock &amp; Sales Reports</div>
                     <div class="record-count" x-text="recordCountText"></div>
                 </div>
 
-                {{-- Loading overlay --}}
                 <div class="loading-overlay" x-show="isLoading" style="display:none;">
                     <div class="loading-spinner"></div>
                     <p style="font-size:.85rem;">Loading data...</p>
                 </div>
 
-                {{--
-                Table container.
-                Initial load: @include renders server-side empty state.
-                After filter:  Alpine replaces via x-html="tableHtml".
-                x-show hides container while loading.
-            --}}
                 <div id="tableContainer" x-show="!isLoading" x-html="tableHtml"
                     style="flex:1; min-height:0; overflow-x:auto; overflow-y:auto;">
                     @include('backend.dc.pages.reports.table', [
@@ -864,33 +842,24 @@
                 </div>
             </div>
 
-            <!-- <div class="export-row">
-                                                    <button class="btn-export btn-export-pdf">
-                                                        <i class="fa-regular fa-file-pdf"></i> Export PDF
-                                                    </button>
-                                                    <button class="btn-export btn-export-excel">
-                                                        <i class="fa-regular fa-file-excel"></i> Export Excel
-                                                    </button>
-                                                </div> -->
-
         </div>{{-- /tab-stock --}}
 
 
         {{-- ════════════════════════════════════
-         TAB 2 — DIFFERENCE REPORT
-    ════════════════════════════════════ --}}
+             TAB 2 — DIFFERENCE REPORT
+        ════════════════════════════════════ --}}
         <div class="tab-panel" :class="{ 'is-active': activeTab === 'difference' }">
-
-            {{-- difference_table includes --}}
             @include('backend.dc.pages.reports.difference_table', [
                 'divisions' => $divisions,
+                'companies' => $companies,
+                'stations' => $stations,
             ])
-        </div>{{-- /tab-difference --}}
+        </div>
 
 
         {{-- ════════════════════════════════════
-         TAB 3 — PENDING (placeholder)
-    ════════════════════════════════════ --}}
+             TAB 3 — MISSING REPORT
+        ════════════════════════════════════ --}}
         <div class="tab-panel" :class="{ 'is-active': activeTab === 'missing' }">
             @include('backend.dc.pages.reports.missing_report_table', [
                 'divisions' => $divisions,
@@ -900,6 +869,10 @@
             ])
         </div>
 
+
+        {{-- ════════════════════════════════════
+             TAB 4 — SUBMITTED REPORT
+        ════════════════════════════════════ --}}
         <div class="tab-panel" :class="{ 'is-active': activeTab === 'submitted' }">
             @include('backend.dc.pages.reports.submit_report_table', [
                 'divisions' => $divisions,
@@ -911,7 +884,7 @@
 
 
         {{-- ── MESSAGE MODAL ── --}}
-        {{-- <div class="modal-backdrop" x-show="messageModal.isOpen" x-transition @click.self="messageModal.isOpen = false">
+        <div class="modal-backdrop" x-show="messageModal.isOpen" x-transition @click.self="messageModal.isOpen = false">
             <div class="modal-box">
                 <div class="modal-title">
                     <i class="fa-solid fa-paper-plane" style="color:#22c55e;"></i>
@@ -926,12 +899,14 @@
                     </button>
                 </div>
             </div>
-        </div> --}}
+        </div>
 
         {{-- ── DELETE MODAL ── --}}
-        {{-- <div class="modal-backdrop" x-show="deleteModal.isOpen" x-transition @click.self="deleteModal.isOpen = false">
+        <div class="modal-backdrop" x-show="deleteModal.isOpen" x-transition @click.self="deleteModal.isOpen = false">
             <div class="modal-box">
-                <div class="confirm-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                <div class="confirm-icon">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
                 <div class="confirm-message">
                     Are you sure you want to delete the report for<br>
                     <strong x-text="deleteModal.stationName"></strong>?<br>
@@ -944,37 +919,52 @@
                     </button>
                 </div>
             </div>
-        </div> --}}
+        </div>
 
     </div>{{-- /rpt-card --}}
 @endsection
-{{-- ═══════════════════════════════════════════════════════════════
-     Replace the entire @push('scripts') block in index.blade.php
-═══════════════════════════════════════════════════════════════ --}}
+
+
 @push('scripts')
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>
         function reportApp() {
             return {
 
-                // ── Active Tab ──────────────────────────────────────────────
-                activeTab: 'stock',
+                // ─────────────────────────────────────────────────────────
+                // SHARED STATE
+                // ─────────────────────────────────────────────────────────
 
-                // ═══════════════════════════════════════════════════════════
-                // TAB 1 — SALES & STOCK STATE
-                // ═══════════════════════════════════════════════════════════
+                activeTab: 'stock',
+                dcDistrict: '{{ $dc_district }}',
+                allDivisions: @json($divisions),
+
+                messageModal: {
+                    isOpen: false,
+                    reportId: null,
+                    stationName: '',
+                    text: ''
+                },
+                deleteModal: {
+                    isOpen: false,
+                    reportId: null,
+                    stationName: ''
+                },
+
+                // ─────────────────────────────────────────────────────────
+                // TAB 1 — STOCK STATE
+                // ─────────────────────────────────────────────────────────
 
                 isLoading: false,
                 tableHtml: '',
                 recordCountText: '',
                 currentPage: 1,
 
-                // Stock tab filters
                 filters: {
                     from_date: '',
                     to_date: '',
                     division: '',
-                    district: '',
+                    district: '', // dcDistrict diye init e set hobe
                     thana_upazila: '',
                     company_id: '',
                     depot_id: '',
@@ -983,13 +973,12 @@
                     stock_status: '',
                 },
 
-                // Stock tab cascade dropdowns
                 availableDistricts: [],
-                availableUpazilas: [],
+                availableUpazilas: [], // dcDistrict er upazilas init e load hobe
 
-                // ═══════════════════════════════════════════════════════════
-                // TAB 2 — DIFFERENCE REPORT STATE
-                // ═══════════════════════════════════════════════════════════
+                // ─────────────────────────────────────────────────────────
+                // TAB 2 — DIFFERENCE STATE
+                // ─────────────────────────────────────────────────────────
 
                 isDiffLoading: false,
                 diffReportRows: [],
@@ -998,63 +987,134 @@
                 diffPerPage: 10,
                 diffTotalPages: 1,
 
-                // Difference tab filters
+                // NOTE: key names match exactly what applyDiffFilter() sends to server
                 diffFilter: {
-                    fromDate: '',
-                    toDate: '',
-                    minDifferenceL: '',
-                    minDifferencePercent: '',
+                    from_date: '',
+                    to_date: '',
                     division: '',
-                    district: '',
-                    thanaUpazila: '',
-                    companyId: '',
-                    stationId: '',
-                    tagOfficer: '',
-                    diffStatus: '',
+                    district: '', // init e dcDistrict set hobe
+                    thana_upazila: '',
+                    company_id: '',
+                    station_id: '',
+                    tag_officer: '',
+                    diff_status: '',
+                    min_diff_l: '',
+                    min_diff_pct: '',
                 },
 
-                // Difference tab cascade dropdowns
                 diffAvailableDistricts: [],
-                diffAvailableUpazilas: [],
+                diffAvailableUpazilas: [], // init e load hobe
 
-                // ═══════════════════════════════════════════════════════════
-                // SHARED
-                // ═══════════════════════════════════════════════════════════
+                // ─────────────────────────────────────────────────────────
+                // TAB 3 — MISSING STATE
+                // ─────────────────────────────────────────────────────────
 
-                // Full location JSON (shared by both tabs)
-                allDivisions: @json($divisions),
+                isMissingLoading: false,
+                missingReportRows: [],
+                missingTotalRecords: 0,
+                missingCurrentPage: 1,
+                missingPerPage: 10,
+                missingTotalPages: 1,
 
-                // Modal states (shared by both tabs)
-                messageModal: {
-                    isOpen: false,
-                    reportId: null,
-                    stationName: '',
-                    text: '',
+                missingFilter: {
+                    from_date: '',
+                    to_date: '',
+                    division: '',
+                    district: '', // init e dcDistrict set hobe
+                    thana_upazila: '',
+                    company_id: '',
+                    depot_id: '',
+                    station_id: '',
                 },
-                deleteModal: {
-                    isOpen: false,
-                    reportId: null,
-                    stationName: '',
+
+                missingAvailableDistricts: [],
+                missingAvailableUpazilas: [], // init e load hobe
+
+                // ─────────────────────────────────────────────────────────
+                // TAB 4 — SUBMITTED STATE
+                // ─────────────────────────────────────────────────────────
+
+                isSubmitLoading: false,
+                submitReportRows: [],
+                submitTotalRecords: 0,
+                submitCurrentPage: 1,
+                submitPerPage: 10,
+                submitTotalPages: 1,
+
+                submitFilter: {
+                    from_date: '',
+                    to_date: '',
+                    division: '',
+                    district: '', // init e dcDistrict set hobe
+                    thana_upazila: '',
+                    company_id: '',
+                    depot_id: '',
+                    station_id: '',
                 },
 
-                // ── Init ───────────────────────────────────────────────────
-                // init() {
-                //     // Keep server-rendered HTML for stock tab on first load
-                //     const container = document.getElementById('tableContainer');
-                //     if (container) {
-                //         this.tableHtml = container.innerHTML;
-                //     }
-                // },
+                submitAvailableDistricts: [],
+                submitAvailableUpazilas: [], // init e load hobe
+
+
+                // ═════════════════════════════════════════════════════════
+                // INIT — page load এ একবারেই সব tab এর district lock করো
+                // ═════════════════════════════════════════════════════════
+
                 init(seeall = '', fromDate = '', toDate = '') {
 
+                    const container = document.getElementById('tableContainer');
+                    if (container) this.tableHtml = container.innerHTML;
+
+                    // ── DC district lock ──
+                    if (this.dcDistrict) {
+                        this.filters.district = this.dcDistrict;
+                        this.diffFilter.district = this.dcDistrict;
+                        this.missingFilter.district = this.dcDistrict;
+                        this.submitFilter.district = this.dcDistrict;
+
+                        let foundUpazilas = [];
+                        for (const div of this.allDivisions) {
+                            const found = (div.districts ?? []).find(
+                                d => d.name_en.toLowerCase() === this.dcDistrict.toLowerCase()
+                            );
+                            if (found) {
+                                foundUpazilas = found.upazilas ?? found.police_stations ?? [];
+                                break;
+                            }
+                        }
+                        this.availableUpazilas = foundUpazilas;
+                        this.diffAvailableUpazilas = foundUpazilas;
+                        this.missingAvailableUpazilas = foundUpazilas;
+                        this.submitAvailableUpazilas = foundUpazilas;
+                    }
+
+                    // ── আজকের date default set করো সব tab এ ──
+                    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+
+                    // Stock tab — default today
+                    if (!this.filters.from_date) this.filters.from_date = today;
+                    if (!this.filters.to_date) this.filters.to_date = today;
+
+                    // Diff tab — default today (unless seeall param দিয়ে এসেছে)
+                    if (!fromDate) {
+                        this.diffFilter.from_date = today;
+                        this.diffFilter.to_date = today;
+                    }
+
+                    // Missing & Submitted — default today
+                    this.missingFilter.from_date = today;
+                    this.missingFilter.to_date = today;
+                    this.submitFilter.from_date = today;
+                    this.submitFilter.to_date = today;
+
+                    // ── seeall param দিয়ে tab switch ──
                     if (seeall === 'difference') {
-                        // ✅ diffFilter (s নেই)
-                        if (fromDate) this.diffFilter.fromDate = fromDate;
-                        if (toDate) this.diffFilter.toDate = toDate;
-                        if (fromDate && !toDate) this.diffFilter.toDate = fromDate;
+                        if (fromDate) this.diffFilter.from_date = fromDate;
+                        if (toDate) this.diffFilter.to_date = toDate;
+                        if (fromDate && !toDate) this.diffFilter.to_date = fromDate;
 
                         this.activeTab = 'difference';
-                        this.$nextTick(() => this.applyDiffFilter()); // ✅ this. দিয়ে call
+                        this.$nextTick(() => this.applyDiffFilter());
 
                     } else if (seeall === 'missing') {
                         this.activeTab = 'missing';
@@ -1066,87 +1126,72 @@
 
                     } else {
                         this.activeTab = 'stock';
-                        // stock tab server-side render হয়, তাই load লাগবে না
+                        // Server-rendered HTML আছে, তাই AJAX call দরকার নেই
+                        // শুধু recordCountText set করো
+                        this.recordCountText = '';
                     }
                 },
 
-                // ── Tab Switch ─────────────────────────────────────────────
+
+                // ─────────────────────────────────────────────────────────
+                // TAB SWITCH
+                // ─────────────────────────────────────────────────────────
+
                 switchTab(tab) {
                     this.activeTab = tab;
 
-                    if (tab === 'difference' && this.diffReportRows.length === 0) {
-                        // this.applyDiffFilter();
+                    // Tab switch করলে যদি data না থাকে তাহলে load করো
+                    if (tab === 'difference' && this.diffTotalRecords === 0) {
+                        this.applyDiffFilter();
                     }
-                    if (tab === 'missing' && this.missingReportRows.length === 0) {
-                        // this.applyMissingFilter();
+                    if (tab === 'missing' && this.missingTotalRecords === 0) {
+                        this.applyMissingFilter();
                     }
-                    if (tab === 'submitted' && this.submitReportRows.length === 0) {
-                        // this.applySubmitFilter();
+                    if (tab === 'submitted' && this.submitTotalRecords === 0) {
+                        this.applySubmitFilter();
                     }
                 },
-                // ═══════════════════════════════════════════════════════════
+
+
+                // ═════════════════════════════════════════════════════════
                 // TAB 1 — STOCK METHODS
-                // ═══════════════════════════════════════════════════════════
+                // ═════════════════════════════════════════════════════════
 
-                onDivisionChange() {
-                    this.filters.district = '';
-                    this.filters.thana_upazila = '';
-                    this.availableUpazilas = [];
+                // Stock tab এ division change নেই (district locked)
+                // শুধু upazila select আছে
 
-                    const found = this.allDivisions.find(d => d.name_en === this.filters.division);
-                    this.availableDistricts = found?.districts ?? [];
-                },
-
-                onDistrictChange() {
-                    this.filters.thana_upazila = '';
-
-                    const division = this.allDivisions.find(d => d.name_en === this.filters.division);
-                    const district = division?.districts?.find(d => d.name_en === this.filters.district);
-                    this.availableUpazilas = district?.police_stations ?? [];
-                },
-
-                buildStockQueryParams(page = 1) {
-                    const params = new URLSearchParams();
+                buildStockParams(page = 1) {
+                    const params = new URLSearchParams({
+                        page
+                    });
                     Object.entries(this.filters).forEach(([key, value]) => {
                         if (value !== '' && value !== null) params.append(key, value);
                     });
-                    params.append('page', page);
                     return params;
                 },
 
                 async applyFilter(page = 1) {
                     this.isLoading = true;
                     this.currentPage = page;
-
                     try {
-                        const response = await fetch(
-                            `{{ route('dc.reports.index') }}?${this.buildStockQueryParams(page)}`, {
+                        const res = await fetch(
+                            `{{ route('dc.reports.index') }}?${this.buildStockParams(page)}`, {
                                 headers: {
                                     'X-Requested-With': 'XMLHttpRequest',
-                                    'Accept': 'application/json',
-                                },
+                                    'Accept': 'application/json'
+                                }
                             }
                         );
-
-                        if (!response.ok) throw new Error(`Server error ${response.status}`);
-
-                        const data = await response.json();
-
+                        if (!res.ok) throw new Error(`Server error ${res.status}`);
+                        const data = await res.json();
                         if (data.success) {
                             this.tableHtml = data.html;
-                            this.recordCountText = data.total > 0 ?
-                                `${data.total} station(s) found` :
-                                '';
+                            this.recordCountText = data.total > 0 ? `${data.total} station(s) found` : '';
                         }
-
-                    } catch (error) {
-                        this.tableHtml = `
-                            <div style="padding:40px; text-align:center; color:#ef4444;">
-                                <i class="fa-solid fa-circle-exclamation"
-                                   style="font-size:1.5rem; margin-bottom:8px; display:block;"></i>
-                                <p>Failed to load data. Please try again.</p>
-                                <small style="color:#94a3b8;">${error.message}</small>
-                            </div>`;
+                    } catch (err) {
+                        this.tableHtml = `<div style="padding:40px;text-align:center;color:#ef4444;">
+                    <i class="fa-solid fa-circle-exclamation" style="font-size:1.5rem;display:block;margin-bottom:8px;"></i>
+                    <p>Failed to load data.</p><small>${err.message}</small></div>`;
                     } finally {
                         this.isLoading = false;
                     }
@@ -1157,104 +1202,67 @@
                     this.applyFilter(page);
                 },
 
-                async resetFilter() {
-                    this.filters = {
-                        from_date: '',
-                        to_date: '',
-                        division: '',
-                        district: '',
-                        thana_upazila: '',
-                        company_id: '',
-                        depot_id: '',
-                        station_id: '',
-                        fuel_type: '',
-                        stock_status: '',
-                    };
-                    this.availableDistricts = [];
-                    this.availableUpazilas = [];
+                resetFilter() {
+                    // district reset করবে না — DC এর district সবসময় locked
+                    this.filters.from_date = '';
+                    this.filters.to_date = '';
+                    this.filters.thana_upazila = '';
+                    this.filters.company_id = '';
+                    this.filters.depot_id = '';
+                    this.filters.station_id = '';
+                    this.filters.fuel_type = '';
+                    this.filters.stock_status = '';
                     this.recordCountText = '';
                     this.currentPage = 1;
-                    await this.applyFilter(1);
+                    // this.applyFilter();
                 },
 
-                // ═══════════════════════════════════════════════════════════
-                // TAB 2 — DIFFERENCE REPORT METHODS
-                // ═══════════════════════════════════════════════════════════
 
-                // Cascade: Division → Districts
-                onDiffDivisionChange() {
-                    this.diffFilter.district = '';
-                    this.diffFilter.thanaUpazila = '';
-                    this.diffAvailableDistricts = [];
-                    this.diffAvailableUpazilas = [];
+                // ═════════════════════════════════════════════════════════
+                // TAB 2 — DIFFERENCE METHODS
+                // ═════════════════════════════════════════════════════════
 
-                    const found = this.allDivisions.find(d => d.name_en === this.diffFilter.division);
-                    this.diffAvailableDistricts = found?.districts ?? [];
+                // Difference tab এ division change করতে পারবে না (district locked)
+                // শুধু upazila select করতে পারবে
+
+                onDiffUpazilaChange() {
+                    // upazila change করলে auto filter apply
                 },
 
-                // Cascade: District → Upazilas
-                onDiffDistrictChange() {
-                    this.diffFilter.thanaUpazila = '';
-                    this.diffAvailableUpazilas = [];
-
-                    const division = this.allDivisions.find(d => d.name_en === this.diffFilter.division);
-                    const district = division?.districts?.find(d => d.name_en === this.diffFilter.district);
-                    // location.json key — police_stations or upazilas
-                    this.diffAvailableUpazilas = district?.upazilas ?? district?.police_stations ?? [];
-                },
-
-                // Apply difference filter — AJAX to differenceReport()
-                async applyDiffFilter(page = 1) {
-                    this.isDiffLoading = true;
-                    this.diffCurrentPage = page;
-
-                    const params = new URLSearchParams();
-
-                    // Only append non-empty values to keep URL clean
-                    const filterMap = {
-                        page: page,
-                        from_date: this.diffFilter.fromDate,
-                        to_date: this.diffFilter.toDate,
-                        division: this.diffFilter.division,
-                        district: this.diffFilter.district,
-                        thana_upazila: this.diffFilter.thanaUpazila,
-                        company_id: this.diffFilter.companyId,
-                        station_id: this.diffFilter.stationId,
-                        tag_officer: this.diffFilter.tagOfficer,
-                        diff_status: this.diffFilter.diffStatus,
-                        min_diff_l: this.diffFilter.minDifferenceL,
-                        min_diff_pct: this.diffFilter.minDifferencePercent,
-                    };
-
-                    Object.entries(filterMap).forEach(([key, value]) => {
+                buildDiffParams(page = 1) {
+                    const params = new URLSearchParams({
+                        page
+                    });
+                    Object.entries(this.diffFilter).forEach(([key, value]) => {
                         if (value !== '' && value !== null && value !== undefined) {
                             params.append(key, value);
                         }
                     });
+                    return params;
+                },
 
+                async applyDiffFilter(page = 1) {
+                    this.isDiffLoading = true;
+                    this.diffCurrentPage = page;
                     try {
-                        const response = await fetch(
-                            `{{ route('dc.reports.difference') }}?${params}`, {
+                        const res = await fetch(
+                            `{{ route('dc.reports.difference') }}?${this.buildDiffParams(page)}`, {
                                 headers: {
                                     'X-Requested-With': 'XMLHttpRequest',
-                                    'Accept': 'application/json',
-                                },
+                                    'Accept': 'application/json'
+                                }
                             }
                         );
-
-                        if (!response.ok) throw new Error(`Server error ${response.status}`);
-
-                        const json = await response.json();
-
+                        if (!res.ok) throw new Error(`Server error ${res.status}`);
+                        const json = await res.json();
                         if (json.success) {
                             this.diffReportRows = json.rows;
                             this.diffTotalRecords = json.total;
                             this.diffTotalPages = json.lastPage;
                             this.diffCurrentPage = json.currentPage;
                         }
-
-                    } catch (error) {
-                        console.error('Difference report fetch failed:', error);
+                    } catch (err) {
+                        console.error('Difference report error:', err);
                         this.diffReportRows = [];
                         this.diffTotalRecords = 0;
                     } finally {
@@ -1262,67 +1270,214 @@
                     }
                 },
 
-                // Reset difference filters & clear table
                 resetDiffFilter() {
-                    this.diffFilter = {
-                        fromDate: '',
-                        toDate: '',
-                        minDifferenceL: '',
-                        minDifferencePercent: '',
-                        division: '',
-                        district: '',
-                        thanaUpazila: '',
-                        companyId: '',
-                        stationId: '',
-                        tagOfficer: '',
-                        diffStatus: '',
-                    };
-                    this.diffAvailableDistricts = [];
-                    this.diffAvailableUpazilas = [];
+                    // district reset করবে না
+                    this.diffFilter.from_date = '';
+                    this.diffFilter.to_date = '';
+                    this.diffFilter.thana_upazila = '';
+                    this.diffFilter.company_id = '';
+                    this.diffFilter.station_id = '';
+                    this.diffFilter.tag_officer = '';
+                    this.diffFilter.diff_status = '';
+                    this.diffFilter.min_diff_l = '';
+                    this.diffFilter.min_diff_pct = '';
                     this.diffReportRows = [];
                     this.diffTotalRecords = 0;
                     this.diffCurrentPage = 1;
                     this.diffTotalPages = 1;
+                    // this.applyDiffFilter();
                 },
 
-                // Pagination for difference tab
                 changeDiffPage(newPage) {
                     if (newPage < 1 || newPage > this.diffTotalPages) return;
                     this.applyDiffFilter(newPage);
                 },
 
-                // View single report
-                viewDiffReport(reportId) {
-                    window.location.href = `/admin/reports/${reportId}`;
-                },
-
-                // Export difference report as PDF
                 exportDiffPdf() {
                     const params = new URLSearchParams();
-                    const exportFields = {
-                        from_date: this.diffFilter.fromDate,
-                        to_date: this.diffFilter.toDate,
-                        division: this.diffFilter.division,
+                    const fields = {
+                        from_date: this.diffFilter.from_date,
+                        to_date: this.diffFilter.to_date,
                         district: this.diffFilter.district,
-                        company_id: this.diffFilter.companyId,
-                        station_id: this.diffFilter.stationId,
+                        station_id: this.diffFilter.station_id,
                     };
-                    Object.entries(exportFields).forEach(([k, v]) => {
+                    Object.entries(fields).forEach(([k, v]) => {
                         if (v) params.append(k, v);
                     });
                     window.open(`{{ route('dc.reports.difference.export-pdf') }}?${params}`, '_blank');
                 },
 
-                // ═══════════════════════════════════════════════════════════
+
+                // ═════════════════════════════════════════════════════════
+                // TAB 3 — MISSING METHODS
+                // ═════════════════════════════════════════════════════════
+
+                buildMissingParams(page = 1) {
+                    const params = new URLSearchParams({
+                        page
+                    });
+                    Object.entries(this.missingFilter).forEach(([key, value]) => {
+                        if (value !== '' && value !== null && value !== undefined) {
+                            params.append(key, value);
+                        }
+                    });
+                    return params;
+                },
+
+                async applyMissingFilter(page = 1) {
+                    this.isMissingLoading = true;
+                    this.missingCurrentPage = page;
+                    try {
+                        const res = await fetch(
+                            `{{ route('dc.reports.missing') }}?${this.buildMissingParams(page)}`, {
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'Accept': 'application/json'
+                                }
+                            }
+                        );
+                        if (!res.ok) throw new Error(`Server error ${res.status}`);
+                        const json = await res.json();
+                        if (json.success) {
+                            this.missingReportRows = json.rows;
+                            this.missingTotalRecords = json.total;
+                            this.missingTotalPages = json.lastPage;
+                            this.missingCurrentPage = json.currentPage;
+                        }
+                    } catch (err) {
+                        console.error('Missing report error:', err);
+                        this.missingReportRows = [];
+                        this.missingTotalRecords = 0;
+                    } finally {
+                        this.isMissingLoading = false;
+                    }
+                },
+
+                resetMissingFilter() {
+                    // district reset করবে না
+                    this.missingFilter.from_date = '';
+                    this.missingFilter.to_date = '';
+                    this.missingFilter.thana_upazila = '';
+                    this.missingFilter.company_id = '';
+                    this.missingFilter.depot_id = '';
+                    this.missingFilter.station_id = '';
+                    this.missingReportRows = [];
+                    this.missingTotalRecords = 0;
+                    this.missingCurrentPage = 1;
+                    this.missingTotalPages = 1;
+                    // this.applyMissingFilter();
+                },
+
+                changeMissingPage(newPage) {
+                    if (newPage < 1 || newPage > this.missingTotalPages) return;
+                    this.applyMissingFilter(newPage);
+                },
+
+                exportMissingPdf() {
+                    const params = new URLSearchParams();
+                    const fields = {
+                        from_date: this.missingFilter.from_date,
+                        to_date: this.missingFilter.to_date,
+                        district: this.missingFilter.district,
+                        station_id: this.missingFilter.station_id,
+                    };
+                    Object.entries(fields).forEach(([k, v]) => {
+                        if (v) params.append(k, v);
+                    });
+                    window.open(`{{ route('dc.reports.missing.export-pdf') }}?${params}`, '_blank');
+                },
+
+
+                // ═════════════════════════════════════════════════════════
+                // TAB 4 — SUBMITTED METHODS
+                // ═════════════════════════════════════════════════════════
+
+                buildSubmitParams(page = 1) {
+                    const params = new URLSearchParams({
+                        page
+                    });
+                    Object.entries(this.submitFilter).forEach(([key, value]) => {
+                        if (value !== '' && value !== null && value !== undefined) {
+                            params.append(key, value);
+                        }
+                    });
+                    return params;
+                },
+
+                async applySubmitFilter(page = 1) {
+                    this.isSubmitLoading = true;
+                    this.submitCurrentPage = page;
+                    try {
+                        const res = await fetch(
+                            `{{ route('dc.reports.submitted') }}?${this.buildSubmitParams(page)}`, {
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'Accept': 'application/json'
+                                }
+                            }
+                        );
+                        if (!res.ok) throw new Error(`Server error ${res.status}`);
+                        const json = await res.json();
+                        if (json.success) {
+                            this.submitReportRows = json.rows;
+                            this.submitTotalRecords = json.total;
+                            this.submitTotalPages = json.lastPage;
+                            this.submitCurrentPage = json.currentPage;
+                        }
+                    } catch (err) {
+                        console.error('Submitted report error:', err);
+                        this.submitReportRows = [];
+                        this.submitTotalRecords = 0;
+                    } finally {
+                        this.isSubmitLoading = false;
+                    }
+                },
+
+                resetSubmitFilter() {
+                    // district reset করবে না
+                    this.submitFilter.from_date = '';
+                    this.submitFilter.to_date = '';
+                    this.submitFilter.thana_upazila = '';
+                    this.submitFilter.company_id = '';
+                    this.submitFilter.depot_id = '';
+                    this.submitFilter.station_id = '';
+                    this.submitReportRows = [];
+                    this.submitTotalRecords = 0;
+                    this.submitCurrentPage = 1;
+                    this.submitTotalPages = 1;
+                    // this.applySubmitFilter();
+                },
+
+                changeSubmitPage(newPage) {
+                    if (newPage < 1 || newPage > this.submitTotalPages) return;
+                    this.applySubmitFilter(newPage);
+                },
+
+                exportSubmitPdf() {
+                    const params = new URLSearchParams();
+                    const fields = {
+                        from_date: this.submitFilter.from_date,
+                        to_date: this.submitFilter.to_date,
+                        district: this.submitFilter.district,
+                        station_id: this.submitFilter.station_id,
+                    };
+                    Object.entries(fields).forEach(([k, v]) => {
+                        if (v) params.append(k, v);
+                    });
+                    window.open(`{{ route('dc.reports.submitted.export-pdf') }}?${params}`, '_blank');
+                },
+
+
+                // ═════════════════════════════════════════════════════════
                 // SHARED MODAL METHODS
-                // ═══════════════════════════════════════════════════════════
+                // ═════════════════════════════════════════════════════════
 
                 openMessageModal(reportId, stationName) {
                     this.messageModal = {
                         isOpen: true,
                         reportId,
                         stationName,
-                        text: '',
+                        text: ''
                     };
                 },
 
@@ -1333,22 +1488,22 @@
                     }
                     try {
                         const csrf = document.querySelector('meta[name="csrf-token"]').content;
-                        const response = await fetch('{{ route('dc.reports.message') }}', {
+                        const res = await fetch('{{ route('dc.reports.message') }}', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': csrf,
+                                'X-CSRF-TOKEN': csrf
                             },
                             body: JSON.stringify({
                                 report_id: this.messageModal.reportId,
-                                message: this.messageModal.text,
+                                message: this.messageModal.text
                             }),
                         });
-                        const data = await response.json();
+                        const data = await res.json();
                         this.messageModal.isOpen = false;
-                        alert(data.success ? 'Message sent successfully!' : 'Failed to send message.');
+                        alert(data.success ? 'Message sent!' : 'Failed to send message.');
                     } catch {
-                        alert('Network error. Please try again.');
+                        alert('Network error.');
                     }
                 },
 
@@ -1363,322 +1518,29 @@
                 async submitDelete() {
                     try {
                         const csrf = document.querySelector('meta[name="csrf-token"]').content;
-                        const deleteUrl = '{{ route('dc.reports.destroy', ':id') }}'
-                            .replace(':id', this.deleteModal.reportId);
-
-                        const response = await fetch(deleteUrl, {
+                        const url = '{{ route('dc.reports.destroy', ':id') }}'.replace(':id', this.deleteModal
+                            .reportId);
+                        const res = await fetch(url, {
                             method: 'DELETE',
                             headers: {
                                 'X-CSRF-TOKEN': csrf,
-                                'Accept': 'application/json',
+                                'Accept': 'application/json'
                             },
                         });
-                        const data = await response.json();
-
+                        const data = await res.json();
                         if (data.success) {
                             this.deleteModal.isOpen = false;
-
-                            // Refresh whichever tab triggered the delete
-                            if (this.activeTab === 'stock') {
-                                await this.applyFilter(this.currentPage);
-                            } else {
-                                await this.applyDiffFilter(this.diffCurrentPage);
-                            }
+                            // Active tab refresh
+                            if (this.activeTab === 'stock') this.applyFilter(this.currentPage);
+                            else if (this.activeTab === 'difference') this.applyDiffFilter(this.diffCurrentPage);
+                            else if (this.activeTab === 'missing') this.applyMissingFilter(this.missingCurrentPage);
+                            else if (this.activeTab === 'submitted') this.applySubmitFilter(this.submitCurrentPage);
                         } else {
-                            alert('Failed to delete report.');
+                            alert('Failed to delete.');
                         }
                     } catch {
-                        alert('Network error. Please try again.');
+                        alert('Network error.');
                     }
-                },
-
-
-                isMissingLoading: false,
-                missingReportRows: [],
-                missingTotalRecords: 0,
-                missingCurrentPage: 1,
-                missingPerPage: 10,
-                missingTotalPages: 1,
-
-                missingFilter: {
-                    fromDate: '',
-                    toDate: '',
-                    division: '',
-                    district: '',
-                    thanaUpazila: '',
-                    companyId: '',
-                    depotId: '',
-                    stationId: '',
-                },
-
-                missingAvailableDistricts: [],
-                missingAvailableUpazilas: [],
-
-                // ═══════════════════════════════════════════════════════════════
-                // TAB 4 — TAG OFFICERS SUBMITTED REPORT STATE
-                // ═══════════════════════════════════════════════════════════════
-
-                isSubmitLoading: false,
-                submitReportRows: [],
-                submitTotalRecords: 0,
-                submitCurrentPage: 1,
-                submitPerPage: 10,
-                submitTotalPages: 1,
-
-                submitFilter: {
-                    fromDate: '',
-                    toDate: '',
-                    division: '',
-                    district: '',
-                    thanaUpazila: '',
-                    companyId: '',
-                    depotId: '',
-                    stationId: '',
-                },
-
-                submitAvailableDistricts: [],
-                submitAvailableUpazilas: [],
-
-
-                // ═══════════════════════════════════════════════════════════════
-                // TAB 3 — MISSING REPORT METHODS
-                // ═══════════════════════════════════════════════════════════════
-
-                // Cascade: Division → Districts
-                onMissingDivisionChange() {
-                    this.missingFilter.district = '';
-                    this.missingFilter.thanaUpazila = '';
-                    this.missingAvailableDistricts = [];
-                    this.missingAvailableUpazilas = [];
-
-                    const found = this.allDivisions.find(d => d.name_en === this.missingFilter.division);
-                    this.missingAvailableDistricts = found?.districts ?? [];
-                },
-
-                // Cascade: District → Upazilas
-                onMissingDistrictChange() {
-                    this.missingFilter.thanaUpazila = '';
-                    this.missingAvailableUpazilas = [];
-
-                    const division = this.allDivisions.find(d => d.name_en === this.missingFilter.division);
-                    const district = division?.districts?.find(d => d.name_en === this.missingFilter.district);
-                    this.missingAvailableUpazilas = district?.upazilas ?? district?.police_stations ?? [];
-                },
-
-                // Apply missing filter — AJAX
-                async applyMissingFilter(page = 1) {
-                    this.isMissingLoading = true;
-                    this.missingCurrentPage = page;
-
-                    const params = new URLSearchParams();
-                    const filterMap = {
-                        page: page,
-                        from_date: this.missingFilter.fromDate,
-                        to_date: this.missingFilter.toDate,
-                        division: this.missingFilter.division,
-                        district: this.missingFilter.district,
-                        thana_upazila: this.missingFilter.thanaUpazila,
-                        company_id: this.missingFilter.companyId,
-                        depot_id: this.missingFilter.depotId,
-                        station_id: this.missingFilter.stationId,
-                    };
-
-                    Object.entries(filterMap).forEach(([key, value]) => {
-                        if (value !== '' && value !== null && value !== undefined) {
-                            params.append(key, value);
-                        }
-                    });
-
-                    try {
-                        const response = await fetch(`{{ route('dc.reports.missing') }}?${params}`, {
-                            headers: {
-                                'X-Requested-With': 'XMLHttpRequest',
-                                'Accept': 'application/json',
-                            },
-                        });
-
-                        if (!response.ok) throw new Error(`Server error ${response.status}`);
-
-                        const json = await response.json();
-
-                        if (json.success) {
-                            this.missingReportRows = json.rows;
-                            this.missingTotalRecords = json.total;
-                            this.missingTotalPages = json.lastPage;
-                            this.missingCurrentPage = json.currentPage;
-                        }
-
-                    } catch (error) {
-                        console.error('Missing report fetch failed:', error);
-                        this.missingReportRows = [];
-                        this.missingTotalRecords = 0;
-                    } finally {
-                        this.isMissingLoading = false;
-                    }
-                },
-
-                // Reset missing filters
-                resetMissingFilter() {
-                    this.missingFilter = {
-                        fromDate: '',
-                        toDate: '',
-                        division: '',
-                        district: '',
-                        thanaUpazila: '',
-                        companyId: '',
-                        depotId: '',
-                        stationId: '',
-                    };
-                    this.missingAvailableDistricts = [];
-                    this.missingAvailableUpazilas = [];
-                    this.missingReportRows = [];
-                    this.missingTotalRecords = 0;
-                    this.missingCurrentPage = 1;
-                    this.missingTotalPages = 1;
-                },
-
-                // Pagination
-                changeMissingPage(newPage) {
-                    if (newPage < 1 || newPage > this.missingTotalPages) return;
-                    this.applyMissingFilter(newPage);
-                },
-
-                // Export
-                exportMissingPdf() {
-                    const params = new URLSearchParams();
-                    const fields = {
-                        from_date: this.missingFilter.fromDate,
-                        to_date: this.missingFilter.toDate,
-                        division: this.missingFilter.division,
-                        district: this.missingFilter.district,
-                        company_id: this.missingFilter.companyId,
-                        station_id: this.missingFilter.stationId,
-                    };
-                    Object.entries(fields).forEach(([k, v]) => {
-                        if (v) params.append(k, v);
-                    });
-                    window.open(`{{ route('dc.reports.missing.export-pdf') }}?${params}`, '_blank');
-                },
-
-
-                // ═══════════════════════════════════════════════════════════════
-                // TAB 4 — SUBMITTED REPORT METHODS
-                // ═══════════════════════════════════════════════════════════════
-
-                // Cascade: Division → Districts
-                onSubmitDivisionChange() {
-                    this.submitFilter.district = '';
-                    this.submitFilter.thanaUpazila = '';
-                    this.submitAvailableDistricts = [];
-                    this.submitAvailableUpazilas = [];
-
-                    const found = this.allDivisions.find(d => d.name_en === this.submitFilter.division);
-                    this.submitAvailableDistricts = found?.districts ?? [];
-                },
-
-                // Cascade: District → Upazilas
-                onSubmitDistrictChange() {
-                    this.submitFilter.thanaUpazila = '';
-                    this.submitAvailableUpazilas = [];
-
-                    const division = this.allDivisions.find(d => d.name_en === this.submitFilter.division);
-                    const district = division?.districts?.find(d => d.name_en === this.submitFilter.district);
-                    this.submitAvailableUpazilas = district?.upazilas ?? district?.police_stations ?? [];
-                },
-
-                // Apply submit filter — AJAX
-                async applySubmitFilter(page = 1) {
-                    this.isSubmitLoading = true;
-                    this.submitCurrentPage = page;
-
-                    const params = new URLSearchParams();
-                    const filterMap = {
-                        page: page,
-                        from_date: this.submitFilter.fromDate,
-                        to_date: this.submitFilter.toDate,
-                        division: this.submitFilter.division,
-                        district: this.submitFilter.district,
-                        thana_upazila: this.submitFilter.thanaUpazila,
-                        company_id: this.submitFilter.companyId,
-                        depot_id: this.submitFilter.depotId,
-                        station_id: this.submitFilter.stationId,
-                    };
-
-                    Object.entries(filterMap).forEach(([key, value]) => {
-                        if (value !== '' && value !== null && value !== undefined) {
-                            params.append(key, value);
-                        }
-                    });
-
-                    try {
-                        const response = await fetch(`{{ route('dc.reports.submitted') }}?${params}`, {
-                            headers: {
-                                'X-Requested-With': 'XMLHttpRequest',
-                                'Accept': 'application/json',
-                            },
-                        });
-
-                        if (!response.ok) throw new Error(`Server error ${response.status}`);
-
-                        const json = await response.json();
-
-                        if (json.success) {
-                            this.submitReportRows = json.rows;
-                            this.submitTotalRecords = json.total;
-                            this.submitTotalPages = json.lastPage;
-                            this.submitCurrentPage = json.currentPage;
-                        }
-
-                    } catch (error) {
-                        console.error('Submit report fetch failed:', error);
-                        this.submitReportRows = [];
-                        this.submitTotalRecords = 0;
-                    } finally {
-                        this.isSubmitLoading = false;
-                    }
-                },
-
-                // Reset submit filters
-                resetSubmitFilter() {
-                    this.submitFilter = {
-                        fromDate: '',
-                        toDate: '',
-                        division: '',
-                        district: '',
-                        thanaUpazila: '',
-                        companyId: '',
-                        depotId: '',
-                        stationId: '',
-                    };
-                    this.submitAvailableDistricts = [];
-                    this.submitAvailableUpazilas = [];
-                    this.submitReportRows = [];
-                    this.submitTotalRecords = 0;
-                    this.submitCurrentPage = 1;
-                    this.submitTotalPages = 1;
-                },
-
-                // Pagination
-                changeSubmitPage(newPage) {
-                    if (newPage < 1 || newPage > this.submitTotalPages) return;
-                    this.applySubmitFilter(newPage);
-                },
-
-                // Export
-                exportSubmitPdf() {
-                    const params = new URLSearchParams();
-                    const fields = {
-                        from_date: this.submitFilter.fromDate,
-                        to_date: this.submitFilter.toDate,
-                        division: this.submitFilter.division,
-                        district: this.submitFilter.district,
-                        company_id: this.submitFilter.companyId,
-                        station_id: this.submitFilter.stationId,
-                    };
-                    Object.entries(fields).forEach(([k, v]) => {
-                        if (v) params.append(k, v);
-                    });
-                    window.open(`{{ route('dc.reports.submitted.export-pdf') }}?${params}`, '_blank');
                 },
 
             }; // end return

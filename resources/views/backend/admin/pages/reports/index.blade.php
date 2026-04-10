@@ -1133,6 +1133,7 @@
                         const data = await response.json();
 
                         if (data.success) {
+                            console.log('Received table HTML:', data.html); // Debug log
                             this.tableHtml = data.html;
                             this.recordCountText = data.total > 0 ?
                                 `${data.total} station(s) found` :

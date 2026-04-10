@@ -23,53 +23,57 @@ class DashboardController extends Controller
         $today     = Carbon::today();
         $thisMonth = Carbon::now()->startOfMonth();
         $yesterday = Carbon::yesterday();
-
         // =============================================
         // TODAY'S REPORTS
         // =============================================
         $todayReports = Fuelreport::whereDate('report_date', $today)->get();
 
         // =============================================
-        // TODAY'S CLOSING STOCK (per fuel type)
+        // TODAY'S STOCK
+        // Last Closing Stock − Today's Total Sales
         // =============================================
-        $yesterdayReports = Fuelreport::whereDate('report_date', $yesterday)->get();
 
-        $todayOctaneStock = $yesterdayReports->sum('octane_closing_stock');
-        $todayPetrolStock = $yesterdayReports->sum('petrol_closing_stock');
-        $todayDieselStock = $yesterdayReports->sum('diesel_closing_stock');
-        // others stock added if needed in future
-        $todayOthersStock = $yesterdayReports->sum('others_closing_stock');
-        
+        // সর্বশেষ report date (আজকের আগে)
+        $lastReportDate = Fuelreport::whereDate('report_date', '<', today())
+            ->max('report_date');
+
+        $lastAvailableReports = $lastReportDate
+            ? Fuelreport::whereDate('report_date', $lastReportDate)->get()
+            : collect();
+
+        // Last closing stock (সব station এর sum)
+        $lastOctaneClosing = $lastAvailableReports->sum('octane_closing_stock');
+        $lastPetrolClosing = $lastAvailableReports->sum('petrol_closing_stock');
+        $lastDieselClosing = $lastAvailableReports->sum('diesel_closing_stock');
+        $lastOthersClosing = $lastAvailableReports->sum('others_closing_stock');
+
+        // আজকের sales
+        $todayOctaneSold = $todayReports->sum('octane_sales');
+        $todayPetrolSold = $todayReports->sum('petrol_sales');
+        $todayDieselSold = $todayReports->sum('diesel_sales');
+        $todayOthersSold = $todayReports->sum('others_sales');
+
+        // Today Stock = Last Closing − Today Sales
+        $todayOctaneStock = $lastOctaneClosing - $todayOctaneSold;
+        $todayPetrolStock = $lastPetrolClosing - $todayPetrolSold;
+        $todayDieselStock = $lastDieselClosing - $todayDieselSold;
+        $todayOthersStock = $lastOthersClosing - $todayOthersSold;
 
         // =============================================
-        // TODAY'S RECEIVED (needed for difference %)
+        // TODAY'S RECEIVED
         // =============================================
         $todayPetrolReceived = $todayReports->sum('petrol_received');
         $todayDieselReceived = $todayReports->sum('diesel_received');
         $todayOctaneReceived = $todayReports->sum('octane_received');
-
-        // others received added if needed in future
         $todayOthersReceived = $todayReports->sum('others_received');
 
         // =============================================
-        // TODAY'S DIFFERENCE (supply - received per migration)
+        // TODAY'S DIFFERENCE
         // =============================================
         $todayPetrolDiff = $todayReports->sum('petrol_difference');
         $todayDieselDiff = $todayReports->sum('diesel_difference');
         $todayOctaneDiff = $todayReports->sum('octane_difference');
-
-        // others difference added if needed in future
         $todayOthersDiff = $todayReports->sum('others_difference');
-
-        // =============================================
-        // TODAY'S SALES (per fuel type)
-        // =============================================
-        $todayPetrolSold = $todayReports->sum('petrol_sales');
-        $todayDieselSold = $todayReports->sum('diesel_sales');
-        $todayOctaneSold = $todayReports->sum('octane_sales');
-
-        // others sales added if needed in future
-        $todayOthersSold = $todayReports->sum('others_sales');
 
         // =============================================
         // TODAY'S DIFFERENCE PERCENTAGE (%)
@@ -80,8 +84,6 @@ class DashboardController extends Controller
             ? round(($todayDieselDiff / $todayDieselReceived) * 100, 1) : 0;
         $todayOctaneDiffPct = $todayOctaneReceived > 0
             ? round(($todayOctaneDiff / $todayOctaneReceived) * 100, 1) : 0;
-
-        // others difference percentage added if needed in future
         $todayOthersDiffPct = $todayOthersReceived > 0
             ? round(($todayOthersDiff / $todayOthersReceived) * 100, 1) : 0;
 
