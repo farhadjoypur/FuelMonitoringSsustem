@@ -293,7 +293,7 @@
 
                             <!-- Row 3 -->
                             <div class="col-md-6">
-                                <label class="form-label fw-semibold">Email Address</label>
+                                <label class="form-label fw-semibold">Email</label>
                                 <input type="email" name="email" class="form-control form-control-lg"
                                     placeholder="depot@example.com">
                             </div>

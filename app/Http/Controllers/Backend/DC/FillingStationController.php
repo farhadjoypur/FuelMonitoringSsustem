@@ -118,15 +118,19 @@ class FillingStationController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'company_id' => 'required|exists:companies,id',
-            'station_name' => 'required|string|max:255|unique:filling_stations,station_name',
+            'station_name' => 'required|string|min:3|max:150|regex:/^[\pL0-9\s\-()]+$/u|unique:filling_stations,station_name',
             'station_code' => 'nullable|string|max:50|unique:filling_stations,station_code',
-            'owner_phone' => 'nullable|string|max:20',
+            'owner_phone' => [
+                'nullable',
+                'unique:users,phone',
+                'regex:/^(?:\+88|88)?(01[3-9]\d{8})$/',
+            ],
             'division' => 'required|string',
             'district' => 'required|string',
             'upazila' => 'required|string',
             'address' => 'nullable|string',
             'linked_depot' => 'nullable|exists:depots,id',
-            'tank_capacity' => 'nullable|numeric',
+            'tank_capacity' => 'nullable|numeric|gt:0',
             'fuel_types' => 'nullable|array',
             'license_file' => 'nullable|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
@@ -172,15 +176,19 @@ class FillingStationController extends Controller
 
         $validator = Validator::make($request->all(), [
             'company_id' => 'required|exists:companies,id',
-            'station_name' => 'required|string|max:255|unique:filling_stations,station_name,'.$station->id,
+            'station_name' => 'required|string|min:3|max:150|regex:/^[\pL0-9\s\-()]+$/u|unique:filling_stations,station_name,'.$station->id,
             'station_code' => 'nullable|string|max:50|unique:filling_stations,station_code,'.$station->id,
-            'owner_phone' => 'nullable|string|max:20',
+            'owner_phone' => [
+                'nullable',
+                'unique:users,phone',
+                'regex:/^(?:\+88|88)?(01[3-9]\d{8})$/',
+            ],
             'division' => 'required|string',
             'district' => 'required|string',
             'upazila' => 'required|string',
             'address' => 'nullable|string',
             'linked_depot' => 'nullable|exists:depots,id',
-            'tank_capacity' => 'nullable|numeric',
+            'tank_capacity' => 'nullable|numeric|gt:0',
             'fuel_types' => 'nullable|array',
             'license_file' => 'nullable|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);

@@ -65,15 +65,21 @@ class AdminUserController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:150',
-            'designation' => 'nullable|string|max:150',
-            'department' => 'nullable|string|max:150',
+            'name' => [
+                'required',
+                'string',
+                'min:3',
+                'max:150',
+                'regex:/^[^0-9!@#$%^&*()_+={}\[\]:;\"\'<>,?\/\\|`~]+$/u',
+            ],
+            'designation' => 'nullable|string|min:2|max:150|regex:/^[\pL\s.\-()]+$/u',
+            'department' => 'nullable|string|min:2|max:150|regex:/^[\pL\s.\-()]+$/u',
             'phone' => [
                 'required',
                 'unique:users,phone',
                 'regex:/^(?:\+88|88)?(01[3-9]\d{8})$/',
             ],
-            'email' => 'nullable|email|unique:users,email',
+            'email' => 'nullable|email:rfc,dns|unique:users,email',
             'password' => 'required',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
@@ -140,9 +146,14 @@ class AdminUserController extends Controller
         $user = User::findOrFail($id);
 
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'nullable|email|unique:users,email,'.$id,
-            // 'phone' => 'required|string|unique:users,phone,'.$id,
+            'name' => [
+                'required',
+                'string',
+                'min:3',
+                'max:150',
+                'regex:/^[^0-9!@#$%^&*()_+={}\[\]:;\"\'<>,?\/\\|`~]+$/u',
+            ],
+            'email' => 'nullable|email:rfc,dns|unique:users,email,'.$id,
             'phone' => [
                 'required',
                 'string',
@@ -150,8 +161,8 @@ class AdminUserController extends Controller
                 'regex:/^(01[3-9]\d{8})$/',
                 'unique:users,phone,'.$id,
             ],
-            'designation' => 'nullable|string',
-            'department' => 'nullable|string',
+            'designation' => 'nullable|string|min:2|max:150|regex:/^[\pL\s.\-()]+$/u',
+            'department' => 'nullable|string|min:2|max:150|regex:/^[\pL\s.\-()]+$/u',
             'status' => 'required|string',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'password' => 'nullable|min:6',

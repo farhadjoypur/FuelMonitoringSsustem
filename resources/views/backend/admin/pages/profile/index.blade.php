@@ -149,7 +149,7 @@
                             </div>
 
                             <div class="col-md-6">
-                                <label class="form-label"><i class="far fa-envelope me-2"></i> Email Address</label>
+                                <label class="form-label"><i class="far fa-envelope me-2"></i> Email</label>
                                 <input type="email" name="email"
                                     class="form-control form-control-custom @error('email') is-invalid @enderror"
                                     value="{{ old('email', auth()->user()->email ?? '') }}" required>
