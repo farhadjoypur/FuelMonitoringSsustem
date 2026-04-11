@@ -138,8 +138,8 @@ class TagOfficerController extends Controller
                 'max:150',
                 'regex:/^[^0-9!@#$%^&*()_+={}\[\]:;\"\'<>,?\/\\|`~]+$/u',
             ],
-            'designation' => 'required|string|max:150',
-            'department' => 'required|string|max:150',
+            'designation' => 'required|string|min:2|max:150|regex:/^[\pL\s.\-()]+$/u',
+            'department' => 'required|string|min:2|max:150|regex:/^[\pL\s.\-()]+$/u',
             'phone' => [
                 'required',
                 'unique:users,phone',
