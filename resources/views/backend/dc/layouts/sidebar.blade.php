@@ -20,14 +20,6 @@
                 </a>
             </li>
 
-            {{-- dc.reports.index --}}
-            <li class="menu-item">
-                <a href="{{ route('dc.reports.index') }}"
-                    class="menu-link {{ request()->routeIs('dc.reports.*') ? 'active' : '' }}">
-                    <span class="material-symbols-rounded">description</span>
-                    <span class="menu-label">Reports</span>
-                </a>
-            </li>
 
             <li class="menu-item">
                 <a href="{{ route('dc.filling-station.index') }}"
@@ -63,6 +55,14 @@
                 </a>
             </li>
 
+
+            <li class="menu-item">
+                <a href="{{ route('dc.reports.index') }}"
+                    class="menu-link {{ request()->routeIs('dc.reports.*') ? 'active' : '' }}">
+                    <span class="material-symbols-rounded">description</span>
+                    <span class="menu-label">Reports</span>
+                </a>
+            </li>
 
 
             <li class="menu-item">
