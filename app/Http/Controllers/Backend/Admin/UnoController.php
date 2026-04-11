@@ -77,10 +77,15 @@ class UnoController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:150',
-            'designation' => 'nullable|string|max:150',
-            'department' => 'nullable|string|max:150',
-            // 'phone' => 'required|unique:users,phone',
+            'name' => [
+                'required',
+                'string',
+                'min:3',
+                'max:150',
+                'regex:/^[^0-9!@#$%^&*()_+={}\[\]:;\"\'<>,?\/\\|`~]+$/u',
+            ],
+            'designation' => 'required|string|min:2|max:150|regex:/^[\pL\s.\-()]+$/u',
+            'department' => 'required|string|min:2|max:150|regex:/^[\pL\s.\-()]+$/u',
             'phone' => [
                 'required',
                 'unique:users,phone',
@@ -159,9 +164,14 @@ class UnoController extends Controller
         $user = User::findOrFail($id);
 
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => [
+                'required',
+                'string',
+                'min:3',
+                'max:150',
+                'regex:/^[^0-9!@#$%^&*()_+={}\[\]:;\"\'<>,?\/\\|`~]+$/u',
+            ],
             'email' => 'nullable|email|unique:users,email,'.$id,
-            // 'phone' => 'required|string|unique:users,phone,'.$id,
             'phone' => [
                 'required',
                 'string',
@@ -169,8 +179,8 @@ class UnoController extends Controller
                 'regex:/^(01[3-9]\d{8})$/',
                 'unique:users,phone,'.$id,
             ],
-            'designation' => 'required|string',
-            'department' => 'required|string',
+            'designation' => 'required|string|min:2|max:150|regex:/^[\pL\s.\-()]+$/u',
+            'department' => 'required|string|min:2|max:150|regex:/^[\pL\s.\-()]+$/u',
             'division' => 'required',
             'district' => 'required',
             'upazila' => 'nullable',
