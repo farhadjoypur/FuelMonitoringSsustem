@@ -20,13 +20,6 @@
                 </a>
             </li>
 
-            <li class="menu-item">
-                <a href="{{ route('uno.reports.index') }}"
-                    class="menu-link {{ request()->routeIs('uno.reports.*') ? 'active' : '' }}">
-                    <span class="material-symbols-rounded">description</span>
-                    <span class="menu-label">Reports</span>
-                </a>
-            </li>
 
             <li class="menu-item">
                 <a href="{{ route('uno.filling-station.index') }}"
@@ -49,6 +42,14 @@
                     class="menu-link {{ request()->routeIs('uno.assign-tag-officer.*') ? 'active' : '' }}">
                     <span class="material-symbols-rounded">assignment_turned_in</span>
                     <span class="menu-label">Assign Tag Officer</span>
+                </a>
+            </li>
+
+            <li class="menu-item">
+                <a href="{{ route('uno.reports.index') }}"
+                    class="menu-link {{ request()->routeIs('uno.reports.*') ? 'active' : '' }}">
+                    <span class="material-symbols-rounded">description</span>
+                    <span class="menu-label">Reports</span>
                 </a>
             </li>
 
