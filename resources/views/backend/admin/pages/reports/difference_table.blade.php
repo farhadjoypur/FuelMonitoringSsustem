@@ -127,9 +127,9 @@
         <div style="display:flex; align-items:center; gap:12px;">
             <span class="record-count" x-show="diffTotalRecords > 0" x-text="diffTotalRecords + ' records found'">
             </span>
-            {{-- <button class="btn-diff-export-pdf" @click="exportDiffPdf()">
-                <i class="fa-solid fa-file-pdf"></i> Export to PDF
-            </button> --}}
+            <button class="btn-diff-export-pdf" @click="exportDiffPdf()">
+    <i class="fa-solid fa-file-pdf"></i> Export to PDF
+</button>
         </div>
     </div>
 

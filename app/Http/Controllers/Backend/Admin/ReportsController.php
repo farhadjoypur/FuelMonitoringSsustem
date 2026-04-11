@@ -11,12 +11,13 @@ use App\Models\Fuelreport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Mpdf\Mpdf;
 
 class ReportsController extends Controller
 {
     public function index(Request $request)
     {
-        
+
         $hasAnyFilter = $this->hasAnyFilterApplied($request);
 
         if (! $hasAnyFilter) {
@@ -786,5 +787,415 @@ class ReportsController extends Controller
             'currentPage' => $currentPage,
             'lastPage'    => $totalPages,
         ]);
+    }
+
+
+
+    public function exportPdf(Request $request)
+    {
+        $filters = $request->only([
+            'from_date',
+            'to_date',
+            'division',
+            'district',
+            'thana_upazila',
+            'company_id',
+            'depot_id',
+            'station_id',
+            'fuel_type',
+            'stock_status'
+        ]);
+
+        $rawReports = $this->buildFilteredQuery($request)
+            ->orderBy('station_id')
+            ->orderBy('report_date')
+            ->get();
+
+        $officerMap = $this->loadOfficerMap();
+        $aggregatedReports = $this->aggregateByStation($rawReports, $request);
+        $formattedReports = $aggregatedReports->map(
+            fn($stationData) => $this->formatAggregatedReport($stationData, $officerMap)
+        );
+        $totalRow = $this->buildTotalRow($formattedReports);
+
+        $html = view('backend.admin.pages.reports.pdf_template', [
+            'reports'  => $formattedReports,
+            'totalRow' => $totalRow,
+            'filters'  => $filters,
+        ])->render();
+
+        $mpdf = new Mpdf([
+            'mode'          => 'utf-8',
+            'format'        => 'A4-L',   // Landscape
+            'margin_top'    => 10,
+            'margin_bottom' => 10,
+            'margin_left'   => 10,
+            'margin_right'  => 10,
+        ]);
+
+        $mpdf->autoScriptToLang = true;
+        $mpdf->autoLangToFont   = true;
+
+        $mpdf->WriteHTML($html);
+
+        return response()->streamDownload(
+            fn() => print($mpdf->Output('', 'S')),
+            'stock-report-' . now()->format('Y-m-d') . '.pdf',
+            ['Content-Type' => 'application/pdf']
+        );
+    }
+
+    // ─── DIFFERENCE REPORT PDF ───────────────────────────────────
+    public function exportDifferencePdf(Request $request)
+    {
+        $filters = $request->only([
+            'from_date',
+            'to_date',
+            'division',
+            'district',
+            'thana_upazila',
+            'company_id',
+            'station_id',
+            'tag_officer',
+            'diff_status',
+            'min_diff_l',
+            'min_diff_pct'
+        ]);
+
+        // differenceReport() এর same logic copy
+        $fuelTypes = ['octane', 'petrol', 'diesel', 'others'];
+
+        $query = Fuelreport::query()
+            ->with(['fillingStation.company', 'fillingStation.assignedOfficer.user.profile']);
+
+        if (!empty($filters['from_date']))
+            $query->whereDate('report_date', '>=', $filters['from_date']);
+        if (!empty($filters['to_date']))
+            $query->whereDate('report_date', '<=', $filters['to_date']);
+        if (!empty($filters['division']))
+            $query->whereHas('fillingStation', fn($q) => $q->where('division', $filters['division']));
+        if (!empty($filters['district']))
+            $query->where('district', $filters['district']);
+        if (!empty($filters['thana_upazila']))
+            $query->where('thana_upazila', $filters['thana_upazila']);
+        if (!empty($filters['company_id']))
+            $query->whereHas('fillingStation', fn($q) => $q->where('company_id', $filters['company_id']));
+        if (!empty($filters['station_id']))
+            $query->where('station_id', $filters['station_id']);
+
+        $allRawReports = $query->orderBy('report_date', 'desc')->orderBy('station_id')->get();
+
+        $officerMap = AssignTagOfficer::with(['officer.profile'])
+            ->where('status', 'active')->get()->keyBy('filling_station_id');
+
+        $rows = $allRawReports->groupBy('station_id')->map(function ($stationReports) use ($fuelTypes, $officerMap) {
+            $firstReport = $stationReports->first();
+            $lastReport  = $stationReports->last();
+            $stationId   = $firstReport->station_id;
+
+            $assignment         = $officerMap->get($stationId);
+            $officerProfile     = $assignment?->officer?->profile;
+            $tagOfficerName     = $officerProfile?->name ?? $assignment?->officer?->name ?? '—';
+            $officerDesignation = $officerProfile?->designation ?? '—';
+            $officerPhone       = $officerProfile?->phone ?? $assignment?->officer?->phone ?? '—';
+
+            $fuelBreakdown = [];
+            foreach ($fuelTypes as $fuel) {
+                $totalSupply      = (float) $stationReports->sum("{$fuel}_supply");
+                $totalReceived    = (float) $stationReports->sum("{$fuel}_received");
+                $differenceL      = $totalSupply - $totalReceived;
+                $differencePercent = $totalSupply > 0 ? round(($differenceL / $totalSupply) * 100, 2) : 0;
+                $diffStatus = match (true) {
+                    abs($differencePercent) >= 5 => 'High',
+                    abs($differencePercent) >= 1 => 'Low',
+                    default                      => 'Normal',
+                };
+                $fuelBreakdown[] = [
+                    'fuelType'          => ucfirst($fuel),
+                    'differenceL'       => number_format($differenceL, 0),
+                    'differencePercent' => $differencePercent,
+                    'diffStatus'        => $diffStatus,
+                ];
+            }
+
+            return [
+                'stationName'        => $firstReport->station_name ?? $firstReport->fillingStation?->station_name ?? '—',
+                'companyName'        => $firstReport->fillingStation?->company?->code ?? '—',
+                'tagOfficerName'     => $tagOfficerName,
+                'officerDesignation' => $officerDesignation,
+                'officerPhone'       => $officerPhone,
+                'district'           => $firstReport->district ?? '—',
+                'thanaUpazila'       => $firstReport->thana_upazila ?? '—',
+                'dateFormatted'      => \Carbon\Carbon::parse($firstReport->report_date)->format('d M Y'),
+                'fuelBreakdown'      => $fuelBreakdown,
+            ];
+        })->values();
+
+        // Post-aggregate filters
+        if (!empty($filters['min_diff_l'])) {
+            $minL = (float) $filters['min_diff_l'];
+            $rows = $rows->filter(
+                fn($row) =>
+                collect($row['fuelBreakdown'])->contains(fn($f) => abs((float) str_replace(',', '', $f['differenceL'])) >= $minL)
+            )->values();
+        }
+        if (!empty($filters['min_diff_pct'])) {
+            $minPct = (float) $filters['min_diff_pct'];
+            $rows = $rows->filter(
+                fn($row) =>
+                collect($row['fuelBreakdown'])->contains(fn($f) => abs($f['differencePercent']) >= $minPct)
+            )->values();
+        }
+        if (!empty($filters['diff_status'])) {
+            $target = ucfirst($filters['diff_status']);
+            $rows = $rows->filter(
+                fn($row) =>
+                collect($row['fuelBreakdown'])->contains(fn($f) => $f['diffStatus'] === $target)
+            )->values();
+        }
+
+        $html = view('backend.admin.pages.reports.pdf_difference', [
+            'rows'    => $rows,
+            'filters' => $filters,
+        ])->render();
+
+        $defaultConfig   = (new \Mpdf\Config\ConfigVariables())->getDefaults();
+        $defaultFontData = (new \Mpdf\Config\FontVariables())->getDefaults()['fontdata'];
+
+        $mpdf = new Mpdf([
+            'mode'          => 'utf-8',
+            'format'        => 'A4-L',
+            'margin_top'    => 10,
+            'margin_bottom' => 10,
+            'margin_left'   => 10,
+            'margin_right'  => 10,
+            'fontDir'       => array_merge($defaultConfig['fontDir'], [
+                base_path('public/fonts'),
+            ]),
+            'fontdata'      => array_merge($defaultFontData, [
+                'solaimanlipi' => [
+                    'R' => 'SolaimanLipi.ttf',
+                ],
+            ]),
+            'default_font'  => 'solaimanlipi',
+        ]);
+
+        $mpdf->autoScriptToLang = true;
+        $mpdf->autoLangToFont   = true;
+        $mpdf->WriteHTML($html);
+
+        return response()->streamDownload(
+            fn() => print($mpdf->Output('', 'S')),
+            'difference-report-' . now()->format('Y-m-d') . '.pdf',
+            ['Content-Type' => 'application/pdf']
+        );
+    }
+
+
+    // ─── MISSING REPORT PDF ──────────────────────────────────────
+    public function exportMissingPdf(Request $request)
+    {
+        $filters = $request->only([
+            'from_date',
+            'to_date',
+            'division',
+            'district',
+            'thana_upazila',
+            'company_id',
+            'depot_id',
+            'station_id'
+        ]);
+
+        $assignmentsQuery = AssignTagOfficer::with([
+            'officer.profile',
+            'fillingStation.company',
+            'fillingStation.depot'
+        ])->where('status', 'active');
+
+        if (!empty($filters['division']))
+            $assignmentsQuery->whereHas('fillingStation', fn($q) => $q->where('division', $filters['division']));
+        if (!empty($filters['district']))
+            $assignmentsQuery->whereHas('fillingStation', fn($q) => $q->where('district', $filters['district']));
+        if (!empty($filters['thana_upazila']))
+            $assignmentsQuery->whereHas('fillingStation', fn($q) => $q->where('upazila', $filters['thana_upazila']));
+        if (!empty($filters['company_id']))
+            $assignmentsQuery->whereHas('fillingStation', fn($q) => $q->where('company_id', $filters['company_id']));
+        if (!empty($filters['depot_id']))
+            $assignmentsQuery->whereHas('fillingStation', fn($q) => $q->where('depot_id', $filters['depot_id']));
+        if (!empty($filters['station_id']))
+            $assignmentsQuery->where('filling_station_id', $filters['station_id']);
+
+        $allAssignments = $assignmentsQuery->get();
+
+        $fromDate = !empty($filters['from_date'])
+            ? \Carbon\Carbon::parse($filters['from_date'])->startOfDay()
+            : now()->subDays(30)->startOfDay();
+        $toDate = !empty($filters['to_date'])
+            ? \Carbon\Carbon::parse($filters['to_date'])->endOfDay()
+            : now()->endOfDay();
+
+        $reportedStationIds = Fuelreport::whereBetween('report_date', [$fromDate, $toDate])
+            ->pluck('station_id')->unique()->toArray();
+
+        $rows = $allAssignments
+            ->filter(fn($a) => !in_array($a->filling_station_id, $reportedStationIds))
+            ->map(function ($assignment) use ($fromDate) {
+                $officer = $assignment->officer;
+                $profile = $officer?->profile;
+                $station = $assignment->fillingStation;
+                return [
+                    'missingDate'  => $fromDate->format('d M Y'),
+                    'officerName'  => $profile?->name ?? $officer?->name ?? '—',
+                    'officerPhone' => $profile?->phone ?? $officer?->phone ?? '—',
+                    'division'     => $station?->division ?? '—',
+                    'district'     => $station?->district ?? '—',
+                    'thanaUpazila' => $station?->upazila ?? '—',
+                    'stationName'  => $station?->station_name ?? '—',
+                    'companyName'  => $station?->company?->code ?? '—',
+                    'depotName'    => $station?->depot?->depot_name ?? '—',
+                ];
+            })->values();
+
+        $html = view('backend.admin.pages.reports.pdf_missing', [
+            'rows'    => $rows,
+            'filters' => $filters,
+            'fromDate' => $fromDate->format('d M Y'),
+            'toDate'   => $toDate->format('d M Y'),
+        ])->render();
+
+        $defaultConfig   = (new \Mpdf\Config\ConfigVariables())->getDefaults();
+        $defaultFontData = (new \Mpdf\Config\FontVariables())->getDefaults()['fontdata'];
+
+        $mpdf = new Mpdf([
+            'mode'          => 'utf-8',
+            'format'        => 'A4-L',
+            'margin_top'    => 10,
+            'margin_bottom' => 10,
+            'margin_left'   => 10,
+            'margin_right'  => 10,
+            'fontDir'       => array_merge($defaultConfig['fontDir'], [
+                base_path('public/fonts'),
+            ]),
+            'fontdata'      => array_merge($defaultFontData, [
+                'solaimanlipi' => [
+                    'R' => 'SolaimanLipi.ttf',
+                ],
+            ]),
+            'default_font'  => 'solaimanlipi',
+        ]);
+
+        $mpdf->autoScriptToLang = true;
+        $mpdf->autoLangToFont   = true;
+        $mpdf->WriteHTML($html);
+
+        return response()->streamDownload(
+            fn() => print($mpdf->Output('', 'S')),
+            'missing-report-' . now()->format('Y-m-d') . '.pdf',
+            ['Content-Type' => 'application/pdf']
+        );
+    }
+
+
+    // ─── SUBMITTED REPORT PDF ────────────────────────────────────
+    public function exportSubmittedPdf(Request $request)
+    {
+        $filters = $request->only([
+            'from_date',
+            'to_date',
+            'division',
+            'district',
+            'thana_upazila',
+            'company_id',
+            'depot_id',
+            'station_id'
+        ]);
+
+        $fuelTypes = ['octane', 'petrol', 'diesel', 'others'];
+
+        $query = Fuelreport::query()->with([
+            'fillingStation.company',
+            'fillingStation.assignedOfficer.officer.profile',
+        ]);
+
+        if (!empty($filters['from_date']))
+            $query->whereDate('report_date', '>=', $filters['from_date']);
+        if (!empty($filters['to_date']))
+            $query->whereDate('report_date', '<=', $filters['to_date']);
+        if (!empty($filters['division']))
+            $query->whereHas('fillingStation', fn($q) => $q->where('division', $filters['division']));
+        if (!empty($filters['district']))
+            $query->where('district', $filters['district']);
+        if (!empty($filters['thana_upazila']))
+            $query->where('thana_upazila', $filters['thana_upazila']);
+        if (!empty($filters['company_id']))
+            $query->whereHas('fillingStation', fn($q) => $q->where('company_id', $filters['company_id']));
+        if (!empty($filters['depot_id']))
+            $query->whereHas('fillingStation', fn($q) => $q->where('depot_id', $filters['depot_id']));
+        if (!empty($filters['station_id']))
+            $query->where('station_id', $filters['station_id']);
+
+        $allReports = $query->orderBy('report_date', 'desc')->get();
+
+        $officerMap = AssignTagOfficer::with(['officer.profile'])
+            ->where('status', 'active')->get()->keyBy('filling_station_id');
+
+        $rows = $allReports->map(function ($report) use ($fuelTypes, $officerMap) {
+            $assignment     = $officerMap->get($report->station_id);
+            $officerProfile = $assignment?->officer?->profile;
+
+            $fuelBreakdown = collect($fuelTypes)->map(fn($fuel) => [
+                'fuelType'     => ucfirst($fuel),
+                'closingStock' => number_format((float)($report->{"{$fuel}_closing_stock"} ?? 0), 0),
+            ])->toArray();
+
+            return [
+                'submitDate'   => \Carbon\Carbon::parse($report->report_date)->format('d M Y'),
+                'officerName'  => $officerProfile?->name ?? $assignment?->officer?->name ?? '—',
+                'officerPhone' => $officerProfile?->phone ?? $assignment?->officer?->phone ?? '—',
+                'division'     => $report->fillingStation?->division ?? '—',
+                'district'     => $report->district ?? '—',
+                'thanaUpazila' => $report->thana_upazila ?? '—',
+                'stationName'  => $report->station_name ?? $report->fillingStation?->station_name ?? '—',
+                'companyName'  => $report->fillingStation?->company?->code ?? '—',
+                'depotName'    => $report->depot_name ?? $report->fillingStation?->depot?->depot_name ?? '—',
+                'fuelBreakdown' => $fuelBreakdown,
+            ];
+        });
+
+        $html = view('backend.admin.pages.reports.pdf_submitted', [
+            'rows'    => $rows,
+            'filters' => $filters,
+        ])->render();
+
+        $defaultConfig   = (new \Mpdf\Config\ConfigVariables())->getDefaults();
+        $defaultFontData = (new \Mpdf\Config\FontVariables())->getDefaults()['fontdata'];
+
+        $mpdf = new Mpdf([
+            'mode'          => 'utf-8',
+            'format'        => 'A4-L',
+            'margin_top'    => 10,
+            'margin_bottom' => 10,
+            'margin_left'   => 10,
+            'margin_right'  => 10,
+            'fontDir'       => array_merge($defaultConfig['fontDir'], [
+                base_path('public/fonts'),
+            ]),
+            'fontdata'      => array_merge($defaultFontData, [
+                'solaimanlipi' => [
+                    'R' => 'SolaimanLipi.ttf',
+                ],
+            ]),
+            'default_font'  => 'solaimanlipi',
+        ]);
+
+        $mpdf->autoScriptToLang = true;
+        $mpdf->autoLangToFont   = true;
+        $mpdf->WriteHTML($html);
+
+        return response()->streamDownload(
+            fn() => print($mpdf->Output('', 'S')),
+            'submitted-report-' . now()->format('Y-m-d') . '.pdf',
+            ['Content-Type' => 'application/pdf']
+        );
     }
 }

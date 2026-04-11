@@ -14,7 +14,7 @@ use App\Http\Controllers\Backend\Admin\TagOfficerController;
 use App\Http\Controllers\Backend\Admin\UnoController;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('admin')->middleware(['role:'.UserRole::ADMIN])->as('admin.')->group(function () {
+Route::prefix('admin')->middleware(['role:' . UserRole::ADMIN])->as('admin.')->group(function () {
     Route::resource('companies', CompanyController::class)->names('companies');
     // Route::resource('stations', FillingStationController::class)->names('stations');
     //  Route::get('/stations/{station}/get', [FillingStationController::class, 'getStation']);
@@ -39,8 +39,6 @@ Route::prefix('admin')->middleware(['role:'.UserRole::ADMIN])->as('admin.')->gro
 
     Route::get('admin/reports/difference', [ReportsController::class, 'differenceReport'])
         ->name('reports.difference');
-    Route::get('admin/reports/difference/export-pdf', [ReportsController::class, 'exportDifferenceReportPdf'])
-        ->name('reports.difference.export-pdf');
 
     Route::get('admin/reports/missing',   [ReportsController::class, 'missingReport'])
         ->name('reports.missing');
@@ -48,11 +46,10 @@ Route::prefix('admin')->middleware(['role:'.UserRole::ADMIN])->as('admin.')->gro
     Route::get('admin/reports/submitted', [ReportsController::class, 'submittedReport'])
         ->name('reports.submitted');
 
-    // admin . reports . missing . export - pdf
-    Route::get('admin/reports/missing/export-pdf', [ReportsController::class, 'exportMissingReportPdf'])
-        ->name('reports.missing.export-pdf');
-    // admin . reports . submitted . export - pdf
-    Route::get('admin/reports/submitted/export-pdf', [ReportsController::class, 'exportSubmittedReportPdf'])
-        ->name('reports.submitted.export-pdf');
+        // export pdf routes
+    Route::get('reports/export-pdf', [ReportsController::class, 'exportPdf'])->name('reports.export.pdf');
 
+    Route::get('reports/export-difference-pdf', [ReportsController::class, 'exportDifferencePdf'])->name('reports.export.difference.pdf');
+    Route::get('reports/export-missing-pdf',    [ReportsController::class, 'exportMissingPdf'])->name('reports.export.missing.pdf');
+    Route::get('reports/export-submitted-pdf',  [ReportsController::class, 'exportSubmittedPdf'])->name('reports.export.submitted.pdf');
 });
