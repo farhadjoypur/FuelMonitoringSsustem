@@ -59,7 +59,7 @@ class ProfileController extends Controller
             'name' => [
                 'required',
                 'string',
-                'min:2',
+                'min:3',
                 'max:150',
                 'regex:/^[^0-9!@#$%^&*()_+={}\[\]:;\"\'<>,?\/\\|`~]+$/u',
             ],

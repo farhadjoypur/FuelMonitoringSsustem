@@ -121,16 +121,21 @@ class TagOfficerController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:150',
+            'name' => [
+                'required',
+                'string',
+                'min:3',
+                'max:150',
+                'regex:/^[^0-9!@#$%^&*()_+={}\[\]:;\"\'<>,?\/\\|`~]+$/u',
+            ],
             'designation' => 'required|string|max:150',
             'department' => 'required|string|max:150',
-            // 'phone' => 'required|unique:users,phone',
             'phone' => [
                 'required',
                 'unique:users,phone',
                 'regex:/^(?:\+88|88)?(01[3-9]\d{8})$/',
             ],
-            'email' => 'nullable|email|unique:users,email',
+            'email' => 'nullable|email:rfc,dns|unique:users,email',
             'division' => 'required',
             'district' => 'required',
             'upazila' => 'required',
@@ -203,9 +208,14 @@ class TagOfficerController extends Controller
         $user = User::findOrFail($id);
 
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'nullable|email|unique:users,email,'.$id,
-            // 'phone' => 'required|string|unique:users,phone,'.$id,
+            'name' => [
+                'required',
+                'string',
+                'min:3',
+                'max:150',
+                'regex:/^[^0-9!@#$%^&*()_+={}\[\]:;\"\'<>,?\/\\|`~]+$/u',
+            ],
+            'email' => 'nullable|email:rfc,dns|unique:users,email,'.$id,
             'phone' => [
                 'required',
                 'string',
