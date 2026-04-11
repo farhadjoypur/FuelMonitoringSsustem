@@ -123,7 +123,7 @@ class FillingStationController extends Controller
         $validator = Validator::make($request->all(), [
             'company_id' => 'required|exists:companies,id',
             'station_name' => 'required|string|max:255|unique:filling_stations,station_name',
-            'station_code' => 'required|string|max:50|unique:filling_stations,station_code',
+            'station_code' => 'nullable|string|max:50|unique:filling_stations,station_code',
             'owner_phone' => 'nullable|string|max:20',
             'division' => 'required|string',
             'district' => 'required|string',
@@ -179,7 +179,7 @@ class FillingStationController extends Controller
         $validator = Validator::make($request->all(), [
             'company_id' => 'required|exists:companies,id',
             'station_name' => 'required|string|max:255|unique:filling_stations,station_name,'.$station->id,
-            'station_code' => 'required|string|max:50|unique:filling_stations,station_code,'.$station->id,
+            'station_code' => 'nullable|string|max:50|unique:filling_stations,station_code,'.$station->id,
             'owner_phone' => 'nullable|string|max:20',
             'division' => 'required|string',
             'district' => 'required|string',
