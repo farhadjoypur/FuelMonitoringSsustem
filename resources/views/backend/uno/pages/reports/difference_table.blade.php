@@ -241,22 +241,22 @@
                         </td>
 
                         {{-- Actions --}}
-                        <td>
-                            <div class="action-btns">
-                                <button class="action-btn btn-view"
-                                    @click="window.location.href='{{ url('admin/reports') }}/' + row.reportId">
-                                    <i class="fa-solid fa-eye fa-xs"></i> View
-                                </button>
-                                <button class="action-btn btn-message"
-                                    @click="openMessageModal(row.reportId, row.stationName)">
-                                    <i class="fa-solid fa-envelope fa-xs"></i> Message
-                                </button>
-                                <button class="action-btn btn-delete"
-                                    @click="openDeleteModal(row.reportId, row.stationName)">
-                                    <i class="fa-solid fa-trash fa-xs"></i> Delete
-                                </button>
-                            </div>
-                        </td>
+                       <td>
+                        <div class="action-btns">
+                            <button class="action-btn btn-view"
+                                @click.prevent="">
+                                <i class="fa-solid fa-eye fa-xs"></i> View
+                            </button>
+                            <button class="action-btn btn-message"
+                                @click.prevent="">
+                                <i class="fa-solid fa-envelope fa-xs"></i> Message
+                            </button>
+                            <button class="action-btn btn-delete"
+                                @click.prevent="">
+                                <i class="fa-solid fa-trash fa-xs"></i> Delete
+                            </button>
+                        </div>
+                    </td>
                     </tr>
                 </template>
             </tbody>
