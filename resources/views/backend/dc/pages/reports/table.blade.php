@@ -14,9 +14,9 @@
     use Carbon\Carbon;
 
     $fuelTypes = [
-        'diesel' => ['label' => 'Diesel', 'css' => 'fuel-diesel'],
-        'petrol' => ['label' => 'Petrol', 'css' => 'fuel-petrol'],
         'octane' => ['label' => 'Octane', 'css' => 'fuel-octane'],
+        'petrol' => ['label' => 'Petrol', 'css' => 'fuel-petrol'],
+        'diesel' => ['label' => 'Diesel', 'css' => 'fuel-diesel'],
         'others' => ['label' => 'Others', 'css' => 'fuel-others'],
     ];
 
@@ -558,24 +558,18 @@
                                 <td rowspan="{{ $fuelCount }}">
                                     <div class="action-buttons">
 
-                                        <a href="{{ url('admin/reports/' . $report['id']) }}"
-                                            class="btn-action btn-view">
+                                        <button class="btn-action btn-view" type="button"
+                                            @click.prevent="">
                                             <i class="fa-solid fa-eye"></i> View
-                                        </a>
+                                        </button>
 
                                         <button class="btn-action btn-message" type="button"
-                                            @click="openMessageModal(
-                                                {{ $report['id'] }},
-                                                '{{ addslashes($report['station_name']) }}'
-                                            )">
+                                            @click.prevent="">
                                             <i class="fa-solid fa-message"></i> Message
                                         </button>
 
                                         <button class="btn-action btn-delete" type="button"
-                                            @click="openDeleteModal(
-                                                {{ $report['id'] }},
-                                                '{{ addslashes($report['station_name']) }}'
-                                            )">
+                                            @click.prevent="">
                                             <i class="fa-solid fa-trash"></i> Delete
                                         </button>
 
