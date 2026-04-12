@@ -120,9 +120,9 @@
         <div style="display:flex; align-items:center; gap:12px;">
             <span class="record-count" x-show="submitTotalRecords > 0" x-text="submitTotalRecords + ' records found'">
             </span>
-            {{-- <button class="btn-submit-export-pdf" @click="exportSubmitPdf()">
+            <button class="btn-submit-export-pdf" @click="exportSubmitPdf()">
                 <i class="fa-solid fa-file-pdf"></i> Export to PDF
-            </button> --}}
+            </button>
         </div>
     </div>
 
@@ -252,66 +252,73 @@
         </table>
 
     </div>{{-- /table scroll wrapper --}}
-{{-- ── Pagination ── --}}
-<div x-show="submitTotalPages > 1" style="display:none;">
-    <div style="display:flex; align-items:center; justify-content:space-between;
+    {{-- ── Pagination ── --}}
+    <div x-show="submitTotalPages > 1" style="display:none;">
+        <div
+            style="display:flex; align-items:center; justify-content:space-between;
                 padding:14px 20px; border-top:1px solid #e2e8f0;
                 font-size:12px; color:#64748b; flex-wrap:wrap; gap:10px;">
 
-        {{-- Records info --}}
-        <span x-text="`Showing page ${submitCurrentPage} of ${submitTotalPages} — ${submitTotalRecords} records`"></span>
+            {{-- Records info --}}
+            <span
+                x-text="`Showing page ${submitCurrentPage} of ${submitTotalPages} — ${submitTotalRecords} records`"></span>
 
-        {{-- Pagination numbers --}}
-        <nav>
-            <ul class="pagination pagination-sm mb-0">
+            {{-- Pagination numbers --}}
+            <nav>
+                <ul class="pagination pagination-sm mb-0">
 
-                {{-- First --}}
-                <li class="page-item" :class="{ disabled: submitCurrentPage <= 1 }">
-                    <button class="page-link" @click="changeSubmitPage(1)" :disabled="submitCurrentPage <= 1">
-                        <i class="fa-solid fa-angles-left fa-xs"></i>
-                    </button>
-                </li>
+                    {{-- First --}}
+                    <li class="page-item" :class="{ disabled: submitCurrentPage <= 1 }">
+                        <button class="page-link" @click="changeSubmitPage(1)" :disabled="submitCurrentPage <= 1">
+                            <i class="fa-solid fa-angles-left fa-xs"></i>
+                        </button>
+                    </li>
 
-                {{-- Prev --}}
-                <li class="page-item" :class="{ disabled: submitCurrentPage <= 1 }">
-                    <button class="page-link" @click="changeSubmitPage(submitCurrentPage - 1)" :disabled="submitCurrentPage <= 1">
-                        <i class="fa-solid fa-chevron-left fa-xs"></i>
-                    </button>
-                </li>
+                    {{-- Prev --}}
+                    <li class="page-item" :class="{ disabled: submitCurrentPage <= 1 }">
+                        <button class="page-link" @click="changeSubmitPage(submitCurrentPage - 1)"
+                            :disabled="submitCurrentPage <= 1">
+                            <i class="fa-solid fa-chevron-left fa-xs"></i>
+                        </button>
+                    </li>
 
-                {{-- Page Numbers (window of 5) --}}
-                <template x-for="page in (() => {
+                    {{-- Page Numbers (window of 5) --}}
+                    <template
+                        x-for="page in (() => {
                     let pages = [];
                     let start = Math.max(1, submitCurrentPage - 2);
                     let end   = Math.min(submitTotalPages, start + 4);
                     start     = Math.max(1, end - 4);
                     for (let i = start; i <= end; i++) pages.push(i);
                     return pages;
-                })()" :key="page">
-                    <li class="page-item" :class="{ active: page === submitCurrentPage }">
-                        <button class="page-link" @click="changeSubmitPage(page)" x-text="page"></button>
+                })()"
+                        :key="page">
+                        <li class="page-item" :class="{ active: page === submitCurrentPage }">
+                            <button class="page-link" @click="changeSubmitPage(page)" x-text="page"></button>
+                        </li>
+                    </template>
+
+                    {{-- Next --}}
+                    <li class="page-item" :class="{ disabled: submitCurrentPage >= submitTotalPages }">
+                        <button class="page-link" @click="changeSubmitPage(submitCurrentPage + 1)"
+                            :disabled="submitCurrentPage >= submitTotalPages">
+                            <i class="fa-solid fa-chevron-right fa-xs"></i>
+                        </button>
                     </li>
-                </template>
 
-                {{-- Next --}}
-                <li class="page-item" :class="{ disabled: submitCurrentPage >= submitTotalPages }">
-                    <button class="page-link" @click="changeSubmitPage(submitCurrentPage + 1)" :disabled="submitCurrentPage >= submitTotalPages">
-                        <i class="fa-solid fa-chevron-right fa-xs"></i>
-                    </button>
-                </li>
+                    {{-- Last --}}
+                    <li class="page-item" :class="{ disabled: submitCurrentPage >= submitTotalPages }">
+                        <button class="page-link" @click="changeSubmitPage(submitTotalPages)"
+                            :disabled="submitCurrentPage >= submitTotalPages">
+                            <i class="fa-solid fa-angles-right fa-xs"></i>
+                        </button>
+                    </li>
 
-                {{-- Last --}}
-                <li class="page-item" :class="{ disabled: submitCurrentPage >= submitTotalPages }">
-                    <button class="page-link" @click="changeSubmitPage(submitTotalPages)" :disabled="submitCurrentPage >= submitTotalPages">
-                        <i class="fa-solid fa-angles-right fa-xs"></i>
-                    </button>
-                </li>
+                </ul>
+            </nav>
 
-            </ul>
-        </nav>
-
+        </div>
     </div>
-</div>
 
 </div>{{-- /table-section --}}
 

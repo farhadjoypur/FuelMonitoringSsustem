@@ -864,14 +864,14 @@
                 </div>
             </div>
 
-            <!-- <div class="export-row">
-                                            <button class="btn-export btn-export-pdf">
-                                                <i class="fa-regular fa-file-pdf"></i> Export PDF
-                                            </button>
-                                            <button class="btn-export btn-export-excel">
+            <div class="export-row">
+                <button class="btn-export btn-export-pdf" @click="exportPdf()">
+                    <i class="fa-regular fa-file-pdf"></i> Export PDF
+                </button>
+                {{-- <button class="btn-export btn-export-excel">
                                                 <i class="fa-regular fa-file-excel"></i> Export Excel
-                                            </button>
-                                        </div> -->
+                                            </button> --}}
+            </div>
 
         </div>{{-- /tab-stock --}}
 
@@ -1158,6 +1158,66 @@
                     this.applyFilter(page);
                 },
 
+                exportPdf() {
+                    const params = new URLSearchParams();
+
+                    if (this.filters.from_date) params.append('from_date', this.filters.from_date);
+                    if (this.filters.to_date) params.append('to_date', this.filters.to_date);
+                    if (this.filters.division) params.append('division', this.filters.division);
+                    if (this.filters.district) params.append('district', this.filters.district);
+                    if (this.filters.thana_upazila) params.append('thana_upazila', this.filters.thana_upazila);
+                    if (this.filters.company_id) params.append('company_id', this.filters.company_id);
+                    if (this.filters.depot_id) params.append('depot_id', this.filters.depot_id);
+                    if (this.filters.station_id) params.append('station_id', this.filters.station_id);
+                    if (this.filters.fuel_type) params.append('fuel_type', this.filters.fuel_type);
+                    if (this.filters.stock_status) params.append('stock_status', this.filters.stock_status);
+
+                    window.open('{{ route('admin.reports.export.pdf') }}?' + params.toString(), '_blank');
+                },
+
+                exportDiffPdf() {
+                    const params = new URLSearchParams();
+                    if (this.diffFilter.fromDate) params.append('from_date', this.diffFilter.fromDate);
+                    if (this.diffFilter.toDate) params.append('to_date', this.diffFilter.toDate);
+                    if (this.diffFilter.division) params.append('division', this.diffFilter.division);
+                    if (this.diffFilter.district) params.append('district', this.diffFilter.district);
+                    if (this.diffFilter.thanaUpazila) params.append('thana_upazila', this.diffFilter.thanaUpazila);
+                    if (this.diffFilter.companyId) params.append('company_id', this.diffFilter.companyId);
+                    if (this.diffFilter.stationId) params.append('station_id', this.diffFilter.stationId);
+                    if (this.diffFilter.tagOfficer) params.append('tag_officer', this.diffFilter.tagOfficer);
+                    if (this.diffFilter.diffStatus) params.append('diff_status', this.diffFilter.diffStatus);
+                    if (this.diffFilter.minDifferenceL) params.append('min_diff_l', this.diffFilter.minDifferenceL);
+                    if (this.diffFilter.minDifferencePercent) params.append('min_diff_pct', this.diffFilter
+                        .minDifferencePercent);
+                    window.open(`{{ route('admin.reports.export.difference.pdf') }}?${params}`, '_blank');
+                },
+
+                exportMissingPdf() {
+                    const params = new URLSearchParams();
+                    if (this.missingFilter.fromDate) params.append('from_date', this.missingFilter.fromDate);
+                    if (this.missingFilter.toDate) params.append('to_date', this.missingFilter.toDate);
+                    if (this.missingFilter.division) params.append('division', this.missingFilter.division);
+                    if (this.missingFilter.district) params.append('district', this.missingFilter.district);
+                    if (this.missingFilter.thanaUpazila) params.append('thana_upazila', this.missingFilter.thanaUpazila);
+                    if (this.missingFilter.companyId) params.append('company_id', this.missingFilter.companyId);
+                    if (this.missingFilter.depotId) params.append('depot_id', this.missingFilter.depotId);
+                    if (this.missingFilter.stationId) params.append('station_id', this.missingFilter.stationId);
+                    window.open('{{ route('admin.reports.export.missing.pdf') }}?' + params.toString(), '_blank');
+                },
+
+                exportSubmitPdf() {
+                    const params = new URLSearchParams();
+                    if (this.submitFilter.fromDate) params.append('from_date', this.submitFilter.fromDate);
+                    if (this.submitFilter.toDate) params.append('to_date', this.submitFilter.toDate);
+                    if (this.submitFilter.division) params.append('division', this.submitFilter.division);
+                    if (this.submitFilter.district) params.append('district', this.submitFilter.district);
+                    if (this.submitFilter.thanaUpazila) params.append('thana_upazila', this.submitFilter.thanaUpazila);
+                    if (this.submitFilter.companyId) params.append('company_id', this.submitFilter.companyId);
+                    if (this.submitFilter.depotId) params.append('depot_id', this.submitFilter.depotId);
+                    if (this.submitFilter.stationId) params.append('station_id', this.submitFilter.stationId);
+                    window.open('{{ route('admin.reports.export.submitted.pdf') }}?' + params.toString(), '_blank');
+                },
+
                 async resetFilter() {
                     this.filters = {
                         from_date: '',
@@ -1297,22 +1357,7 @@
                     window.location.href = `/admin/reports/${reportId}`;
                 },
 
-                // Export difference report as PDF
-                exportDiffPdf() {
-                    const params = new URLSearchParams();
-                    const exportFields = {
-                        from_date: this.diffFilter.fromDate,
-                        to_date: this.diffFilter.toDate,
-                        division: this.diffFilter.division,
-                        district: this.diffFilter.district,
-                        company_id: this.diffFilter.companyId,
-                        station_id: this.diffFilter.stationId,
-                    };
-                    Object.entries(exportFields).forEach(([k, v]) => {
-                        if (v) params.append(k, v);
-                    });
-                    window.open(`{{ route('admin.reports.difference.export-pdf') }}?${params}`, '_blank');
-                },
+               
 
                 // ═══════════════════════════════════════════════════════════
                 // SHARED MODAL METHODS
@@ -1544,23 +1589,7 @@
                     this.applyMissingFilter(newPage);
                 },
 
-                // Export
-                exportMissingPdf() {
-                    const params = new URLSearchParams();
-                    const fields = {
-                        from_date: this.missingFilter.fromDate,
-                        to_date: this.missingFilter.toDate,
-                        division: this.missingFilter.division,
-                        district: this.missingFilter.district,
-                        company_id: this.missingFilter.companyId,
-                        station_id: this.missingFilter.stationId,
-                    };
-                    Object.entries(fields).forEach(([k, v]) => {
-                        if (v) params.append(k, v);
-                    });
-                    window.open(`{{ route('admin.reports.missing.export-pdf') }}?${params}`, '_blank');
-                },
-
+               
 
                 // ═══════════════════════════════════════════════════════════════
                 // TAB 4 — SUBMITTED REPORT METHODS
@@ -1665,23 +1694,7 @@
                     this.applySubmitFilter(newPage);
                 },
 
-                // Export
-                exportSubmitPdf() {
-                    const params = new URLSearchParams();
-                    const fields = {
-                        from_date: this.submitFilter.fromDate,
-                        to_date: this.submitFilter.toDate,
-                        division: this.submitFilter.division,
-                        district: this.submitFilter.district,
-                        company_id: this.submitFilter.companyId,
-                        station_id: this.submitFilter.stationId,
-                    };
-                    Object.entries(fields).forEach(([k, v]) => {
-                        if (v) params.append(k, v);
-                    });
-                    window.open(`{{ route('admin.reports.submitted.export-pdf') }}?${params}`, '_blank');
-                },
-
+              
             }; // end return
         } // end reportApp
     </script>
