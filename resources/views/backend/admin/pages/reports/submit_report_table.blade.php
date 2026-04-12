@@ -157,7 +157,7 @@
                     <th style="width:80px;">COMPANY</th>
                     {{-- Depot --}}
                     <th style="width:80px;">DEPOT</th>
-                    <th style="width:80px;">FUEL TYPE</th>
+                    <th style="width:80px;">FUEL</th>
                     <th style="width:90px;">CLOSING STOCK</th>
                     <th style="width:80px;">STATUS</th>
                 </tr>
