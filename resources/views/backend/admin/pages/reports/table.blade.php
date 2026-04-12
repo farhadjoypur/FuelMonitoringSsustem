@@ -25,7 +25,7 @@
      */
     function formatNumber(float $value): string
     {
-        return $value != 0 ? number_format($value, 2, '.', ',') : '—';
+        return $value != 0 ? number_format($value, 2, '.', ',') : '0';
     }
 
     /**
@@ -36,7 +36,7 @@
     function formatDifference(float $value): string
     {
         if ($value == 0) {
-            return '—';
+            return '0';
         }
         return ($value > 0 ? '' : '') . number_format($value, 2, '.', ',');
     }
@@ -521,7 +521,8 @@
                                 </span>
                             </td>
 
-                            <td>{{ formatNumber($report[$fuelKey . '_prev_stock'] ?? 0) }}</td>
+                            {{-- <td>{{ formatNumber($report[$fuelKey . '_prev_stock'] ?? 0) }}</td> --}}
+                            <td>{{ '0' }}</td>
 
                             <td class="cell-supply">
                                 {{ formatNumber($report[$fuelKey . '_supply'] ?? 0) }}
@@ -606,7 +607,8 @@
                                 <strong>{{ ucfirst($fuelKey) }} Total:</strong>
                             </td>
 
-                            <td class="">{{ formatNumber($totalRow["{$fuelKey}_prev_stock"] ?? 0) }}</td>
+                            {{-- <td class="">{{ formatNumber($totalRow["{$fuelKey}_prev_stock"] ?? 0) }}</td> --}}
+                            <td class="">{{ '0' }}</td>
                             <td class="">{{ formatNumber($totalRow["{$fuelKey}_supply"] ?? 0) }}</td>
                             <td class="">{{ formatNumber($totalRow["{$fuelKey}_received"] ?? 0) }}</td>
                             <td class=" {{ ($totalRow["{$fuelKey}_difference"] ?? 0) != 0 ? 'text-warning' : '' }}">
@@ -642,7 +644,8 @@
                         <td colspan="6" class="text-end fw-bold">
                             GRAND TOTAL (All Fuels)
                         </td>
-                        <td class="">{{ formatNumber($grandPrev) }}</td>
+                        {{-- <td class="">{{ formatNumber($grandPrev) }}</td> --}}
+                        <td class="">{{ '0' }}</td>
                         <td class="">{{ formatNumber($grandSupply) }}</td>
                         <td class="">{{ formatNumber($grandReceived) }}</td>
                         <td class=" {{ $grandDiff > 0 ? 'text-warning' : '' }}">

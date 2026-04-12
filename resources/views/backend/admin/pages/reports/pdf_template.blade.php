@@ -235,13 +235,13 @@
 
         function pdfFormatNumber(float $value): string
         {
-            return $value != 0 ? number_format($value, 2, '.', ',') : '-';
+            return $value != 0 ? number_format($value, 2, '.', ',') : '0';
         }
 
         function pdfFormatDiff(float $value): string
         {
             if ($value == 0) {
-                return '-';
+                return '0';
             }
             return number_format($value, 2, '.', ',');
         }
@@ -285,7 +285,7 @@
                 <th style="width:9%">Company</th>
                 <th style="width:8%">Tag Officer</th>
                 <th style="width:5%">Fuel</th>
-                {{-- <th style="width:7%">Prev. Stock (L)<small>Opening</small></th> --}}
+                <th style="width:7%">Prev. Stock (L)<small>Opening</small></th>
                 <th style="width:7%">Supply (L)<small>From Depot</small></th>
                 <th style="width:7%">Received At Station (L)<small>At Station</small></th>
                 <th style="width:7%">Difference (L)<small>Supply - Received</small></th>
@@ -348,7 +348,7 @@
                             <span class="fuel-badge {{ $fuelMeta['css'] }}">{{ $fuelMeta['label'] }}</span>
                         </td>
 
-                        {{-- <td>{{ pdfFormatNumber($report[$fuelKey . '_prev_stock'] ?? 0) }}</td> --}}
+                        <td>{{ '-' }}</td>
                         <td class="cell-supply">{{ pdfFormatNumber($report[$fuelKey . '_supply'] ?? 0) }}</td>
                         <td>{{ pdfFormatNumber($report[$fuelKey . '_received'] ?? 0) }}</td>
                         <td class="{{ pdfDiffClass($report[$fuelKey . '_difference'] ?? 0) }}">
@@ -382,7 +382,8 @@
                         <td colspan="6" style="text-align:right; padding-right:8px;">
                             <strong>{{ ucfirst($fuelKey) }} Total:</strong>
                         </td>
-                        <td>{{ pdfFormatNumber($totalRow["{$fuelKey}_prev_stock"] ?? 0) }}</td>
+                        {{-- <td>{{ pdfFormatNumber($totalRow["{$fuelKey}_prev_stock"] ?? 0) }}</td> --}}
+                        <td>{{ '-' }}</td>
                         <td>{{ pdfFormatNumber($totalRow["{$fuelKey}_supply"] ?? 0) }}</td>
                         <td>{{ pdfFormatNumber($totalRow["{$fuelKey}_received"] ?? 0) }}</td>
                         <td>{{ pdfFormatDiff($totalRow["{$fuelKey}_difference"] ?? 0) }}</td>
@@ -408,7 +409,8 @@
                     <td colspan="6" style="text-align:right; padding-right:8px;">
                         GRAND TOTAL (All Fuels)
                     </td>
-                    <td>{{ pdfFormatNumber($gPrev) }}</td>
+                    {{-- <td>{{ pdfFormatNumber($gPrev) }}</td> --}}
+                    <td>{{ '-' }}</td>
                     <td>{{ pdfFormatNumber($gSupply) }}</td>
                     <td>{{ pdfFormatNumber($gReceived) }}</td>
                     <td>{{ pdfFormatDiff($gDiff) }}</td>
