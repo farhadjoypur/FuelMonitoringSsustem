@@ -14,9 +14,9 @@
     use Carbon\Carbon;
 
     $fuelTypes = [
-        'diesel' => ['label' => 'Diesel', 'css' => 'fuel-diesel'],
-        'petrol' => ['label' => 'Petrol', 'css' => 'fuel-petrol'],
         'octane' => ['label' => 'Octane', 'css' => 'fuel-octane'],
+        'petrol' => ['label' => 'Petrol', 'css' => 'fuel-petrol'],
+        'diesel' => ['label' => 'Diesel', 'css' => 'fuel-diesel'],
         'others' => ['label' => 'Others', 'css' => 'fuel-others'],
     ];
 
