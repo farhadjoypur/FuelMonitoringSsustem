@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Backend\DC;
 
-
 use App\Http\Controllers\Controller;
 use App\Models\AssignTagOfficer;
 use App\Models\Company;
@@ -27,21 +26,22 @@ class DcReportsController extends Controller
             throw new \Exception('District not found for this DC user. Please contact administrator.');
         }
     }
+
     public function index(Request $request)
     {
         $hasAnyFilter = $this->hasAnyFilterApplied($request);
-        $upazilas = $this->getDistrictUpazilas($this->dcDistrict);
+        $upazilas     = $this->getDistrictUpazilas($this->dcDistrict);
 
         if (! $hasAnyFilter) {
             if (! $request->ajax()) {
                 return view('backend.dc.pages.reports.index', [
-                    'reports'   => collect(),
-                    'companies' => Company::orderBy('name')->get(['id', 'name']),
-                    'depots'    => Depot::orderBy('depot_name')->get(['id', 'depot_name']),
-                    'stations'  => FillingStation::orderBy('station_name')->get(['id', 'station_name', 'district']),
-                    'divisions' => $this->loadDivisions(),
-                    'upazilas'  => $upazilas,
-                    'dc_district'  => $this->dcDistrict,
+                    'reports'     => collect(),
+                    'companies'   => Company::orderBy('name')->get(['id', 'name']),
+                    'depots'      => Depot::orderBy('depot_name')->get(['id', 'depot_name']),
+                    'stations'    => FillingStation::orderBy('station_name')->get(['id', 'station_name', 'district']),
+                    'divisions'   => $this->loadDivisions(),
+                    'upazilas'    => $upazilas,
+                    'dc_district' => $this->dcDistrict,
                 ]);
             }
 
@@ -57,21 +57,18 @@ class DcReportsController extends Controller
         }
 
         $rawReports = $this->buildFilteredQuery($request)
+            ->orderBy('report_date', 'desc')
             ->orderBy('station_id')
-            ->orderBy('report_date')
             ->get();
 
-        $officerMap = $this->loadOfficerMap();
-
-        $aggregatedReports = $this->aggregateByStation($rawReports, $request);
-
-        $formattedReports = $aggregatedReports->map(
-            fn($stationData) => $this->formatAggregatedReport($stationData, $officerMap)
+        $officerMap       = $this->loadOfficerMap();
+        $formattedReports = $rawReports->map(
+            fn($report) => $this->formatSingleReport($report, $officerMap)
         );
 
-        $perPage      = 10;
-        $currentPage  = (int) $request->get('page', 1);
-        $total        = $formattedReports->count();
+        $perPage          = 10;
+        $currentPage      = (int) $request->get('page', 1);
+        $total            = $formattedReports->count();
         $paginatedReports = $formattedReports->forPage($currentPage, $perPage);
 
         if ($request->ajax()) {
@@ -99,14 +96,13 @@ class DcReportsController extends Controller
         }
 
         return view('backend.dc.pages.reports.index', [
-            'reports'   => collect(),
-            'companies' => Company::orderBy('name')->get(['id', 'name']),
-            'depots'    => Depot::orderBy('depot_name')->get(['id', 'depot_name']),
-            'stations'  => FillingStation::orderBy('station_name')->get(['id', 'station_name', 'district']),
-            'divisions' => $this->loadDivisions(),
-            'upazilas'  => $upazilas,
-            'dc_district' => $this->dcDistrict
-
+            'reports'     => collect(),
+            'companies'   => Company::orderBy('name')->get(['id', 'name']),
+            'depots'      => Depot::orderBy('depot_name')->get(['id', 'depot_name']),
+            'stations'    => FillingStation::orderBy('station_name')->get(['id', 'station_name', 'district']),
+            'divisions'   => $this->loadDivisions(),
+            'upazilas'    => $upazilas,
+            'dc_district' => $this->dcDistrict,
         ]);
     }
 
@@ -137,30 +133,28 @@ class DcReportsController extends Controller
             ->where('district', $this->dcDistrict)
             ->with(['fillingStation.company', 'fillingStation.depot']);
 
-        if ($request->filled('from_date')) {
-            $query->whereDate('report_date', '>=', $request->from_date);
+        if ($request->filled('from_date') && !$request->filled('to_date')) {
+            $from = \Carbon\Carbon::parse($request->from_date)->startOfDay();
+            $to   = \Carbon\Carbon::parse($request->from_date)->endOfDay();
+            $query->whereBetween('report_date', [$from, $to]);
+        } elseif ($request->filled('from_date') && $request->filled('to_date')) {
+            $from = \Carbon\Carbon::parse($request->from_date)->startOfDay();
+            $to   = \Carbon\Carbon::parse($request->to_date)->endOfDay();
+            $query->whereBetween('report_date', [$from, $to]);
         }
-        if ($request->filled('to_date') && $request->filled('from_date')) {
-            $query->whereBetween('report_date', [$request->from_date, $request->to_date]);
-        }
-        if ($request->filled('division')) {
+
+        if ($request->filled('division'))
             $query->whereHas('fillingStation', fn($q) => $q->where('division', $request->division));
-        }
-        if ($request->filled('district')) {
+        if ($request->filled('district'))
             $query->where('district', $request->district);
-        }
-        if ($request->filled('thana_upazila')) {
+        if ($request->filled('thana_upazila'))
             $query->where('thana_upazila', $request->thana_upazila);
-        }
-        if ($request->filled('company_id')) {
+        if ($request->filled('company_id'))
             $query->whereHas('fillingStation', fn($q) => $q->where('company_id', $request->company_id));
-        }
-        if ($request->filled('depot_id')) {
+        if ($request->filled('depot_id'))
             $query->whereHas('fillingStation.depot', fn($q) => $q->where('id', $request->depot_id));
-        }
-        if ($request->filled('station_id')) {
+        if ($request->filled('station_id'))
             $query->where('station_id', $request->station_id);
-        }
         if ($request->filled('fuel_type')) {
             $fuelType = strtolower(trim($request->fuel_type));
             $allowed  = ['octane', 'petrol', 'diesel', 'others'];
@@ -173,6 +167,20 @@ class DcReportsController extends Controller
                 );
             }
         }
+        if ($request->filled('stock_status')) {
+            $status = $request->stock_status;
+            $query->where(function ($q) use ($status) {
+                $fuelKeys    = ['diesel', 'petrol', 'octane', 'others'];
+                $closingCols = array_map(fn($f) => "COALESCE({$f}_closing_stock, 0)", $fuelKeys);
+                $sumExpr     = implode(' + ', $closingCols);
+                match ($status) {
+                    'available' => $q->whereRaw("({$sumExpr}) >= 1000"),
+                    'low'       => $q->whereRaw("({$sumExpr}) > 0 AND ({$sumExpr}) < 1000"),
+                    'zero'      => $q->whereRaw("({$sumExpr}) <= 0"),
+                    default     => null,
+                };
+            });
+        }
 
         return $query;
     }
@@ -181,11 +189,6 @@ class DcReportsController extends Controller
     // OFFICER MAP
     // ─────────────────────────────────────────────────────────────
 
-    /**
-     * station_id → officer name
-     * assign_tag_officers.filling_station_id দিয়ে join করা হয়।
-     * profiles table থেকে name নেওয়া হচ্ছে।
-     */
     private function loadOfficerMap(): Collection
     {
         return AssignTagOfficer::with(['officer.profile'])
@@ -193,7 +196,6 @@ class DcReportsController extends Controller
             ->get()
             ->keyBy('filling_station_id')
             ->map(function ($assignment) {
-                // profiles.name → users.name → fallback '—'
                 return $assignment->officer?->profile?->name
                     ?? $assignment->officer?->name
                     ?? '—';
@@ -201,142 +203,81 @@ class DcReportsController extends Controller
     }
 
     // ─────────────────────────────────────────────────────────────
-    // AGGREGATION
+    // FORMAT SINGLE REPORT (no groupBy)
     // ─────────────────────────────────────────────────────────────
 
-    private function aggregateByStation(Collection $rawReports, Request $request): Collection
-    {
-        $fuelKeys = ['diesel', 'petrol', 'octane', 'others'];
-
-        $aggregated = $rawReports->groupBy('station_id')->map(function ($stationRows) use ($fuelKeys) {
-            $firstRow = $stationRows->first();
-            $lastRow  = $stationRows->last();
-
-            $stationData = [
-                'id'               => $lastRow->id,
-                'station_id'       => $firstRow->station_id,
-                'station_name'     => $firstRow->station_name ?? $firstRow->fillingStation?->station_name ?? '—',
-                'district'         => $firstRow->district ?? '',
-                'division'         => $firstRow->fillingStation?->division ?? '',
-                'thana_upazila'    => $firstRow->thana_upazila ?? '',
-                'company_name'     => $firstRow->fillingStation?->company?->code ?? '—',
-                'depot_name'       => $firstRow->depot_name ?? $firstRow->fillingStation?->depot?->depot_name ?? '',
-                'comment'          => $lastRow->comment ?? '',
-                'report_date_from' => $firstRow->report_date?->format('Y-m-d') ?? '',
-                'report_date_to'   => $lastRow->report_date?->format('Y-m-d') ?? '',
-            ];
-
-            foreach ($fuelKeys as $fuel) {
-                $stationData["{$fuel}_prev_stock"]    = (float) ($firstRow->{"{$fuel}_prev_stock"} ?? 0);
-                $stationData["{$fuel}_supply"]        = (float) $stationRows->sum("{$fuel}_supply");
-                $stationData["{$fuel}_received"]      = (float) $stationRows->sum("{$fuel}_received");
-                $stationData["{$fuel}_sales"]         = (float) $stationRows->sum("{$fuel}_sales");
-                $stationData["{$fuel}_closing_stock"] = (float) ($lastRow->{"{$fuel}_closing_stock"} ?? 0);
-                $stationData["{$fuel}_difference"]    = $stationData["{$fuel}_supply"] - $stationData["{$fuel}_received"];
-            }
-
-            return $stationData;
-        });
-
-        if (request()->filled('stock_status')) {
-            $status     = request('stock_status');
-            $aggregated = $aggregated->filter(function ($row) use ($status, $fuelKeys) {
-                $closingTotal = array_sum(array_map(fn($f) => $row["{$f}_closing_stock"], $fuelKeys));
-                $diffTotal    = array_sum(array_map(fn($f) => abs($row["{$f}_difference"]), $fuelKeys));
-
-                return match ($status) {
-                    'available' => $closingTotal >= 1000,
-                    'low'       => $closingTotal > 0 && $closingTotal < 1000,
-                    'zero'      => $closingTotal <= 0,
-                    // 'highdiff'  => $diffTotal > 50,
-                    default     => true,
-                };
-            });
-        }
-
-        return $aggregated->values();
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    // FORMATTING
-    // ─────────────────────────────────────────────────────────────
-
-    private function formatAggregatedReport(array $stationData, Collection $officerMap): array
+    private function formatSingleReport($report, Collection $officerMap): array
     {
         $fuelKeys   = ['diesel', 'petrol', 'octane', 'others'];
-        $stationId  = $stationData['station_id'];
-
-        // assign_tag_officers.filling_station_id দিয়ে officer নাও
-        $tagOfficer = $officerMap->get($stationId, '—');
+        $tagOfficer = $officerMap->get($report->station_id, '—');
 
         $fuelStatuses = [];
         foreach ($fuelKeys as $fuel) {
             $fuelStatuses[$fuel] = $this->resolveFuelStatus(
-                $stationData["{$fuel}_closing_stock"],
-                $stationData["{$fuel}_difference"]
+                (float) ($report->{"{$fuel}_closing_stock"} ?? 0),
+                (float) ($report->{"{$fuel}_supply"} ?? 0) - (float) ($report->{"{$fuel}_received"} ?? 0)
             );
         }
 
-        $totalClosing = array_sum(array_map(fn($f) => $stationData["{$f}_closing_stock"], $fuelKeys));
-        $totalDiff    = array_sum(array_map(fn($f) => abs($stationData["{$f}_difference"]), $fuelKeys));
-
+        $totalClosing  = array_sum(array_map(fn($f) => (float) ($report->{"{$f}_closing_stock"} ?? 0), $fuelKeys));
         $overallStatus = match (true) {
-            // $totalDiff > 50      => ['label' => 'High Difference', 'css' => 'status-highdiff'],
-            $totalClosing <= 0   => ['label' => 'Zero Stock',      'css' => 'status-zero'],
-            $totalClosing < 1000 => ['label' => 'Low Stock',       'css' => 'status-low'],
-            default              => ['label' => 'Available',       'css' => 'status-available'],
+            $totalClosing <= 0   => ['label' => 'Zero Stock', 'css' => 'status-zero'],
+            $totalClosing < 1000 => ['label' => 'Low Stock',  'css' => 'status-low'],
+            default              => ['label' => 'Available',  'css' => 'status-available'],
         };
 
         return [
-            'id'               => $stationData['id'],
-            'report_date_from' => $stationData['report_date_from'],
-            'report_date_to'   => $stationData['report_date_to'],
-            'station_name'     => $stationData['station_name'],
-            'district'         => $stationData['district'],
-            'division'         => $stationData['division'],
-            'thana_upazila'    => $stationData['thana_upazila'],
-            'company_name'     => $stationData['company_name'],
-            'depot_name'       => $stationData['depot_name'],
+            'id'               => $report->id,
+            'report_date_from' => $report->report_date?->format('Y-m-d') ?? '',
+            'report_date_to'   => $report->report_date?->format('Y-m-d') ?? '',
+            'station_name'     => $report->station_name ?? $report->fillingStation?->station_name ?? '—',
+            'district'         => $report->district ?? '',
+            'division'         => $report->fillingStation?->division ?? '',
+            'thana_upazila'    => $report->thana_upazila ?? '',
+            'company_name'     => $report->fillingStation?->company?->code ?? '—',
+            'depot_name'       => $report->depot_name ?? $report->fillingStation?->depot?->depot_name ?? '',
             'tag_officer'      => $tagOfficer,
-            'comment'          => $stationData['comment'],
+            'comment'          => $report->comment ?? '',
             'fuel_statuses'    => $fuelStatuses,
             'overall_status'   => $overallStatus,
 
-            'diesel_prev_stock'    => $stationData['diesel_prev_stock'],
-            'diesel_supply'        => $stationData['diesel_supply'],
-            'diesel_received'      => $stationData['diesel_received'],
-            'diesel_difference'    => $stationData['diesel_difference'],
-            'diesel_sales'         => $stationData['diesel_sales'],
-            'diesel_closing_stock' => $stationData['diesel_closing_stock'],
+            'diesel_prev_stock'    => (float) ($report->diesel_prev_stock ?? 0),
+            'diesel_supply'        => (float) ($report->diesel_supply ?? 0),
+            'diesel_received'      => (float) ($report->diesel_received ?? 0),
+            'diesel_difference'    => (float) ($report->diesel_supply ?? 0) - (float) ($report->diesel_received ?? 0),
+            'diesel_sales'         => (float) ($report->diesel_sales ?? 0),
+            'diesel_closing_stock' => (float) ($report->diesel_closing_stock ?? 0),
 
-            'petrol_prev_stock'    => $stationData['petrol_prev_stock'],
-            'petrol_supply'        => $stationData['petrol_supply'],
-            'petrol_received'      => $stationData['petrol_received'],
-            'petrol_difference'    => $stationData['petrol_difference'],
-            'petrol_sales'         => $stationData['petrol_sales'],
-            'petrol_closing_stock' => $stationData['petrol_closing_stock'],
+            'petrol_prev_stock'    => (float) ($report->petrol_prev_stock ?? 0),
+            'petrol_supply'        => (float) ($report->petrol_supply ?? 0),
+            'petrol_received'      => (float) ($report->petrol_received ?? 0),
+            'petrol_difference'    => (float) ($report->petrol_supply ?? 0) - (float) ($report->petrol_received ?? 0),
+            'petrol_sales'         => (float) ($report->petrol_sales ?? 0),
+            'petrol_closing_stock' => (float) ($report->petrol_closing_stock ?? 0),
 
-            'octane_prev_stock'    => $stationData['octane_prev_stock'],
-            'octane_supply'        => $stationData['octane_supply'],
-            'octane_received'      => $stationData['octane_received'],
-            'octane_difference'    => $stationData['octane_difference'],
-            'octane_sales'         => $stationData['octane_sales'],
-            'octane_closing_stock' => $stationData['octane_closing_stock'],
+            'octane_prev_stock'    => (float) ($report->octane_prev_stock ?? 0),
+            'octane_supply'        => (float) ($report->octane_supply ?? 0),
+            'octane_received'      => (float) ($report->octane_received ?? 0),
+            'octane_difference'    => (float) ($report->octane_supply ?? 0) - (float) ($report->octane_received ?? 0),
+            'octane_sales'         => (float) ($report->octane_sales ?? 0),
+            'octane_closing_stock' => (float) ($report->octane_closing_stock ?? 0),
 
-            'others_prev_stock'    => $stationData['others_prev_stock'],
-            'others_supply'        => $stationData['others_supply'],
-            'others_received'      => $stationData['others_received'],
-            'others_difference'    => $stationData['others_difference'],
-            'others_sales'         => $stationData['others_sales'],
-            'others_closing_stock' => $stationData['others_closing_stock'],
+            'others_prev_stock'    => (float) ($report->others_prev_stock ?? 0),
+            'others_supply'        => (float) ($report->others_supply ?? 0),
+            'others_received'      => (float) ($report->others_received ?? 0),
+            'others_difference'    => (float) ($report->others_supply ?? 0) - (float) ($report->others_received ?? 0),
+            'others_sales'         => (float) ($report->others_sales ?? 0),
+            'others_closing_stock' => (float) ($report->others_closing_stock ?? 0),
         ];
     }
 
+    // ─────────────────────────────────────────────────────────────
+    // FORMATTING HELPERS
+    // ─────────────────────────────────────────────────────────────
+
     private function resolveFuelStatus(float $closingStock, float $difference): array
     {
-        $absDiff = abs($difference);
         if ($closingStock <= 0)   return ['label' => 'Zero',      'css' => 'status-zero'];
-        // if ($absDiff > 50)        return ['label' => 'High Diff', 'css' => 'status-highdiff'];
         if ($closingStock < 1000) return ['label' => 'Low',       'css' => 'status-low'];
         return ['label' => 'Available', 'css' => 'status-available'];
     }
@@ -407,11 +348,12 @@ class DcReportsController extends Controller
         return response()->json(['success' => true, 'message' => 'Report deleted successfully.']);
     }
 
-
+    // ─────────────────────────────────────────────────────────────
+    // DIFFERENCE REPORT — daily, no groupBy
+    // ─────────────────────────────────────────────────────────────
 
     public function differenceReport(Request $request)
     {
-        // ── Validation ───────────────────────────────────────────────
         $validated = $request->validate([
             'from_date'     => 'nullable|date',
             'to_date'       => 'nullable|date|after_or_equal:from_date',
@@ -427,52 +369,26 @@ class DcReportsController extends Controller
             'page'          => 'nullable|integer|min:1',
         ]);
 
-        // ── Build base query ─────────────────────────────────────────
         $query = Fuelreport::query()
-            ->with([
-                'fillingStation.company',
-                'fillingStation.assignedOfficer.user.profile',
-            ]);
+            ->with(['fillingStation.company'])
+            ->where('district', $this->dcDistrict);
 
-        $query->where('district', $this->dcDistrict);
-
-        // Date range
-        if (! empty($validated['from_date'])) {
-            $query->whereDate('report_date', '>=', $validated['from_date']);
-        }
-        if (! empty($validated['to_date']) && ! empty($validated['from_date'])) {
+        if (!empty($validated['from_date']) && empty($validated['to_date']))
+            $query->whereDate('report_date', $validated['from_date']);
+        elseif (!empty($validated['from_date']) && !empty($validated['to_date']))
             $query->whereBetween('report_date', [$validated['from_date'], $validated['to_date']]);
-        }
 
-        // Location
-        if (! empty($validated['division'])) {
-            $query->whereHas(
-                'fillingStation',
-                fn($q) => $q->where('division', $validated['division'])
-            );
-        }
-        if (! empty($validated['district'])) {
+        if (!empty($validated['division']))
+            $query->whereHas('fillingStation', fn($q) => $q->where('division', $validated['division']));
+        if (!empty($validated['district']))
             $query->where('district', $validated['district']);
-        }
-        if (! empty($validated['thana_upazila'])) {
+        if (!empty($validated['thana_upazila']))
             $query->where('thana_upazila', $validated['thana_upazila']);
-        }
-
-        // Company
-        if (! empty($validated['company_id'])) {
-            $query->whereHas(
-                'fillingStation',
-                fn($q) => $q->where('company_id', $validated['company_id'])
-            );
-        }
-
-        // Station
-        if (! empty($validated['station_id'])) {
+        if (!empty($validated['company_id']))
+            $query->whereHas('fillingStation', fn($q) => $q->where('company_id', $validated['company_id']));
+        if (!empty($validated['station_id']))
             $query->where('station_id', $validated['station_id']);
-        }
-
-        // Tag officer name search
-        if (! empty($validated['tag_officer'])) {
+        if (!empty($validated['tag_officer'])) {
             $officerName = $validated['tag_officer'];
             $query->whereHas(
                 'fillingStation.assignedOfficer.officer.profile',
@@ -480,126 +396,87 @@ class DcReportsController extends Controller
             );
         }
 
-        // ── Load & aggregate per station ─────────────────────────────
         $fuelTypes   = ['octane', 'petrol', 'diesel', 'others'];
         $perPage     = 10;
         $currentPage = (int) ($validated['page'] ?? 1);
 
-        $allRawReports = $query
-            ->orderBy('report_date', 'desc')
-            ->orderBy('station_id')
-            ->get();
+        $officerMap    = AssignTagOfficer::with(['officer.profile'])
+            ->where('status', 'active')->get()->keyBy('filling_station_id');
+        $allRawReports = $query->orderBy('report_date', 'desc')->orderBy('station_id')->get();
 
-        // Officer map: station_id → officer info
-        $officerMap = AssignTagOfficer::with(['officer.profile'])
-            ->where('status', 'active')
-            ->get()
-            ->keyBy('filling_station_id');
+        // Per daily report — NO groupBy
+        $rows = $allRawReports->map(function ($report) use ($fuelTypes, $officerMap) {
+            $stationId          = $report->station_id;
+            $assignment         = $officerMap->get($stationId);
+            $officerProfile     = $assignment?->officer?->profile;
+            $tagOfficerName     = $officerProfile?->name ?? $assignment?->officer?->name ?? '—';
+            $officerDesignation = $officerProfile?->designation ?? '—';
+            $officerPhone       = $officerProfile?->phone ?? $assignment?->officer?->phone ?? '—';
 
-        // Aggregate by station
-        $aggregatedRows = $allRawReports
-            ->groupBy('station_id')
-            ->map(function ($stationReports) use ($fuelTypes, $officerMap) {
-
-                $firstReport = $stationReports->first();
-                $lastReport  = $stationReports->last();
-                $stationId   = $firstReport->station_id;
-
-                // Officer info
-                $assignment          = $officerMap->get($stationId);
-                $officerProfile      = $assignment?->officer?->profile;
-                $tagOfficerName      = $officerProfile?->name
-                    ?? $assignment?->officer?->name
-                    ?? '—';
-                $officerDesignation  = $officerProfile?->designation ?? '—';
-                $officerPhone        = $officerProfile?->phone
-                    ?? $assignment?->officer?->phone
-                    ?? '—';
-
-                // Per-fuel difference calculation
-                $fuelBreakdown = [];
-                foreach ($fuelTypes as $fuel) {
-                    $totalSupply   = (float) $stationReports->sum("{$fuel}_supply");
-                    $totalReceived = (float) $stationReports->sum("{$fuel}_received");
-                    $differenceL   = $totalSupply - $totalReceived;
-
-                    $differencePercent = $totalSupply > 0
-                        ? round(($differenceL / $totalSupply) * 100, 2)
-                        : 0;
-
-                    $diffStatus = match (true) {
-                        abs($differencePercent) >= 5 => 'High',
-                        abs($differencePercent) >= 1 => 'Low',
-                        default                      => 'Normal',
-                    };
-
-                    $fuelBreakdown[] = [
-                        'fuelType'          => ucfirst($fuel),
-                        'differenceL'       => number_format($differenceL, 0),
-                        'differencePercent' => $differencePercent,
-                        'diffStatus'        => $diffStatus,
-                    ];
-                }
-
-                return [
-                    'reportId'           => $lastReport->id,
-                    'stationId'          => $stationId,
-                    'reportDate'         => $firstReport->report_date, // ← raw date for sorting
-                    'stationName'        => $firstReport->station_name
-                        ?? $firstReport->fillingStation?->station_name
-                        ?? '—',
-                    'companyName'        => $firstReport->fillingStation?->company?->code ?? '—',
-                    'tagOfficerName'     => $tagOfficerName,
-                    'officerDesignation' => $officerDesignation,
-                    'officerPhone'       => $officerPhone,
-                    'district'           => $firstReport->district ?? '—',
-                    'thanaUpazila'       => $firstReport->thana_upazila ?? '—',
-                    'dateFormatted'      => \Carbon\Carbon::parse($firstReport->report_date)->format('d M Y'),
-                    'dayName'            => \Carbon\Carbon::parse($firstReport->report_date)->format('l'),
-                    'fuelBreakdown'      => $fuelBreakdown,
+            $fuelBreakdown = [];
+            foreach ($fuelTypes as $fuel) {
+                $totalSupply       = (float) ($report->{"{$fuel}_supply"} ?? 0);
+                $totalReceived     = (float) ($report->{"{$fuel}_received"} ?? 0);
+                $differenceL       = $totalSupply - $totalReceived;
+                $differencePercent = $totalSupply > 0 ? round(($differenceL / $totalSupply) * 100, 2) : 0;
+                $diffStatus        = match (true) {
+                    abs($differencePercent) >= 5 => 'High',
+                    abs($differencePercent) >= 1 => 'Low',
+                    default                      => 'Normal',
+                };
+                $fuelBreakdown[] = [
+                    'fuelType'          => ucfirst($fuel),
+                    'differenceL'       => number_format($differenceL, 0),
+                    'differencePercent' => $differencePercent,
+                    'diffStatus'        => $diffStatus,
                 ];
-            })
-            ->values();
+            }
 
-        // ── Post-aggregate filters ───────────────────────────────────
+            return [
+                'reportId'           => $report->id,
+                'stationId'          => $stationId,
+                'reportDate'         => $report->report_date,
+                'stationName'        => $report->station_name ?? $report->fillingStation?->station_name ?? '—',
+                'companyName'        => $report->fillingStation?->company?->code ?? '—',
+                'tagOfficerName'     => $tagOfficerName,
+                'officerDesignation' => $officerDesignation,
+                'officerPhone'       => $officerPhone,
+                'district'           => $report->district ?? '—',
+                'thanaUpazila'       => $report->thana_upazila ?? '—',
+                'dateFormatted'      => \Carbon\Carbon::parse($report->report_date)->format('d M Y'),
+                'dayName'            => \Carbon\Carbon::parse($report->report_date)->format('l'),
+                'fuelBreakdown'      => $fuelBreakdown,
+            ];
+        });
 
-        // Minimum difference (L) filter
-        if (! empty($validated['min_diff_l'])) {
+        if (!empty($validated['min_diff_l'])) {
             $minL = (float) $validated['min_diff_l'];
-            $aggregatedRows = $aggregatedRows->filter(function ($row) use ($minL) {
-                return collect($row['fuelBreakdown'])->contains(function ($fuelRow) use ($minL) {
-                    return abs((float) str_replace(',', '', $fuelRow['differenceL'])) >= $minL;
-                });
-            })->values();
+            $rows = $rows->filter(
+                fn($row) => collect($row['fuelBreakdown'])->contains(
+                    fn($f) => abs((float) str_replace(',', '', $f['differenceL'])) >= $minL
+                )
+            )->values();
         }
 
-        // Minimum difference (%) filter
-        if (! empty($validated['min_diff_pct'])) {
+        if (!empty($validated['min_diff_pct'])) {
             $minPct = (float) $validated['min_diff_pct'];
-            $aggregatedRows = $aggregatedRows->filter(function ($row) use ($minPct) {
-                return collect($row['fuelBreakdown'])->contains(function ($fuelRow) use ($minPct) {
-                    return abs($fuelRow['differencePercent']) >= $minPct;
-                });
-            })->values();
+            $rows   = $rows->filter(
+                fn($row) => collect($row['fuelBreakdown'])->contains(
+                    fn($f) => abs($f['differencePercent']) >= $minPct
+                )
+            )->values();
         }
 
-        // Diff status filter
-        if (! empty($validated['diff_status'])) {
-            $targetStatus   = ucfirst($validated['diff_status']);
-            $aggregatedRows = $aggregatedRows->filter(function ($row) use ($targetStatus) {
-                return collect($row['fuelBreakdown'])->contains(
-                    fn($fuelRow) => $fuelRow['diffStatus'] === $targetStatus
-                );
-            })->values();
+        if (!empty($validated['diff_status'])) {
+            $targetStatus = ucfirst($validated['diff_status']);
+            $rows         = $rows->filter(
+                fn($row) => collect($row['fuelBreakdown'])->contains(fn($f) => $f['diffStatus'] === $targetStatus)
+            )->values();
         }
 
-        // ── Sort by date DESC (নতুন আগে) ────────────────────────────
-        $aggregatedRows = $aggregatedRows->sortByDesc('reportDate')->values();
-
-        // ── Paginate ─────────────────────────────────────────────────
-        $totalRecords  = $aggregatedRows->count();
+        $totalRecords  = $rows->count();
         $totalPages    = (int) ceil($totalRecords / $perPage) ?: 1;
-        $paginatedRows = $aggregatedRows->forPage($currentPage, $perPage)->values();
+        $paginatedRows = $rows->forPage($currentPage, $perPage)->values();
 
         return response()->json([
             'success'     => true,
@@ -610,102 +487,75 @@ class DcReportsController extends Controller
         ]);
     }
 
+    // ─────────────────────────────────────────────────────────────
+    // MISSING REPORT
+    // ─────────────────────────────────────────────────────────────
+
     public function missingReport(Request $request)
     {
         $perPage     = 10;
         $currentPage = (int) $request->get('page', 1);
 
-        // সব active assignment নিয়ে আসো
-        $assignmentsQuery = AssignTagOfficer::with(['officer.profile', 'fillingStation.company', 'fillingStation.depot'])
-            ->where('status', 'active');
-        $assignmentsQuery->where('district', $this->dcDistrict);
+        $assignmentsQuery = AssignTagOfficer::with([
+            'officer.profile',
+            'fillingStation.company',
+            'fillingStation.depot',
+        ])->where('status', 'active')
+            ->whereHas('fillingStation', fn($q) => $q->where('district', $this->dcDistrict));
 
-        // Location filter
-        if ($request->filled('division')) {
-            $assignmentsQuery->whereHas(
-                'fillingStation',
-                fn($q) =>
-                $q->where('division', $request->division)
-            );
-        }
-        if ($request->filled('district')) {
-            $assignmentsQuery->whereHas(
-                'fillingStation',
-                fn($q) =>
-                $q->where('district', $request->district)
-            );
-        }
-        if ($request->filled('thana_upazila')) {
-            $assignmentsQuery->whereHas(
-                'fillingStation',
-                fn($q) =>
-                $q->where('upazila', $request->thana_upazila)
-            );
-        }
-        if ($request->filled('company_id')) {
-            $assignmentsQuery->whereHas(
-                'fillingStation',
-                fn($q) =>
-                $q->where('company_id', $request->company_id)
-            );
-        }
-        if ($request->filled('depot_id')) {
-            $assignmentsQuery->whereHas(
-                'fillingStation',
-                fn($q) =>
-                $q->where('depot_id', $request->depot_id)
-            );
-        }
-        if ($request->filled('station_id')) {
+        if ($request->filled('division'))
+            $assignmentsQuery->whereHas('fillingStation', fn($q) => $q->where('division', $request->division));
+        if ($request->filled('district'))
+            $assignmentsQuery->whereHas('fillingStation', fn($q) => $q->where('district', $request->district));
+        if ($request->filled('thana_upazila'))
+            $assignmentsQuery->whereHas('fillingStation', fn($q) => $q->where('upazila', $request->thana_upazila));
+        if ($request->filled('company_id'))
+            $assignmentsQuery->whereHas('fillingStation', fn($q) => $q->where('company_id', $request->company_id));
+        if ($request->filled('depot_id'))
+            $assignmentsQuery->whereHas('fillingStation', fn($q) => $q->where('depot_id', $request->depot_id));
+        if ($request->filled('station_id'))
             $assignmentsQuery->where('filling_station_id', $request->station_id);
-        }
 
         $allAssignments = $assignmentsQuery->get();
 
         if ($request->filled('from_date') && !$request->filled('to_date')) {
-
-            // 👉 Only single day
             $fromDate = \Carbon\Carbon::parse($request->from_date)->startOfDay();
             $toDate   = \Carbon\Carbon::parse($request->from_date)->endOfDay();
         } elseif ($request->filled('from_date') && $request->filled('to_date')) {
-
-            // 👉 Date range
             $fromDate = \Carbon\Carbon::parse($request->from_date)->startOfDay();
             $toDate   = \Carbon\Carbon::parse($request->to_date)->endOfDay();
+        } else {
+            $fromDate = now()->startOfDay();
+            $toDate   = now()->endOfDay();
         }
 
-        // যেসব station এ report আছে সেগুলোর station_id বের করো
         $reportedStationIds = Fuelreport::whereBetween('report_date', [$fromDate, $toDate])
+            ->where('district', $this->dcDistrict)
+            ->whereNotNull('station_id')
             ->pluck('station_id')
             ->unique()
             ->toArray();
 
-        // Report submit করেনি এমন assignment খুঁজে বের করো
         $missingRows = $allAssignments
-            ->filter(
-                fn($assignment) =>
-                ! in_array($assignment->filling_station_id, $reportedStationIds)
-            )
+            ->filter(fn($assignment) => !in_array($assignment->filling_station_id, $reportedStationIds))
             ->map(function ($assignment) use ($fromDate) {
-                $officer  = $assignment->officer;
-                $profile  = $officer?->profile;
-                $station  = $assignment->fillingStation;
-
+                $officer = $assignment->officer;
+                $profile = $officer?->profile;
+                $station = $assignment->fillingStation;
                 return [
-                    'id'            => $assignment->id,
-                    'missingDate'   => $fromDate->format('Y-m-d'),
-                    'officerName'   => $profile?->name ?? $officer?->name ?? '—',
-                    'officerPhone'  => $profile?->phone ?? $officer?->phone ?? '—',
-                    'division'      => $station?->division ?? '—',
-                    'district'      => $station?->district ?? '—',
-                    'thanaUpazila'  => $station?->upazila ?? '—',
-                    'stationName'   => $station?->station_name ?? '—',
-                    'companyName'   => $station?->company?->code ?? '—',
-                    'depotName'     => $station?->depot?->depot_name ?? '—',
-                    'status'        => 'Pending',
+                    'id'           => $assignment->id,
+                    'missingDate'  => $fromDate->format('Y-m-d'),
+                    'officerName'  => $profile?->name ?? $officer?->name ?? '—',
+                    'officerPhone' => $profile?->phone ?? $officer?->phone ?? '—',
+                    'division'     => $station?->division ?? '—',
+                    'district'     => $station?->district ?? '—',
+                    'thanaUpazila' => $station?->upazila ?? '—',
+                    'stationName'  => $station?->station_name ?? '—',
+                    'companyName'  => $station?->company?->code ?? '—',
+                    'depotName'    => $station?->depot?->depot_name ?? '—',
+                    'status'       => 'Pending',
                 ];
-            })
-            ->values();
+            })->values();
 
         $total      = $missingRows->count();
         $totalPages = (int) ceil($total / $perPage) ?: 1;
@@ -720,77 +570,47 @@ class DcReportsController extends Controller
         ]);
     }
 
-    /*
-|--------------------------------------------------------------------------
-| TAB 4 — Submitted Report
-| যেসব station report submit করেছে সেগুলো দেখাবে
-|--------------------------------------------------------------------------
-*/
+    // ─────────────────────────────────────────────────────────────
+    // SUBMITTED REPORT — daily, no groupBy
+    // ─────────────────────────────────────────────────────────────
+
     public function submittedReport(Request $request)
     {
         $perPage     = 10;
         $currentPage = (int) $request->get('page', 1);
 
         $query = Fuelreport::query()
-            ->with([
-                'fillingStation.company',
-                'fillingStation.assignedOfficer.officer.profile',
-            ]);
-        $query->where('district', $this->dcDistrict);
-        // Date range
-        if ($request->filled('from_date')) {
-            $query->whereDate('report_date', '>=', $request->from_date);
-        }
-        if ($request->filled('to_date') && $request->filled('from_date')) {
-            $query->whereBetween('report_date', [$request->from_date, $request->to_date]);
-        }
+            ->with(['fillingStation.company', 'fillingStation.depot'])
+            ->where('district', $this->dcDistrict);
 
-        // Location
-        if ($request->filled('division')) {
-            $query->whereHas(
-                'fillingStation',
-                fn($q) =>
-                $q->where('division', $request->division)
-            );
-        }
-        if ($request->filled('district')) {
+        if ($request->filled('from_date') && !$request->filled('to_date'))
+            $query->whereDate('report_date', $request->from_date);
+        elseif ($request->filled('from_date') && $request->filled('to_date'))
+            $query->whereBetween('report_date', [$request->from_date, $request->to_date]);
+
+        if ($request->filled('division'))
+            $query->whereHas('fillingStation', fn($q) => $q->where('division', $request->division));
+        if ($request->filled('district'))
             $query->where('district', $request->district);
-        }
-        if ($request->filled('thana_upazila')) {
+        if ($request->filled('thana_upazila'))
             $query->where('thana_upazila', $request->thana_upazila);
-        }
-        if ($request->filled('company_id')) {
-            $query->whereHas(
-                'fillingStation',
-                fn($q) =>
-                $q->where('company_id', $request->company_id)
-            );
-        }
-        if ($request->filled('depot_id')) {
-            $query->whereHas(
-                'fillingStation',
-                fn($q) =>
-                $q->where('depot_id', $request->depot_id)
-            );
-        }
-        if ($request->filled('station_id')) {
+        if ($request->filled('company_id'))
+            $query->whereHas('fillingStation', fn($q) => $q->where('company_id', $request->company_id));
+        if ($request->filled('depot_id'))
+            $query->whereHas('fillingStation', fn($q) => $q->where('depot_id', $request->depot_id));
+        if ($request->filled('station_id'))
             $query->where('station_id', $request->station_id);
-        }
 
         $fuelTypes  = ['octane', 'petrol', 'diesel', 'others'];
         $allReports = $query->orderBy('report_date', 'desc')->get();
 
-        // Officer map: station_id → officer info
         $officerMap = AssignTagOfficer::with(['officer.profile'])
-            ->where('status', 'active')
-            ->get()
-            ->keyBy('filling_station_id');
+            ->where('status', 'active')->get()->keyBy('filling_station_id');
 
         $rows = $allReports->map(function ($report) use ($fuelTypes, $officerMap) {
             $assignment     = $officerMap->get($report->station_id);
             $officerProfile = $assignment?->officer?->profile;
 
-            // Per-fuel closing stock
             $fuelBreakdown = collect($fuelTypes)->map(fn($fuel) => [
                 'fuelType'     => ucfirst($fuel),
                 'closingStock' => number_format((float) ($report->{"{$fuel}_closing_stock"} ?? 0), 0),
