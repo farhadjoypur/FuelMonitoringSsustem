@@ -849,8 +849,10 @@
                 const s = parseFloat(this.fuels[f].sales) || 0;
                 return s > p + r;
             });
-            if (blocked) { e.preventDefault();
-                alert('Sales cannot exceed available stock!'); }
+            if (blocked) {
+                e.preventDefault();
+                alert('Sales cannot exceed available stock!');
+            }
         }
     }">
 
@@ -944,7 +946,7 @@
                         {{-- Column Headers --}}
                         <div class="col-head"><i class="fa-solid fa-clock-rotate-left fa-xs"></i> Previous Stock (L)</div>
                         <div class="col-head"><i class="fa-solid fa-truck fa-xs"></i> Supply From Depot (L)</div>
-                        <div class="col-head"><i class="fa-solid fa-arrow-down fa-xs"></i> Received (L)</div>
+                        <div class="col-head"><i class="fa-solid fa-arrow-down fa-xs"></i> Received At Station (L)</div>
                         <div class="col-head"><i class="fa-solid fa-calculator fa-xs"></i> Difference (L)</div>
                         <div class="col-head"><i class="fa-solid fa-chart-line fa-xs"></i> Sales (L)</div>
                         <div class="col-head"><i class="fa-solid fa-warehouse fa-xs"></i> Closing Stock (L)</div>
@@ -971,7 +973,7 @@
                         </div>
 
                         {{-- Received --}}
-                        <div class="col-cell" data-label="Received (L)">
+                        <div class="col-cell" data-label="Received At Station (L)">
                             <input type="number" step="0.01" min="0" name="{{ $fk }}_received"
                                 :class="['num-input', fuels.{{ $fk }}.receivedWarn ? 'is-invalid' : '']"
                                 x-model="fuels.{{ $fk }}.received" @input="validate('{{ $fk }}')">
@@ -1028,22 +1030,22 @@
             <div class="saved-header">
                 <h5>Saved Reports</h5>
                 <!-- <div class="export-btns">
-                    @if (Route::has('fuel-reports.export.pdf'))
+                            @if (Route::has('fuel-reports.export.pdf'))
     <a href="{{ route('fuel-reports.export.pdf') }}" class="btn-export-pdf">
 @else
     <a href="#" class="btn-export-pdf">
     @endif
-                        <i class="fa-solid fa-file-pdf"></i> Export to PDF
-                    </a>
+                                <i class="fa-solid fa-file-pdf"></i> Export to PDF
+                            </a>
 
-                    @if (Route::has('fuel-reports.export.excel'))
+                            @if (Route::has('fuel-reports.export.excel'))
     <a href="{{ route('fuel-reports.export.excel') }}" class="btn-export-excel">
 @else
     <a href="#" class="btn-export-excel">
     @endif
-                        <i class="fa-solid fa-file-excel"></i> Export to Excel
-                    </a>
-                </div> -->
+                                <i class="fa-solid fa-file-excel"></i> Export to Excel
+                            </a>
+                        </div> -->
             </div>
 
             <div class="table-responsive">

@@ -252,7 +252,7 @@
                             <th>Fuel Type</th>
                             <th>Previous Stock (L)</th>
                             <th>Supply From Depot (L)</th>
-                            <th>Received (L)</th>
+                            <th>Received At Station (L)</th>
                             <th>Difference (L)</th>
                             <th>Sales (L)</th>
                             <th class="text-center">Action</th>
