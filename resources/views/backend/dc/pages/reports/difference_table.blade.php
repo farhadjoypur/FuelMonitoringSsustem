@@ -271,15 +271,15 @@
                         <td>
                             <div class="action-btns">
                                 <button class="action-btn btn-view"
-                                    @click="viewDiffReport(row.reportId)">
+                                    @click.prevent="">
                                     <i class="fa-solid fa-eye fa-xs"></i> View
                                 </button>
                                 <button class="action-btn btn-message"
-                                    @click="openMessageModal(row.reportId, row.stationName)">
+                                    @click.prevent="">
                                     <i class="fa-solid fa-envelope fa-xs"></i> Message
                                 </button>
                                 <button class="action-btn btn-delete"
-                                    @click="openDeleteModal(row.reportId, row.stationName)">
+                                    @click.prevent="">
                                     <i class="fa-solid fa-trash fa-xs"></i> Delete
                                 </button>
                             </div>
