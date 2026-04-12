@@ -49,9 +49,8 @@ class ReportsController extends Controller
             ->get();
 
         $officerMap        = $this->loadOfficerMap();
-        $aggregatedReports = $this->aggregateByStation($rawReports, $request);
-        $formattedReports  = $aggregatedReports->map(
-            fn($stationData) => $this->formatAggregatedReport($stationData, $officerMap)
+        $formattedReports = $rawReports->map(
+            fn($report) => $this->formatSingleReport($report, $officerMap)
         );
 
         $perPage          = 10;
@@ -92,6 +91,70 @@ class ReportsController extends Controller
         ]);
     }
 
+    private function formatSingleReport($report, Collection $officerMap): array
+    {
+        $fuelKeys   = ['diesel', 'petrol', 'octane', 'others'];
+        $tagOfficer = $officerMap->get($report->station_id, '—');
+
+        $fuelStatuses = [];
+        foreach ($fuelKeys as $fuel) {
+            $fuelStatuses[$fuel] = $this->resolveFuelStatus(
+                (float)($report->{"{$fuel}_closing_stock"} ?? 0),
+                (float)($report->{"{$fuel}_supply"} ?? 0) - (float)($report->{"{$fuel}_received"} ?? 0)
+            );
+        }
+
+        $totalClosing  = array_sum(array_map(fn($f) => (float)($report->{"{$f}_closing_stock"} ?? 0), $fuelKeys));
+        $overallStatus = match (true) {
+            $totalClosing <= 0   => ['label' => 'Zero Stock', 'css' => 'status-zero'],
+            $totalClosing < 1000 => ['label' => 'Low Stock',  'css' => 'status-low'],
+            default              => ['label' => 'Available',  'css' => 'status-available'],
+        };
+
+        return [
+            'id'               => $report->id,
+            'report_date_from' => $report->report_date?->format('Y-m-d') ?? '',
+            'report_date_to'   => $report->report_date?->format('Y-m-d') ?? '',
+            'station_name'     => $report->station_name ?? $report->fillingStation?->station_name ?? '—',
+            'district'         => $report->district ?? '',
+            'division'         => $report->fillingStation?->division ?? '',
+            'thana_upazila'    => $report->thana_upazila ?? '',
+            'company_name'     => $report->fillingStation?->company?->code ?? '—',
+            'depot_name'       => $report->depot_name ?? $report->fillingStation?->depot?->depot_name ?? '',
+            'tag_officer'      => $tagOfficer,
+            'comment'          => $report->comment ?? '',
+            'fuel_statuses'    => $fuelStatuses,
+            'overall_status'   => $overallStatus,
+
+            'diesel_prev_stock'    => (float)($report->diesel_prev_stock ?? 0),
+            'diesel_supply'        => (float)($report->diesel_supply ?? 0),
+            'diesel_received'      => (float)($report->diesel_received ?? 0),
+            'diesel_difference'    => (float)($report->diesel_supply ?? 0) - (float)($report->diesel_received ?? 0),
+            'diesel_sales'         => (float)($report->diesel_sales ?? 0),
+            'diesel_closing_stock' => (float)($report->diesel_closing_stock ?? 0),
+
+            'petrol_prev_stock'    => (float)($report->petrol_prev_stock ?? 0),
+            'petrol_supply'        => (float)($report->petrol_supply ?? 0),
+            'petrol_received'      => (float)($report->petrol_received ?? 0),
+            'petrol_difference'    => (float)($report->petrol_supply ?? 0) - (float)($report->petrol_received ?? 0),
+            'petrol_sales'         => (float)($report->petrol_sales ?? 0),
+            'petrol_closing_stock' => (float)($report->petrol_closing_stock ?? 0),
+
+            'octane_prev_stock'    => (float)($report->octane_prev_stock ?? 0),
+            'octane_supply'        => (float)($report->octane_supply ?? 0),
+            'octane_received'      => (float)($report->octane_received ?? 0),
+            'octane_difference'    => (float)($report->octane_supply ?? 0) - (float)($report->octane_received ?? 0),
+            'octane_sales'         => (float)($report->octane_sales ?? 0),
+            'octane_closing_stock' => (float)($report->octane_closing_stock ?? 0),
+
+            'others_prev_stock'    => (float)($report->others_prev_stock ?? 0),
+            'others_supply'        => (float)($report->others_supply ?? 0),
+            'others_received'      => (float)($report->others_received ?? 0),
+            'others_difference'    => (float)($report->others_supply ?? 0) - (float)($report->others_received ?? 0),
+            'others_sales'         => (float)($report->others_sales ?? 0),
+            'others_closing_stock' => (float)($report->others_closing_stock ?? 0),
+        ];
+    }
     // ─────────────────────────────────────────────────────────────
     // QUERY BUILDING
     // ─────────────────────────────────────────────────────────────
@@ -102,10 +165,21 @@ class ReportsController extends Controller
         $query = Fuelreport::query()
             ->with(['fillingStation.company', 'fillingStation.depot']);
 
-        if ($request->filled('from_date'))
-            $query->whereDate('report_date', '>=', $request->from_date);
-        if ($request->filled('to_date') && $request->filled('from_date'))
-            $query->whereBetween('report_date', [$request->from_date, $request->to_date]);
+        if ($request->filled('from_date') && !$request->filled('to_date')) {
+
+            // 👉 Only single day
+            $from = \Carbon\Carbon::parse($request->from_date)->startOfDay();
+            $to   = \Carbon\Carbon::parse($request->from_date)->endOfDay();
+
+            $query->whereBetween('report_date', [$from, $to]);
+        } elseif ($request->filled('from_date') && $request->filled('to_date')) {
+
+            // 👉 Range
+            $from = \Carbon\Carbon::parse($request->from_date)->startOfDay();
+            $to   = \Carbon\Carbon::parse($request->to_date)->endOfDay();
+
+            $query->whereBetween('report_date', [$from, $to]);
+        }
         if ($request->filled('division'))
             $query->whereHas('fillingStation', fn($q) => $q->where('division', $request->division));
         if ($request->filled('district'))
@@ -158,8 +232,8 @@ class ReportsController extends Controller
     private function aggregateByStation(Collection $rawReports, Request $request): Collection
     {
         $fuelKeys = ['diesel', 'petrol', 'octane', 'others'];
-
-        $aggregated = $rawReports->groupBy('station_id')->map(function ($stationRows) use ($fuelKeys) {
+        
+        $aggregated = $rawReports->groupBy('station_id')->map(function ($stationRows) use ($fuelKeys , $request) {
             $firstRow = $stationRows->first();
             $lastRow  = $stationRows->last();
 
@@ -173,8 +247,15 @@ class ReportsController extends Controller
                 'company_name'     => $firstRow->fillingStation?->company?->code ?? '—',
                 'depot_name'       => $firstRow->depot_name ?? $firstRow->fillingStation?->depot?->depot_name ?? '',
                 'comment'          => $lastRow->comment ?? '',
-                'report_date_from' => $firstRow->report_date?->format('Y-m-d') ?? '',
-                'report_date_to'   => $lastRow->report_date?->format('Y-m-d') ?? '',
+                'report_date_from' => $request->filled('from_date')
+                    ? \Carbon\Carbon::parse($request->from_date)->format('Y-m-d')
+                    : $firstRow->report_date?->format('Y-m-d') ?? '',
+
+                'report_date_to' => $request->filled('to_date')
+                    ? \Carbon\Carbon::parse($request->to_date)->format('Y-m-d')
+                    : ($request->filled('from_date')
+                        ? \Carbon\Carbon::parse($request->from_date)->format('Y-m-d')
+                        : $lastRow->report_date?->format('Y-m-d') ?? ''),
             ];
 
             foreach ($fuelKeys as $fuel) {
