@@ -140,8 +140,8 @@ class DcReportsController extends Controller
         if ($request->filled('from_date')) {
             $query->whereDate('report_date', '>=', $request->from_date);
         }
-        if ($request->filled('to_date')) {
-            $query->whereDate('report_date', '<=', $request->to_date);
+        if ($request->filled('to_date') && $request->filled('from_date')) {
+            $query->whereBetween('report_date', [$request->from_date, $request->to_date]);
         }
         if ($request->filled('division')) {
             $query->whereHas('fillingStation', fn($q) => $q->where('division', $request->division));
@@ -440,8 +440,8 @@ class DcReportsController extends Controller
         if (! empty($validated['from_date'])) {
             $query->whereDate('report_date', '>=', $validated['from_date']);
         }
-        if (! empty($validated['to_date'])) {
-            $query->whereDate('report_date', '<=', $validated['to_date']);
+        if (! empty($validated['to_date']) && ! empty($validated['from_date'])) {
+            $query->whereBetween('report_date', [$validated['from_date'], $validated['to_date']]);
         }
 
         // Location
@@ -662,14 +662,17 @@ class DcReportsController extends Controller
 
         $allAssignments = $assignmentsQuery->get();
 
-        // Date range — default: যদি filter না দেয়, last 30 days
-        $fromDate = $request->filled('from_date')
-            ? \Carbon\Carbon::parse($request->from_date)->startOfDay()
-            : now()->subDays(30)->startOfDay();
+        if ($request->filled('from_date') && !$request->filled('to_date')) {
 
-        $toDate = $request->filled('to_date')
-            ? \Carbon\Carbon::parse($request->to_date)->endOfDay()
-            : now()->endOfDay();
+            // 👉 Only single day
+            $fromDate = \Carbon\Carbon::parse($request->from_date)->startOfDay();
+            $toDate   = \Carbon\Carbon::parse($request->from_date)->endOfDay();
+        } elseif ($request->filled('from_date') && $request->filled('to_date')) {
+
+            // 👉 Date range
+            $fromDate = \Carbon\Carbon::parse($request->from_date)->startOfDay();
+            $toDate   = \Carbon\Carbon::parse($request->to_date)->endOfDay();
+        }
 
         // যেসব station এ report আছে সেগুলোর station_id বের করো
         $reportedStationIds = Fuelreport::whereBetween('report_date', [$fromDate, $toDate])
@@ -738,8 +741,8 @@ class DcReportsController extends Controller
         if ($request->filled('from_date')) {
             $query->whereDate('report_date', '>=', $request->from_date);
         }
-        if ($request->filled('to_date')) {
-            $query->whereDate('report_date', '<=', $request->to_date);
+        if ($request->filled('to_date') && $request->filled('from_date')) {
+            $query->whereBetween('report_date', [$request->from_date, $request->to_date]);
         }
 
         // Location

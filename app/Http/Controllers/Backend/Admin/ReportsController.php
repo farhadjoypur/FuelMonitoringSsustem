@@ -96,10 +96,6 @@ class ReportsController extends Controller
     // QUERY BUILDING
     // ─────────────────────────────────────────────────────────────
 
-    private function getDcDistrict(): ?string
-    {
-        return Auth::user()?->profile?->district;
-    }
 
     private function buildFilteredQuery(Request $request)
     {
@@ -108,8 +104,8 @@ class ReportsController extends Controller
 
         if ($request->filled('from_date'))
             $query->whereDate('report_date', '>=', $request->from_date);
-        if ($request->filled('to_date'))
-            $query->whereDate('report_date', '<=', $request->to_date);
+        if ($request->filled('to_date') && $request->filled('from_date'))
+            $query->whereBetween('report_date', [$request->from_date, $request->to_date]);
         if ($request->filled('division'))
             $query->whereHas('fillingStation', fn($q) => $q->where('division', $request->division));
         if ($request->filled('district'))
@@ -416,8 +412,8 @@ class ReportsController extends Controller
 
         if (!empty($validated['from_date']))
             $query->whereDate('report_date', '>=', $validated['from_date']);
-        if (!empty($validated['to_date']))
-            $query->whereDate('report_date', '<=', $validated['to_date']);
+        if (!empty($validated['to_date']) && !empty($validated['from_date']))
+            $query->whereBetween('report_date', [$validated['from_date'], $validated['to_date']]);
         if (!empty($validated['division']))
             $query->whereHas('fillingStation', fn($q) => $q->where('division', $validated['division']));
         if (!empty($validated['district']))
@@ -566,12 +562,17 @@ class ReportsController extends Controller
 
         $allAssignments = $assignmentsQuery->get();
 
-        $fromDate = $request->filled('from_date')
-            ? \Carbon\Carbon::parse($request->from_date)->startOfDay()
-            : now()->subDays(30)->startOfDay();
-        $toDate = $request->filled('to_date')
-            ? \Carbon\Carbon::parse($request->to_date)->endOfDay()
-            : now()->endOfDay();
+        if ($request->filled('from_date') && !$request->filled('to_date')) {
+
+            // 👉 Only single day
+            $fromDate = \Carbon\Carbon::parse($request->from_date)->startOfDay();
+            $toDate   = \Carbon\Carbon::parse($request->from_date)->endOfDay();
+        } elseif ($request->filled('from_date') && $request->filled('to_date')) {
+
+            // 👉 Date range
+            $fromDate = \Carbon\Carbon::parse($request->from_date)->startOfDay();
+            $toDate   = \Carbon\Carbon::parse($request->to_date)->endOfDay();
+        }
 
         $reportedStationIds = Fuelreport::whereBetween('report_date', [$fromDate, $toDate])
             ->pluck('station_id')->unique()->toArray();
@@ -626,8 +627,8 @@ class ReportsController extends Controller
 
         if ($request->filled('from_date'))
             $query->whereDate('report_date', '>=', $request->from_date);
-        if ($request->filled('to_date'))
-            $query->whereDate('report_date', '<=', $request->to_date);
+        if ($request->filled('to_date') && $request->filled('from_date'))
+            $query->whereBetween('report_date', [$request->from_date, $request->to_date]);
         if ($request->filled('division'))
             $query->whereHas('fillingStation', fn($q) => $q->where('division', $request->division));
         if ($request->filled('district'))
@@ -756,10 +757,8 @@ class ReportsController extends Controller
         $query = Fuelreport::query()
             ->with(['fillingStation.company', 'fillingStation.assignedOfficer.user.profile']);
 
-        if (!empty($filters['from_date']))
-            $query->whereDate('report_date', '>=', $filters['from_date']);
-        if (!empty($filters['to_date']))
-            $query->whereDate('report_date', '<=', $filters['to_date']);
+        if (!empty($filters['from_date']) && !empty($filters['to_date']))
+            $query->whereBetween('report_date', [$filters['from_date'], $filters['to_date']]);
         if (!empty($filters['division']))
             $query->whereHas('fillingStation', fn($q) => $q->where('division', $filters['division']));
         if (!empty($filters['district']))
@@ -899,12 +898,17 @@ class ReportsController extends Controller
 
         $allAssignments = $assignmentsQuery->get();
 
-        $fromDate = !empty($filters['from_date'])
-            ? \Carbon\Carbon::parse($filters['from_date'])->startOfDay()
-            : now()->subDays(30)->startOfDay();
-        $toDate = !empty($filters['to_date'])
-            ? \Carbon\Carbon::parse($filters['to_date'])->endOfDay()
-            : now()->endOfDay();
+        if ($request->filled('from_date') && !$request->filled('to_date')) {
+
+            // 👉 Only single day
+            $fromDate = \Carbon\Carbon::parse($request->from_date)->startOfDay();
+            $toDate   = \Carbon\Carbon::parse($request->from_date)->endOfDay();
+        } elseif ($request->filled('from_date') && $request->filled('to_date')) {
+
+            // 👉 Date range
+            $fromDate = \Carbon\Carbon::parse($request->from_date)->startOfDay();
+            $toDate   = \Carbon\Carbon::parse($request->to_date)->endOfDay();
+        }
 
         $reportedStationIds = Fuelreport::whereBetween('report_date', [$fromDate, $toDate])
             ->pluck('station_id')->unique()->toArray();
@@ -971,8 +975,8 @@ class ReportsController extends Controller
 
         if (!empty($filters['from_date']))
             $query->whereDate('report_date', '>=', $filters['from_date']);
-        if (!empty($filters['to_date']))
-            $query->whereDate('report_date', '<=', $filters['to_date']);
+        if (!empty($filters['to_date']) && !empty($filters['from_date']))
+            $query->whereBetween('report_date', [$filters['from_date'], $filters['to_date']]);
         if (!empty($filters['division']))
             $query->whereHas('fillingStation', fn($q) => $q->where('division', $filters['division']));
         if (!empty($filters['district']))
