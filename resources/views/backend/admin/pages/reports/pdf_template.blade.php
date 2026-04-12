@@ -287,7 +287,7 @@
                 <th style="width:5%">Fuel</th>
                 {{-- <th style="width:7%">Prev. Stock (L)<small>Opening</small></th> --}}
                 <th style="width:7%">Supply (L)<small>From Depot</small></th>
-                <th style="width:7%">Received (L)<small>At Station</small></th>
+                <th style="width:7%">Received At Station (L)<small>At Station</small></th>
                 <th style="width:7%">Difference (L)<small>Supply - Received</small></th>
                 <th style="width:7%">Sales (L)<small>Total</small></th>
                 <th style="width:7%">Closing Stock (L)<small>Last date</small></th>

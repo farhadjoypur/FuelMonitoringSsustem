@@ -291,8 +291,8 @@
 
 
         /* ================================================
-                                                                                                                                   RESPONSIVE DESIGN (Mobile Friendly)
-                                                                                                                                   ================================================ */
+                                                                                                                                               RESPONSIVE DESIGN (Mobile Friendly)
+                                                                                                                                               ================================================ */
 
         /* ১০২৪ পিক্সেলের নিচে (ট্যাবলেট ও ল্যাপটপ) */
         @media (max-width: 1024px) {
@@ -465,7 +465,7 @@
                 <div class="input-grid">
                     <div class="grid-head"><i class="fa-solid fa-clock-rotate-left fa-xs"></i> Previous Stock (L)</div>
                     <div class="grid-head"><i class="fa-solid fa-truck fa-xs"></i> Supply From Depot (L)</div>
-                    <div class="grid-head"><i class="fa-solid fa-arrow-down fa-xs"></i> Received (L)</div>
+                    <div class="grid-head"><i class="fa-solid fa-arrow-down fa-xs"></i> Received At Station (L)</div>
                     <div class="grid-head"><i class="fa-solid fa-calculator fa-xs"></i> Difference (L)</div>
                     <div class="grid-head"><i class="fa-solid fa-chart-line fa-xs"></i> Sales (L)</div>
                     <div class="grid-head"><i class="fa-solid fa-warehouse fa-xs"></i> Closing Stock (L)</div>
@@ -524,7 +524,7 @@
                 <div class="input-grid">
                     <div class="grid-head"><i class="fa-solid fa-clock-rotate-left fa-xs"></i> Previous Stock (L)</div>
                     <div class="grid-head"><i class="fa-solid fa-truck fa-xs"></i> Supply From Depot (L)</div>
-                    <div class="grid-head"><i class="fa-solid fa-arrow-down fa-xs"></i> Received (L)</div>
+                    <div class="grid-head"><i class="fa-solid fa-arrow-down fa-xs"></i> Received At Station (L)</div>
                     <div class="grid-head"><i class="fa-solid fa-calculator fa-xs"></i> Difference (L)</div>
                     <div class="grid-head"><i class="fa-solid fa-chart-line fa-xs"></i> Sales (L)</div>
                     <div class="grid-head"><i class="fa-solid fa-warehouse fa-xs"></i> Closing Stock (L)</div>
@@ -584,7 +584,7 @@
                 <div class="input-grid">
                     <div class="grid-head"><i class="fa-solid fa-clock-rotate-left fa-xs"></i> Previous Stock (L)</div>
                     <div class="grid-head"><i class="fa-solid fa-truck fa-xs"></i> Supply From Depot (L)</div>
-                    <div class="grid-head"><i class="fa-solid fa-arrow-down fa-xs"></i> Received (L)</div>
+                    <div class="grid-head"><i class="fa-solid fa-arrow-down fa-xs"></i> Received At Station (L)</div>
                     <div class="grid-head"><i class="fa-solid fa-calculator fa-xs"></i> Difference (L)</div>
                     <div class="grid-head"><i class="fa-solid fa-chart-line fa-xs"></i> Sales (L)</div>
                     <div class="grid-head"><i class="fa-solid fa-warehouse fa-xs"></i> Closing Stock (L)</div>

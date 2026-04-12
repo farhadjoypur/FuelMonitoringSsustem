@@ -674,17 +674,51 @@
         }
 
         /* Responsive */
-        @media (max-width:1100px) {
+        /* Responsive Design Updates */
+
+        @media (max-width: 1100px) {
+
+            /* হেডার হাইড করা */
+            .col-head {
+                display: none;
+            }
+
+            /* গ্রিড স্ট্রাকচার ঠিক করা */
             .fuel-grid {
                 grid-template-columns: repeat(3, 1fr);
             }
 
-            .col-head {
-                display: none;
+            /* প্রতিটি সেলের উপরে লেবেল দেখানোর ম্যাজিক */
+            .col-cell,
+            .col-cell-auto {
+                position: relative;
+                padding-top: 38px !important;
+                /* লেবেলের জন্য জায়গা */
+                border-right: 1px solid #f1f5f9;
+            }
+
+            .col-cell::before,
+            .col-cell-auto::before {
+                content: attr(data-label);
+                /* HTML এর data-label থেকে টেক্সট নিবে */
+                position: absolute;
+                top: 12px;
+                left: 12px;
+                font-size: 10px;
+                font-weight: 800;
+                text-transform: uppercase;
+                color: #64748b;
+                letter-spacing: 0.5px;
+                white-space: nowrap;
+            }
+
+            .col-cell-auto {
+                align-items: flex-start;
+                justify-content: flex-start;
             }
         }
 
-        @media (max-width:768px) {
+        @media (max-width: 768px) {
             .report-container {
                 padding: 14px;
             }
@@ -715,7 +749,7 @@
             }
         }
 
-        @media (max-width:480px) {
+        @media (max-width: 480px) {
             .station-row {
                 grid-template-columns: 1fr;
             }
@@ -727,6 +761,7 @@
             .col-cell,
             .col-cell-auto {
                 border-right: none;
+                padding-top: 35px !important;
             }
         }
     </style>
@@ -849,8 +884,10 @@
                 const s = parseFloat(this.fuels[f].sales) || 0;
                 return s > p + r;
             });
-            if (blocked) { e.preventDefault();
-                alert('Sales cannot exceed available stock!'); }
+            if (blocked) {
+                e.preventDefault();
+                alert('Sales cannot exceed available stock!');
+            }
         }
     }">
 
@@ -944,7 +981,7 @@
                         {{-- Column Headers --}}
                         <div class="col-head"><i class="fa-solid fa-clock-rotate-left fa-xs"></i> Previous Stock (L)</div>
                         <div class="col-head"><i class="fa-solid fa-truck fa-xs"></i> Supply From Depot (L)</div>
-                        <div class="col-head"><i class="fa-solid fa-arrow-down fa-xs"></i> Received (L)</div>
+                        <div class="col-head"><i class="fa-solid fa-arrow-down fa-xs"></i> Received At Station (L)</div>
                         <div class="col-head"><i class="fa-solid fa-calculator fa-xs"></i> Difference (L)</div>
                         <div class="col-head"><i class="fa-solid fa-chart-line fa-xs"></i> Sales (L)</div>
                         <div class="col-head"><i class="fa-solid fa-warehouse fa-xs"></i> Closing Stock (L)</div>
@@ -971,7 +1008,7 @@
                         </div>
 
                         {{-- Received --}}
-                        <div class="col-cell" data-label="Received (L)">
+                        <div class="col-cell" data-label="Received At Station (L)">
                             <input type="number" step="0.01" min="0" name="{{ $fk }}_received"
                                 :class="['num-input', fuels.{{ $fk }}.receivedWarn ? 'is-invalid' : '']"
                                 x-model="fuels.{{ $fk }}.received" @input="validate('{{ $fk }}')">
@@ -1028,22 +1065,22 @@
             <div class="saved-header">
                 <h5>Saved Reports</h5>
                 <!-- <div class="export-btns">
-                    @if (Route::has('fuel-reports.export.pdf'))
+                                    @if (Route::has('fuel-reports.export.pdf'))
     <a href="{{ route('fuel-reports.export.pdf') }}" class="btn-export-pdf">
 @else
     <a href="#" class="btn-export-pdf">
     @endif
-                        <i class="fa-solid fa-file-pdf"></i> Export to PDF
-                    </a>
+                                        <i class="fa-solid fa-file-pdf"></i> Export to PDF
+                                    </a>
 
-                    @if (Route::has('fuel-reports.export.excel'))
+                                    @if (Route::has('fuel-reports.export.excel'))
     <a href="{{ route('fuel-reports.export.excel') }}" class="btn-export-excel">
 @else
     <a href="#" class="btn-export-excel">
     @endif
-                        <i class="fa-solid fa-file-excel"></i> Export to Excel
-                    </a>
-                </div> -->
+                                        <i class="fa-solid fa-file-excel"></i> Export to Excel
+                                    </a>
+                                </div> -->
             </div>
 
             <div class="table-responsive">
