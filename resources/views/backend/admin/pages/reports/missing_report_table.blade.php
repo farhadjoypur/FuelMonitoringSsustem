@@ -119,7 +119,7 @@
     {{-- Header --}}
     <div class="table-header-row">
         <div class="table-title">
-            Tag Officer Pending Reports
+            Tag Officer Missing Reports
         </div>
         <div style="display:flex; align-items:center; gap:12px;">
             <span class="record-count"
@@ -166,7 +166,7 @@
                     <th style="width:80px;">COMPANY</th>
                     {{-- depot --}}
                     <th style="width:80px;">DEPOT</th>
-                    <th style="width:80px;">FUEL TYPE</th>
+                    <th style="width:80px;">FUEL</th>
                     <th style="width:80px;">STATUS</th>
                 </tr>
             </thead>
