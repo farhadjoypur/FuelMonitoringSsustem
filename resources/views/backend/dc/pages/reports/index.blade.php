@@ -1517,20 +1517,35 @@
 
                 async submitDelete() {
                     try {
-                        const csrf = document.querySelector('meta[name="csrf-token"]').content;
-                        const url = '{{ route('dc.reports.destroy', ':id') }}'.replace(':id', this.deleteModal
-                            .reportId);
+                        // Try meta tag first, fallback to cookie
+                        const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+                        const csrf = csrfMeta 
+                            ? csrfMeta.getAttribute('content')
+                            : document.cookie.split('; ')
+                                .find(row => row.startsWith('XSRF-TOKEN='))
+                                ?.split('=')[1];
+
+                        if (!csrf) {
+                            alert('CSRF token not found. Please refresh the page.');
+                            return;
+                        }
+
+                        const url = `/dc/reports/${this.deleteModal.reportId}`;
+
                         const res = await fetch(url, {
                             method: 'DELETE',
                             headers: {
-                                'X-CSRF-TOKEN': csrf,
-                                'Accept': 'application/json'
+                                'X-CSRF-TOKEN': decodeURIComponent(csrf),
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json',
                             },
                         });
+
+                        if (!res.ok) throw new Error(`Server error ${res.status}`);
+
                         const data = await res.json();
                         if (data.success) {
                             this.deleteModal.isOpen = false;
-                            // Active tab refresh
                             if (this.activeTab === 'stock') this.applyFilter(this.currentPage);
                             else if (this.activeTab === 'difference') this.applyDiffFilter(this.diffCurrentPage);
                             else if (this.activeTab === 'missing') this.applyMissingFilter(this.missingCurrentPage);
@@ -1538,8 +1553,8 @@
                         } else {
                             alert('Failed to delete.');
                         }
-                    } catch {
-                        alert('Network error.');
+                    } catch (err) {
+                        alert('Network error: ' + err.message);
                     }
                 },
 

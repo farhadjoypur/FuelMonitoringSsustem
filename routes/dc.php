@@ -46,3 +46,4 @@ Route::prefix('dc')->middleware(['role:' . UserRole::DC])->as('dc.')->group(func
     Route::get('dc/reports/submitted/export-pdf', [DcReportsController::class, 'exportSubmittedReportPdf'])
         ->name('reports.submitted.export-pdf');
 });
+

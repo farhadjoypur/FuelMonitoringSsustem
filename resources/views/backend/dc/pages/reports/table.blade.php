@@ -559,7 +559,7 @@
                                 <td rowspan="{{ $fuelCount }}">
                                     <div class="action-buttons">
 
-                                        <button class="btn-action btn-view" type="button"
+                                        {{-- <button class="btn-action btn-view" type="button"
                                             @click.prevent="">
                                             <i class="fa-solid fa-eye"></i> View
                                         </button>
@@ -567,10 +567,13 @@
                                         <button class="btn-action btn-message" type="button"
                                             @click.prevent="">
                                             <i class="fa-solid fa-message"></i> Message
-                                        </button>
+                                        </button> --}}
 
                                         <button class="btn-action btn-delete" type="button"
-                                            @click.prevent="">
+                                            @click="openDeleteModal(
+                                                {{ $report['id'] }},
+                                                '{{ addslashes($report['station_name']) }}'
+                                            )">
                                             <i class="fa-solid fa-trash"></i> Delete
                                         </button>
 
