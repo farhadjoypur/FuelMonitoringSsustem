@@ -33,19 +33,36 @@ class DashboardController extends Controller
         // Last Closing Stock − Today's Total Sales
         // =============================================
 
-        // সর্বশেষ report date (আজকের আগে)
-        $lastReportDate = Fuelreport::whereDate('report_date', '<', today())
-            ->max('report_date');
+        $currentStock = DB::table('fuelreports as f')
+            ->joinSub(
+                DB::table('fuelreports')
+                    ->selectRaw('station_id, MAX(report_date) as latest_date')
+                    ->groupBy('station_id'),
+                'latest',
+                function ($join) {
+                    $join->on('f.station_id', '=', 'latest.station_id')
+                        ->on('f.report_date', '=', 'latest.latest_date');
+                }
+            )
+            ->selectRaw('
+        COUNT(DISTINCT f.station_id)             as total_stations,
+        COALESCE(SUM(f.octane_closing_stock), 0) as octane,
+        COALESCE(SUM(f.petrol_closing_stock), 0) as petrol,
+        COALESCE(SUM(f.diesel_closing_stock), 0) as diesel,
+        COALESCE(SUM(f.others_closing_stock), 0) as others,
+        COALESCE(SUM(
+            f.octane_closing_stock +
+            f.petrol_closing_stock +
+            f.diesel_closing_stock +
+            f.others_closing_stock
+        ), 0) as grand_total
+    ')
+            ->first();
 
-        $lastAvailableReports = $lastReportDate
-            ? Fuelreport::whereDate('report_date', $lastReportDate)->get()
-            : collect();
-
-        // Last closing stock (সব station এর sum)
-        $lastOctaneClosing = $lastAvailableReports->sum('octane_closing_stock');
-        $lastPetrolClosing = $lastAvailableReports->sum('petrol_closing_stock');
-        $lastDieselClosing = $lastAvailableReports->sum('diesel_closing_stock');
-        $lastOthersClosing = $lastAvailableReports->sum('others_closing_stock');
+        $todayOctaneStock = $currentStock->octane;
+        $todayPetrolStock = $currentStock->petrol;
+        $todayDieselStock = $currentStock->diesel;
+        $todayOthersStock = $currentStock->others;
 
         // আজকের sales
         $todayOctaneSold = $todayReports->sum('octane_sales');
@@ -53,11 +70,11 @@ class DashboardController extends Controller
         $todayDieselSold = $todayReports->sum('diesel_sales');
         $todayOthersSold = $todayReports->sum('others_sales');
 
-        // Today Stock = Last Closing − Today Sales
-        $todayOctaneStock = $lastOctaneClosing - $todayOctaneSold;
-        $todayPetrolStock = $lastPetrolClosing - $todayPetrolSold;
-        $todayDieselStock = $lastDieselClosing - $todayDieselSold;
-        $todayOthersStock = $lastOthersClosing - $todayOthersSold;
+        // যাতে blade এ কিছু বদলাতে না হয়
+        $todayOctaneStock = $currentStock->octane;
+        $todayPetrolStock = $currentStock->petrol;
+        $todayDieselStock = $currentStock->diesel;
+        $todayOthersStock = $currentStock->others;
 
         // =============================================
         // TODAY'S RECEIVED

@@ -251,15 +251,28 @@ class ReportsController extends Controller
 
     private function buildTotalRow(Collection $allFormattedReports): array
     {
-        $totals = [];
-        foreach (['diesel', 'petrol', 'octane', 'others'] as $fuel) {
-            $totals["{$fuel}_prev_stock"]    = $allFormattedReports->sum("{$fuel}_prev_stock");
-            $totals["{$fuel}_supply"]        = $allFormattedReports->sum("{$fuel}_supply");
-            $totals["{$fuel}_received"]      = $allFormattedReports->sum("{$fuel}_received");
-            $totals["{$fuel}_difference"]    = $allFormattedReports->sum("{$fuel}_difference");
-            $totals["{$fuel}_sales"]         = $allFormattedReports->sum("{$fuel}_sales");
-            $totals["{$fuel}_closing_stock"] = $allFormattedReports->sum("{$fuel}_closing_stock");
+        $fuelKeys = ['diesel', 'petrol', 'octane', 'others'];
+        $totals   = [];
+
+        foreach ($fuelKeys as $fuel) {
+            // supply, received, sales, difference — সব row এর sum (ঠিক আছে)
+            $totals["{$fuel}_prev_stock"] = $allFormattedReports->sum("{$fuel}_prev_stock");
+            $totals["{$fuel}_supply"]     = $allFormattedReports->sum("{$fuel}_supply");
+            $totals["{$fuel}_received"]   = $allFormattedReports->sum("{$fuel}_received");
+            $totals["{$fuel}_difference"] = $allFormattedReports->sum("{$fuel}_difference");
+            $totals["{$fuel}_sales"]      = $allFormattedReports->sum("{$fuel}_sales");
+
+            // closing_stock — প্রতিটা station এর সর্বশেষ row শুধু
+            $totals["{$fuel}_closing_stock"] = $allFormattedReports
+                ->groupBy('station_name')
+                ->map(
+                    fn($stationRows) => $stationRows
+                        ->sortByDesc('report_date_from')
+                        ->first()["{$fuel}_closing_stock"] ?? 0
+                )
+                ->sum();
         }
+
         return $totals;
     }
 
