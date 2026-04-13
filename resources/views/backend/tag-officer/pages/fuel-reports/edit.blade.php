@@ -367,34 +367,6 @@
         </div>
     </form>
 </div>
-@php
-    $reportDateStr = \Carbon\Carbon::parse($fuelReport->report_date)->toDateString();
-    $todayStr      = \Carbon\Carbon::today()->toDateString();
-    $isEditable    = $reportDateStr === $todayStr;
-@endphp
-
-@if(! $isEditable)
-<div style="min-height:55vh;display:flex;align-items:center;justify-content:center;padding:30px;">
-    <div style="background:#fff;border-radius:14px;border:1px solid #fecaca;padding:44px 36px;max-width:480px;width:100%;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
-        <div style="width:68px;height:68px;background:#fef2f2;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
-            <i class="fa-solid fa-lock" style="font-size:1.8rem;color:#ef4444;"></i>
-        </div>
-        <h4 style="font-size:1.1rem;font-weight:700;color:#1e293b;margin-bottom:12px;">Access Restricted</h4>
-        <p style="font-size:.875rem;color:#64748b;line-height:1.8;margin-bottom:26px;">
-            You are only authorized to edit <strong style="color:#1e293b;">today's report</strong>.
-            Editing reports from previous dates is <strong style="color:#ef4444;">strictly not permitted</strong>
-            to maintain data integrity and compliance standards.
-            <br><br>
-            <span style="font-size:.78rem;color:#94a3b8;">
-                If you require assistance, please contact your supervisor or system administrator.
-            </span>
-        </p>
-        <a href="{{ route('fuel-reports.index') }}"
-            style="display:inline-flex;align-items:center;gap:8px;background:#2563eb;color:#fff;border-radius:8px;padding:11px 28px;font-size:.875rem;font-weight:600;text-decoration:none;">
-            <i class="fa-solid fa-arrow-left fa-xs"></i> Back to Reports
-        </a>
-    </div>
-</div>
 @endif
 @endsection
 
