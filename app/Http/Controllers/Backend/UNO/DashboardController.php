@@ -117,10 +117,11 @@ class DashboardController extends Controller
         $totalStations = count($stationIds);
 
         // UNO এর jurisdiction এ assigned active tag officers
-        $totalOfficers = AssignTagOfficer::where('status', 'active')
-            ->whereIn('filling_station_id', $stationIds)
-            ->distinct('officer_id')
-            ->count('officer_id');
+        // $totalOfficers = AssignTagOfficer::where('status', 'active')
+        //     ->whereIn('filling_station_id', $stationIds)
+        //     ->distinct('officer_id')
+        //     ->count('officer_id');
+        $totalOfficers = User::where('role', '2')->count();
 
         $newDepots = Depot::where('created_at', '>=', $thisMonth)
             ->whereHas('fillingStations', function($q) use ($unoUpazila, $unoDistrict) {
