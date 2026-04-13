@@ -12,6 +12,24 @@ use Illuminate\Support\Facades\Auth;
 
 class FuelReportController extends Controller
 {
+
+    private function authorizeTodayOnly(Fuelreport $fuelReport): void
+    {
+        $reportDate = Carbon::parse($fuelReport->report_date)->toDateString();
+        $today      = Carbon::today()->toDateString();
+
+        if ($reportDate !== $today) {
+            if (request()->expectsJson() || request()->ajax()) {
+                abort(response()->json([
+                    'success' => false,
+                    'message' => 'PREVIOUS_REPORT'
+                ], 403));
+            }
+            abort(403, 'PREVIOUS_REPORT');
+        }
+    }
+
+
     // ═══════════════════════════════════════════════════════
     //  HELPER — লগইন করা Officer এর active assignment বের করা
     // ═══════════════════════════════════════════════════════
@@ -287,6 +305,7 @@ class FuelReportController extends Controller
     public function edit(Fuelreport $fuelReport)
     {
         $this->authorizeReport($fuelReport);
+        $this->authorizeTodayOnly($fuelReport);
         return view('backend.tag-officer.pages.fuel-reports.edit', compact('fuelReport'));
     }
 
@@ -296,6 +315,7 @@ class FuelReportController extends Controller
     public function update(Request $request, Fuelreport $fuelReport)
     {
         $this->authorizeReport($fuelReport);
+        $this->authorizeTodayOnly($fuelReport);
 
         $ctx = $this->getOfficerAssignment();
 
@@ -415,6 +435,7 @@ class FuelReportController extends Controller
             ->route('fuel-reports.index')
             ->with('success', 'Report updated successfully!');
     }
+    
 
     // ═══════════════════════════════════════════════════════
     //  DESTROY — রিপোর্ট Delete
@@ -422,6 +443,7 @@ class FuelReportController extends Controller
     public function destroy(Fuelreport $fuelReport)
     {
         $this->authorizeReport($fuelReport);
+        $this->authorizeTodayOnly($fuelReport);
         $fuelReport->delete();
 
         return redirect()

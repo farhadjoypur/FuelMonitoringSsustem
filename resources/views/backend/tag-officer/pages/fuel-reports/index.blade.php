@@ -1220,45 +1220,66 @@
                                             @endif
                                         </td>
                                         <td rowspan="{{ $rowCount }}" style="vertical-align:top;padding-top:10px;">
-                                            <div class="action-btns">
-                                                <a href="{{ route('fuel-reports.show', $report) }}" class="btn-view">
-                                                    <i class="fa-solid fa-eye fa-xs"></i> View
-                                                </a>
+                                        @php
+                                            $isToday = \Carbon\Carbon::parse($report->report_date)->toDateString() === \Carbon\Carbon::today()->toDateString();
+                                        @endphp
+                                        <div class="action-btns">
 
-                                                {{-- Alpine-powered Edit Button --}}
+                                            {{-- View --}}
+                                            <a href="{{ route('fuel-reports.show', $report) }}" class="btn-view">
+                                                <i class="fa-solid fa-eye fa-xs"></i> View
+                                            </a>
+
+                                            {{-- Edit --}}
+                                            @if ($isToday)
                                                 <button type="button" class="btn-edit-inline"
                                                     @click="loadEdit({{ json_encode([
-                                                        'id' => $report->id,
-                                                        'report_date' => $report->report_date,
-                                                        'comment' => $report->comment ?? '',
-                                                        'octane_prev_stock' => (float) $report->octane_prev_stock,
-                                                        'octane_supply' => (float) $report->octane_supply,
-                                                        'octane_received' => (float) $report->octane_received,
-                                                        'octane_sales' => (float) $report->octane_sales,
-                                                        'petrol_prev_stock' => (float) $report->petrol_prev_stock,
-                                                        'petrol_supply' => (float) $report->petrol_supply,
-                                                        'petrol_received' => (float) $report->petrol_received,
-                                                        'petrol_sales' => (float) $report->petrol_sales,
-                                                        'diesel_prev_stock' => (float) $report->diesel_prev_stock,
-                                                        'diesel_supply' => (float) $report->diesel_supply,
-                                                        'diesel_received' => (float) $report->diesel_received,
-                                                        'diesel_sales' => (float) $report->diesel_sales,
-                                                        'others_prev_stock' => (float) $report->others_prev_stock,
-                                                        'others_supply' => (float) $report->others_supply,
-                                                        'others_received' => (float) $report->others_received,
-                                                        'others_sales' => (float) $report->others_sales,
+                                                        'id'                 => $report->id,
+                                                        'report_date'        => $report->report_date,
+                                                        'comment'            => $report->comment ?? '',
+                                                        'octane_prev_stock'  => (float) $report->octane_prev_stock,
+                                                        'octane_supply'      => (float) $report->octane_supply,
+                                                        'octane_received'    => (float) $report->octane_received,
+                                                        'octane_sales'       => (float) $report->octane_sales,
+                                                        'petrol_prev_stock'  => (float) $report->petrol_prev_stock,
+                                                        'petrol_supply'      => (float) $report->petrol_supply,
+                                                        'petrol_received'    => (float) $report->petrol_received,
+                                                        'petrol_sales'       => (float) $report->petrol_sales,
+                                                        'diesel_prev_stock'  => (float) $report->diesel_prev_stock,
+                                                        'diesel_supply'      => (float) $report->diesel_supply,
+                                                        'diesel_received'    => (float) $report->diesel_received,
+                                                        'diesel_sales'       => (float) $report->diesel_sales,
+                                                        'others_prev_stock'  => (float) $report->others_prev_stock,
+                                                        'others_supply'      => (float) $report->others_supply,
+                                                        'others_received'    => (float) $report->others_received,
+                                                        'others_sales'       => (float) $report->others_sales,
                                                     ]) }})">
                                                     <i class="fa-solid fa-pen-to-square fa-xs"></i> Edit
                                                 </button>
+                                            @else
+                                                <button type="button" class="btn-edit-inline"
+                                                    onclick="document.getElementById('restrictionModal').style.display='flex'">
+                                                    <i class="fa-solid fa-pen-to-square fa-xs"></i> Edit
+                                                </button>
+                                            @endif
 
-                                                <form action="{{ route('fuel-reports.destroy', $report) }}"
-                                                    method="POST" onsubmit="return confirm('Delete this report?')">
+                                            {{-- Delete --}}
+                                            @if ($isToday)
+                                                <form action="{{ route('fuel-reports.destroy', $report) }}" method="POST"
+                                                    onsubmit="return confirm('Are you sure you want to delete this report? This action cannot be undone.')">
                                                     @csrf @method('DELETE')
                                                     <button type="submit" class="btn-del">
                                                         <i class="fa-solid fa-trash fa-xs"></i> Delete
                                                     </button>
                                                 </form>
-                                            </div>
+                                            @else
+                                                <button type="button" class="btn-del"
+                                                    onclick="document.getElementById('restrictionModal').style.display='flex'">
+                                                    <i class="fa-solid fa-trash fa-xs"></i> Delete
+                                                </button>
+                                            @endif
+
+                                        </div>
                                         </td>
                                     @endif
                                 </tr>
@@ -1283,5 +1304,24 @@
             @endif
         </div>
 
+        {{-- ══ Restriction Modal ══ --}}
+        <div id="restrictionModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:99999;align-items:center;justify-content:center;">
+            <div style="background:#fff;border-radius:16px;padding:40px 32px;width:460px;max-width:93vw;box-shadow:0 24px 64px rgba(0,0,0,0.22);text-align:center;">
+                <div style="width:68px;height:68px;background:#fef2f2;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
+                    <i class="fa-solid fa-lock" style="font-size:1.8rem;color:#ef4444;"></i>
+                </div>
+                <h5 style="font-size:1.05rem;font-weight:700;color:#1e293b;margin-bottom:10px;">
+                    Action Not Permitted
+                </h5>
+                <p style="font-size:.855rem;color:#64748b;line-height:1.8;margin-bottom:6px;">
+                    You are only authorized to <strong style="color:#1e293b;">edit or delete today's report</strong>.
+                </p>
+                    <br><br>
+                <button onclick="document.getElementById('restrictionModal').style.display='none'"
+                    style="background:#2563eb;color:#fff;border:none;border-radius:8px;padding:12px 36px;font-size:.875rem;font-weight:600;cursor:pointer;letter-spacing:.2px;">
+                    <i class="fa-solid fa-check fa-xs" style="margin-right:6px;"></i> I Understand
+                </button>
+            </div>
+        
     </div>{{-- /report-container --}}
 @endsection
