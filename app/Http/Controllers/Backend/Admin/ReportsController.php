@@ -532,18 +532,12 @@ class ReportsController extends Controller
         if ($request->filled('station_id'))
             $assignmentsQuery->where('filling_station_id', $request->station_id);
 
-        $allAssignments = $assignmentsQuery->get();
+        if ($request->filled('from_date') && !$request->filled('to_date'))
+            $assignmentsQuery->whereDate('report_date', $request->from_date);
+        elseif ($request->filled('from_date') && $request->filled('to_date'))
+            $assignmentsQuery->whereBetween('report_date', [$request->from_date, $request->to_date]);
 
-        if ($request->filled('from_date') && !$request->filled('to_date')) {
-            $fromDate = \Carbon\Carbon::parse($request->from_date)->startOfDay();
-            $toDate   = \Carbon\Carbon::parse($request->from_date)->endOfDay();
-        } elseif ($request->filled('from_date') && $request->filled('to_date')) {
-            $fromDate = \Carbon\Carbon::parse($request->from_date)->startOfDay();
-            $toDate   = \Carbon\Carbon::parse($request->to_date)->endOfDay();
-        } else {
-            $fromDate = now()->startOfDay();
-            $toDate   = now()->endOfDay();
-        }
+        $allAssignments = $assignmentsQuery->get();
 
         $reportedStationIds = Fuelreport::whereBetween('report_date', [$fromDate, $toDate])
             ->whereNotNull('station_id')
