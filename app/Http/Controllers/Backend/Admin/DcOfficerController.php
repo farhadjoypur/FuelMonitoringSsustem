@@ -85,7 +85,7 @@ class DcOfficerController extends Controller
                 'unique:users,phone',
                 'regex:/^(?:\+88|88)?(01[3-9]\d{8})$/',
             ],
-            'email' => 'nullable|email|unique:users,email',
+            'email' => 'nullable|email:rfc,dns|unique:users,email',
             'division' => 'required',
             'district' => 'required',
             'upazila' => 'nullable',
@@ -169,7 +169,7 @@ class DcOfficerController extends Controller
                 'max:150',
                 'regex:/^[^0-9!@#$%^&*()_+={}\[\]:;\"\'<>,?\/\\|`~]+$/u',
             ],
-            'email' => 'nullable|email|unique:users,email,'.$id,
+            'email' => 'nullable|email:rfc,dns|unique:users,email,'.$id,
             'phone' => [
                 'required',
                 'string',
