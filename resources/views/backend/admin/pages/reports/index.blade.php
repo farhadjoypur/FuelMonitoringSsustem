@@ -929,12 +929,12 @@
         </div> --}}
 
         {{-- ── DELETE MODAL ── --}}
-        {{-- <div class="modal-backdrop" x-show="deleteModal.isOpen" x-transition @click.self="deleteModal.isOpen = false">
+        <div class="modal-backdrop" x-show="deleteModal.isOpen" x-transition @click.self="deleteModal.isOpen = false">
             <div class="modal-box">
                 <div class="confirm-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
                 <div class="confirm-message">
-                    Are you sure you want to delete the report for<br>
-                    <strong x-text="deleteModal.stationName"></strong>?<br>
+                    Are you sure to delete the report?<br>
+                    <!-- <strong x-text="deleteModal.stationName"></strong>?<br> -->
                     <span style="font-size:.80rem; color:#94a3b8;">This action cannot be undone.</span>
                 </div>
                 <div class="modal-footer" style="justify-content:center;">
@@ -944,7 +944,7 @@
                     </button>
                 </div>
             </div>
-        </div> --}}
+        </div> 
 
     </div>{{-- /rpt-card --}}
 @endsection

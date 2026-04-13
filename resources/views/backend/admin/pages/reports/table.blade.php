@@ -556,17 +556,13 @@
                                     {{ $report['comment'] ?: 'No comments' }}
                                 </td>
 
-                                <td rowspan="{{ $fuelCount }}">
+                               <td rowspan="{{ $fuelCount }}">
                                     <div class="action-buttons">
 
-                                        <a href="{{ url('admin/reports/' . $report['id']) }}"
-                                            class="btn-action btn-view"
-                                            @click.prevent="openViewModal(
-                                                {{ $report['id'] }},
-                                                '{{ addslashes($report['station_name']) }}'
-                                            )">
-                                                <i class="fa-solid fa-eye"></i> View
-                                            </a>
+                                        {{-- <a href="{{ url('admin/reports/' . $report['id']) }}"
+                                            class="btn-action btn-view">
+                                            <i class="fa-solid fa-eye"></i> View
+                                        </a>
 
                                         <button class="btn-action btn-message" type="button"
                                             @click="openMessageModal(
@@ -574,7 +570,7 @@
                                                 '{{ addslashes($report['station_name']) }}'
                                             )">
                                             <i class="fa-solid fa-message"></i> Message
-                                        </button>
+                                        </button> --}}
 
                                         <button class="btn-action btn-delete" type="button"
                                             @click="openDeleteModal(
