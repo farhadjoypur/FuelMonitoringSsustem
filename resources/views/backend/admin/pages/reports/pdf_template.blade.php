@@ -383,7 +383,7 @@
                             <strong>{{ ucfirst($fuelKey) }} Total:</strong>
                         </td>
                         {{-- <td>{{ pdfFormatNumber($totalRow["{$fuelKey}_prev_stock"] ?? 0) }}</td> --}}
-                        <td>{{ '-' }}</td>
+                        <td>{{ '' }}</td>
                         <td>{{ pdfFormatNumber($totalRow["{$fuelKey}_supply"] ?? 0) }}</td>
                         <td>{{ pdfFormatNumber($totalRow["{$fuelKey}_received"] ?? 0) }}</td>
                         <td>{{ pdfFormatDiff($totalRow["{$fuelKey}_difference"] ?? 0) }}</td>
@@ -410,7 +410,7 @@
                         GRAND TOTAL (All Fuels)
                     </td>
                     {{-- <td>{{ pdfFormatNumber($gPrev) }}</td> --}}
-                    <td>{{ '-' }}</td>
+                    <td>{{ '' }}</td>
                     <td>{{ pdfFormatNumber($gSupply) }}</td>
                     <td>{{ pdfFormatNumber($gReceived) }}</td>
                     <td>{{ pdfFormatDiff($gDiff) }}</td>
