@@ -848,7 +848,7 @@
             @include('backend.uno.pages.reports.difference_table', [
                 'divisions' => $divisions,
                 'companies' => $companies,
-                'stations'  => $stations,
+                'stations' => $stations,
             ])
         </div>
 
@@ -860,8 +860,8 @@
             @include('backend.uno.pages.reports.missing_report_table', [
                 'divisions' => $divisions,
                 'companies' => $companies,
-                'depots'    => $depots,
-                'stations'  => $stations,
+                'depots' => $depots,
+                'stations' => $stations,
             ])
         </div>
 
@@ -873,8 +873,8 @@
             @include('backend.uno.pages.reports.submit_report_table', [
                 'divisions' => $divisions,
                 'companies' => $companies,
-                'depots'    => $depots,
-                'stations'  => $stations,
+                'depots' => $depots,
+                'stations' => $stations,
             ])
         </div>
 
@@ -898,7 +898,8 @@
         </div>
 
         {{-- ── DELETE MODAL ── --}}
-        <div class="modal-backdrop" x-show="deleteModal.isOpen" x-transition @click.self="deleteModal.isOpen = false">
+        <div class="modal-backdrop" x-show="deleteModal.isOpen" x-cloak x-transition
+            @click.self="deleteModal.isOpen = false">
             <div class="modal-box">
                 <div class="confirm-icon">
                     <i class="fa-solid fa-triangle-exclamation"></i>
@@ -933,7 +934,7 @@
 
                 activeTab: 'stock',
                 unoDistrict: '{{ $uno_district }}',
-                unoUpazila:  '{{ $uno_upazila }}',
+                unoUpazila: '{{ $uno_upazila }}',
                 allDivisions: @json($divisions),
 
                 messageModal: {
@@ -961,8 +962,8 @@
                     from_date: '',
                     to_date: '',
                     division: '',
-                    district: '',       // init এ unoDistrict দিয়ে set হবে
-                    thana_upazila: '',  // init এ unoUpazila দিয়ে set হবে
+                    district: '', // init এ unoDistrict দিয়ে set হবে
+                    thana_upazila: '', // init এ unoUpazila দিয়ে set হবে
                     company_id: '',
                     depot_id: '',
                     station_id: '',
@@ -984,8 +985,8 @@
                 diffFilter: {
                     from_date: '',
                     to_date: '',
-                    district: '',       // init এ unoDistrict set হবে
-                    thana_upazila: '',  // init এ unoUpazila set হবে
+                    district: '', // init এ unoDistrict set হবে
+                    thana_upazila: '', // init এ unoUpazila set হবে
                     company_id: '',
                     station_id: '',
                     tag_officer: '',
@@ -1010,8 +1011,8 @@
                 missingFilter: {
                     from_date: '',
                     to_date: '',
-                    district: '',       // init এ unoDistrict set হবে
-                    thana_upazila: '',  // init এ unoUpazila set হবে
+                    district: '', // init এ unoDistrict set হবে
+                    thana_upazila: '', // init এ unoUpazila set হবে
                     company_id: '',
                     depot_id: '',
                     station_id: '',
@@ -1033,8 +1034,8 @@
                 submitFilter: {
                     from_date: '',
                     to_date: '',
-                    district: '',       // init এ unoDistrict set হবে
-                    thana_upazila: '',  // init এ unoUpazila set হবে
+                    district: '', // init এ unoDistrict set হবে
+                    thana_upazila: '', // init এ unoUpazila set হবে
                     company_id: '',
                     depot_id: '',
                     station_id: '',
@@ -1053,35 +1054,35 @@
                     if (container) this.tableHtml = container.innerHTML;
 
                     // ── UNO district + upazila lock — সব tab এ ──
-                    this.filters.district       = this.unoDistrict;
-                    this.filters.thana_upazila  = this.unoUpazila;
-                    this.diffFilter.district      = this.unoDistrict;
+                    this.filters.district = this.unoDistrict;
+                    this.filters.thana_upazila = this.unoUpazila;
+                    this.diffFilter.district = this.unoDistrict;
                     this.diffFilter.thana_upazila = this.unoUpazila;
-                    this.missingFilter.district      = this.unoDistrict;
+                    this.missingFilter.district = this.unoDistrict;
                     this.missingFilter.thana_upazila = this.unoUpazila;
-                    this.submitFilter.district      = this.unoDistrict;
+                    this.submitFilter.district = this.unoDistrict;
                     this.submitFilter.thana_upazila = this.unoUpazila;
 
                     // ── আজকের date default set করো সব tab এ ──
                     const today = new Date().toISOString().split('T')[0];
 
                     if (!this.filters.from_date) this.filters.from_date = today;
-                    if (!this.filters.to_date)   this.filters.to_date   = today;
+                    if (!this.filters.to_date) this.filters.to_date = today;
 
                     if (!fromDate) {
                         this.diffFilter.from_date = today;
-                        this.diffFilter.to_date   = today;
+                        this.diffFilter.to_date = today;
                     }
 
                     this.missingFilter.from_date = today;
-                    this.missingFilter.to_date   = today;
-                    this.submitFilter.from_date  = today;
-                    this.submitFilter.to_date    = today;
+                    this.missingFilter.to_date = today;
+                    this.submitFilter.from_date = today;
+                    this.submitFilter.to_date = today;
 
                     // ── seeall param দিয়ে tab switch ──
                     if (seeall === 'difference') {
                         if (fromDate) this.diffFilter.from_date = fromDate;
-                        if (toDate)   this.diffFilter.to_date   = toDate;
+                        if (toDate) this.diffFilter.to_date = toDate;
                         if (fromDate && !toDate) this.diffFilter.to_date = fromDate;
 
                         this.activeTab = 'difference';
@@ -1126,7 +1127,9 @@
                 // ═════════════════════════════════════════════════════════
 
                 buildStockParams(page = 1) {
-                    const params = new URLSearchParams({ page });
+                    const params = new URLSearchParams({
+                        page
+                    });
                     Object.entries(this.filters).forEach(([key, value]) => {
                         if (value !== '' && value !== null) params.append(key, value);
                     });
@@ -1134,8 +1137,8 @@
                 },
 
                 async applyFilter(page = 1) {
-                    this.isLoading    = true;
-                    this.currentPage  = page;
+                    this.isLoading = true;
+                    this.currentPage = page;
                     try {
                         const res = await fetch(
                             `{{ route('uno.reports.index') }}?${this.buildStockParams(page)}`, {
@@ -1148,7 +1151,7 @@
                         if (!res.ok) throw new Error(`Server error ${res.status}`);
                         const data = await res.json();
                         if (data.success) {
-                            this.tableHtml       = data.html;
+                            this.tableHtml = data.html;
                             this.recordCountText = data.total > 0 ? `${data.total} station(s) found` : '';
                         }
                     } catch (err) {
@@ -1167,12 +1170,12 @@
 
                 resetFilter() {
                     // district + upazila reset করবে না — UNO এর jurisdiction সবসময় locked
-                    this.filters.from_date   = '';
-                    this.filters.to_date     = '';
-                    this.filters.company_id  = '';
-                    this.filters.depot_id    = '';
-                    this.filters.station_id  = '';
-                    this.filters.fuel_type   = '';
+                    this.filters.from_date = '';
+                    this.filters.to_date = '';
+                    this.filters.company_id = '';
+                    this.filters.depot_id = '';
+                    this.filters.station_id = '';
+                    this.filters.fuel_type = '';
                     this.filters.stock_status = '';
                     this.recordCountText = '';
                     this.currentPage = 1;
@@ -1184,7 +1187,9 @@
                 // ═════════════════════════════════════════════════════════
 
                 buildDiffParams(page = 1) {
-                    const params = new URLSearchParams({ page });
+                    const params = new URLSearchParams({
+                        page
+                    });
                     Object.entries(this.diffFilter).forEach(([key, value]) => {
                         if (value !== '' && value !== null && value !== undefined) {
                             params.append(key, value);
@@ -1194,7 +1199,7 @@
                 },
 
                 async applyDiffFilter(page = 1) {
-                    this.isDiffLoading   = true;
+                    this.isDiffLoading = true;
                     this.diffCurrentPage = page;
                     try {
                         const res = await fetch(
@@ -1208,14 +1213,14 @@
                         if (!res.ok) throw new Error(`Server error ${res.status}`);
                         const json = await res.json();
                         if (json.success) {
-                            this.diffReportRows   = json.rows;
-                            this.diffTotalRecords  = json.total;
-                            this.diffTotalPages    = json.lastPage;
-                            this.diffCurrentPage   = json.currentPage;
+                            this.diffReportRows = json.rows;
+                            this.diffTotalRecords = json.total;
+                            this.diffTotalPages = json.lastPage;
+                            this.diffCurrentPage = json.currentPage;
                         }
                     } catch (err) {
                         console.error('Difference report error:', err);
-                        this.diffReportRows  = [];
+                        this.diffReportRows = [];
                         this.diffTotalRecords = 0;
                     } finally {
                         this.isDiffLoading = false;
@@ -1224,18 +1229,18 @@
 
                 resetDiffFilter() {
                     // district + upazila reset করবে না
-                    this.diffFilter.from_date    = '';
-                    this.diffFilter.to_date      = '';
-                    this.diffFilter.company_id   = '';
-                    this.diffFilter.station_id   = '';
-                    this.diffFilter.tag_officer  = '';
-                    this.diffFilter.diff_status  = '';
-                    this.diffFilter.min_diff_l   = '';
+                    this.diffFilter.from_date = '';
+                    this.diffFilter.to_date = '';
+                    this.diffFilter.company_id = '';
+                    this.diffFilter.station_id = '';
+                    this.diffFilter.tag_officer = '';
+                    this.diffFilter.diff_status = '';
+                    this.diffFilter.min_diff_l = '';
                     this.diffFilter.min_diff_pct = '';
-                    this.diffReportRows   = [];
+                    this.diffReportRows = [];
                     this.diffTotalRecords = 0;
-                    this.diffCurrentPage  = 1;
-                    this.diffTotalPages   = 1;
+                    this.diffCurrentPage = 1;
+                    this.diffTotalPages = 1;
                 },
 
                 changeDiffPage(newPage) {
@@ -1246,11 +1251,11 @@
                 exportDiffPdf() {
                     const params = new URLSearchParams();
                     const fields = {
-                        from_date:    this.diffFilter.from_date,
-                        to_date:      this.diffFilter.to_date,
-                        district:     this.diffFilter.district,
+                        from_date: this.diffFilter.from_date,
+                        to_date: this.diffFilter.to_date,
+                        district: this.diffFilter.district,
                         thana_upazila: this.diffFilter.thana_upazila,
-                        station_id:   this.diffFilter.station_id,
+                        station_id: this.diffFilter.station_id,
                     };
                     Object.entries(fields).forEach(([k, v]) => {
                         if (v) params.append(k, v);
@@ -1264,7 +1269,9 @@
                 // ═════════════════════════════════════════════════════════
 
                 buildMissingParams(page = 1) {
-                    const params = new URLSearchParams({ page });
+                    const params = new URLSearchParams({
+                        page
+                    });
                     Object.entries(this.missingFilter).forEach(([key, value]) => {
                         if (value !== '' && value !== null && value !== undefined) {
                             params.append(key, value);
@@ -1274,7 +1281,7 @@
                 },
 
                 async applyMissingFilter(page = 1) {
-                    this.isMissingLoading   = true;
+                    this.isMissingLoading = true;
                     this.missingCurrentPage = page;
                     try {
                         const res = await fetch(
@@ -1288,14 +1295,14 @@
                         if (!res.ok) throw new Error(`Server error ${res.status}`);
                         const json = await res.json();
                         if (json.success) {
-                            this.missingReportRows   = json.rows;
-                            this.missingTotalRecords  = json.total;
-                            this.missingTotalPages    = json.lastPage;
-                            this.missingCurrentPage   = json.currentPage;
+                            this.missingReportRows = json.rows;
+                            this.missingTotalRecords = json.total;
+                            this.missingTotalPages = json.lastPage;
+                            this.missingCurrentPage = json.currentPage;
                         }
                     } catch (err) {
                         console.error('Missing report error:', err);
-                        this.missingReportRows  = [];
+                        this.missingReportRows = [];
                         this.missingTotalRecords = 0;
                     } finally {
                         this.isMissingLoading = false;
@@ -1304,15 +1311,15 @@
 
                 resetMissingFilter() {
                     // district + upazila reset করবে না
-                    this.missingFilter.from_date  = '';
-                    this.missingFilter.to_date    = '';
+                    this.missingFilter.from_date = '';
+                    this.missingFilter.to_date = '';
                     this.missingFilter.company_id = '';
-                    this.missingFilter.depot_id   = '';
+                    this.missingFilter.depot_id = '';
                     this.missingFilter.station_id = '';
-                    this.missingReportRows   = [];
+                    this.missingReportRows = [];
                     this.missingTotalRecords = 0;
-                    this.missingCurrentPage  = 1;
-                    this.missingTotalPages   = 1;
+                    this.missingCurrentPage = 1;
+                    this.missingTotalPages = 1;
                 },
 
                 changeMissingPage(newPage) {
@@ -1323,11 +1330,11 @@
                 exportMissingPdf() {
                     const params = new URLSearchParams();
                     const fields = {
-                        from_date:    this.missingFilter.from_date,
-                        to_date:      this.missingFilter.to_date,
-                        district:     this.missingFilter.district,
+                        from_date: this.missingFilter.from_date,
+                        to_date: this.missingFilter.to_date,
+                        district: this.missingFilter.district,
                         thana_upazila: this.missingFilter.thana_upazila,
-                        station_id:   this.missingFilter.station_id,
+                        station_id: this.missingFilter.station_id,
                     };
                     Object.entries(fields).forEach(([k, v]) => {
                         if (v) params.append(k, v);
@@ -1341,7 +1348,9 @@
                 // ═════════════════════════════════════════════════════════
 
                 buildSubmitParams(page = 1) {
-                    const params = new URLSearchParams({ page });
+                    const params = new URLSearchParams({
+                        page
+                    });
                     Object.entries(this.submitFilter).forEach(([key, value]) => {
                         if (value !== '' && value !== null && value !== undefined) {
                             params.append(key, value);
@@ -1351,7 +1360,7 @@
                 },
 
                 async applySubmitFilter(page = 1) {
-                    this.isSubmitLoading   = true;
+                    this.isSubmitLoading = true;
                     this.submitCurrentPage = page;
                     try {
                         const res = await fetch(
@@ -1365,14 +1374,14 @@
                         if (!res.ok) throw new Error(`Server error ${res.status}`);
                         const json = await res.json();
                         if (json.success) {
-                            this.submitReportRows   = json.rows;
-                            this.submitTotalRecords  = json.total;
-                            this.submitTotalPages    = json.lastPage;
-                            this.submitCurrentPage   = json.currentPage;
+                            this.submitReportRows = json.rows;
+                            this.submitTotalRecords = json.total;
+                            this.submitTotalPages = json.lastPage;
+                            this.submitCurrentPage = json.currentPage;
                         }
                     } catch (err) {
                         console.error('Submitted report error:', err);
-                        this.submitReportRows  = [];
+                        this.submitReportRows = [];
                         this.submitTotalRecords = 0;
                     } finally {
                         this.isSubmitLoading = false;
@@ -1381,15 +1390,15 @@
 
                 resetSubmitFilter() {
                     // district + upazila reset করবে না
-                    this.submitFilter.from_date  = '';
-                    this.submitFilter.to_date    = '';
+                    this.submitFilter.from_date = '';
+                    this.submitFilter.to_date = '';
                     this.submitFilter.company_id = '';
-                    this.submitFilter.depot_id   = '';
+                    this.submitFilter.depot_id = '';
                     this.submitFilter.station_id = '';
-                    this.submitReportRows   = [];
+                    this.submitReportRows = [];
                     this.submitTotalRecords = 0;
-                    this.submitCurrentPage  = 1;
-                    this.submitTotalPages   = 1;
+                    this.submitCurrentPage = 1;
+                    this.submitTotalPages = 1;
                 },
 
                 changeSubmitPage(newPage) {
@@ -1400,11 +1409,11 @@
                 exportSubmitPdf() {
                     const params = new URLSearchParams();
                     const fields = {
-                        from_date:    this.submitFilter.from_date,
-                        to_date:      this.submitFilter.to_date,
-                        district:     this.submitFilter.district,
+                        from_date: this.submitFilter.from_date,
+                        to_date: this.submitFilter.to_date,
+                        district: this.submitFilter.district,
                         thana_upazila: this.submitFilter.thana_upazila,
-                        station_id:   this.submitFilter.station_id,
+                        station_id: this.submitFilter.station_id,
                     };
                     Object.entries(fields).forEach(([k, v]) => {
                         if (v) params.append(k, v);
@@ -1433,7 +1442,7 @@
                     }
                     try {
                         const csrf = document.querySelector('meta[name="csrf-token"]').content;
-                        const res  = await fetch('{{ route('uno.reports.message') }}', {
+                        const res = await fetch('{{ route('uno.reports.message') }}', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -1441,7 +1450,7 @@
                             },
                             body: JSON.stringify({
                                 report_id: this.messageModal.reportId,
-                                message:   this.messageModal.text
+                                message: this.messageModal.text
                             }),
                         });
                         const data = await res.json();
@@ -1463,11 +1472,11 @@
                 async submitDelete() {
                     try {
                         const csrfMeta = document.querySelector('meta[name="csrf-token"]');
-                        const csrf = csrfMeta
-                            ? csrfMeta.getAttribute('content')
-                            : document.cookie.split('; ')
-                                .find(row => row.startsWith('XSRF-TOKEN='))
-                                ?.split('=')[1];
+                        const csrf = csrfMeta ?
+                            csrfMeta.getAttribute('content') :
+                            document.cookie.split('; ')
+                            .find(row => row.startsWith('XSRF-TOKEN='))
+                            ?.split('=')[1];
 
                         if (!csrf) {
                             alert('CSRF token not found. Please refresh the page.');
@@ -1490,10 +1499,10 @@
                         const data = await res.json();
                         if (data.success) {
                             this.deleteModal.isOpen = false;
-                            if (this.activeTab === 'stock')           this.applyFilter(this.currentPage);
+                            if (this.activeTab === 'stock') this.applyFilter(this.currentPage);
                             else if (this.activeTab === 'difference') this.applyDiffFilter(this.diffCurrentPage);
-                            else if (this.activeTab === 'missing')    this.applyMissingFilter(this.missingCurrentPage);
-                            else if (this.activeTab === 'submitted')  this.applySubmitFilter(this.submitCurrentPage);
+                            else if (this.activeTab === 'missing') this.applyMissingFilter(this.missingCurrentPage);
+                            else if (this.activeTab === 'submitted') this.applySubmitFilter(this.submitCurrentPage);
                         } else {
                             alert('Failed to delete.');
                         }
