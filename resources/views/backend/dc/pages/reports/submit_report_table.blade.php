@@ -158,6 +158,20 @@
 
 <div class="table-section">
 
+    
+    {{-- Header --}}
+    <div class="table-header-row">
+        <div class="table-title">
+            Tag Officer Submitted Reports
+        </div>
+        <div style="display:flex; align-items:center; gap:12px;">
+            <span class="record-count" x-show="submitTotalRecords > 0" x-text="submitTotalRecords + ' records found'">
+            </span>
+            <button class="btn-submit-export-pdf" @click="exportSubmitPdf()">
+                <i class="fa-solid fa-file-pdf"></i> Export to PDF
+            </button>
+        </div>
+    </div>
     <div class="table-header-row">
         <div class="table-title">Tag Officer Submitted Reports</div>
         <span class="record-count"
@@ -317,3 +331,135 @@
     </div>
 
 </div>{{-- /table-section --}}
+
+
+{{-- ── Styles ────────────────────────────────────────────────────── --}}
+<style>
+    /* Submitted Report Table */
+    .submit-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 1000px;
+        font-size: .775rem;
+        background: #fff;
+    }
+
+    .submit-table thead {
+        background: #f8fafc;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .submit-table th {
+        padding: 10px 10px;
+        text-align: left;
+        font-weight: 600;
+        color: #475569;
+        font-size: .68rem;
+        text-transform: uppercase;
+        letter-spacing: .3px;
+        white-space: nowrap;
+    }
+
+    .submit-table tbody tr {
+        border-bottom: 2px solid #e2e8f0;
+        transition: background .12s;
+    }
+
+    .submit-table tbody tr:hover {
+        background: #fafbfc;
+    }
+
+    .submit-table td {
+        padding: 0 10px;
+        color: #1e293b;
+        vertical-align: middle;
+    }
+
+    .submit-table td.row-number {
+        font-weight: 600;
+        color: #94a3b8;
+        font-size: 12px;
+        text-align: center;
+        padding: 12px 4px;
+    }
+
+    .submit-table td.td-submit-date {
+        padding: 12px 10px;
+    }
+
+    .submit-table td.td-officer-name {
+        padding: 12px 10px;
+        font-weight: 500;
+    }
+
+    .submit-table td.td-station-name {
+        padding: 12px 10px;
+        font-weight: 500;
+    }
+
+    /* Fuel sub-rows */
+    .submit-table .fuel-rows {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .submit-table .fuel-row {
+        display: flex;
+        align-items: center;
+        padding: 7px 0;
+        min-height: 34px;
+        border-bottom: 1px dashed #e2e8f0;
+    }
+
+    .submit-table .fuel-row:last-child {
+        border-bottom: none;
+    }
+
+    .submit-table .fuel-type {
+        font-size: .72rem;
+        color: #64748b;
+        font-weight: 500;
+    }
+
+    /* Status badges */
+    .submit-status-badge {
+        display: inline-block;
+        font-size: .70rem;
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 20px;
+        white-space: nowrap;
+    }
+
+    .submit-status-submitted {
+        background: #f0fdf4;
+        color: #15803d;
+        border: 1px solid #bbf7d0;
+    }
+
+    .submit-status-pending {
+        background: #fef2f2;
+        color: #dc2626;
+        border: 1px solid #fecaca;
+    }
+
+    /* Export button */
+    .btn-submit-export-pdf {
+        background: #2563eb;
+        color: #fff;
+        border: none;
+        border-radius: 7px;
+        padding: 8px 16px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: background .2s;
+    }
+
+    .btn-submit-export-pdf:hover {
+        background: #1d4ed8;
+    }
+</style>

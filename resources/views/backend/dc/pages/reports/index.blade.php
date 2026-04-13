@@ -883,6 +883,14 @@
                     ])
                 </div>
             </div>
+             <div class="export-row">
+                <button class="btn-export btn-export-pdf" @click="exportPdf()">
+                    <i class="fa-regular fa-file-pdf"></i> Export PDF
+                </button>
+                {{-- <button class="btn-export btn-export-excel">
+                                                <i class="fa-regular fa-file-excel"></i> Export Excel
+                                            </button> --}}
+            </div>
 
         </div>{{-- /tab-stock --}}
 
@@ -896,6 +904,8 @@
                 'companies' => $companies,
                 'stations' => $stations,
             ])
+            {{-- pdf button  --}}
+            
         </div>
 
 
@@ -1368,18 +1378,64 @@
                     this.applyDiffFilter(newPage);
                 },
 
+                 exportPdf() {
+                    const params = new URLSearchParams();
+
+                    if (this.filters.from_date) params.append('from_date', this.filters.from_date);
+                    if (this.filters.to_date) params.append('to_date', this.filters.to_date);
+                    if (this.filters.division) params.append('division', this.filters.division);
+                    if (this.filters.district) params.append('district', this.filters.district);
+                    if (this.filters.thana_upazila) params.append('thana_upazila', this.filters.thana_upazila);
+                    if (this.filters.company_id) params.append('company_id', this.filters.company_id);
+                    if (this.filters.depot_id) params.append('depot_id', this.filters.depot_id);
+                    if (this.filters.station_id) params.append('station_id', this.filters.station_id);
+                    if (this.filters.fuel_type) params.append('fuel_type', this.filters.fuel_type);
+                    if (this.filters.stock_status) params.append('stock_status', this.filters.stock_status);
+
+                    window.open('{{ route('dc.reports.export.pdf') }}?' + params.toString(), '_blank');
+                },
+
                 exportDiffPdf() {
                     const params = new URLSearchParams();
-                    const fields = {
-                        from_date: this.diffFilter.from_date,
-                        to_date: this.diffFilter.to_date,
-                        district: this.diffFilter.district,
-                        station_id: this.diffFilter.station_id,
-                    };
-                    Object.entries(fields).forEach(([k, v]) => {
-                        if (v) params.append(k, v);
-                    });
-                    window.open(`{{ route('dc.reports.difference.export-pdf') }}?${params}`, '_blank');
+                    if (this.diffFilter.fromDate) params.append('from_date', this.diffFilter.fromDate);
+                    if (this.diffFilter.toDate) params.append('to_date', this.diffFilter.toDate);
+                    if (this.diffFilter.division) params.append('division', this.diffFilter.division);
+                    if (this.diffFilter.district) params.append('district', this.diffFilter.district);
+                    if (this.diffFilter.thanaUpazila) params.append('thana_upazila', this.diffFilter.thanaUpazila);
+                    if (this.diffFilter.companyId) params.append('company_id', this.diffFilter.companyId);
+                    if (this.diffFilter.stationId) params.append('station_id', this.diffFilter.stationId);
+                    if (this.diffFilter.tagOfficer) params.append('tag_officer', this.diffFilter.tagOfficer);
+                    if (this.diffFilter.diffStatus) params.append('diff_status', this.diffFilter.diffStatus);
+                    if (this.diffFilter.minDifferenceL) params.append('min_diff_l', this.diffFilter.minDifferenceL);
+                    if (this.diffFilter.minDifferencePercent) params.append('min_diff_pct', this.diffFilter
+                        .minDifferencePercent);
+                    window.open(`{{ route('dc.reports.export.difference.pdf') }}?${params}`, '_blank');
+                },
+
+                exportMissingPdf() {
+                    const params = new URLSearchParams();
+                    if (this.missingFilter.fromDate) params.append('from_date', this.missingFilter.fromDate);
+                    if (this.missingFilter.toDate) params.append('to_date', this.missingFilter.toDate);
+                    if (this.missingFilter.division) params.append('division', this.missingFilter.division);
+                    if (this.missingFilter.district) params.append('district', this.missingFilter.district);
+                    if (this.missingFilter.thanaUpazila) params.append('thana_upazila', this.missingFilter.thanaUpazila);
+                    if (this.missingFilter.companyId) params.append('company_id', this.missingFilter.companyId);
+                    if (this.missingFilter.depotId) params.append('depot_id', this.missingFilter.depotId);
+                    if (this.missingFilter.stationId) params.append('station_id', this.missingFilter.stationId);
+                    window.open('{{ route('dc.reports.export.missing.pdf') }}?' + params.toString(), '_blank');
+                },
+
+                exportSubmitPdf() {
+                    const params = new URLSearchParams();
+                    if (this.submitFilter.fromDate) params.append('from_date', this.submitFilter.fromDate);
+                    if (this.submitFilter.toDate) params.append('to_date', this.submitFilter.toDate);
+                    if (this.submitFilter.division) params.append('division', this.submitFilter.division);
+                    if (this.submitFilter.district) params.append('district', this.submitFilter.district);
+                    if (this.submitFilter.thanaUpazila) params.append('thana_upazila', this.submitFilter.thanaUpazila);
+                    if (this.submitFilter.companyId) params.append('company_id', this.submitFilter.companyId);
+                    if (this.submitFilter.depotId) params.append('depot_id', this.submitFilter.depotId);
+                    if (this.submitFilter.stationId) params.append('station_id', this.submitFilter.stationId);
+                    window.open('{{ route('dc.reports.export.submitted.pdf') }}?' + params.toString(), '_blank');
                 },
 
 
@@ -1448,19 +1504,7 @@
                     this.applyMissingFilter(newPage);
                 },
 
-                exportMissingPdf() {
-                    const params = new URLSearchParams();
-                    const fields = {
-                        from_date: this.missingFilter.from_date,
-                        to_date: this.missingFilter.to_date,
-                        district: this.missingFilter.district,
-                        station_id: this.missingFilter.station_id,
-                    };
-                    Object.entries(fields).forEach(([k, v]) => {
-                        if (v) params.append(k, v);
-                    });
-                    window.open(`{{ route('dc.reports.missing.export-pdf') }}?${params}`, '_blank');
-                },
+
 
 
                 // ═════════════════════════════════════════════════════════
@@ -1528,19 +1572,6 @@
                     this.applySubmitFilter(newPage);
                 },
 
-                exportSubmitPdf() {
-                    const params = new URLSearchParams();
-                    const fields = {
-                        from_date: this.submitFilter.from_date,
-                        to_date: this.submitFilter.to_date,
-                        district: this.submitFilter.district,
-                        station_id: this.submitFilter.station_id,
-                    };
-                    Object.entries(fields).forEach(([k, v]) => {
-                        if (v) params.append(k, v);
-                    });
-                    window.open(`{{ route('dc.reports.submitted.export-pdf') }}?${params}`, '_blank');
-                },
 
 
                 // ═════════════════════════════════════════════════════════

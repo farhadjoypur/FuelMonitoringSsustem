@@ -158,6 +158,21 @@
 
 <div class="table-section">
 
+    {{-- Header --}}
+    <div class="table-header-row">
+        <div class="table-title">
+            Tag Officer Missing Reports
+        </div>
+        <div style="display:flex; align-items:center; gap:12px;">
+            <span class="record-count"
+                x-show="missingTotalRecords > 0"
+                x-text="missingTotalRecords + ' records found'">
+            </span>
+           <button class="btn-missing-export-pdf" @click="exportMissingPdf()">
+    <i class="fa-solid fa-file-pdf"></i> Export to PDF
+</button>
+        </div>
+    </div>
     <div class="table-header-row">
         <div class="table-title">Tag Officer Pending Reports</div>
         <span class="record-count"
@@ -292,3 +307,120 @@
     </div>
 
 </div>{{-- /table-section --}}
+
+
+
+{{-- ── Styles (add to index.blade.php <style> block) ─────────── --}}
+<style>
+    /* Missing Report Table */
+    .missing-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 900px;
+        font-size: .775rem;
+        background: #fff;
+    }
+    .missing-table thead {
+        background: #f8fafc;
+        border-bottom: 2px solid #e2e8f0;
+    }
+    .missing-table th {
+        padding: 10px 10px;
+        text-align: left;
+        font-weight: 600;
+        color: #475569;
+        font-size: .68rem;
+        text-transform: uppercase;
+        letter-spacing: .3px;
+        white-space: nowrap;
+    }
+    .missing-table tbody tr {
+        border-bottom: 2px solid #e2e8f0;
+        transition: background .12s;
+    }
+    .missing-table tbody tr:hover { background: #fafbfc; }
+    .missing-table td {
+        padding: 0 10px;
+        color: #1e293b;
+        vertical-align: middle;
+    }
+    .missing-table td.row-number {
+        font-weight: 600;
+        color: #94a3b8;
+        font-size: 12px;
+        text-align: center;
+        padding: 12px 4px;
+    }
+    .missing-table td.td-missing-date {
+        padding: 12px 10px;
+        font-weight: 600;
+        font-size: .78rem;
+        color: #334155;
+        white-space: nowrap;
+    }
+    .missing-table td.td-officer-name {
+        padding: 12px 10px;
+        font-weight: 500;
+    }
+    .missing-table td.td-phone {
+        padding: 12px 10px;
+        white-space: nowrap;
+    }
+    .missing-table td.td-station-name {
+        padding: 12px 10px;
+        font-weight: 500;
+    }
+
+    /* Fuel sub-rows inside missing table */
+    .missing-table .fuel-rows { display: flex; flex-direction: column; }
+    .missing-table .fuel-row {
+        display: flex;
+        align-items: center;
+        padding: 7px 0;
+        min-height: 34px;
+        border-bottom: 1px dashed #e2e8f0;
+    }
+    .missing-table .fuel-row:last-child { border-bottom: none; }
+    .missing-table .fuel-type {
+        font-size: .72rem;
+        color: #64748b;
+        font-weight: 500;
+    }
+
+    /* Pending status badge */
+    .missing-status-badge {
+        display: inline-block;
+        font-size: .70rem;
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 20px;
+        white-space: nowrap;
+    }
+    .missing-status-pending {
+        background: #fef2f2;
+        color: #dc2626;
+        border: 1px solid #fecaca;
+    }
+    .missing-status-submitted {
+        background: #f0fdf4;
+        color: #15803d;
+        border: 1px solid #bbf7d0;
+    }
+
+    /* Export button */
+    .btn-missing-export-pdf {
+        background: #16a34a;
+        color: #fff;
+        border: none;
+        border-radius: 7px;
+        padding: 8px 16px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: background .2s;
+    }
+    .btn-missing-export-pdf:hover { background: #15803d; }
+</style>

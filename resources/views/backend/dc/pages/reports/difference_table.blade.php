@@ -181,6 +181,17 @@
 
 {{-- ── Table Section ────────────────────────────────────────────── --}}
 <div class="table-section">
+     {{-- Header: title + record count + export button --}}
+    <div class="table-header-row">
+        <div class="table-title">Difference Report</div>
+        <div style="display:flex; align-items:center; gap:12px;">
+            <span class="record-count" x-show="diffTotalRecords > 0" x-text="diffTotalRecords + ' records found'">
+            </span>
+            <button class="btn-diff-export-pdf" @click="exportDiffPdf()">
+    <i class="fa-solid fa-file-pdf"></i> Export to PDF
+</button>
+        </div>
+    </div>
 
     <div class="table-header-row">
         <div class="table-title">Difference Report</div>
@@ -378,3 +389,94 @@
     </div>
 
 </div>{{-- /table-section --}}
+
+
+{{-- ── Difference-tab-specific styles ─────────────────────────── --}}
+{{-- Add these inside the existing <style> block in index.blade.php --}}
+<style>
+    /* Export PDF button — scoped name to avoid conflict with stock tab */
+    .btn-diff-export-pdf {
+        background: #307c32;
+        color: #fff;
+        border: none;
+        border-radius: 7px;
+        padding: 8px 16px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: background .2s;
+    }
+
+    .btn-diff-export-pdf:hover {
+        background: #dc2626;
+    }
+
+    /* Difference value colours */
+    .diff-value-nonzero {
+        color: #dc2626;
+        font-weight: 700;
+    }
+
+    .diff-percent-negative {
+        color: #dc2626;
+        font-weight: 700;
+    }
+
+    .diff-percent-positive {
+        color: #f59e0b;
+        font-weight: 700;
+    }
+
+    /* Status badges */
+    .diff-status-badge {
+        font-size: 11px;
+        padding: 2px 8px;
+        border-radius: 20px;
+        font-weight: 600;
+        white-space: nowrap;
+        display: inline-block;
+    }
+
+    .diff-status-high {
+        background: #fef2f2;
+        color: #991b1b;
+    }
+
+    .diff-status-low {
+        background: #fff7ed;
+        color: #c2410c;
+    }
+
+    .diff-status-normal {
+        background: #f0fdf4;
+        color: #15803d;
+    }
+
+    /* Pagination buttons (reused from stock tab via .btn-page) */
+    .btn-page {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 6px 14px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        color: #475569;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        transition: background .15s;
+    }
+
+    .btn-page:hover:not(:disabled) {
+        background: #f1f5f9;
+    }
+
+    .btn-page:disabled {
+        opacity: .4;
+        cursor: not-allowed;
+    }
+</style>

@@ -31,8 +31,6 @@ Route::prefix('dc')->middleware(['role:' . UserRole::DC])->as('dc.')->group(func
 
     Route::get('dc/reports/difference', [DcReportsController::class, 'differenceReport'])
         ->name('reports.difference');
-    Route::get('dc/reports/difference/export-pdf', [DcReportsController::class, 'exportDifferenceReportPdf'])
-        ->name('reports.difference.export-pdf');
 
     Route::get('dc/reports/missing',   [DcReportsController::class, 'missingReport'])
         ->name('reports.missing');
@@ -40,11 +38,9 @@ Route::prefix('dc')->middleware(['role:' . UserRole::DC])->as('dc.')->group(func
     Route::get('dc/reports/submitted', [DcReportsController::class, 'submittedReport'])
         ->name('reports.submitted');
 
-    //  . reports . missing . export - pdf
-    Route::get('dc/reports/missing/export-pdf', [DcReportsController::class, 'exportMissingReportPdf'])
-        ->name('reports.missing.export-pdf');
-    //  . reports . submitted . export - pdf
-    Route::get('dc/reports/submitted/export-pdf', [DcReportsController::class, 'exportSubmittedReportPdf'])
-        ->name('reports.submitted.export-pdf');
+    // export pdf routes
+    Route::get('reports/export-pdf', [DcReportsController::class, 'exportPdf'])->name('reports.export.pdf');
+    Route::get('reports/export-difference-pdf', [DcReportsController::class, 'exportDifferencePdf'])->name('reports.export.difference.pdf');
+    Route::get('reports/export-missing-pdf',    [DcReportsController::class, 'exportMissingPdf'])->name('reports.export.missing.pdf');
+    Route::get('reports/export-submitted-pdf',  [DcReportsController::class, 'exportSubmittedPdf'])->name('reports.export.submitted.pdf');
 });
-
