@@ -23,6 +23,7 @@ Route::prefix('admin')->middleware(['role:' . UserRole::ADMIN])->as('admin.')->g
 
     // KB UTSHO
     Route::resource('dashboard', DashboardController::class);
+    Route::delete('dashboard/{id}/destroy', [DashboardController::class, 'destroy'])->name('dashboard.report.destroy');
     Route::resource('profile', ProfileController::class);
     Route::resource('filling-station', FillingStationController::class);
     Route::resource('tag-officer', TagOfficerController::class);

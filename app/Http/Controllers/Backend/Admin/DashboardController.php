@@ -334,6 +334,7 @@ class DashboardController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        Fuelreport::findOrFail($id)->delete();
+        return redirect()->back()->with('success', 'Report deleted successfully.');
     }
 }
