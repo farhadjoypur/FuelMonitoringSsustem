@@ -769,15 +769,57 @@
                         </select>
                     </div>
 
-                    <div class="form-group">
-                        <label>Filling Station</label>
-                        <select x-model="filters.station_id">
-                            <option value="">All Stations</option>
-                            @foreach ($stations as $station)
-                                <option value="{{ $station->id }}">{{ $station->station_name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
+                    <div class="form-group" style="position: relative;">
+    <label>Filling Station</label>
+    <div style="position: relative;">
+        <input
+            type="text"
+            x-model="stationSearch"
+            @input="stationOpen = true"
+            @focus="stationOpen = true"
+            @keydown.escape="stationOpen = false"
+            placeholder="Search station..."
+            autocomplete="off"
+            style="width:100%; padding-right:30px; box-sizing:border-box;"
+        />
+        <span x-show="stationSelected" @click="clearStation()" 
+            style="position:absolute; right:8px; top:50%; transform:translateY(-50%);
+                   cursor:pointer; color:#94a3b8; font-size:13px; user-select:none;">✕</span>
+    </div>
+
+    <div x-show="stationOpen"
+        style="position:absolute; top:100%; left:0; right:0; background:#fff;
+               border:1px solid #e2e8f0; border-radius:6px; z-index:9999;
+               max-height:220px; overflow-y:auto; box-shadow:0 4px 12px rgba(0,0,0,.12);">
+
+        {{-- All Stations --}}
+        <div
+            @mousedown.prevent="clearStation(); stationOpen = false;"
+            style="padding:9px 12px; font-size:13px; cursor:pointer;
+                   color:#64748b; border-bottom:1px solid #f1f5f9;"
+            @mouseover="$el.style.background='#f8fafc'"
+            @mouseleave="$el.style.background=''">
+            All Stations
+        </div>
+
+        {{-- Filtered list --}}
+        <template x-for="s in filteredStations" :key="s.id">
+            <div
+                @mousedown.prevent="selectStation(s)"
+                x-text="s.name"
+                style="padding:9px 12px; font-size:13px; cursor:pointer;"
+                @mouseover="$el.style.background='#f8fafc'"
+                @mouseleave="$el.style.background=''">
+            </div>
+        </template>
+
+        {{-- No result --}}
+        <div x-show="filteredStations.length === 0"
+            style="padding:9px 12px; font-size:13px; color:#94a3b8; text-align:center;">
+            No result found
+        </div>
+    </div>
+</div>
 
                     <div class="form-group">
                         <label>Fuel Type</label>
@@ -1055,12 +1097,42 @@
                 submitAvailableDistricts: [],
                 submitAvailableUpazilas: [], // init e load hobe
 
+                stationSearch: '',
+                stationOpen: false,
+                stationSelected: null,
+                allStations: @json($stations->map(fn($s) => ['id' => $s->id, 'name' => $s->station_name])),
+
+                get filteredStations() {
+                    if (!this.stationSearch) return this.allStations;
+                    return this.allStations.filter(s =>
+                        s.name.toLowerCase().includes(this.stationSearch.toLowerCase())
+                    );
+                },
+
+                selectStation(s) {
+                    this.stationSelected = s;
+                    this.stationSearch = s.name;
+                    this.filters.station_id = s.id;
+                    this.stationOpen = false;
+                },
+
+                clearStation() {
+                    this.stationSelected = null;
+                    this.stationSearch = '';
+                    this.filters.station_id = '';
+                    this.stationOpen = true;
+                },
 
                 // ═════════════════════════════════════════════════════════
                 // INIT — page load এ একবারেই সব tab এর district lock করো
                 // ═════════════════════════════════════════════════════════
 
                 init(seeall = '', fromDate = '', toDate = '') {
+                    document.addEventListener('click', (e) => {
+                        if (!e.target.closest('.form-group')) {
+                            this.stationOpen = false;
+                        }
+                    });
 
                     const container = document.getElementById('tableContainer');
                     if (container) this.tableHtml = container.innerHTML;
@@ -1214,6 +1286,9 @@
                     this.filters.stock_status = '';
                     this.recordCountText = '';
                     this.currentPage = 1;
+                    this.filters.station_id = '';
+                    this.stationSearch = '';      // ← এটা যোগ করো
+                    this.stationSelected = null;  // ← এটা যোগ করো
                     // this.applyFilter();
                 },
 
