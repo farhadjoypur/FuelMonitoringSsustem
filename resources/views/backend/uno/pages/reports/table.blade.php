@@ -490,9 +490,21 @@
                                     @endif
                                 </td>
 
-                                <td class="cell-station" rowspan="{{ $fuelCount }}">
+                                <!-- <td class="cell-station" rowspan="{{ $fuelCount }}">
                                     <div class="station-name">{{ $report['station_name'] }}</div>
                                     <div class="station-sub">{{ $report['district'] }}</div>
+                                </td> -->
+                                <td class="cell-station" rowspan="{{ $fuelCount }}">
+                                    <div class="station-name">{{ $report['station_name'] }}</div>
+                                    <div class="station-sub">
+                                        @if(!empty($report['thana_upazila']) && !empty($report['district']))
+                                            {{ $report['thana_upazila'] }}, {{ $report['district'] }}
+                                        @elseif(!empty($report['district']))
+                                            {{ $report['district'] }}
+                                        @else
+                                            —
+                                        @endif
+                                    </div>
                                 </td>
 
                                 <td class="cell-company" rowspan="{{ $fuelCount }}">

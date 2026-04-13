@@ -43,7 +43,6 @@
             overflow: hidden;
         }
 
-        /* Header card */
         .report-header {
             padding: 24px;
             border-bottom: 1px solid #f1f5f9;
@@ -86,17 +85,9 @@
             gap: 5px;
         }
 
-        .meta-item .meta-label i {
-            color: var(--primary);
-        }
+        .meta-item .meta-label i { color: var(--primary); }
+        .meta-item .meta-value { font-size: 14px; font-weight: 700; color: var(--dark); }
 
-        .meta-item .meta-value {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--dark);
-        }
-
-        /* Category bar */
         .category-bar {
             padding: 11px 18px;
             font-size: 13px;
@@ -108,22 +99,10 @@
             gap: 8px;
         }
 
-        .category-bar i {
-            color: var(--primary);
-        }
+        .category-bar i { color: var(--primary); }
+        .bar-line { flex: 1; height: 1px; background: #e2e8f0; margin-left: 6px; }
 
-        .bar-line {
-            flex: 1;
-            height: 1px;
-            background: #e2e8f0;
-            margin-left: 6px;
-        }
-
-        /* Stats grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-        }
+        .stats-grid { display: grid; grid-template-columns: repeat(6, 1fr); }
 
         .stat-head {
             background: #f8fafc;
@@ -138,9 +117,7 @@
             text-align: center;
         }
 
-        .stat-head:last-child {
-            border-right: none;
-        }
+        .stat-head:last-child { border-right: none; }
 
         .stat-cell {
             background: #fff;
@@ -149,43 +126,16 @@
             border-right: 1px solid #f1f5f9;
         }
 
-        .stat-cell:last-child {
-            border-right: none;
-        }
+        .stat-cell:last-child { border-right: none; }
+        .stat-cell .val { font-size: 20px; font-weight: 700; color: var(--dark); display: block; }
+        .stat-cell .lbl { font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: .3px; margin-top: 3px; display: block; }
 
-        .stat-cell .val {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--dark);
-            display: block;
-        }
+        .stat-cell.closing { background: #eff6ff; }
+        .stat-cell.closing .val { color: var(--primary); }
 
-        .stat-cell .lbl {
-            font-size: 10px;
-            color: #94a3b8;
-            text-transform: uppercase;
-            letter-spacing: .3px;
-            margin-top: 3px;
-            display: block;
-        }
+        .diff-neg { color: #dc2626 !important; }
+        .diff-pos { color: #16a34a !important; }
 
-        .stat-cell.closing {
-            background: #eff6ff;
-        }
-
-        .stat-cell.closing .val {
-            color: var(--primary);
-        }
-
-        .diff-neg {
-            color: #dc2626 !important;
-        }
-
-        .diff-pos {
-            color: #16a34a !important;
-        }
-
-        /* Action buttons */
         .btn-back {
             background: #f1f5f9;
             color: var(--dark);
@@ -200,10 +150,7 @@
             gap: 7px;
         }
 
-        .btn-back:hover {
-            background: #e2e8f0;
-            color: var(--dark);
-        }
+        .btn-back:hover { background: #e2e8f0; color: var(--dark); }
 
         .btn-edit {
             background: var(--primary);
@@ -216,12 +163,11 @@
             display: inline-flex;
             align-items: center;
             gap: 7px;
+            border: none;
+            cursor: pointer;
         }
 
-        .btn-edit:hover {
-            background: #1d4ed8;
-            color: #fff;
-        }
+        .btn-edit:hover { background: #1d4ed8; color: #fff; }
 
         .btn-delete {
             background: #fff;
@@ -237,13 +183,36 @@
             cursor: pointer;
         }
 
-        .btn-delete:hover {
-            background: #fef2f2;
-        }
+        .btn-delete:hover { background: #fef2f2; }
     </style>
 @endpush
 
 @section('content')
+
+    {{-- ══ Restriction Modal ══ --}}
+    <div id="restrictionModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:99999;align-items:center;justify-content:center;">
+        <div style="background:#fff;border-radius:16px;padding:40px 32px;width:460px;max-width:93vw;box-shadow:0 24px 64px rgba(0,0,0,0.22);text-align:center;">
+            <div style="width:68px;height:68px;background:#fef2f2;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
+                <i class="fa-solid fa-lock" style="font-size:1.8rem;color:#ef4444;"></i>
+            </div>
+            <h5 style="font-size:1.05rem;font-weight:700;color:#1e293b;margin-bottom:10px;">
+                Action Not Permitted
+            </h5>
+            <p style="font-size:.855rem;color:#64748b;line-height:1.8;margin-bottom:6px;">
+                You are only authorized to <strong style="color:#1e293b;">edit or delete today's report</strong>.
+            </p>
+            
+            <button onclick="document.getElementById('restrictionModal').style.display='none'"
+                style="background:#2563eb;color:#fff;border:none;border-radius:8px;padding:12px 36px;font-size:.875rem;font-weight:600;cursor:pointer;letter-spacing:.2px;">
+                <i class="fa-solid fa-check fa-xs" style="margin-right:6px;"></i> I Understand
+            </button>
+        </div>
+    </div>
+
+    @php
+        $isToday = \Carbon\Carbon::parse($fuelReport->report_date)->toDateString() === \Carbon\Carbon::today()->toDateString();
+    @endphp
+
     <div class="report-container">
 
         <div class="page-header">
@@ -256,7 +225,7 @@
         {{-- Station Info --}}
         <div class="custom-card">
             <div class="report-header">
-                <h5><i class="fa-solid fa-gas-pump"></i> Daily Fuel Summary Report </h5>
+                <h5><i class="fa-solid fa-gas-pump"></i> Daily Fuel Summary Report</h5>
                 <div class="meta-grid">
                     <div class="meta-item">
                         <div class="meta-label"><i class="fa-solid fa-building-columns fa-xs"></i> Filling Station</div>
@@ -291,33 +260,12 @@
                 <div class="stat-head"><i class="fa-solid fa-calculator fa-xs"></i> Difference (L)</div>
                 <div class="stat-head"><i class="fa-solid fa-chart-line fa-xs"></i> Sales (L)</div>
                 <div class="stat-head"><i class="fa-solid fa-warehouse fa-xs"></i> Closing Stock (L)</div>
-
-                <div class="stat-cell">
-                    <span class="val">{{ number_format($fuelReport->petrol_prev_stock, 2) }}</span>
-                    <span class="lbl">Previous</span>
-                </div>
-                <div class="stat-cell">
-                    <span class="val">{{ number_format($fuelReport->petrol_supply, 2) }}</span>
-                    <span class="lbl">Supply</span>
-                </div>
-                <div class="stat-cell">
-                    <span class="val">{{ number_format($fuelReport->petrol_received, 2) }}</span>
-                    <span class="lbl">Received</span>
-                </div>
-                <div class="stat-cell">
-                    <span class="val {{ $fuelReport->petrol_difference < 0 ? 'diff-neg' : 'diff-pos' }}">
-                        {{ $fuelReport->petrol_difference >= 0 ? '+' : '' }}{{ number_format($fuelReport->petrol_difference, 2) }}
-                    </span>
-                    <span class="lbl">Diff</span>
-                </div>
-                <div class="stat-cell">
-                    <span class="val">{{ number_format($fuelReport->petrol_sales, 2) }}</span>
-                    <span class="lbl">Sales</span>
-                </div>
-                <div class="stat-cell closing">
-                    <span class="val">{{ number_format($fuelReport->petrol_closing_stock, 2) }}</span>
-                    <span class="lbl">Closing</span>
-                </div>
+                <div class="stat-cell"><span class="val">{{ number_format($fuelReport->petrol_prev_stock, 2) }}</span><span class="lbl">Previous</span></div>
+                <div class="stat-cell"><span class="val">{{ number_format($fuelReport->petrol_supply, 2) }}</span><span class="lbl">Supply</span></div>
+                <div class="stat-cell"><span class="val">{{ number_format($fuelReport->petrol_received, 2) }}</span><span class="lbl">Received</span></div>
+                <div class="stat-cell"><span class="val {{ $fuelReport->petrol_difference < 0 ? 'diff-neg' : 'diff-pos' }}">{{ $fuelReport->petrol_difference >= 0 ? '+' : '' }}{{ number_format($fuelReport->petrol_difference, 2) }}</span><span class="lbl">Diff</span></div>
+                <div class="stat-cell"><span class="val">{{ number_format($fuelReport->petrol_sales, 2) }}</span><span class="lbl">Sales</span></div>
+                <div class="stat-cell closing"><span class="val">{{ number_format($fuelReport->petrol_closing_stock, 2) }}</span><span class="lbl">Closing</span></div>
             </div>
         </div>
 
@@ -334,26 +282,12 @@
                 <div class="stat-head"><i class="fa-solid fa-calculator fa-xs"></i> Difference (L)</div>
                 <div class="stat-head"><i class="fa-solid fa-chart-line fa-xs"></i> Sales (L)</div>
                 <div class="stat-head"><i class="fa-solid fa-warehouse fa-xs"></i> Closing Stock (L)</div>
-
-                <div class="stat-cell"><span
-                        class="val">{{ number_format($fuelReport->diesel_prev_stock, 2) }}</span><span
-                        class="lbl">Previous</span></div>
-                <div class="stat-cell"><span class="val">{{ number_format($fuelReport->diesel_supply, 2) }}</span><span
-                        class="lbl">Supply</span></div>
-                <div class="stat-cell"><span
-                        class="val">{{ number_format($fuelReport->diesel_received, 2) }}</span><span
-                        class="lbl">Received</span></div>
-                <div class="stat-cell">
-                    <span class="val {{ $fuelReport->diesel_difference < 0 ? 'diff-neg' : 'diff-pos' }}">
-                        {{ $fuelReport->diesel_difference >= 0 ? '+' : '' }}{{ number_format($fuelReport->diesel_difference, 2) }}
-                    </span>
-                    <span class="lbl">Diff</span>
-                </div>
-                <div class="stat-cell"><span class="val">{{ number_format($fuelReport->diesel_sales, 2) }}</span><span
-                        class="lbl">Sales</span></div>
-                <div class="stat-cell closing"><span
-                        class="val">{{ number_format($fuelReport->diesel_closing_stock, 2) }}</span><span
-                        class="lbl">Closing</span></div>
+                <div class="stat-cell"><span class="val">{{ number_format($fuelReport->diesel_prev_stock, 2) }}</span><span class="lbl">Previous</span></div>
+                <div class="stat-cell"><span class="val">{{ number_format($fuelReport->diesel_supply, 2) }}</span><span class="lbl">Supply</span></div>
+                <div class="stat-cell"><span class="val">{{ number_format($fuelReport->diesel_received, 2) }}</span><span class="lbl">Received</span></div>
+                <div class="stat-cell"><span class="val {{ $fuelReport->diesel_difference < 0 ? 'diff-neg' : 'diff-pos' }}">{{ $fuelReport->diesel_difference >= 0 ? '+' : '' }}{{ number_format($fuelReport->diesel_difference, 2) }}</span><span class="lbl">Diff</span></div>
+                <div class="stat-cell"><span class="val">{{ number_format($fuelReport->diesel_sales, 2) }}</span><span class="lbl">Sales</span></div>
+                <div class="stat-cell closing"><span class="val">{{ number_format($fuelReport->diesel_closing_stock, 2) }}</span><span class="lbl">Closing</span></div>
             </div>
         </div>
 
@@ -370,27 +304,12 @@
                 <div class="stat-head"><i class="fa-solid fa-calculator fa-xs"></i> Difference (L)</div>
                 <div class="stat-head"><i class="fa-solid fa-chart-line fa-xs"></i> Sales (L)</div>
                 <div class="stat-head"><i class="fa-solid fa-warehouse fa-xs"></i> Closing Stock (L)</div>
-
-                <div class="stat-cell"><span
-                        class="val">{{ number_format($fuelReport->octane_prev_stock, 2) }}</span><span
-                        class="lbl">Previous</span></div>
-                <div class="stat-cell"><span
-                        class="val">{{ number_format($fuelReport->octane_supply, 2) }}</span><span
-                        class="lbl">Supply</span></div>
-                <div class="stat-cell"><span
-                        class="val">{{ number_format($fuelReport->octane_received, 2) }}</span><span
-                        class="lbl">Received</span></div>
-                <div class="stat-cell">
-                    <span class="val {{ $fuelReport->octane_difference < 0 ? 'diff-neg' : 'diff-pos' }}">
-                        {{ $fuelReport->octane_difference >= 0 ? '+' : '' }}{{ number_format($fuelReport->octane_difference, 2) }}
-                    </span>
-                    <span class="lbl">Diff</span>
-                </div>
-                <div class="stat-cell"><span class="val">{{ number_format($fuelReport->octane_sales, 2) }}</span><span
-                        class="lbl">Sales</span></div>
-                <div class="stat-cell closing"><span
-                        class="val">{{ number_format($fuelReport->octane_closing_stock, 2) }}</span><span
-                        class="lbl">Closing</span></div>
+                <div class="stat-cell"><span class="val">{{ number_format($fuelReport->octane_prev_stock, 2) }}</span><span class="lbl">Previous</span></div>
+                <div class="stat-cell"><span class="val">{{ number_format($fuelReport->octane_supply, 2) }}</span><span class="lbl">Supply</span></div>
+                <div class="stat-cell"><span class="val">{{ number_format($fuelReport->octane_received, 2) }}</span><span class="lbl">Received</span></div>
+                <div class="stat-cell"><span class="val {{ $fuelReport->octane_difference < 0 ? 'diff-neg' : 'diff-pos' }}">{{ $fuelReport->octane_difference >= 0 ? '+' : '' }}{{ number_format($fuelReport->octane_difference, 2) }}</span><span class="lbl">Diff</span></div>
+                <div class="stat-cell"><span class="val">{{ number_format($fuelReport->octane_sales, 2) }}</span><span class="lbl">Sales</span></div>
+                <div class="stat-cell closing"><span class="val">{{ number_format($fuelReport->octane_closing_stock, 2) }}</span><span class="lbl">Closing</span></div>
             </div>
         </div>
 
@@ -407,27 +326,12 @@
                 <div class="stat-head"><i class="fa-solid fa-calculator fa-xs"></i> Difference (L)</div>
                 <div class="stat-head"><i class="fa-solid fa-chart-line fa-xs"></i> Sales (L)</div>
                 <div class="stat-head"><i class="fa-solid fa-warehouse fa-xs"></i> Closing Stock (L)</div>
-
-                <div class="stat-cell"><span
-                        class="val">{{ number_format($fuelReport->others_prev_stock, 2) }}</span><span
-                        class="lbl">Previous</span></div>
-                <div class="stat-cell"><span
-                        class="val">{{ number_format($fuelReport->others_supply, 2) }}</span><span
-                        class="lbl">Supply</span></div>
-                <div class="stat-cell"><span
-                        class="val">{{ number_format($fuelReport->others_received, 2) }}</span><span
-                        class="lbl">Received</span></div>
-                <div class="stat-cell">
-                    <span class="val {{ $fuelReport->others_difference < 0 ? 'diff-neg' : 'diff-pos' }}">
-                        {{ $fuelReport->others_difference >= 0 ? '+' : '' }}{{ number_format($fuelReport->others_difference, 2) }}
-                    </span>
-                    <span class="lbl">Diff</span>
-                </div>
-                <div class="stat-cell"><span class="val">{{ number_format($fuelReport->others_sales, 2) }}</span><span
-                        class="lbl">Sales</span></div>
-                <div class="stat-cell closing"><span
-                        class="val">{{ number_format($fuelReport->others_closing_stock, 2) }}</span><span
-                        class="lbl">Closing</span></div>
+                <div class="stat-cell"><span class="val">{{ number_format($fuelReport->others_prev_stock, 2) }}</span><span class="lbl">Previous</span></div>
+                <div class="stat-cell"><span class="val">{{ number_format($fuelReport->others_supply, 2) }}</span><span class="lbl">Supply</span></div>
+                <div class="stat-cell"><span class="val">{{ number_format($fuelReport->others_received, 2) }}</span><span class="lbl">Received</span></div>
+                <div class="stat-cell"><span class="val {{ $fuelReport->others_difference < 0 ? 'diff-neg' : 'diff-pos' }}">{{ $fuelReport->others_difference >= 0 ? '+' : '' }}{{ number_format($fuelReport->others_difference, 2) }}</span><span class="lbl">Diff</span></div>
+                <div class="stat-cell"><span class="val">{{ number_format($fuelReport->others_sales, 2) }}</span><span class="lbl">Sales</span></div>
+                <div class="stat-cell closing"><span class="val">{{ number_format($fuelReport->others_closing_stock, 2) }}</span><span class="lbl">Closing</span></div>
             </div>
         </div>
 
@@ -436,16 +340,34 @@
             <a href="{{ route('fuel-reports.index') }}" class="btn-back">
                 <i class="fa-solid fa-arrow-left fa-xs"></i> Back
             </a>
-            <a href="{{ route('fuel-reports.edit', $fuelReport) }}" class="btn-edit">
-                <i class="fa-regular fa-pen-to-square fa-xs"></i> Edit
-            </a>
-            <form action="{{ route('fuel-reports.destroy', $fuelReport) }}" method="POST"
-                onsubmit="return confirm('এই রিপোর্ট মুছে ফেলবেন?')">
-                @csrf @method('DELETE')
-                <button type="submit" class="btn-delete">
+
+            {{-- Edit Button --}}
+            @if ($isToday)
+                <a href="{{ route('fuel-reports.edit', $fuelReport) }}" class="btn-edit">
+                    <i class="fa-regular fa-pen-to-square fa-xs"></i> Edit
+                </a>
+            @else
+                <button type="button" class="btn-edit"
+                    onclick="document.getElementById('restrictionModal').style.display='flex'">
+                    <i class="fa-regular fa-pen-to-square fa-xs"></i> Edit
+                </button>
+            @endif
+
+            {{-- Delete Button --}}
+            @if ($isToday)
+                <form action="{{ route('fuel-reports.destroy', $fuelReport) }}" method="POST"
+                    onsubmit="return confirm('Are you sure you want to delete this report? This action cannot be undone.')">
+                    @csrf @method('DELETE')
+                    <button type="submit" class="btn-delete">
+                        <i class="fa-regular fa-trash-can fa-xs"></i> Delete
+                    </button>
+                </form>
+            @else
+                <button type="button" class="btn-delete"
+                    onclick="document.getElementById('restrictionModal').style.display='flex'">
                     <i class="fa-regular fa-trash-can fa-xs"></i> Delete
                 </button>
-            </form>
+            @endif
         </div>
 
     </div>
