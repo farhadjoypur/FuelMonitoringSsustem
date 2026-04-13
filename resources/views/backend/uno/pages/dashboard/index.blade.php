@@ -1135,10 +1135,20 @@
                                     {{-- Actions --}}
                                     <td>
                                         <div class="action-btns">
-                                            <a href="{{ url('uno/reports/' . $report->id) }}"
+                                            <!-- <a href="{{ url('uno/reports/' . $report->id) }}"
                                                 class="action-btn btn-view">View</a>
-                                            <button class="action-btn btn-message">Message</button>
-                                            <button class="action-btn btn-delete">Delete</button>
+                                            <button class="action-btn btn-message">Message</button> -->
+                                            <form id="uno-delete-form-{{ $report->id }}"
+                                                action="{{ route('uno.dashboard.report.destroy', $report->id) }}"
+                                                method="POST" style="display:none;">
+                                                @csrf
+                                                @method('DELETE')
+                                            </form>
+
+                                            <button type="button" class="action-btn btn-delete"
+                                                onclick="confirmDelete('uno-delete-form-{{ $report->id }}')">
+                                                Delete
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -1149,7 +1159,7 @@
             </div>
 
             <div class="table-footer">
-                <a href="#" class="see-all-btn">
+                <a href="{{ route('uno.reports.index') }}" class="see-all-btn">
                     See All Reports
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2">
@@ -1161,3 +1171,25 @@
 
     </div>
 @endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+function confirmDelete(formId) {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: 'This report will be permanently deleted.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#94a3b8',
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById(formId).submit();
+        }
+    });
+}
+</script>
+@endpush

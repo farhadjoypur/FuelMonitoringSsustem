@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('uno')->middleware(['role:' . UserRole::UNO])->as('uno.')->group(function () {
     Route::resource('dashboard', DashboardController::class);
+    Route::delete('dashboard/{id}/report-destroy', [DashboardController::class, 'reportDestroy'])->name('dashboard.report.destroy');
     Route::resource('profile', ProfileController::class);
     Route::resource('filling-station', FillingStationController::class);
     Route::resource('tag-officer', TagOfficerController::class);
