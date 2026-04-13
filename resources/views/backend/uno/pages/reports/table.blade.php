@@ -511,8 +511,8 @@
                                 </span>
                             </td>
 
-                            {{-- <td>{{ formatNumber($report[$fuelKey . '_prev_stock'] ?? 0) }}</td> --}}
-                            <td>{{ '0' }}</td>
+                            <td>{{ formatNumber($report[$fuelKey . '_prev_stock'] ?? 0) }}</td>
+                            {{-- <td>{{ '0' }}</td> --}}
 
                             <td class="cell-supply">
                                 {{ formatNumber($report[$fuelKey . '_supply'] ?? 0) }}
@@ -587,7 +587,7 @@
                             </td>
 
                             {{-- <td class="">{{ formatNumber($totalRow["{$fuelKey}_prev_stock"] ?? 0) }}</td> --}}
-                            <td class="">{{ '0' }}</td>
+                            <td class="">{{ '' }}</td>
                             <td class="">{{ formatNumber($totalRow["{$fuelKey}_supply"] ?? 0) }}</td>
                             <td class="">{{ formatNumber($totalRow["{$fuelKey}_received"] ?? 0) }}</td>
                             <td class=" {{ ($totalRow["{$fuelKey}_difference"] ?? 0) != 0 ? 'text-warning' : '' }}">
@@ -624,7 +624,7 @@
                             GRAND TOTAL (All Fuels)
                         </td>
                         {{-- <td class="">{{ formatNumber($grandPrev) }}</td> --}}
-                        <td class="">{{ '0' }}</td>
+                        <td class="">{{ '' }}</td>
                         <td class="">{{ formatNumber($grandSupply) }}</td>
                         <td class="">{{ formatNumber($grandReceived) }}</td>
                         <td class=" {{ $grandDiff > 0 ? 'text-warning' : '' }}">
