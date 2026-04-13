@@ -12,6 +12,7 @@ use App\Http\Controllers\Backend\DC\DcReportsController;
 
 Route::prefix('dc')->middleware(['role:' . UserRole::DC])->as('dc.')->group(function () {
     Route::resource('dashboard', DashboardController::class);
+    Route::delete('dashboard/{id}/report-destroy', [DashboardController::class, 'reportDestroy'])->name('dashboard.report.destroy');
     Route::resource('profile', ProfileController::class);
     Route::resource('filling-station', FillingStationController::class);
     Route::resource('uno', UnoController::class);

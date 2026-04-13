@@ -354,4 +354,10 @@ class DashboardController extends Controller
             'dcDistrict',
         ));
     }
+
+    public function reportDestroy(string $id)
+    {
+        Fuelreport::findOrFail($id)->delete();
+        return redirect()->back()->with('success', 'Report deleted successfully.');
+    }
 }
