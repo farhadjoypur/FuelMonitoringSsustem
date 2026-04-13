@@ -642,6 +642,32 @@
                 <a href="{{ route('fuel-reports.index') }}" class="btn-cancel">Cancel</a>
             </div>
         </form>
+        {{-- ── Restriction Modal ── --}}
+        <div id="restrictionModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99999;align-items:center;justify-content:center;">
+            <div style="background:#fff;border-radius:14px;padding:36px 30px;width:440px;max-width:93vw;box-shadow:0 20px 60px rgba(0,0,0,0.2);text-align:center;">
+                <div style="width:64px;height:64px;background:#fef2f2;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;">
+                    <i class="fa-solid fa-lock" style="font-size:1.6rem;color:#ef4444;"></i>
+                </div>
+                <h5 style="font-size:1.05rem;font-weight:700;color:#1e293b;margin-bottom:10px;">
+                    Action Not Permitted
+                </h5>
+                <p style="font-size:.855rem;color:#64748b;line-height:1.75;margin-bottom:6px;">
+                    You are only authorized to <strong style="color:#1e293b;">edit or delete today's report</strong>.
+                </p>
+                <p style="font-size:.855rem;color:#64748b;line-height:1.75;margin-bottom:22px;">
+                    Modifications to reports from <strong style="color:#ef4444;">previous dates</strong> are strictly
+                    not permitted in order to maintain data integrity and ensure audit compliance.
+                    <br><br>
+                    <span style="font-size:.78rem;color:#94a3b8;">
+                        If you believe this is an error or require assistance,
+                        please contact your supervisor or system administrator.
+                    </span>
+                </p>
+                <button onclick="document.getElementById('restrictionModal').style.display='none'" style="background:#2563eb;color:#fff;border:none;border-radius:8px;padding:11px 32px;font-size:.875rem;font-weight:600;cursor:pointer;letter-spacing:.2px;">
+                    <i class="fa-solid fa-check fa-xs" style="margin-right:6px;"></i> I Understand
+                </button>
+            </div>
+        </div>
     </div>
 @endsection
 @push('scripts')
