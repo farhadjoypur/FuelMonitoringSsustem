@@ -512,7 +512,7 @@
                             </td>
 
                             <td>{{ formatNumber($report[$fuelKey . '_prev_stock'] ?? 0) }}</td>
-                            <td>{{ '0' }}</td>
+                            {{-- <td>{{ '0' }}</td> --}}
 
                             <td class="cell-supply">
                                 {{ formatNumber($report[$fuelKey . '_supply'] ?? 0) }}
