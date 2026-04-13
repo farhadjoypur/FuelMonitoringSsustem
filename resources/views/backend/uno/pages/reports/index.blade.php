@@ -765,14 +765,37 @@
                         </select>
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group" style="position: relative;">
                         <label>Filling Station</label>
-                        <select x-model="filters.station_id">
-                            <option value="">All Stations</option>
-                            @foreach ($stations as $station)
-                                <option value="{{ $station->id }}">{{ $station->station_name }}</option>
-                            @endforeach
-                        </select>
+                        <div style="position: relative;">
+                            <input type="text" x-model="stationSearch" @focus="stationOpen = true"
+                                @click="stationOpen = true" @keydown.escape="stationOpen = false"
+                                placeholder="Search station..." autocomplete="off"
+                                style="width:100%; padding-right:30px; box-sizing:border-box;" />
+                            <button x-show="stationSelected" @click="clearStation()" type="button"
+                                style="position:absolute; right:8px; top:50%; transform:translateY(-50%);
+                   background:none; border:none; cursor:pointer; color:#94a3b8;">✕</button>
+                        </div>
+
+                        <div x-show="stationOpen" @click.outside="stationOpen = false"
+                            style="position:absolute; top:100%; left:0; right:0; background:#fff;
+               border:1px solid #e2e8f0; border-radius:6px; z-index:999;
+               max-height:220px; overflow-y:auto; box-shadow:0 4px 12px rgba(0,0,0,.1);">
+
+                            <div @click="clearStation(); stationOpen = false;"
+                                style="padding:8px 12px; font-size:13px; cursor:pointer; color:#64748b;"
+                                @mouseover="$el.style.background='#f8fafc'" @mouseleave="$el.style.background=''">All
+                                Stations</div>
+
+                            <template x-for="s in filteredStations" :key="s.id">
+                                <div @click="selectStation(s)" x-text="s.name"
+                                    style="padding:8px 12px; font-size:13px; cursor:pointer;"
+                                    @mouseover="$el.style.background='#f8fafc'" @mouseleave="$el.style.background=''"></div>
+                            </template>
+
+                            <div x-show="filteredStations.length === 0"
+                                style="padding:8px 12px; font-size:13px; color:#94a3b8;">No stations found</div>
+                        </div>
                     </div>
 
                     <div class="form-group">
@@ -994,6 +1017,10 @@
                     min_diff_l: '',
                     min_diff_pct: '',
                 },
+                stationSearch: '',
+                stationOpen: false,
+                stationSelected: null,
+                allStations: @json($stations->map(fn($s) => ['id' => $s->id, 'name' => $s->station_name])),
 
                 diffAvailableUpazilas: [], // init এ load হবে
 
@@ -1049,6 +1076,11 @@
                 // ═════════════════════════════════════════════════════════
 
                 init(seeall = '', fromDate = '', toDate = '') {
+                     document.addEventListener('click', (e) => {
+                        if (!e.target.closest('.form-group')) {
+                            this.stationOpen = false;
+                        }
+                    });
 
                     const container = document.getElementById('tableContainer');
                     if (container) this.tableHtml = container.innerHTML;
@@ -1102,6 +1134,26 @@
                     }
                 },
 
+                get filteredStations() {
+                    if (!this.stationSearch) return this.allStations;
+                    return this.allStations.filter(s =>
+                        s.name.toLowerCase().includes(this.stationSearch.toLowerCase())
+                    );
+                },
+
+                selectStation(s) {
+                    this.stationSelected = s;
+                    this.stationSearch = s.name;
+                    this.filters.station_id = s.id;
+                    this.stationOpen = false;
+                },
+
+                clearStation() {
+                    this.stationSelected = null;
+                    this.stationSearch = '';
+                    this.filters.station_id = '';
+                    this.stationOpen = true;
+                },
 
                 // ─────────────────────────────────────────────────────────
                 // TAB SWITCH
