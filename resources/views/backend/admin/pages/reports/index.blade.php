@@ -929,7 +929,7 @@
         </div> --}}
 
         {{-- ── DELETE MODAL ── --}}
-        <div class="modal-backdrop" x-show="deleteModal.isOpen" x-transition @click.self="deleteModal.isOpen = false">
+        <div class="modal-backdrop" x-show="deleteModal.isOpen" x-cloak x-transition  @click.self="deleteModal.isOpen = false">
             <div class="modal-box">
                 <div class="confirm-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
                 <div class="confirm-message">
