@@ -569,12 +569,12 @@
                                             <i class="fa-solid fa-message"></i> Message
                                         </button> --}}
                                         <button class="btn-action btn-delete" type="button"
-                                            @click="openDeleteModal(
-                                                {{ $report['id'] }},
-                                                '{{ addslashes($report['station_name']) }}'
-                                            )">
-                                            <i class="fa-solid fa-trash"></i> Delete
-                                        </button>
+        @click="deleteReport(
+            {{ $report['id'] }},
+            '{{ addslashes($report['station_name']) }}'
+        )">
+    <i class="fa-solid fa-trash"></i> Delete
+</button>
                                     </div>
                                 </td>
                             @endif

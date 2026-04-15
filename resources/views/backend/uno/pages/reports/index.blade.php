@@ -950,7 +950,7 @@
 
 
         {{-- ── MESSAGE MODAL ── --}}
-        <div class="modal-backdrop" x-show="messageModal.isOpen" x-transition @click.self="messageModal.isOpen = false">
+        {{-- <div class="modal-backdrop" x-show="messageModal.isOpen" x-transition @click.self="messageModal.isOpen = false">
             <div class="modal-box">
                 <div class="modal-title">
                     <i class="fa-solid fa-paper-plane" style="color:#22c55e;"></i>
@@ -965,10 +965,10 @@
                     </button>
                 </div>
             </div>
-        </div>
+        </div> --}}
 
         {{-- ── DELETE MODAL ── --}}
-        <div class="modal-backdrop" x-show="deleteModal.isOpen" x-cloak x-transition
+        {{-- <div class="modal-backdrop" x-show="deleteModal.isOpen" x-cloak x-transition
             @click.self="deleteModal.isOpen = false">
             <div class="modal-box">
                 <div class="confirm-icon">
@@ -986,7 +986,7 @@
                     </button>
                 </div>
             </div>
-        </div>
+        </div> --}}
 
     </div>{{-- /rpt-card --}}
 @endsection
@@ -1629,6 +1629,71 @@
                     if (this.submitFilter.stationId) params.append('station_id', this.submitFilter.stationId);
                     window.open('{{ route('uno.reports.export.submitted.pdf') }}?' + params.toString(), '_blank');
                 },
+                // ═══════════════════════════════════════════════════════════
+// DELETE REPORT WITH SWEETALERT2 (নতুন)
+// ═══════════════════════════════════════════════════════════
+
+async deleteReport(reportId, stationName = '') {
+    const result = await Swal.fire({
+        title: 'Are you sure?',
+        html: stationName 
+            ? `Do you want to delete the report for <strong>${stationName}</strong>?` 
+            : 'Do you want to delete this report?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, Delete it!',
+        cancelButtonText: 'Cancel',
+        reverseButtons: true,
+        focusCancel: true
+    });
+
+    if (result.isConfirmed) {
+        try {
+            const csrf = document.querySelector('meta[name="csrf-token"]').content;
+            const deleteUrl = `{{ route('admin.reports.destroy', ':id') }}`.replace(':id', reportId);
+
+            const response = await fetch(deleteUrl, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': csrf,
+                    'Accept': 'application/json',
+                },
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                Swal.fire({
+                    title: 'Deleted!',
+                    text: 'The report has been successfully deleted.',
+                    icon: 'success',
+                    timer: 1800,
+                    showConfirmButton: false
+                });
+
+                // Refresh the current active tab automatically
+                await this.$nextTick(async () => {
+                    if (this.activeTab === 'stock') {
+                        await this.applyFilter(this.currentPage);
+                    } else if (this.activeTab === 'difference') {
+                        await this.applyDiffFilter(this.diffCurrentPage);
+                    } else if (this.activeTab === 'missing') {
+                        await this.applyMissingFilter(this.missingCurrentPage);
+                    } else if (this.activeTab === 'submitted') {
+                        await this.applySubmitFilter(this.submitCurrentPage);
+                    }
+                });
+            } else {
+                Swal.fire('Failed!', data.message || 'Could not delete the report.', 'error');
+            }
+        } catch (error) {
+            console.error(error);
+            Swal.fire('Error!', 'Something went wrong. Please try again later.', 'error');
+        }
+    }
+},
 
             }; // end return
         } // end reportApp
