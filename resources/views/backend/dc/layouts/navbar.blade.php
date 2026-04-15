@@ -3,7 +3,7 @@
 
         <div class="d-flex align-items-center">
             <img src="{{ asset('backend/assets/images/logo.png') }}" alt="loog" style="width: 40px">
-            <h2 class="navbar-brand text-white fw-bold mb-0 mx-2" style="font-size: 24px; padding: 10px 0">DC Panel</h2>
+            <h2 class="navbar-brand text-white fw-bold mb-0 mx-2" style="font-size: 24px; padding: 10px 0">DC Office</h2>
             <p class="text-stat text-white mb-0 d-none d-md-block" style=" padding-left: 45px;">
                 Bangladesh Government - Fuel Distribution Monitoring System
             </p>
