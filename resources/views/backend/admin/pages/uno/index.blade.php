@@ -1,6 +1,6 @@
 @extends('backend.admin.layouts.app')
 
-@section('title', 'UNO Officer Management')
+@section('title', 'UNO Office Management')
 
 @push('styles')
     <style>
@@ -91,13 +91,13 @@
     <div class="container-fluid p-4">
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
             <div>
-                <h4 class="fw-bold">UNO Management</h4>
-                <p class="text-muted small">Manage UNO Officers Information and Assignments</p>
+                <h4 class="fw-bold">UNO Office Management</h4>
+                <p class="text-muted small">Manage UNO Offices Information and Assignments</p>
             </div>
 
             <button class="btn btn-primary px-4 py-2 w-sm-100 w-auto" data-bs-toggle="modal" data-bs-target="#addOfficerModal"
                 style="background-color: #006699; border-radius: 8px; border: none;">
-                <i class="bi bi-plus-lg me-2"></i> Add UNO Officer
+                <i class="bi bi-plus-lg me-2"></i> Add UNO Office
             </button>
         </div>
 
@@ -303,7 +303,7 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content" style="border-radius: 15px;">
                 <div class="modal-header border-0 pt-4 px-4">
-                    <h5 class="modal-title fw-bold" id="addOfficerModalLabel">Add UNO Officer</h5>
+                    <h5 class="modal-title fw-bold" id="addOfficerModalLabel">Add UNO Office</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body px-4">
@@ -311,7 +311,7 @@
                         @csrf
 
                         <div class="mb-3">
-                            <label class="form-label small fw-bold">Officer Name *</label>
+                            <label class="form-label small fw-bold">UNO Name *</label>
                             <input type="text" name="name"
                                 class="form-control bg-light border-0 py-2 @error('name') is-invalid @enderror"
                                 placeholder="Enter name" value="{{ old('name') }}">
@@ -441,7 +441,7 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content" style="border-radius: 15px;">
                 <div class="modal-header border-0 pt-4 px-4">
-                    <h5 class="modal-title fw-bold">Edit UNO Officer</h5>
+                    <h5 class="modal-title fw-bold">Edit UNO Office</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
@@ -459,7 +459,7 @@
                             value="{{ old('edit_url_handler') }}">
 
                         <div class="mb-3">
-                            <label class="form-label small fw-bold">Officer Name *</label>
+                            <label class="form-label small fw-bold">UNO Name *</label>
                             <input type="text" name="name" id="edit_name"
                                 class="form-control bg-light border-0 py-2 @error('name') is-invalid @enderror"
                                 value="{{ old('name') }}">

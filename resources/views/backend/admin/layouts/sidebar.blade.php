@@ -59,7 +59,7 @@
                 <a href="{{ route('admin.dc-officer.index') }}"
                     class="menu-link {{ request()->routeIs('admin.dc-officer.*') ? 'active' : '' }}">
                     <span class="material-symbols-rounded">group</span>
-                    <span class="menu-label">DC Officer</span>
+                    <span class="menu-label">DC Office</span>
                 </a>
             </li>
 
@@ -67,7 +67,7 @@
                 <a href="{{ route('admin.uno.index') }}"
                     class="menu-link {{ request()->routeIs('admin.uno.*') ? 'active' : '' }}">
                     <span class="material-symbols-rounded">badge</span>
-                    <span class="menu-label">UNO Officer</span>
+                    <span class="menu-label">UNO Office</span>
                 </a>
             </li>
 
