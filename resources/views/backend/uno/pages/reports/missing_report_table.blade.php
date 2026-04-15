@@ -134,13 +134,29 @@
 
 <div class="table-section">
 
-    <div class="table-header-row">
-        <div class="table-title">Tag Officer Pending Reports</div>
+ <div class="table-header-row">
+
+    <div class="table-title">
+        Tag Officer Pending Reports
+    </div>
+
+    <div class="header-right">
+
         <span class="record-count"
             x-show="missingTotalRecords > 0"
             x-text="missingTotalRecords + ' records found'">
         </span>
+
+        <div class="export-row">
+            <button class="btn-export btn-export-pdf" @click="exportMissingPdf()">
+                <i class="fa-regular fa-file-pdf"></i> Export PDF
+            </button>
+        </div>
+
     </div>
+
+</div>
+    
 
     {{-- Empty --}}
     <div x-show="!isMissingLoading && missingTotalRecords === 0"

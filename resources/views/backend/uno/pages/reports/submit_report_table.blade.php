@@ -134,13 +134,28 @@
 
 <div class="table-section">
 
-    <div class="table-header-row">
-        <div class="table-title">Tag Officer Submitted Reports</div>
+  <div class="table-header-row">
+
+    <div class="table-title">
+        Tag Officer Submitted Reports
+    </div>
+
+    <div class="header-right">
+
         <span class="record-count"
             x-show="submitTotalRecords > 0"
             x-text="submitTotalRecords + ' records found'">
         </span>
+
+        <div class="export-row">
+            <button class="btn-export btn-export-pdf" @click="exportSubmitPdf()">
+                <i class="fa-regular fa-file-pdf"></i> Export PDF
+            </button>
+        </div>
+
     </div>
+
+</div>
 
     {{-- Empty --}}
     <div x-show="!isSubmitLoading && submitTotalRecords === 0"

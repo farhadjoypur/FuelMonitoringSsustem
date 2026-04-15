@@ -48,8 +48,8 @@
         }
 
         /* ══════════════════════════════════════
-           DATA ROWS (Stock / Received / Sales…)
-        ══════════════════════════════════════ */
+               DATA ROWS (Stock / Received / Sales…)
+            ══════════════════════════════════════ */
         .data-section {
             margin-bottom: 24px;
         }
@@ -906,28 +906,28 @@
          RECENT ACTIVITIES
     ============================================================ --}}
         <!-- <div class="card" style="padding:0">
-            <div class="ac-head">
-                <i class="fa-solid fa-wave-square"></i>
-                <span class="ac-title">Recent Activities</span>
-            </div>
-            @forelse($recentActivities as $act)
+                <div class="ac-head">
+                    <i class="fa-solid fa-wave-square"></i>
+                    <span class="ac-title">Recent Activities</span>
+                </div>
+                @forelse($recentActivities as $act)
     <div class="act-item">
-                    <div class="act-dot {{ $act['color'] }}">
-                        <i class="fa-solid {{ $act['icon'] }} fa-xs"></i>
-                    </div>
-                    <div>
-                        <div class="ai-title">{{ $act['title'] }}</div>
-                        <div class="ai-sub">{{ $act['sub'] }}</div>
-                        <div class="ai-time">
-                            <i class="fa-regular fa-clock fa-xs"></i>
-                            {{ \Carbon\Carbon::parse($act['time'])->diffForHumans() }}
+                        <div class="act-dot {{ $act['color'] }}">
+                            <i class="fa-solid {{ $act['icon'] }} fa-xs"></i>
+                        </div>
+                        <div>
+                            <div class="ai-title">{{ $act['title'] }}</div>
+                            <div class="ai-sub">{{ $act['sub'] }}</div>
+                            <div class="ai-time">
+                                <i class="fa-regular fa-clock fa-xs"></i>
+                                {{ \Carbon\Carbon::parse($act['time'])->diffForHumans() }}
+                            </div>
                         </div>
                     </div>
-                </div>
         @empty
-                <div class="no-data">No activity found।</div>
+                    <div class="no-data">No activity found।</div>
     @endforelse
-        </div> -->
+            </div> -->
 
         {{-- ============================================================
         Difference Report Table
@@ -942,15 +942,15 @@
                     </span>
                 </div>
                 <!-- <button class="export-pdf-btn">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                        <polyline points="14 2 14 8 20 8" />
-                        <line x1="16" y1="13" x2="8" y2="13" />
-                        <line x1="16" y1="17" x2="8" y2="17" />
-                    </svg>
-                    Export to PDF
-                </button> -->
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                            <polyline points="14 2 14 8 20 8" />
+                            <line x1="16" y1="13" x2="8" y2="13" />
+                            <line x1="16" y1="17" x2="8" y2="17" />
+                        </svg>
+                        Export to PDF
+                    </button> -->
             </div>
 
             <div class="diff-table-wrapper">
@@ -1073,21 +1073,42 @@
                                     </td>
 
                                     {{-- Difference (%) --}}
+                                    {{-- Difference (%) --}}
                                     <td class="diff-column">
                                         <div class="fuel-rows">
-                                            @foreach ($fuels as $fuelData)
+                                            @foreach ($fuels as $fuelName => $fuelData)
                                                 @php
-                                                    $pct =
-                                                        $fuelData['received'] > 0
-                                                            ? round(
-                                                                (abs($fuelData['diff']) / $fuelData['received']) * 100,
-                                                                1,
-                                                            )
+                                                    $release = match ($fuelName) {
+                                                        'Octane' => (float) $report->octane_supply,
+                                                        'Petrol' => (float) $report->petrol_supply,
+                                                        'Diesel' => (float) $report->diesel_supply,
+                                                        'Others' => (float) $report->others_supply,
+                                                        default => $fuelData['received'],
+                                                    };
+
+                                                    $diffPct =
+                                                        $release > 0
+                                                            ? round((abs($fuelData['diff']) / $release) * 100, 1)
                                                             : 0;
+
+                                                    $alertText = match (true) {
+                                                        $diffPct >= 50 => 'High Diff',
+                                                        $diffPct >= 20 => 'Medium Diff',
+                                                        $diffPct > 0 => 'Low Diff',
+                                                        default => 'Normal',
+                                                    };
+
+                                                    $alertClass = match (true) {
+                                                        $diffPct >= 50 => 'alert-high',
+                                                        $diffPct >= 20 => 'alert-medium',
+                                                        $diffPct > 0 => 'alert-low',
+                                                        default => 'alert-normal',
+                                                    };
                                                 @endphp
+
                                                 <div class="fuel-row">
                                                     <span class="fuel-percent">
-                                                        {{ $pct > 0 ? $pct . '%' : '—' }}
+                                                        {{ $diffPct !== null ? $diffPct . '%' : '—' }}
                                                     </span>
                                                 </div>
                                             @endforeach
@@ -1136,8 +1157,8 @@
                                     <td>
                                         <div class="action-btns">
                                             <!-- <a href="{{ url('uno/reports/' . $report->id) }}"
-                                                class="action-btn btn-view">View</a>
-                                            <button class="action-btn btn-message">Message</button> -->
+                                                    class="action-btn btn-view">View</a>
+                                                <button class="action-btn btn-message">Message</button> -->
                                             <form id="uno-delete-form-{{ $report->id }}"
                                                 action="{{ route('uno.dashboard.report.destroy', $report->id) }}"
                                                 method="POST" style="display:none;">
@@ -1173,23 +1194,23 @@
 @endsection
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-function confirmDelete(formId) {
-    Swal.fire({
-        title: 'Are you sure?',
-        text: 'This report will be permanently deleted.',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#ef4444',
-        cancelButtonColor: '#94a3b8',
-        confirmButtonText: 'Yes, delete it!',
-        cancelButtonText: 'Cancel'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            document.getElementById(formId).submit();
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function confirmDelete(formId) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'This report will be permanently deleted.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#94a3b8',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById(formId).submit();
+                }
+            });
         }
-    });
-}
-</script>
+    </script>
 @endpush

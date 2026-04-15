@@ -1099,26 +1099,48 @@
                                     </td>
 
                                     {{-- Difference (%) --}}
-                                    <td class="diff-column">
-                                        <div class="fuel-rows">
-                                            @foreach ($fuels as $fuelData)
-                                                @php
-                                                    $pct =
-                                                        $fuelData['received'] > 0
-                                                            ? round(
-                                                                (abs($fuelData['diff']) / $fuelData['received']) * 100,
-                                                                1,
-                                                            )
-                                                            : 0;
-                                                @endphp
-                                                <div class="fuel-row">
-                                                    <span class="fuel-percent">
-                                                        {{ $pct > 0 ? $pct . '%' : '—' }}
-                                                    </span>
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                    </td>
+{{-- Difference (%) --}}
+<td class="diff-column">
+    <div class="fuel-rows">
+        @foreach ($fuels as $fuelName => $fuelData)
+
+    @php
+    $release = match ($fuelName) {
+        'Octane' => (float) $report->octane_supply,
+        'Petrol' => (float) $report->petrol_supply,
+        'Diesel' => (float) $report->diesel_supply,
+        'Others' => (float) $report->others_supply,
+        default  => $fuelData['received'],
+    };
+
+    $diffPct = $release > 0 
+        ? round((abs($fuelData['diff']) / $release) * 100, 1) 
+        : 0;
+
+    $alertText = match (true) {
+        $diffPct >= 50 => 'High Diff',
+        $diffPct >= 20 => 'Medium Diff',
+        $diffPct > 0   => 'Low Diff',
+        default        => 'Normal',
+    };
+
+    $alertClass = match (true) {
+        $diffPct >= 50 => 'alert-high',
+        $diffPct >= 20 => 'alert-medium',
+        $diffPct > 0   => 'alert-low',
+        default        => 'alert-normal',
+    };
+@endphp
+
+    <div class="fuel-row">
+        <span class="fuel-percent">
+            {{ $diffPct !== null ? $diffPct . '%' : '—' }}
+        </span>
+    </div>
+
+@endforeach
+    </div>
+</td>
 
                                     {{-- Alert --}}
                                     {{-- Alert --}}

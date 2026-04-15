@@ -26,6 +26,28 @@
             background: var(--bg);
             color: var(--text);
         }
+        .table-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.export-row {
+    display: flex;
+    align-items: center;
+}
+
+.record-count {
+    font-size: 14px;
+    color: #666;
+}
 
         .page-title {
             font-size: 1.25rem;
@@ -472,7 +494,7 @@
             justify-content: flex-end;
             gap: 10px;
             padding: 14px 24px 20px;
-            border-top: 1px solid var(--border);
+            /* border-top: 1px solid var(--border); */
         }
 
         .btn-export {
@@ -671,6 +693,7 @@
                 width: 100%;
                 justify-content: center;
             }
+
         }
     </style>
 @endpush
@@ -838,28 +861,47 @@
             </div>
 
             <div class="table-section">
-                <div class="table-header-row">
-                    <div class="table-title">Stock &amp; Sales Reports</div>
-                    <div class="record-count" x-text="recordCountText"></div>
-                </div>
 
-                <div class="loading-overlay" x-show="isLoading" style="display:none;">
-                    <div class="loading-spinner"></div>
-                    <p style="font-size:.85rem;">Loading data...</p>
-                </div>
+    <div class="table-header-row">
 
-                <div id="tableContainer" x-show="!isLoading" x-html="tableHtml"
-                    style="flex:1; min-height:0; overflow-x:auto; overflow-y:auto;">
-                    @include('backend.uno.pages.reports.table', [
-                        'reports' => $reports,
-                        'totalRow' => null,
-                        'currentPage' => 1,
-                        'lastPage' => 1,
-                        'total' => 0,
-                        'filters' => [],
-                    ])
-                </div>
-            </div>
+        <div class="table-title">
+            Stock & Sales Reports
+        </div>
+
+        <div class="header-right">
+
+            <div class="record-count" x-text="recordCountText"></div>
+
+            <button class="btn-export btn-export-pdf" @click="exportPdf()">
+                <i class="fa-regular fa-file-pdf"></i> Export PDF
+            </button>
+
+        </div>
+
+    </div>
+
+    <div class="loading-overlay" x-show="isLoading" style="display:none;">
+        <div class="loading-spinner"></div>
+        <p style="font-size:.85rem;">Loading data...</p>
+    </div>
+
+    <div id="tableContainer"
+        x-show="!isLoading"
+        x-html="tableHtml"
+        style="flex:1; min-height:0; overflow-x:auto; overflow-y:auto;">
+
+        @include('backend.uno.pages.reports.table', [
+            'reports' => $reports,
+            'totalRow' => null,
+            'currentPage' => 1,
+            'lastPage' => 1,
+            'total' => 0,
+            'filters' => [],
+        ])
+
+    </div>
+
+</div>
 
         </div>{{-- /tab-stock --}}
 
@@ -873,6 +915,7 @@
                 'companies' => $companies,
                 'stations' => $stations,
             ])
+           
         </div>
 
 
@@ -886,6 +929,8 @@
                 'depots' => $depots,
                 'stations' => $stations,
             ])
+
+           
         </div>
 
 
@@ -899,6 +944,8 @@
                 'depots' => $depots,
                 'stations' => $stations,
             ])
+
+           
         </div>
 
 
@@ -1076,7 +1123,7 @@
                 // ═════════════════════════════════════════════════════════
 
                 init(seeall = '', fromDate = '', toDate = '') {
-                     document.addEventListener('click', (e) => {
+                    document.addEventListener('click', (e) => {
                         if (!e.target.closest('.form-group')) {
                             this.stationOpen = false;
                         }
@@ -1300,20 +1347,6 @@
                     this.applyDiffFilter(newPage);
                 },
 
-                exportDiffPdf() {
-                    const params = new URLSearchParams();
-                    const fields = {
-                        from_date: this.diffFilter.from_date,
-                        to_date: this.diffFilter.to_date,
-                        district: this.diffFilter.district,
-                        thana_upazila: this.diffFilter.thana_upazila,
-                        station_id: this.diffFilter.station_id,
-                    };
-                    Object.entries(fields).forEach(([k, v]) => {
-                        if (v) params.append(k, v);
-                    });
-                    window.open(`{{ route('uno.reports.difference.export-pdf') }}?${params}`, '_blank');
-                },
 
 
                 // ═════════════════════════════════════════════════════════
@@ -1379,20 +1412,7 @@
                     this.applyMissingFilter(newPage);
                 },
 
-                exportMissingPdf() {
-                    const params = new URLSearchParams();
-                    const fields = {
-                        from_date: this.missingFilter.from_date,
-                        to_date: this.missingFilter.to_date,
-                        district: this.missingFilter.district,
-                        thana_upazila: this.missingFilter.thana_upazila,
-                        station_id: this.missingFilter.station_id,
-                    };
-                    Object.entries(fields).forEach(([k, v]) => {
-                        if (v) params.append(k, v);
-                    });
-                    window.open(`{{ route('uno.reports.missing.export-pdf') }}?${params}`, '_blank');
-                },
+
 
 
                 // ═════════════════════════════════════════════════════════
@@ -1458,20 +1478,7 @@
                     this.applySubmitFilter(newPage);
                 },
 
-                exportSubmitPdf() {
-                    const params = new URLSearchParams();
-                    const fields = {
-                        from_date: this.submitFilter.from_date,
-                        to_date: this.submitFilter.to_date,
-                        district: this.submitFilter.district,
-                        thana_upazila: this.submitFilter.thana_upazila,
-                        station_id: this.submitFilter.station_id,
-                    };
-                    Object.entries(fields).forEach(([k, v]) => {
-                        if (v) params.append(k, v);
-                    });
-                    window.open(`{{ route('uno.reports.submitted.export-pdf') }}?${params}`, '_blank');
-                },
+
 
 
                 // ═════════════════════════════════════════════════════════
@@ -1561,6 +1568,66 @@
                     } catch (err) {
                         alert('Network error: ' + err.message);
                     }
+                },
+
+                exportPdf() {
+                    const params = new URLSearchParams();
+
+                    if (this.filters.from_date) params.append('from_date', this.filters.from_date);
+                    if (this.filters.to_date) params.append('to_date', this.filters.to_date);
+                    if (this.filters.division) params.append('division', this.filters.division);
+                    if (this.filters.district) params.append('district', this.filters.district);
+                    if (this.filters.thana_upazila) params.append('thana_upazila', this.filters.thana_upazila);
+                    if (this.filters.company_id) params.append('company_id', this.filters.company_id);
+                    if (this.filters.depot_id) params.append('depot_id', this.filters.depot_id);
+                    if (this.filters.station_id) params.append('station_id', this.filters.station_id);
+                    if (this.filters.fuel_type) params.append('fuel_type', this.filters.fuel_type);
+                    if (this.filters.stock_status) params.append('stock_status', this.filters.stock_status);
+
+                    window.open('{{ route('uno.reports.export.pdf') }}?' + params.toString(), '_blank');
+                },
+
+                exportDiffPdf() {
+                    const params = new URLSearchParams();
+                    if (this.diffFilter.fromDate) params.append('from_date', this.diffFilter.fromDate);
+                    if (this.diffFilter.toDate) params.append('to_date', this.diffFilter.toDate);
+                    if (this.diffFilter.division) params.append('division', this.diffFilter.division);
+                    if (this.diffFilter.district) params.append('district', this.diffFilter.district);
+                    if (this.diffFilter.thanaUpazila) params.append('thana_upazila', this.diffFilter.thanaUpazila);
+                    if (this.diffFilter.companyId) params.append('company_id', this.diffFilter.companyId);
+                    if (this.diffFilter.stationId) params.append('station_id', this.diffFilter.stationId);
+                    if (this.diffFilter.tagOfficer) params.append('tag_officer', this.diffFilter.tagOfficer);
+                    if (this.diffFilter.diffStatus) params.append('diff_status', this.diffFilter.diffStatus);
+                    if (this.diffFilter.minDifferenceL) params.append('min_diff_l', this.diffFilter.minDifferenceL);
+                    if (this.diffFilter.minDifferencePercent) params.append('min_diff_pct', this.diffFilter
+                        .minDifferencePercent);
+                    window.open(`{{ route('uno.reports.export.difference.pdf') }}?${params}`, '_blank');
+                },
+
+                exportMissingPdf() {
+                    const params = new URLSearchParams();
+                    if (this.missingFilter.fromDate) params.append('from_date', this.missingFilter.fromDate);
+                    if (this.missingFilter.toDate) params.append('to_date', this.missingFilter.toDate);
+                    if (this.missingFilter.division) params.append('division', this.missingFilter.division);
+                    if (this.missingFilter.district) params.append('district', this.missingFilter.district);
+                    if (this.missingFilter.thanaUpazila) params.append('thana_upazila', this.missingFilter.thanaUpazila);
+                    if (this.missingFilter.companyId) params.append('company_id', this.missingFilter.companyId);
+                    if (this.missingFilter.depotId) params.append('depot_id', this.missingFilter.depotId);
+                    if (this.missingFilter.stationId) params.append('station_id', this.missingFilter.stationId);
+                    window.open('{{ route('uno.reports.export.missing.pdf') }}?' + params.toString(), '_blank');
+                },
+
+                exportSubmitPdf() {
+                    const params = new URLSearchParams();
+                    if (this.submitFilter.fromDate) params.append('from_date', this.submitFilter.fromDate);
+                    if (this.submitFilter.toDate) params.append('to_date', this.submitFilter.toDate);
+                    if (this.submitFilter.division) params.append('division', this.submitFilter.division);
+                    if (this.submitFilter.district) params.append('district', this.submitFilter.district);
+                    if (this.submitFilter.thanaUpazila) params.append('thana_upazila', this.submitFilter.thanaUpazila);
+                    if (this.submitFilter.companyId) params.append('company_id', this.submitFilter.companyId);
+                    if (this.submitFilter.depotId) params.append('depot_id', this.submitFilter.depotId);
+                    if (this.submitFilter.stationId) params.append('station_id', this.submitFilter.stationId);
+                    window.open('{{ route('uno.reports.export.submitted.pdf') }}?' + params.toString(), '_blank');
                 },
 
             }; // end return

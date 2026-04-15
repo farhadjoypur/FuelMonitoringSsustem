@@ -1,4 +1,5 @@
 <?php
+
 use App\Enums\UserRole;
 use App\Http\Controllers\Backend\UNO\AssignTagOfficerController;
 use App\Http\Controllers\Backend\UNO\DashboardController;
@@ -28,11 +29,14 @@ Route::prefix('uno')->middleware(['role:' . UserRole::UNO])->as('uno.')->group(f
 
     Route::get('reports/missing', [UnoReportsController::class, 'missingReport'])
         ->name('reports.missing');
-    Route::get('reports/missing/export-pdf', [UnoReportsController::class, 'exportMissingReportPdf'])
-        ->name('reports.missing.export-pdf');
 
     Route::get('reports/submitted', [UnoReportsController::class, 'submittedReport'])
         ->name('reports.submitted');
-    Route::get('reports/submitted/export-pdf', [UnoReportsController::class, 'exportSubmittedReportPdf'])
-        ->name('reports.submitted.export-pdf');
+
+    // export pdf routes
+    Route::get('reports/export-pdf', [UnoReportsController::class, 'exportPdf'])->name('reports.export.pdf');
+
+    Route::get('reports/export-difference-pdf', [UnoReportsController::class, 'exportDifferencePdf'])->name('reports.export.difference.pdf');
+    Route::get('reports/export-missing-pdf',    [UnoReportsController::class, 'exportMissingPdf'])->name('reports.export.missing.pdf');
+    Route::get('reports/export-submitted-pdf',  [UnoReportsController::class, 'exportSubmittedPdf'])->name('reports.export.submitted.pdf');
 });
