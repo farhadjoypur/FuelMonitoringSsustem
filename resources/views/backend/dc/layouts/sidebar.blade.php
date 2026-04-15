@@ -33,7 +33,7 @@
                 <a href="{{ route('dc.uno.index') }}"
                     class="menu-link {{ request()->routeIs('dc.uno.*') ? 'active' : '' }}">
                     <span class="material-symbols-rounded">badge</span>
-                    <span class="menu-label">UNO Officer</span>
+                    <span class="menu-label">UNO Office</span>
                 </a>
             </li>
 

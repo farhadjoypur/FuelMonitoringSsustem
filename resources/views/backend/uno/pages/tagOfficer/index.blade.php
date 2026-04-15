@@ -1,6 +1,6 @@
 @extends('backend.uno.layouts.app')
 
-@section('title', 'Tag Officer Management')
+@section('title', 'Tag Office Management')
 
 @push('styles')
     <style>
@@ -91,8 +91,8 @@
     <div class="container-fluid p-4">
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
             <div>
-                <h4 class="fw-bold">Tag Officer Management</h4>
-                <p class="text-muted small">Manage Tag Officers Information and Assignments</p>
+                <h4 class="fw-bold">Tag Office Management</h4>
+                <p class="text-muted small">Manage Tag Offices Information and Assignments</p>
             </div>
 
             <button class="btn btn-primary px-4 py-2 w-sm-100 w-auto" data-bs-toggle="modal" data-bs-target="#addOfficerModal"
