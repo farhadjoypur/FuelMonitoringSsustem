@@ -936,7 +936,7 @@
 
 
         {{-- ── MESSAGE MODAL ── --}}
-        <div class="modal-backdrop" x-show="messageModal.isOpen" x-transition @click.self="messageModal.isOpen = false">
+        {{-- <div class="modal-backdrop" x-show="messageModal.isOpen" x-transition @click.self="messageModal.isOpen = false">
             <div class="modal-box">
                 <div class="modal-title">
                     <i class="fa-solid fa-paper-plane" style="color:#22c55e;"></i>
@@ -951,7 +951,7 @@
                     </button>
                 </div>
             </div>
-        </div>
+        </div> --}}
 
         {{-- ── DELETE MODAL ── --}}
         {{-- <div class="modal-backdrop" x-show="deleteModal.isOpen" x-cloak x-transition @click.self="deleteModal.isOpen = false">
@@ -1224,13 +1224,13 @@
 
                     // Tab switch করলে যদি data না থাকে তাহলে load করো
                     if (tab === 'difference' && this.diffTotalRecords === 0) {
-                        this.applyDiffFilter();
+                        
                     }
                     if (tab === 'missing' && this.missingTotalRecords === 0) {
-                        this.applyMissingFilter();
+                       
                     }
                     if (tab === 'submitted' && this.submitTotalRecords === 0) {
-                        this.applySubmitFilter();
+                       
                     }
                 },
 

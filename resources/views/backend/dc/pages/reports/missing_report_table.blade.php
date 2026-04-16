@@ -173,13 +173,13 @@
 </button>
         </div>
     </div>
-    <div class="table-header-row">
+    {{-- <div class="table-header-row">
         <div class="table-title">Tag Officer Pending Reports</div>
         <span class="record-count"
             x-show="missingTotalRecords > 0"
             x-text="missingTotalRecords + ' records found'">
         </span>
-    </div>
+    </div> --}}
 
     {{-- Empty --}}
     <div x-show="!isMissingLoading && missingTotalRecords === 0"

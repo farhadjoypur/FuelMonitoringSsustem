@@ -101,21 +101,24 @@ class DashboardController extends Controller
         $todayOctaneSold = (float) ($todayReport?->octane_sales ?? 0);
         $todayOthersSold = (float) ($todayReport?->others_sales ?? 0);
 
-        // ─── TODAY'S DIFFERENCE (L) ───────────────────────────
-        $todayPetrolDiff = (float) ($todayReport?->petrol_difference ?? 0);
-        $todayDieselDiff = (float) ($todayReport?->diesel_difference ?? 0);
-        $todayOctaneDiff = (float) ($todayReport?->octane_difference ?? 0);
-        $todayOthersDiff = (float) ($todayReport?->others_difference ?? 0);
+        // ─── TODAY'S DIFFERENCE (L) — runtime calculate ───────
+        $todayPetrolDiff = (float)($todayReport?->petrol_supply ?? 0) - (float)($todayReport?->petrol_received ?? 0);
+        $todayDieselDiff = (float)($todayReport?->diesel_supply ?? 0) - (float)($todayReport?->diesel_received ?? 0);
+        $todayOctaneDiff = (float)($todayReport?->octane_supply ?? 0) - (float)($todayReport?->octane_received ?? 0);
+        $todayOthersDiff = (float)($todayReport?->others_supply ?? 0) - (float)($todayReport?->others_received ?? 0);
 
         // ─── TODAY'S DIFFERENCE (%) ───────────────────────────
-        $todayPetrolDiffPct = $todayPetrolReceived > 0
-            ? round(($todayPetrolDiff / $todayPetrolReceived) * 100, 1) : 0;
-        $todayDieselDiffPct = $todayDieselReceived > 0
-            ? round(($todayDieselDiff / $todayDieselReceived) * 100, 1) : 0;
-        $todayOctaneDiffPct = $todayOctaneReceived > 0
-            ? round(($todayOctaneDiff / $todayOctaneReceived) * 100, 1) : 0;
-        $todayOthersDiffPct = $todayOthersReceived > 0
-            ? round(($todayOthersDiff / $todayOthersReceived) * 100, 1) : 0;
+        $todayPetrolDiffPct = (float)($todayReport?->petrol_supply ?? 0) > 0
+            ? round(($todayPetrolDiff / (float)$todayReport->petrol_supply) * 100, 2) : 0;
+
+        $todayDieselDiffPct = (float)($todayReport?->diesel_supply ?? 0) > 0
+            ? round(($todayDieselDiff / (float)$todayReport->diesel_supply) * 100, 2) : 0;
+
+        $todayOctaneDiffPct = (float)($todayReport?->octane_supply ?? 0) > 0
+            ? round(($todayOctaneDiff / (float)$todayReport->octane_supply) * 100, 2) : 0;
+
+        $todayOthersDiffPct = (float)($todayReport?->others_supply ?? 0) > 0
+            ? round(($todayOthersDiff / (float)$todayReport->others_supply) * 100, 2) : 0;
 
         // ─── IS ESTIMATED (আজকের report নেই) ─────────────────
         $isEstimatedStock = !$todayReport && $lastReport;
