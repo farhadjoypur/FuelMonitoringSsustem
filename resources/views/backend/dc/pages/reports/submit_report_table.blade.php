@@ -172,13 +172,7 @@
             </button>
         </div>
     </div>
-    <div class="table-header-row">
-        <div class="table-title">Tag Officer Submitted Reports</div>
-        <span class="record-count"
-            x-show="submitTotalRecords > 0"
-            x-text="submitTotalRecords + ' records found'">
-        </span>
-    </div>
+    
 
     {{-- Empty --}}
     <div x-show="!isSubmitLoading && submitTotalRecords === 0"

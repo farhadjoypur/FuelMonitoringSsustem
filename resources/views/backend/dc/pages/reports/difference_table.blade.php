@@ -193,15 +193,7 @@
         </div>
     </div>
 
-    <div class="table-header-row">
-        <div class="table-title">Difference Report</div>
-        <div style="display:flex; align-items:center; gap:12px;">
-            <span class="record-count"
-                x-show="diffTotalRecords > 0"
-                x-text="diffTotalRecords + ' records found'">
-            </span>
-        </div>
-    </div>
+    
 
     {{-- Empty state --}}
     <div x-show="!isDiffLoading && diffTotalRecords === 0"
