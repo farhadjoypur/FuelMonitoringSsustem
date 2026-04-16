@@ -474,7 +474,7 @@
             justify-content: flex-end;
             gap: 10px;
             padding: 14px 24px 20px;
-            border-top: 1px solid var(--border);
+            /* border-top: 1px solid var(--border); */
         }
 
         .btn-export {
@@ -865,16 +865,32 @@
 
             {{-- Table section --}}
             <div class="table-section">
-                <div class="table-header-row">
-                    <div class="table-title">Stock &amp; Sales Reports</div>
-                    <div class="record-count" x-text="recordCountText"></div>
-                </div>
+                <div class="table-header-row" style="display:flex; justify-content:space-between; align-items:center;">
+    
+    <div class="table-title">
+        Stock &amp; Sales Reports
+    </div>
+
+    <div style="display:flex; align-items:center; gap:12px;">
+        
+        <div class="record-count" x-text="recordCountText"></div>
+
+        <div class="export-row">
+            <button class="btn-export btn-export-pdf" @click="exportPdf()">
+                <i class="fa-regular fa-file-pdf"></i> Export PDF
+            </button>
+        </div>
+
+    </div>
+
+</div>
 
                 {{-- Loading overlay --}}
                 <div class="loading-overlay" x-show="isLoading" style="display:none;">
                     <div class="loading-spinner"></div>
                     <p style="font-size:.85rem;">Loading data...</p>
                 </div>
+                
 
                 {{--
                 Table container.
@@ -895,14 +911,7 @@
                 </div>
             </div>
 
-            <div class="export-row">
-                <button class="btn-export btn-export-pdf" @click="exportPdf()">
-                    <i class="fa-regular fa-file-pdf"></i> Export PDF
-                </button>
-                {{-- <button class="btn-export btn-export-excel">
-                                                <i class="fa-regular fa-file-excel"></i> Export Excel
-                                            </button> --}}
-            </div>
+           
 
         </div>{{-- /tab-stock --}}
 
