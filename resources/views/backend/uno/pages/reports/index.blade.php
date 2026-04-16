@@ -1169,11 +1169,11 @@
 
                     } else if (seeall === 'missing') {
                         this.activeTab = 'missing';
-                        this.$nextTick(() => this.applyMissingFilter());
+                        // this.$nextTick(() => this.applyMissingFilter());
 
                     } else if (seeall === 'submitted') {
                         this.activeTab = 'submitted';
-                        this.$nextTick(() => this.applySubmitFilter());
+                        // this.$nextTick(() => this.applySubmitFilter());
 
                     } else {
                         this.activeTab = 'stock';
@@ -1206,18 +1206,21 @@
                 // TAB SWITCH
                 // ─────────────────────────────────────────────────────────
 
+                // switchTab(tab) {
+                //     this.activeTab = tab;
+
+                //     if (tab === 'difference' && this.diffTotalRecords === 0) {
+                //         this.applyDiffFilter();
+                //     }
+                //     if (tab === 'missing' && this.missingTotalRecords === 0) {
+                //         this.applyMissingFilter();
+                //     }
+                //     if (tab === 'submitted' && this.submitTotalRecords === 0) {
+                //         this.applySubmitFilter();
+                //     }
+                // },
                 switchTab(tab) {
                     this.activeTab = tab;
-
-                    if (tab === 'difference' && this.diffTotalRecords === 0) {
-                        this.applyDiffFilter();
-                    }
-                    if (tab === 'missing' && this.missingTotalRecords === 0) {
-                        this.applyMissingFilter();
-                    }
-                    if (tab === 'submitted' && this.submitTotalRecords === 0) {
-                        this.applySubmitFilter();
-                    }
                 },
 
 
