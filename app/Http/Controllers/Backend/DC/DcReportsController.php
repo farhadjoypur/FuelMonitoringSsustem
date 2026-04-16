@@ -994,6 +994,9 @@ class DcReportsController extends Controller
             @mkdir($tempDir, 0777, true);
         }
 
+        // Raise pcre limit as a safety net
+        @ini_set('pcre.backtrack_limit', 10000000);
+
         $defaultConfig   = (new ConfigVariables())->getDefaults();
         $defaultFontData = (new FontVariables())->getDefaults()['fontdata'];
 
