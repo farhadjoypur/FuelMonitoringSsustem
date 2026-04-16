@@ -726,12 +726,16 @@ class UnoReportsController extends Controller
             'stock_status',
         ]);
 
+        $jurisdiction = $this->getUnoJurisdiction();
+        $unoUpazila   = $jurisdiction['upazila'];
+        $unoDistrict  = $jurisdiction['district'];
+
         $rawReports = $this->buildFilteredQuery($request)
             ->orderBy('report_date', 'desc')
             ->orderBy('station_id')
             ->get();
 
-        $officerMap       = $this->loadOfficerMap();
+        $officerMap       = $this->loadOfficerMap( $unoUpazila, $unoDistrict);
         $formattedReports = $rawReports->map(fn($r) => $this->formatSingleReport($r, $officerMap));
         $totalRow         = $this->buildTotalRow($formattedReports);
 
@@ -937,7 +941,6 @@ class UnoReportsController extends Controller
             ->whereNotNull('station_id')
             ->where('district', $unoDistrict)
             ->when($unoUpazila, fn($q) => $q->where('thana_upazila', $unoUpazila))
-            ->where('division', $jurisdiction['division'])
             ->pluck('station_id')->unique()->toArray();
 
         $rows = $allAssignments
@@ -1002,7 +1005,7 @@ class UnoReportsController extends Controller
         $query = Fuelreport::query()->with([
             'fillingStation.company',
             'fillingStation.depot',
-        ])->where('district', $unoDistrict)->when($unoUpazila, fn($q) => $q->where('thana_upazila', $unoUpazila))->where('division', $jurisdiction['division']);
+        ])->where('district', $unoDistrict)->when($unoUpazila, fn($q) => $q->where('thana_upazila', $unoUpazila));
 
         if (!empty($filters['from_date']) && empty($filters['to_date']))
             $query->whereDate('report_date', $filters['from_date']);
