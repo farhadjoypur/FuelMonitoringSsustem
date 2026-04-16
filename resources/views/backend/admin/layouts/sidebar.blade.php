@@ -122,7 +122,7 @@
             @csrf
             <button type="submit" class="menu-link logout-link" id="logout-btn">
                 <span class="material-symbols-rounded">power_settings_new</span>
-                <span class="menu-label">Logout</span>
+                <span class="menu-label" id="logout-text">Logout</span>
             </button>
         </form>
     </div>
