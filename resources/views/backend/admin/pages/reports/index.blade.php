@@ -1093,34 +1093,49 @@
                 // },
                 init(seeall = '', fromDate = '', toDate = '') {
 
-                    document.addEventListener('click', (e) => {
-                        if (!e.target.closest('.form-group')) {
-                            this.stationOpen = false;
-                        }
-                    });
+    // ── Default today's date for Stock tab filters ──
+    const today = new Date().toISOString().split('T')[0]; // "2026-04-16"
+    this.filters.from_date = today;
+    this.filters.to_date   = today;
 
-                    if (seeall === 'difference') {
-                        // ✅ diffFilter (s নেই)
-                        if (fromDate) this.diffFilter.fromDate = fromDate;
-                        if (toDate) this.diffFilter.toDate = toDate;
-                        if (fromDate && !toDate) this.diffFilter.toDate = fromDate;
+    // ── Default today's date for Missing tab filters ──
+    this.missingFilter.fromDate = today;
+    this.missingFilter.toDate   = today;
 
-                        this.activeTab = 'difference';
-                        this.$nextTick(() => this.applyDiffFilter()); // ✅ this. দিয়ে call
+    // ── Default today's date for Submit tab filters ──
+    this.submitFilter.fromDate = today;
+    this.submitFilter.toDate   = today;
 
-                    } else if (seeall === 'missing') {
-                        this.activeTab = 'missing';
-                        this.$nextTick(() => this.applyMissingFilter());
+    // ── Default today's date for Difference tab filters ──
+    this.diffFilter.fromDate = today;
+    this.diffFilter.toDate   = today;
 
-                    } else if (seeall === 'submitted') {
-                        this.activeTab = 'submitted';
-                        this.$nextTick(() => this.applySubmitFilter());
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.form-group')) {
+            this.stationOpen = false;
+        }
+    });
 
-                    } else {
-                        this.activeTab = 'stock';
-                        // stock tab server-side render হয়, তাই load লাগবে না
-                    }
-                },
+    if (seeall === 'difference') {
+        if (fromDate) this.diffFilter.fromDate = fromDate;
+        if (toDate)   this.diffFilter.toDate   = toDate;
+        if (fromDate && !toDate) this.diffFilter.toDate = fromDate;
+
+        this.activeTab = 'difference';
+        this.$nextTick(() => this.applyDiffFilter());
+
+    } else if (seeall === 'missing') {
+        this.activeTab = 'missing';
+        this.$nextTick(() => this.applyMissingFilter());
+
+    } else if (seeall === 'submitted') {
+        this.activeTab = 'submitted';
+        this.$nextTick(() => this.applySubmitFilter());
+
+    } else {
+        this.activeTab = 'stock';
+    }
+},
 
                 get filteredStations() {
                     if (!this.stationSearch) return this.allStations;
