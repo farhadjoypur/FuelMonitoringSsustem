@@ -134,16 +134,30 @@ class DashboardController extends Controller
         // =============================================
         // TODAY'S DIFFERENCE PERCENTAGE (%)
         // =============================================
-        $todayPetrolDiffPct = $todayPetrolReceived > 0
-            ? round(($todayPetrolDiff / $todayPetrolReceived) * 100, 1) : 0;
-        $todayDieselDiffPct = $todayDieselReceived > 0
-            ? round(($todayDieselDiff / $todayDieselReceived) * 100, 1) : 0;
-        $todayOctaneDiffPct = $todayOctaneReceived > 0
-            ? round(($todayOctaneDiff / $todayOctaneReceived) * 100, 1) : 0;
-        // others difference percentage added if needed in future
-        $todayOthersDiffPct = $todayOthersReceived > 0  
-            ? round(($todayOthersDiff / $todayOthersReceived) * 100, 1) : 0;
+        // $todayPetrolDiffPct = $todayPetrolReceived > 0
+        //     ? round(($todayPetrolDiff / $todayPetrolReceived) * 100, 1) : 0;
+        // $todayDieselDiffPct = $todayDieselReceived > 0
+        //     ? round(($todayDieselDiff / $todayDieselReceived) * 100, 1) : 0;
+        // $todayOctaneDiffPct = $todayOctaneReceived > 0
+        //     ? round(($todayOctaneDiff / $todayOctaneReceived) * 100, 1) : 0;
+        // $todayOthersDiffPct = $todayOthersReceived > 0  
+        //     ? round(($todayOthersDiff / $todayOthersReceived) * 100, 1) : 0;
 
+        // NEW ✅
+        $todayPetrolSupply  = $todayReports->sum('petrol_supply');
+        $todayDieselSupply  = $todayReports->sum('diesel_supply');
+        $todayOctaneSupply  = $todayReports->sum('octane_supply');
+        $todayOthersSupply  = $todayReports->sum('others_supply');
+
+        $todayPetrolDiffPct = $todayPetrolSupply > 0
+            ? round((abs($todayPetrolDiff) / $todayPetrolSupply) * 100, 1) : 0;
+        $todayDieselDiffPct = $todayDieselSupply > 0
+            ? round((abs($todayDieselDiff) / $todayDieselSupply) * 100, 1) : 0;
+        $todayOctaneDiffPct = $todayOctaneSupply > 0
+            ? round((abs($todayOctaneDiff) / $todayOctaneSupply) * 100, 1) : 0;
+        $todayOthersDiffPct = $todayOthersSupply > 0
+            ? round((abs($todayOthersDiff) / $todayOthersSupply) * 100, 1) : 0;
+            
         // =============================================
         // SUMMARY CARDS — শুধু DC এর district এর data
         // =============================================
