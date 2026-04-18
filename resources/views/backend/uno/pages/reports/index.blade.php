@@ -821,7 +821,7 @@
                         </div>
                     </div>
 
-                    <div class="form-group">
+                    <!-- <div class="form-group">
                         <label>Fuel Type</label>
                         <select x-model="filters.fuel_type">
                             <option value="">All Types</option>
@@ -830,7 +830,7 @@
                             <option value="diesel">Diesel</option>
                             <option value="others">Others</option>
                         </select>
-                    </div>
+                    </div> -->
 
                     <div class="form-group">
                         <label>Stock Status</label>
