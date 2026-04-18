@@ -474,7 +474,7 @@
             justify-content: flex-end;
             gap: 10px;
             padding: 14px 24px 20px;
-            border-top: 1px solid var(--border);
+            /* border-top: 1px solid var(--border); */
         }
 
         .btn-export {
@@ -770,56 +770,45 @@
                     </div>
 
                     <div class="form-group" style="position: relative;">
-    <label>Filling Station</label>
-    <div style="position: relative;">
-        <input
-            type="text"
-            x-model="stationSearch"
-            @input="stationOpen = true"
-            @focus="stationOpen = true"
-            @keydown.escape="stationOpen = false"
-            placeholder="Search station..."
-            autocomplete="off"
-            style="width:100%; padding-right:30px; box-sizing:border-box;"
-        />
-        <span x-show="stationSelected" @click="clearStation()" 
-            style="position:absolute; right:8px; top:50%; transform:translateY(-50%);
+                        <label>Filling Station</label>
+                        <div style="position: relative;">
+                            <input type="text" x-model="stationSearch" @input="stationOpen = true"
+                                @focus="stationOpen = true" @keydown.escape="stationOpen = false"
+                                placeholder="Search station..." autocomplete="off"
+                                style="width:100%; padding-right:30px; box-sizing:border-box;" />
+                            <span x-show="stationSelected" @click="clearStation()"
+                                style="position:absolute; right:8px; top:50%; transform:translateY(-50%);
                    cursor:pointer; color:#94a3b8; font-size:13px; user-select:none;">✕</span>
-    </div>
+                        </div>
 
-    <div x-show="stationOpen"
-        style="position:absolute; top:100%; left:0; right:0; background:#fff;
+                        <div x-show="stationOpen"
+                            style="position:absolute; top:100%; left:0; right:0; background:#fff;
                border:1px solid #e2e8f0; border-radius:6px; z-index:9999;
                max-height:220px; overflow-y:auto; box-shadow:0 4px 12px rgba(0,0,0,.12);">
 
-        {{-- All Stations --}}
-        <div
-            @mousedown.prevent="clearStation(); stationOpen = false;"
-            style="padding:9px 12px; font-size:13px; cursor:pointer;
+                            {{-- All Stations --}}
+                            <div @mousedown.prevent="clearStation(); stationOpen = false;"
+                                style="padding:9px 12px; font-size:13px; cursor:pointer;
                    color:#64748b; border-bottom:1px solid #f1f5f9;"
-            @mouseover="$el.style.background='#f8fafc'"
-            @mouseleave="$el.style.background=''">
-            All Stations
-        </div>
+                                @mouseover="$el.style.background='#f8fafc'" @mouseleave="$el.style.background=''">
+                                All Stations
+                            </div>
 
-        {{-- Filtered list --}}
-        <template x-for="s in filteredStations" :key="s.id">
-            <div
-                @mousedown.prevent="selectStation(s)"
-                x-text="s.name"
-                style="padding:9px 12px; font-size:13px; cursor:pointer;"
-                @mouseover="$el.style.background='#f8fafc'"
-                @mouseleave="$el.style.background=''">
-            </div>
-        </template>
+                            {{-- Filtered list --}}
+                            <template x-for="s in filteredStations" :key="s.id">
+                                <div @mousedown.prevent="selectStation(s)" x-text="s.name"
+                                    style="padding:9px 12px; font-size:13px; cursor:pointer;"
+                                    @mouseover="$el.style.background='#f8fafc'" @mouseleave="$el.style.background=''">
+                                </div>
+                            </template>
 
-        {{-- No result --}}
-        <div x-show="filteredStations.length === 0"
-            style="padding:9px 12px; font-size:13px; color:#94a3b8; text-align:center;">
-            No result found
-        </div>
-    </div>
-</div>
+                            {{-- No result --}}
+                            <div x-show="filteredStations.length === 0"
+                                style="padding:9px 12px; font-size:13px; color:#94a3b8; text-align:center;">
+                                No result found
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="form-group">
                         <label>Fuel Type</label>
@@ -863,7 +852,17 @@
             <div class="table-section">
                 <div class="table-header-row">
                     <div class="table-title">Stock &amp; Sales Reports</div>
-                    <div class="record-count" x-text="recordCountText"></div>
+                    <div style="display:flex; align-items:center; gap:12px;">
+
+                        <div class="record-count" x-text="recordCountText"></div>
+
+                        <div class="export-row">
+                            <button class="btn-export btn-export-pdf" @click="exportPdf()">
+                                <i class="fa-regular fa-file-pdf"></i> Export PDF
+                            </button>
+                        </div>
+
+                    </div>
                 </div>
 
                 <div class="loading-overlay" x-show="isLoading" style="display:none;">
@@ -883,14 +882,7 @@
                     ])
                 </div>
             </div>
-             <div class="export-row">
-                <button class="btn-export btn-export-pdf" @click="exportPdf()">
-                    <i class="fa-regular fa-file-pdf"></i> Export PDF
-                </button>
-                {{-- <button class="btn-export btn-export-excel">
-                                                <i class="fa-regular fa-file-excel"></i> Export Excel
-                                            </button> --}}
-            </div>
+
 
         </div>{{-- /tab-stock --}}
 
@@ -905,7 +897,7 @@
                 'stations' => $stations,
             ])
             {{-- pdf button  --}}
-            
+
         </div>
 
 
@@ -1224,13 +1216,13 @@
 
                     // Tab switch করলে যদি data না থাকে তাহলে load করো
                     if (tab === 'difference' && this.diffTotalRecords === 0) {
-                        
+
                     }
                     if (tab === 'missing' && this.missingTotalRecords === 0) {
-                       
+
                     }
                     if (tab === 'submitted' && this.submitTotalRecords === 0) {
-                       
+
                     }
                 },
 
@@ -1297,8 +1289,8 @@
                     this.recordCountText = '';
                     this.currentPage = 1;
                     this.filters.station_id = '';
-                    this.stationSearch = '';      // ← এটা যোগ করো
-                    this.stationSelected = null;  // ← এটা যোগ করো
+                    this.stationSearch = ''; // ← এটা যোগ করো
+                    this.stationSelected = null; // ← এটা যোগ করো
                     // this.applyFilter();
                 },
 
@@ -1378,7 +1370,7 @@
                     this.applyDiffFilter(newPage);
                 },
 
-                 exportPdf() {
+                exportPdf() {
                     const params = new URLSearchParams();
 
                     if (this.filters.from_date) params.append('from_date', this.filters.from_date);
@@ -1625,11 +1617,11 @@
                     try {
                         // Try meta tag first, fallback to cookie
                         const csrfMeta = document.querySelector('meta[name="csrf-token"]');
-                        const csrf = csrfMeta 
-                            ? csrfMeta.getAttribute('content')
-                            : document.cookie.split('; ')
-                                .find(row => row.startsWith('XSRF-TOKEN='))
-                                ?.split('=')[1];
+                        const csrf = csrfMeta ?
+                            csrfMeta.getAttribute('content') :
+                            document.cookie.split('; ')
+                            .find(row => row.startsWith('XSRF-TOKEN='))
+                            ?.split('=')[1];
 
                         if (!csrf) {
                             alert('CSRF token not found. Please refresh the page.');
@@ -1665,70 +1657,70 @@
                 },
 
                 // ═══════════════════════════════════════════════════════════
-// DELETE REPORT WITH SWEETALERT2 (নতুন)
-// ═══════════════════════════════════════════════════════════
+                // DELETE REPORT WITH SWEETALERT2 (নতুন)
+                // ═══════════════════════════════════════════════════════════
 
-async deleteReport(reportId, stationName = '') {
-    const result = await Swal.fire({
-        title: 'Are you sure?',
-        html: stationName 
-            ? `Do you want to delete the report for <strong>${stationName}</strong>?` 
-            : 'Do you want to delete this report?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Yes, Delete it!',
-        cancelButtonText: 'Cancel',
-        reverseButtons: true,
-        focusCancel: true
-    });
+                async deleteReport(reportId, stationName = '') {
+                    const result = await Swal.fire({
+                        title: 'Are you sure?',
+                        html: stationName ?
+                            `Do you want to delete the report for <strong>${stationName}</strong>?` :
+                            'Do you want to delete this report?',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Yes, Delete it!',
+                        cancelButtonText: 'Cancel',
+                        reverseButtons: true,
+                        focusCancel: true
+                    });
 
-    if (result.isConfirmed) {
-        try {
-            const csrf = document.querySelector('meta[name="csrf-token"]').content;
-            const deleteUrl = `{{ route('admin.reports.destroy', ':id') }}`.replace(':id', reportId);
+                    if (result.isConfirmed) {
+                        try {
+                            const csrf = document.querySelector('meta[name="csrf-token"]').content;
+                            const deleteUrl = `{{ route('admin.reports.destroy', ':id') }}`.replace(':id', reportId);
 
-            const response = await fetch(deleteUrl, {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': csrf,
-                    'Accept': 'application/json',
-                },
-            });
+                            const response = await fetch(deleteUrl, {
+                                method: 'DELETE',
+                                headers: {
+                                    'X-CSRF-TOKEN': csrf,
+                                    'Accept': 'application/json',
+                                },
+                            });
 
-            const data = await response.json();
+                            const data = await response.json();
 
-            if (data.success) {
-                Swal.fire({
-                    title: 'Deleted!',
-                    text: 'The report has been successfully deleted.',
-                    icon: 'success',
-                    timer: 1800,
-                    showConfirmButton: false
-                });
+                            if (data.success) {
+                                Swal.fire({
+                                    title: 'Deleted!',
+                                    text: 'The report has been successfully deleted.',
+                                    icon: 'success',
+                                    timer: 1800,
+                                    showConfirmButton: false
+                                });
 
-                // Refresh the current active tab automatically
-                await this.$nextTick(async () => {
-                    if (this.activeTab === 'stock') {
-                        await this.applyFilter(this.currentPage);
-                    } else if (this.activeTab === 'difference') {
-                        await this.applyDiffFilter(this.diffCurrentPage);
-                    } else if (this.activeTab === 'missing') {
-                        await this.applyMissingFilter(this.missingCurrentPage);
-                    } else if (this.activeTab === 'submitted') {
-                        await this.applySubmitFilter(this.submitCurrentPage);
+                                // Refresh the current active tab automatically
+                                await this.$nextTick(async () => {
+                                    if (this.activeTab === 'stock') {
+                                        await this.applyFilter(this.currentPage);
+                                    } else if (this.activeTab === 'difference') {
+                                        await this.applyDiffFilter(this.diffCurrentPage);
+                                    } else if (this.activeTab === 'missing') {
+                                        await this.applyMissingFilter(this.missingCurrentPage);
+                                    } else if (this.activeTab === 'submitted') {
+                                        await this.applySubmitFilter(this.submitCurrentPage);
+                                    }
+                                });
+                            } else {
+                                Swal.fire('Failed!', data.message || 'Could not delete the report.', 'error');
+                            }
+                        } catch (error) {
+                            console.error(error);
+                            Swal.fire('Error!', 'Something went wrong. Please try again later.', 'error');
+                        }
                     }
-                });
-            } else {
-                Swal.fire('Failed!', data.message || 'Could not delete the report.', 'error');
-            }
-        } catch (error) {
-            console.error(error);
-            Swal.fire('Error!', 'Something went wrong. Please try again later.', 'error');
-        }
-    }
-},
+                },
 
             }; // end return
         } // end reportApp
