@@ -558,25 +558,18 @@
 
                                 <td rowspan="{{ $fuelCount }}">
                                     <div class="action-buttons">
-
-                                        {{-- <button class="btn-action btn-view" type="button"
-                                            @click.prevent="">
-                                            <i class="fa-solid fa-eye"></i> View
+                                        <a href="{{ route('dc.reports.edit', $report['id']) }}"
+                                        class="btn-action"
+                                        style="background:#2563eb; color:#fff;">
+                                            <i class="fa-solid fa-pen-to-square"></i> Edit
+                                        </a>
+                                        <button class="btn-action btn-delete" type="button"
+                                            @click="deleteReport(
+                                                {{ $report['id'] }},
+                                                '{{ addslashes($report['station_name']) }}'
+                                            )">
+                                            <i class="fa-solid fa-trash"></i> Delete
                                         </button>
-
-                                        <button class="btn-action btn-message" type="button"
-                                            @click.prevent="">
-                                            <i class="fa-solid fa-message"></i> Message
-                                        </button> --}}
-
-                                       <button class="btn-action btn-delete" type="button"
-        @click="deleteReport(
-            {{ $report['id'] }},
-            '{{ addslashes($report['station_name']) }}'
-        )">
-    <i class="fa-solid fa-trash"></i> Delete
-</button>
-
                                     </div>
                                 </td>
                             @endif

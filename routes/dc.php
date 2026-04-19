@@ -38,6 +38,10 @@ Route::prefix('dc')->middleware(['role:' . UserRole::DC])->as('dc.')->group(func
     Route::get('dc/reports/submitted', [DcReportsController::class, 'submittedReport'])
         ->name('reports.submitted');
 
+    // edit reports
+    Route::get('reports/{fuelReport}/edit', [DcReportsController::class, 'edit'])->name('reports.edit');
+    Route::put('reports/{fuelReport}/update', [DcReportsController::class, 'update'])->name('reports.update');    
+
     // export pdf routes
     Route::get('reports/export-pdf', [DcReportsController::class, 'exportPdf'])->name('reports.export.pdf');
     Route::get('reports/export-difference-pdf', [DcReportsController::class, 'exportDifferencePdf'])->name('reports.export.difference.pdf');

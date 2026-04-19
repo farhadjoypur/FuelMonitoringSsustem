@@ -1158,19 +1158,20 @@
                                     {{-- Actions --}}
                                     <td>
                                         <div class="action-btns">
-                                            <!-- <a href="{{ url('dc/reports/' . $report->id) }}"
-                                                class="action-btn btn-view">View</a>
-                                            <button class="action-btn btn-message">Message</button> -->
+                                            <a href="{{ route('dc.reports.edit', $report->id) }}"
+                                            class="action-btn"
+                                            style="background:#2563eb; color:#fff; text-decoration:none; border:none; display:inline-flex; align-items:center; justify-content:center; gap:4px;">
+                                                <i class="fa-solid fa-pen-to-square fa-xs"></i> Edit
+                                            </a>
                                             <form id="dc-delete-form-{{ $report->id }}"
                                                 action="{{ route('dc.dashboard.report.destroy', $report->id) }}"
                                                 method="POST" style="display:none;">
                                                 @csrf
                                                 @method('DELETE')
                                             </form>
-
                                             <button type="button" class="action-btn btn-delete"
                                                 onclick="confirmDelete('dc-delete-form-{{ $report->id }}')">
-                                                Delete
+                                                <i class="fa-solid fa-trash fa-xs"></i> Delete
                                             </button>
                                         </div>
                                     </td>
