@@ -1186,7 +1186,9 @@
                                         <div class="action-btns">
                                             <a href="{{ route('admin.reports.edit', $report->id) }}"
                                             class="action-btn"
-                                            style="background:#2563eb; color:#fff; text-decoration:none; display:inline-flex; align-items:center; justify-content:center;">
+                                            style="background:#2563eb; color:#fff; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:4px;">
+                                                
+                                                <i class="fa-solid fa-pen-to-square fa-xs"></i> 
                                                 Edit
                                             </a>
 
