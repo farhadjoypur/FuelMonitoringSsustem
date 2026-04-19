@@ -319,6 +319,11 @@
                                     @click="openMessageModal(row.reportId, row.stationName)">
                                     <i class="fa-solid fa-envelope fa-xs"></i> Message
                                 </button>--}}
+                                <a :href="`/admin/reports/${row.reportId}/edit`"
+                                class="action-btn"
+                                style="background:#2563eb; color:#fff;">
+                                    <i class="fa-solid fa-pen-to-square fa-xs"></i> Edit
+                                </a>
                                 <button class="action-btn btn-delete"
                                     @click="openDeleteModal(row.reportId, row.stationName)">
                                     <i class="fa-solid fa-trash fa-xs"></i> Delete

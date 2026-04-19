@@ -46,6 +46,9 @@ Route::prefix('admin')->middleware(['role:' . UserRole::ADMIN])->as('admin.')->g
 
     Route::get('admin/reports/submitted', [ReportsController::class, 'submittedReport'])
         ->name('reports.submitted');
+    
+    Route::get('reports/{fuelReport}/edit', [ReportsController::class, 'edit'])->name('reports.edit');
+    Route::put('reports/{fuelReport}', [ReportsController::class, 'update'])->name('reports.update');  
 
         // export pdf routes
     Route::get('reports/export-pdf', [ReportsController::class, 'exportPdf'])->name('reports.export.pdf');

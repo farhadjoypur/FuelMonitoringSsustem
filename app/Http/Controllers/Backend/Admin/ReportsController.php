@@ -666,6 +666,138 @@ class ReportsController extends Controller
     }
 
     // ─────────────────────────────────────────────────────────────
+    // ADMIN EDIT — no date restriction
+    // ─────────────────────────────────────────────────────────────
+
+    public function edit(Fuelreport $fuelReport)
+    {
+        // Try to get name from AssignTagOfficer relationship first
+        $assignment = AssignTagOfficer::with(['officer.profile'])
+            ->where('officer_id', $fuelReport->tag_officer_id)
+            ->first();
+
+        $tagOfficerName = $assignment?->officer?->profile?->name
+            ?? $assignment?->officer?->name
+            ?? null;
+
+        // Fallback: load user directly from tag_officer_id
+        if (! $tagOfficerName && $fuelReport->tag_officer_id) {
+            $officer = \App\Models\User::with('profile')
+                ->find($fuelReport->tag_officer_id);
+
+            $tagOfficerName = $officer?->profile?->name
+                ?? $officer?->name
+                ?? '— Unknown Officer —';
+        }
+
+        // Final fallback
+        if (! $tagOfficerName) {
+            $tagOfficerName = '— No Officer Assigned —';
+        }
+
+        return view('backend.admin.pages.reports.edit', compact('fuelReport', 'tagOfficerName'));
+    }
+
+    public function update(Request $request, Fuelreport $fuelReport)
+    {
+        $request->validate([
+            'report_date'       => 'required|date',
+            'tag_officer_id'    => 'nullable|exists:users,id',
+
+            'petrol_prev_stock' => 'required|numeric|min:0',
+            'petrol_supply'     => 'required|numeric|min:0',
+            'petrol_received'   => 'required|numeric|min:0',
+            'petrol_sales'      => 'required|numeric|min:0',
+
+            'diesel_prev_stock' => 'required|numeric|min:0',
+            'diesel_supply'     => 'required|numeric|min:0',
+            'diesel_received'   => 'required|numeric|min:0',
+            'diesel_sales'      => 'required|numeric|min:0',
+
+            'octane_prev_stock' => 'required|numeric|min:0',
+            'octane_supply'     => 'required|numeric|min:0',
+            'octane_received'   => 'required|numeric|min:0',
+            'octane_sales'      => 'required|numeric|min:0',
+
+            'others_prev_stock' => 'required|numeric|min:0',
+            'others_supply'     => 'required|numeric|min:0',
+            'others_received'   => 'required|numeric|min:0',
+            'others_sales'      => 'required|numeric|min:0',
+
+            'comment'           => 'nullable|string|max:500',
+        ]);
+
+        // Auto-calculate
+        $petrolDiff    = $request->petrol_supply  - $request->petrol_received;
+        $petrolClosing = $request->petrol_prev_stock + $request->petrol_received - $request->petrol_sales;
+
+        $dieselDiff    = $request->diesel_supply  - $request->diesel_received;
+        $dieselClosing = $request->diesel_prev_stock + $request->diesel_received - $request->diesel_sales;
+
+        $octaneDiff    = $request->octane_supply  - $request->octane_received;
+        $octaneClosing = $request->octane_prev_stock + $request->octane_received - $request->octane_sales;
+
+        $othersDiff    = $request->others_supply  - $request->others_received;
+        $othersClosing = $request->others_prev_stock + $request->others_received - $request->others_sales;
+
+        $data = [
+            'report_date'   => $request->report_date,
+            'comment'       => $request->comment,
+
+            'petrol_prev_stock'    => $request->petrol_prev_stock,
+            'petrol_supply'        => $request->petrol_supply,
+            'petrol_received'      => $request->petrol_received,
+            'petrol_difference'    => $petrolDiff,
+            'petrol_sales'         => $request->petrol_sales,
+            'petrol_closing_stock' => $petrolClosing,
+
+            'diesel_prev_stock'    => $request->diesel_prev_stock,
+            'diesel_supply'        => $request->diesel_supply,
+            'diesel_received'      => $request->diesel_received,
+            'diesel_difference'    => $dieselDiff,
+            'diesel_sales'         => $request->diesel_sales,
+            'diesel_closing_stock' => $dieselClosing,
+
+            'octane_prev_stock'    => $request->octane_prev_stock,
+            'octane_supply'        => $request->octane_supply,
+            'octane_received'      => $request->octane_received,
+            'octane_difference'    => $octaneDiff,
+            'octane_sales'         => $request->octane_sales,
+            'octane_closing_stock' => $octaneClosing,
+
+            'others_prev_stock'    => $request->others_prev_stock,
+            'others_supply'        => $request->others_supply,
+            'others_received'      => $request->others_received,
+            'others_difference'    => $othersDiff,
+            'others_sales'         => $request->others_sales,
+            'others_closing_stock' => $othersClosing,
+
+            'petrol_status' => $this->resolveFuelStatusLabel($petrolClosing),
+            'diesel_status' => $this->resolveFuelStatusLabel($dieselClosing),
+            'octane_status' => $this->resolveFuelStatusLabel($octaneClosing),
+            'others_status' => $this->resolveFuelStatusLabel($othersClosing),
+        ];
+
+        // Update tag officer if changed
+        if ($request->filled('tag_officer_id')) {
+            $data['tag_officer_id'] = $request->tag_officer_id;
+        }
+
+        $fuelReport->update($data);
+
+        return redirect()
+            ->route('admin.reports.index')
+            ->with('success', 'Report updated successfully by admin.');
+    }
+
+    private function resolveFuelStatusLabel(float $closing): string
+    {
+        if ($closing <= 0)   return 'Zero Stock';
+        if ($closing < 1000) return 'Low Stock';
+        return 'Normal';
+    }
+
+    // ─────────────────────────────────────────────────────────────
     // EXPORT PDF — STOCK & SALES
     // ─────────────────────────────────────────────────────────────
 

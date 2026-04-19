@@ -556,32 +556,22 @@
                                     {{ $report['comment'] ?: 'No comments' }}
                                 </td>
 
-                               <td rowspan="{{ $fuelCount }}">
-                                    <div class="action-buttons">
-
-                                        {{-- <a href="{{ url('admin/reports/' . $report['id']) }}"
-                                            class="btn-action btn-view">
-                                            <i class="fa-solid fa-eye"></i> View
-                                        </a>
-
-                                        <button class="btn-action btn-message" type="button"
-                                            @click="openMessageModal(
-                                                {{ $report['id'] }},
-                                                '{{ addslashes($report['station_name']) }}'
-                                            )">
-                                            <i class="fa-solid fa-message"></i> Message
-                                        </button> --}}
-
-                                        <button class="btn-action btn-delete" type="button"
-        @click="deleteReport(
-            {{ $report['id'] }},
-            '{{ addslashes($report['station_name']) }}'
-        )">
-    <i class="fa-solid fa-trash"></i> Delete
-</button>
-
-                                    </div>
-                                </td>
+                            <td rowspan="{{ $fuelCount }}">
+                                <div class="action-buttons">
+                                    <a href="{{ route('admin.reports.edit', $report['id']) }}"
+                                    class="btn-action"
+                                    style="background:#2563eb; color:#fff;">
+                                        <i class="fa-solid fa-pen-to-square"></i> Edit
+                                    </a>
+                                    <button class="btn-action btn-delete" type="button"
+                                        @click="deleteReport(
+                                            {{ $report['id'] }},
+                                            '{{ addslashes($report['station_name']) }}'
+                                        )">
+                                        <i class="fa-solid fa-trash"></i> Delete
+                                    </button>
+                                </div>
+                            </td>   
                             @endif
 
                         </tr>
