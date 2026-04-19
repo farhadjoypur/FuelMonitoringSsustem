@@ -558,6 +558,10 @@
 
                             <td rowspan="{{ $fuelCount }}">
                                 <div class="action-buttons">
+                                    {{-- <a href="{{ url('admin/reports/' . $report['id']) }}"
+                                            class="btn-action btn-view">
+                                            <i class="fa-solid fa-eye"></i> View
+                                    </a>--}}
                                     <a href="{{ route('admin.reports.edit', $report['id']) }}"
                                     class="btn-action"
                                     style="background:#2563eb; color:#fff;">
