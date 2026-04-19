@@ -1184,20 +1184,23 @@
                                     {{-- Actions --}}
                                     <td>
                                         <div class="action-btns">
-                                            <!-- <a href="{{ url('admin/reports/' . $report->id) }}"
-                                                class="action-btn btn-view">View</a>
-                                            <button class="action-btn btn-message">Message</button> -->
-                                            <form id="delete-form-{{ $report->id }}"
-                                            action="{{ route('admin.dashboard.report.destroy', $report->id) }}"
-                                            method="POST" style="display:none;">
-                                            @csrf
-                                            @method('DELETE')
-                                        </form>
+                                            <a href="{{ route('admin.reports.edit', $report->id) }}"
+                                            class="action-btn"
+                                            style="background:#2563eb; color:#fff; text-decoration:none; display:inline-flex; align-items:center; justify-content:center;">
+                                                Edit
+                                            </a>
 
-                                        <button type="button" class="action-btn btn-delete"
-                                            onclick="confirmDelete('delete-form-{{ $report->id }}')">
-                                            Delete
-                                        </button>
+                                            <form id="delete-form-{{ $report->id }}"
+                                                action="{{ route('admin.dashboard.report.destroy', $report->id) }}"
+                                                method="POST" style="display:none;">
+                                                @csrf
+                                                @method('DELETE')
+                                            </form>
+
+                                            <button type="button" class="action-btn btn-delete"
+                                                onclick="confirmDelete('delete-form-{{ $report->id }}')">
+                                                Delete
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
