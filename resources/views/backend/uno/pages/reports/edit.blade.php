@@ -332,6 +332,9 @@
         .input-grid { grid-template-columns: 1fr; }
         .grid-cell, .grid-cell-auto { border-right: none; }
     }
+    .auto-value.closing-value {
+        color: #2563eb;
+    }
 </style>
 @endpush
 
@@ -558,7 +561,7 @@
 
                 {{-- Closing Stock (auto-calculated) --}}
                 <div class="grid-cell-auto close-bg" data-label="Closing Stock (L)">
-                    <span class="auto-value close" id="{{ $fk }}_closing_display">
+                    <span class="auto-value closing-value" id="{{ $fk }}_closing_display">
                         {{ number_format(($fuelReport->{$fk.'_closing_stock'} ?? 0), 2) }}
                     </span>
                     <span class="auto-label">Auto</span>
