@@ -321,7 +321,7 @@
                                 </button>--}}
                                 <a :href="`/admin/reports/${row.reportId}/edit`"
                                 class="action-btn"
-                                style="background:#2563eb; color:#fff;">
+                                 style="background:#2563eb; color:#fff; text-decoration:none; border:none;">
                                     <i class="fa-solid fa-pen-to-square fa-xs"></i> Edit
                                 </a>
                                 <button class="action-btn btn-delete"
