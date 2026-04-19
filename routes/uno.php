@@ -32,6 +32,10 @@ Route::prefix('uno')->middleware(['role:' . UserRole::UNO])->as('uno.')->group(f
 
     Route::get('reports/submitted', [UnoReportsController::class, 'submittedReport'])
         ->name('reports.submitted');
+        
+    // edit routes
+    Route::get('reports/{fuelReport}/edit', [UnoReportsController::class, 'edit'])->name('reports.edit');
+    Route::put('reports/{fuelReport}/update', [UnoReportsController::class, 'update'])->name('reports.update');    
 
     // export pdf routes
     Route::get('reports/export-pdf', [UnoReportsController::class, 'exportPdf'])->name('reports.export.pdf');

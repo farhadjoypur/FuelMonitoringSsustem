@@ -1156,19 +1156,21 @@
                                     {{-- Actions --}}
                                     <td>
                                         <div class="action-btns">
-                                            <!-- <a href="{{ url('uno/reports/' . $report->id) }}"
-                                                    class="action-btn btn-view">View</a>
-                                                <button class="action-btn btn-message">Message</button> -->
+                                            <a href="{{ route('uno.reports.edit', $report->id) }}"
+                                            class="action-btn"
+                                            style="background:#2563eb; color:#fff; text-decoration:none; border:none;
+                                                    display:inline-flex; align-items:center; justify-content:center; gap:4px;">
+                                                <i class="fa-solid fa-pen-to-square fa-xs"></i> Edit
+                                            </a>
                                             <form id="uno-delete-form-{{ $report->id }}"
                                                 action="{{ route('uno.dashboard.report.destroy', $report->id) }}"
                                                 method="POST" style="display:none;">
                                                 @csrf
                                                 @method('DELETE')
                                             </form>
-
                                             <button type="button" class="action-btn btn-delete"
                                                 onclick="confirmDelete('uno-delete-form-{{ $report->id }}')">
-                                                Delete
+                                                <i class="fa-solid fa-trash fa-xs"></i> Delete
                                             </button>
                                         </div>
                                     </td>
