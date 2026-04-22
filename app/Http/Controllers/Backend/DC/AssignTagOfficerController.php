@@ -149,17 +149,17 @@ class AssignTagOfficerController extends Controller
                     ->with('error', 'This officer is already assigned to this station!');
             }
 
-            if ($request->status == 'active') {
-                $existsActive = AssignTagOfficer::where('filling_station_id', $request->filling_station_id)
-                    ->where('status', 'active')
-                    ->exists();
+            // if ($request->status == 'active') {
+            //     $existsActive = AssignTagOfficer::where('filling_station_id', $request->filling_station_id)
+            //         ->where('status', 'active')
+            //         ->exists();
 
-                if ($existsActive) {
-                    return back()
-                        ->withInput()
-                        ->with('error', 'An active officer is already assigned to this filling station!');
-                }
-            }
+            //     if ($existsActive) {
+            //         return back()
+            //             ->withInput()
+            //             ->with('error', 'An active officer is already assigned to this filling station!');
+            //     }
+            // }
 
             AssignTagOfficer::create([
                 'dc_id' => Auth::id(),
