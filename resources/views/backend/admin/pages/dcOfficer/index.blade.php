@@ -789,6 +789,22 @@
                 loadUpazilas($('#division').val(), $(this).val(), '', '#upazila');
             });
 
+
+            // ===============================
+            // 🔹 FILTER PERSISTENCE ON RELOAD
+            // ===============================
+
+            const currentDivision = "{{ request('division') }}";
+            const currentDistrict = "{{ request('district') }}";
+            const currentUpazila = "{{ request('upazila') }}";
+
+            if (currentDivision) {
+                loadDistricts(currentDivision, currentDistrict, '#district');
+                if (currentDistrict) {
+                    loadUpazilas(currentDivision, currentDistrict, currentUpazila, '#upazila');
+                }
+            }
+
             // ===============================
             // 🔹 ADD MODAL
             // ===============================

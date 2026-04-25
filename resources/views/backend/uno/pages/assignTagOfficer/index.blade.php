@@ -606,8 +606,10 @@
                     const selected = dist.name_en === selectedDist ? 'selected' : '';
                     options += `<option value="${dist.name_en}" ${selected}>${dist.name_en}</option>`;
                 });
+                $(target).html(options).prop('disabled', false);
+            } else {
+                $(target).html(options).prop('disabled', true);
             }
-            $(target).html(options);
         }
 
         function loadUpazilas(divName, distName, selectedUpz, target) {
@@ -619,9 +621,12 @@
                     const selected = ps.name_en === selectedUpz ? 'selected' : '';
                     options += `<option value="${ps.name_en}" ${selected}>${ps.name_en}</option>`;
                 });
+                $(target).html(options).prop('disabled', false);
+            } else {
+                $(target).html(options).prop('disabled', true);
             }
-            $(target).html(options);
         }
+
 
         $(document).ready(function() {
             // ==========================================
