@@ -14,7 +14,8 @@ Route::prefix('tag-officer')->middleware(['role:'.UserRole::TAG_OFFICER])->as('t
 });
 
 Route::prefix('tag-officer')->name('fuel-reports.')->middleware(['auth'])->group(function () {
- 
+    Route::get('fuel-reports/station-data', [FuelReportController::class, 'getStationData'])
+        ->name('fuel-reports.station-data');
     Route::get('/fuel-reports', [FuelReportController::class, 'index'])->name('index');
     Route::get('/fuel-reports/create', [FuelReportController::class, 'create'])->name('create');
     Route::post('/fuel-reports', [FuelReportController::class, 'store'])->name('store');
@@ -28,4 +29,5 @@ Route::prefix('tag-officer')->name('fuel-reports.')->middleware(['auth'])->group
  
     // AJAX Route: Previous Stock Auto-fill এর জন্য
     Route::post('/fuel-reports/get-previous-stocks', [FuelReportController::class, 'getPreviousStocks'])->name('previous-stocks');
+
 });
