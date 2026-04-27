@@ -53,7 +53,14 @@ class ReportsController extends Controller
             fn($report) => $this->formatSingleReport($report, $officerMap)
         );
 
-        $perPage          = 10;
+        $perPage = 10;
+
+        // এটা দিয়ে:
+        $perPage = $request->get('per_page', 10);
+        if ($perPage === 'all' || (int)$perPage <= 0) {
+            $perPage = $total ?: 1;
+        }
+        $perPage = (int) $perPage;
         $currentPage      = (int) $request->get('page', 1);
         $total            = $formattedReports->count();
         $paginatedReports = $formattedReports->forPage($currentPage, $perPage);
@@ -63,7 +70,7 @@ class ReportsController extends Controller
                 'reports'     => $paginatedReports,
                 'totalRow'    => $this->buildTotalRow($formattedReports),
                 'currentPage' => $currentPage,
-                'lastPage'    => (int) ceil($total / $perPage),
+                'lastPage' => $perPage >= $total ? 1 : (int) ceil($total / $perPage),
                 'total'       => $total,
                 'filters'     => $request->only([
                     'from_date',

@@ -1043,6 +1043,7 @@
                 diffCurrentPage: 1,
                 diffPerPage: 10,
                 diffTotalPages: 1,
+                perPage: 10,
 
                 // Difference tab filters
                 diffFilter: {
@@ -1093,49 +1094,55 @@
                 // },
                 init(seeall = '', fromDate = '', toDate = '') {
 
-    // ── Default today's date for Stock tab filters ──
-    const today = new Date().toISOString().split('T')[0]; // "2026-04-16"
-    this.filters.from_date = today;
-    this.filters.to_date   = today;
+                    // ── Default today's date for Stock tab filters ──
+                    const today = new Date().toISOString().split('T')[0]; // "2026-04-16"
+                    this.filters.from_date = today;
+                    this.filters.to_date   = today;
 
-    // ── Default today's date for Missing tab filters ──
-    this.missingFilter.fromDate = today;
-    this.missingFilter.toDate   = today;
+                    // ── Default today's date for Missing tab filters ──
+                    this.missingFilter.fromDate = today;
+                    this.missingFilter.toDate   = today;
 
-    // ── Default today's date for Submit tab filters ──
-    this.submitFilter.fromDate = today;
-    this.submitFilter.toDate   = today;
+                    // ── Default today's date for Submit tab filters ──
+                    this.submitFilter.fromDate = today;
+                    this.submitFilter.toDate   = today;
 
-    // ── Default today's date for Difference tab filters ──
-    this.diffFilter.fromDate = today;
-    this.diffFilter.toDate   = today;
+                    // ── Default today's date for Difference tab filters ──
+                    this.diffFilter.fromDate = today;
+                    this.diffFilter.toDate   = today;
 
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('.form-group')) {
-            this.stationOpen = false;
-        }
-    });
+                    document.addEventListener('click', (e) => {
+                        if (!e.target.closest('.form-group')) {
+                            this.stationOpen = false;
+                        }
+                    });
 
-    if (seeall === 'difference') {
-        if (fromDate) this.diffFilter.fromDate = fromDate;
-        if (toDate)   this.diffFilter.toDate   = toDate;
-        if (fromDate && !toDate) this.diffFilter.toDate = fromDate;
+                    if (seeall === 'difference') {
+                        if (fromDate) this.diffFilter.fromDate = fromDate;
+                        if (toDate)   this.diffFilter.toDate   = toDate;
+                        if (fromDate && !toDate) this.diffFilter.toDate = fromDate;
 
-        this.activeTab = 'difference';
-        this.$nextTick(() => this.applyDiffFilter());
+                        this.activeTab = 'difference';
+                        this.$nextTick(() => this.applyDiffFilter());
 
-    } else if (seeall === 'missing') {
-        this.activeTab = 'missing';
-        this.$nextTick(() => this.applyMissingFilter());
+                    } else if (seeall === 'missing') {
+                        this.activeTab = 'missing';
+                        this.$nextTick(() => this.applyMissingFilter());
 
-    } else if (seeall === 'submitted') {
-        this.activeTab = 'submitted';
-        this.$nextTick(() => this.applySubmitFilter());
+                    } else if (seeall === 'submitted') {
+                        this.activeTab = 'submitted';
+                        this.$nextTick(() => this.applySubmitFilter());
 
-    } else {
-        this.activeTab = 'stock';
-    }
-},
+                    } else {
+                        this.activeTab = 'stock';
+                    }
+
+                    window.addEventListener('perpage-change', (e) => {
+                        this.perPage = e.detail.value;
+                        this.currentPage = 1;
+                        this.applyFilter(1);
+                    });
+                },
 
                 get filteredStations() {
                     if (!this.stationSearch) return this.allStations;
@@ -1240,10 +1247,20 @@
                     }
                 },
 
+                buildStockQueryParams(page = 1) {
+                    const params = new URLSearchParams();
+                    Object.entries(this.filters).forEach(([key, value]) => {
+                        if (value !== '' && value !== null) params.append(key, value);
+                    });
+                    params.append('page', page);
+                    params.append('per_page', this.perPage); // ← এটা যোগ করো
+                    return params;
+                },
                 goToPage(page) {
                     if (page < 1) return;
                     this.applyFilter(page);
                 },
+                
 
                 exportPdf() {
                     const params = new URLSearchParams();
@@ -1326,6 +1343,7 @@
                     this.filters.station_id = '';
                     this.stationSearch = ''; // ← এটা যোগ করো
                     this.stationSelected = null;
+                    this.perPage = 10;
 
                 },
 
