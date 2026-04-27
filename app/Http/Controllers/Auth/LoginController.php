@@ -90,6 +90,7 @@ class LoginController extends Controller
                         ->withInput();
                 }
 
+                // dd($user->role);
                 if ($user->role == UserRole::ADMIN) {
                     return redirect()->route('admin.dashboard.index')
                         ->with('success', 'Login successfully');
