@@ -183,14 +183,22 @@ class FuelReportController extends Controller
             'comment'           => 'nullable|string|max:500',
         ]);
 
-        $exists = Fuelreport::where('tag_officer_id', $ctx['officerId'])
-            ->where('station_id', $ctx['stationId'])
+        // $exists = Fuelreport::where('tag_officer_id', $ctx['officerId'])
+        //     ->where('station_id', $ctx['stationId'])
+        //     ->where('report_date', $request->report_date)
+        //     ->exists();
+
+        // if ($exists) {
+        //     return back()->withInput()
+        //         ->with('error', 'A report for "' . $ctx['stationName'] . '" on this date already exists.');
+        // }
+        $exists = Fuelreport::where('station_id', $ctx['stationId'])
             ->where('report_date', $request->report_date)
             ->exists();
 
         if ($exists) {
             return back()->withInput()
-                ->with('error', 'A report for "' . $ctx['stationName'] . '" on this date already exists.');
+                ->with('error', 'A report for "' . $ctx['stationName'] . '" on this date has already been submitted.');
         }
 
         $octaneDiff    = $request->octane_supply - $request->octane_received;
@@ -300,8 +308,12 @@ class FuelReportController extends Controller
             'comment'           => 'nullable|string|max:500',
         ]);
 
-        $exists = Fuelreport::where('tag_officer_id', $ctx['officerId'])
-            ->where('station_id', $ctx['stationId'])
+        // $exists = Fuelreport::where('tag_officer_id', $ctx['officerId'])
+        //     ->where('station_id', $ctx['stationId'])
+        //     ->where('report_date', $request->report_date)
+        //     ->where('id', '!=', $fuelReport->id)
+        //     ->exists();
+        $exists = Fuelreport::where('station_id', $ctx['stationId'])
             ->where('report_date', $request->report_date)
             ->where('id', '!=', $fuelReport->id)
             ->exists();

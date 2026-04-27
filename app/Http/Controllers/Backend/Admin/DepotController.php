@@ -48,7 +48,7 @@ class DepotController extends Controller
         }
 
         // FIX #2 — pagination 25 so records don't swap between pages
-        $depots = $query->latest()->paginate(25)->withQueryString();
+        $depots = $query->latest()->paginate(10)->withQueryString();
 
         $totalDepots    = Depot::count();
         $activeDepots   = Depot::where('status', 'active')->count();
