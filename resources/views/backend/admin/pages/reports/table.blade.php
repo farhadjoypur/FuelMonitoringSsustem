@@ -53,6 +53,7 @@
     }
 
     $filters = $filters ?? [];
+    $perPage = $perPage ?? 10;
     $currentPage = $currentPage ?? 1;
     $lastPage = $lastPage ?? 1;
     $total = $total ?? 0;
@@ -397,7 +398,6 @@
 </style>
 
 @if ($reports->isEmpty())
-
     {{-- ── Empty / no-filter state ── --}}
     <div class="empty-state">
         <i class="fa-solid fa-filter"></i>
@@ -448,7 +448,10 @@
                 </tr>
             </thead>
             <tbody>
-                @php $serialCounter = ($currentPage - 1) * 10; @endphp
+                @php
+                    $effectivePerPage = $perPage >= PHP_INT_MAX || $perPage === 'all' ? $total : $perPage;
+                    $serialCounter = ($currentPage - 1) * $effectivePerPage;
+                @endphp
                 @foreach ($reports as $serialOffset => $report)
                     @php
                         // Serial number accounts for pagination offset
@@ -556,26 +559,25 @@
                                     {{ $report['comment'] ?: 'No comments' }}
                                 </td>
 
-                            <td rowspan="{{ $fuelCount }}">
-                                <div class="action-buttons">
-                                    {{-- <a href="{{ url('admin/reports/' . $report['id']) }}"
+                                <td rowspan="{{ $fuelCount }}">
+                                    <div class="action-buttons">
+                                        {{-- <a href="{{ url('admin/reports/' . $report['id']) }}"
                                             class="btn-action btn-view">
                                             <i class="fa-solid fa-eye"></i> View
-                                    </a>--}}
-                                    <a href="{{ route('admin.reports.edit', $report['id']) }}"
-                                    class="btn-action"
-                                    style="background:#2563eb; color:#fff;">
-                                        <i class="fa-solid fa-pen-to-square"></i> Edit
-                                    </a>
-                                    <button class="btn-action btn-delete" type="button"
-                                        @click="deleteReport(
+                                    </a> --}}
+                                        <a href="{{ route('admin.reports.edit', $report['id']) }}" class="btn-action"
+                                            style="background:#2563eb; color:#fff;">
+                                            <i class="fa-solid fa-pen-to-square"></i> Edit
+                                        </a>
+                                        <button class="btn-action btn-delete" type="button"
+                                            @click="deleteReport(
                                             {{ $report['id'] }},
                                             '{{ addslashes($report['station_name']) }}'
                                         )">
-                                        <i class="fa-solid fa-trash"></i> Delete
-                                    </button>
-                                </div>
-                            </td>   
+                                            <i class="fa-solid fa-trash"></i> Delete
+                                        </button>
+                                    </div>
+                                </td>
                             @endif
 
                         </tr>
@@ -653,36 +655,62 @@
     </div>
 
     {{-- ── Pagination ── --}}
-    @if ($lastPage > 1)
-        <div class="pagination-bar">
-            <div class="pagination-info">
-                Showing page {{ $currentPage }} of {{ $lastPage }}
-                ({{ $total }} station{{ $total !== 1 ? 's' : '' }})
-            </div>
-            <div class="pagination-links">
+    {{-- ── Per Page + Pagination ── --}}
+    <div class="pagination-bar">
 
-                {{-- Previous --}}
-                <button class="page-btn" @click="goToPage({{ $currentPage - 1 }})"
-                    @if ($currentPage <= 1) disabled @endif>
-                    <i class="fa-solid fa-chevron-left" style="font-size:.65rem;"></i>
-                </button>
+        {{-- Left: Per Page Selector --}}
+        <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:.75rem; color:#64748b;">Show:</span>
+            <select
+                onchange="
+                window.__alpine = document.querySelector('[x-data]').__x;
+                // Alpine কে per page update করে re-fetch করো
+                const app = Alpine.evaluate(document.querySelector('[x-data]'), 'reportApp');
+            "
+                @change.stop="$dispatch('perpage-change', { value: $event.target.value })"
+                style="padding:4px 10px; border:1.5px solid #e2e8f0; border-radius:6px;
+                   font-size:.78rem; color:#1e293b; background:#fff; cursor:pointer;">
+                <option value="10" {{ request('per_page', 10) == 10 ? 'selected' : '' }}>10</option>
+                <option value="50" {{ request('per_page', 10) == 50 ? 'selected' : '' }}>50</option>
+                <option value="100" {{ request('per_page', 10) == 100 ? 'selected' : '' }}>100</option>
+                <option value="all" {{ request('per_page', 10) == 'all' ? 'selected' : '' }}>All</option>
+            </select>
+            <span style="font-size:.75rem; color:#94a3b8;">entries per page</span>
 
-                {{-- Page numbers --}}
-                @for ($pageNum = max(1, $currentPage - 2); $pageNum <= min($lastPage, $currentPage + 2); $pageNum++)
-                    <button class="page-btn {{ $pageNum === $currentPage ? 'is-active' : '' }}"
-                        @click="goToPage({{ $pageNum }})">
-                        {{ $pageNum }}
-                    </button>
-                @endfor
-
-                {{-- Next --}}
-                <button class="page-btn" @click="goToPage({{ $currentPage + 1 }})"
-                    @if ($currentPage >= $lastPage) disabled @endif>
-                    <i class="fa-solid fa-chevron-right" style="font-size:.65rem;"></i>
-                </button>
-
-            </div>
+            @if ($total > 0)
+                <span style="font-size:.75rem; color:#94a3b8; margin-left:8px;">
+                    — {{ $total }} station{{ $total !== 1 ? 's' : '' }} found
+                </span>
+            @endif
         </div>
-    @endif
+
+        {{-- Right: Page Navigation --}}
+        @if ($lastPage > 1)
+            <div style="display:flex; align-items:center; gap:8px;">
+                <div class="pagination-info">
+                    Page {{ $currentPage }} of {{ $lastPage }}
+                </div>
+                <div class="pagination-links">
+                    <button class="page-btn" @click="goToPage({{ $currentPage - 1 }})"
+                        @if ($currentPage <= 1) disabled @endif>
+                        <i class="fa-solid fa-chevron-left" style="font-size:.65rem;"></i>
+                    </button>
+
+                    @for ($pageNum = max(1, $currentPage - 2); $pageNum <= min($lastPage, $currentPage + 2); $pageNum++)
+                        <button class="page-btn {{ $pageNum === $currentPage ? 'is-active' : '' }}"
+                            @click="goToPage({{ $pageNum }})">
+                            {{ $pageNum }}
+                        </button>
+                    @endfor
+
+                    <button class="page-btn" @click="goToPage({{ $currentPage + 1 }})"
+                        @if ($currentPage >= $lastPage) disabled @endif>
+                        <i class="fa-solid fa-chevron-right" style="font-size:.65rem;"></i>
+                    </button>
+                </div>
+            </div>
+        @endif
+
+    </div>
 
 @endif

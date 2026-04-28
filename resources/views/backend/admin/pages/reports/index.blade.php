@@ -824,15 +824,15 @@
                     </div>
 
                     <!-- <div class="form-group">
-                        <label>Fuel Type</label>
-                        <select x-model="filters.fuel_type">
-                            <option value="">All Types</option>
-                            <option value="octane">Octane</option>
-                            <option value="petrol">Petrol</option>
-                            <option value="diesel">Diesel</option>
-                            <option value="others">Others</option>
-                        </select>
-                    </div> -->
+                            <label>Fuel Type</label>
+                            <select x-model="filters.fuel_type">
+                                <option value="">All Types</option>
+                                <option value="octane">Octane</option>
+                                <option value="petrol">Petrol</option>
+                                <option value="diesel">Diesel</option>
+                                <option value="others">Others</option>
+                            </select>
+                        </div> -->
 
                     <div class="form-group">
                         <label>Stock Status</label>
@@ -866,31 +866,31 @@
             {{-- Table section --}}
             <div class="table-section">
                 <div class="table-header-row" style="display:flex; justify-content:space-between; align-items:center;">
-    
-    <div class="table-title">
-        Stock &amp; Sales Reports
-    </div>
 
-    <div style="display:flex; align-items:center; gap:12px;">
-        
-        <div class="record-count" x-text="recordCountText"></div>
+                    <div class="table-title">
+                        Stock &amp; Sales Reports
+                    </div>
 
-        <div class="export-row">
-            <button class="btn-export btn-export-pdf" @click="exportPdf()">
-                <i class="fa-regular fa-file-pdf"></i> Export PDF
-            </button>
-        </div>
+                    <div style="display:flex; align-items:center; gap:12px;">
 
-    </div>
+                        <div class="record-count" x-text="recordCountText"></div>
 
-</div>
+                        <div class="export-row">
+                            <button class="btn-export btn-export-pdf" @click="exportPdf()">
+                                <i class="fa-regular fa-file-pdf"></i> Export PDF
+                            </button>
+                        </div>
+
+                    </div>
+
+                </div>
 
                 {{-- Loading overlay --}}
                 <div class="loading-overlay" x-show="isLoading" style="display:none;">
                     <div class="loading-spinner"></div>
                     <p style="font-size:.85rem;">Loading data...</p>
                 </div>
-                
+
 
                 {{--
                 Table container.
@@ -911,7 +911,7 @@
                 </div>
             </div>
 
-           
+
 
         </div>{{-- /tab-stock --}}
 
@@ -1043,6 +1043,7 @@
                 diffCurrentPage: 1,
                 diffPerPage: 10,
                 diffTotalPages: 1,
+                perPage: 10,
 
                 // Difference tab filters
                 diffFilter: {
@@ -1093,49 +1094,55 @@
                 // },
                 init(seeall = '', fromDate = '', toDate = '') {
 
-    // ── Default today's date for Stock tab filters ──
-    const today = new Date().toISOString().split('T')[0]; // "2026-04-16"
-    this.filters.from_date = today;
-    this.filters.to_date   = today;
+                    // ── Default today's date for Stock tab filters ──
+                    const today = new Date().toISOString().split('T')[0]; // "2026-04-16"
+                    this.filters.from_date = today;
+                    this.filters.to_date = today;
 
-    // ── Default today's date for Missing tab filters ──
-    this.missingFilter.fromDate = today;
-    this.missingFilter.toDate   = today;
+                    // ── Default today's date for Missing tab filters ──
+                    this.missingFilter.fromDate = today;
+                    this.missingFilter.toDate = today;
 
-    // ── Default today's date for Submit tab filters ──
-    this.submitFilter.fromDate = today;
-    this.submitFilter.toDate   = today;
+                    // ── Default today's date for Submit tab filters ──
+                    this.submitFilter.fromDate = today;
+                    this.submitFilter.toDate = today;
 
-    // ── Default today's date for Difference tab filters ──
-    this.diffFilter.fromDate = today;
-    this.diffFilter.toDate   = today;
+                    // ── Default today's date for Difference tab filters ──
+                    this.diffFilter.fromDate = today;
+                    this.diffFilter.toDate = today;
 
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('.form-group')) {
-            this.stationOpen = false;
-        }
-    });
+                    document.addEventListener('click', (e) => {
+                        if (!e.target.closest('.form-group')) {
+                            this.stationOpen = false;
+                        }
+                    });
 
-    if (seeall === 'difference') {
-        if (fromDate) this.diffFilter.fromDate = fromDate;
-        if (toDate)   this.diffFilter.toDate   = toDate;
-        if (fromDate && !toDate) this.diffFilter.toDate = fromDate;
+                    if (seeall === 'difference') {
+                        if (fromDate) this.diffFilter.fromDate = fromDate;
+                        if (toDate) this.diffFilter.toDate = toDate;
+                        if (fromDate && !toDate) this.diffFilter.toDate = fromDate;
 
-        this.activeTab = 'difference';
-        this.$nextTick(() => this.applyDiffFilter());
+                        this.activeTab = 'difference';
+                        this.$nextTick(() => this.applyDiffFilter());
 
-    } else if (seeall === 'missing') {
-        this.activeTab = 'missing';
-        this.$nextTick(() => this.applyMissingFilter());
+                    } else if (seeall === 'missing') {
+                        this.activeTab = 'missing';
+                        this.$nextTick(() => this.applyMissingFilter());
 
-    } else if (seeall === 'submitted') {
-        this.activeTab = 'submitted';
-        this.$nextTick(() => this.applySubmitFilter());
+                    } else if (seeall === 'submitted') {
+                        this.activeTab = 'submitted';
+                        this.$nextTick(() => this.applySubmitFilter());
 
-    } else {
-        this.activeTab = 'stock';
-    }
-},
+                    } else {
+                        this.activeTab = 'stock';
+                    }
+
+                    window.addEventListener('perpage-change', (e) => {
+                        this.perPage = e.detail.value;
+                        this.currentPage = 1;
+                        this.applyFilter(1);
+                    });
+                },
 
                 get filteredStations() {
                     if (!this.stationSearch) return this.allStations;
@@ -1240,10 +1247,20 @@
                     }
                 },
 
+                buildStockQueryParams(page = 1) {
+                    const params = new URLSearchParams();
+                    Object.entries(this.filters).forEach(([key, value]) => {
+                        if (value !== '' && value !== null) params.append(key, value);
+                    });
+                    params.append('page', page);
+                    params.append('per_page', this.perPage); // ← এটা যোগ করো
+                    return params;
+                },
                 goToPage(page) {
                     if (page < 1) return;
                     this.applyFilter(page);
                 },
+
 
                 exportPdf() {
                     const params = new URLSearchParams();
@@ -1326,6 +1343,7 @@
                     this.filters.station_id = '';
                     this.stationSearch = ''; // ← এটা যোগ করো
                     this.stationSelected = null;
+                    this.perPage = 10;
 
                 },
 
@@ -1376,6 +1394,7 @@
                         diff_status: this.diffFilter.diffStatus,
                         min_diff_l: this.diffFilter.minDifferenceL,
                         min_diff_pct: this.diffFilter.minDifferencePercent,
+                        per_page:     this.diffPerPage,
                     };
 
                     Object.entries(filterMap).forEach(([key, value]) => {
@@ -1403,6 +1422,7 @@
                             this.diffTotalRecords = json.total;
                             this.diffTotalPages = json.lastPage;
                             this.diffCurrentPage = json.currentPage;
+                            this.diffPerPage = json.perPage === 'all' ? this.diffTotalRecords : json.perPage;
                         }
 
                     } catch (error) {
@@ -1435,6 +1455,7 @@
                     this.diffTotalRecords = 0;
                     this.diffCurrentPage = 1;
                     this.diffTotalPages = 1;
+                    this.diffPerPage = 10;
                 },
 
                 // Pagination for difference tab
@@ -1618,6 +1639,7 @@
                         company_id: this.missingFilter.companyId,
                         depot_id: this.missingFilter.depotId,
                         station_id: this.missingFilter.stationId,
+                        per_page:      this.missingPerPage,
                     };
 
                     Object.entries(filterMap).forEach(([key, value]) => {
@@ -1643,6 +1665,7 @@
                             this.missingTotalRecords = json.total;
                             this.missingTotalPages = json.lastPage;
                             this.missingCurrentPage = json.currentPage;
+                            this.missingPerPage      = json.perPage === 'all' ? this.missingTotalRecords : json.perPage;
                         }
 
                     } catch (error) {
@@ -1672,6 +1695,7 @@
                     this.missingTotalRecords = 0;
                     this.missingCurrentPage = 1;
                     this.missingTotalPages = 1;
+                    this.missingPerPage = 10;
                 },
 
                 // Pagination
@@ -1723,6 +1747,7 @@
                         company_id: this.submitFilter.companyId,
                         depot_id: this.submitFilter.depotId,
                         station_id: this.submitFilter.stationId,
+                        per_page:      this.submitPerPage,
                     };
 
                     Object.entries(filterMap).forEach(([key, value]) => {
@@ -1748,6 +1773,7 @@
                             this.submitTotalRecords = json.total;
                             this.submitTotalPages = json.lastPage;
                             this.submitCurrentPage = json.currentPage;
+                            this.submitPerPage      = json.perPage === 'all' ? this.submitTotalRecords : json.perPage;
                         }
 
                     } catch (error) {
@@ -1777,6 +1803,7 @@
                     this.submitTotalRecords = 0;
                     this.submitCurrentPage = 1;
                     this.submitTotalPages = 1;
+                    this.submitPerPage = 10;
                 },
 
                 // Pagination
@@ -1786,70 +1813,70 @@
                 },
 
                 // ═══════════════════════════════════════════════════════════
-// DELETE REPORT WITH SWEETALERT2 (নতুন)
-// ═══════════════════════════════════════════════════════════
+                // DELETE REPORT WITH SWEETALERT2 (নতুন)
+                // ═══════════════════════════════════════════════════════════
 
-async deleteReport(reportId, stationName = '') {
-    const result = await Swal.fire({
-        title: 'Are you sure?',
-        html: stationName 
-            ? `Do you want to delete the report for <strong>${stationName}</strong>?` 
-            : 'Do you want to delete this report?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Yes, Delete it!',
-        cancelButtonText: 'Cancel',
-        reverseButtons: true,
-        focusCancel: true
-    });
+                async deleteReport(reportId, stationName = '') {
+                    const result = await Swal.fire({
+                        title: 'Are you sure?',
+                        html: stationName ?
+                            `Do you want to delete the report for <strong>${stationName}</strong>?` :
+                            'Do you want to delete this report?',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Yes, Delete it!',
+                        cancelButtonText: 'Cancel',
+                        reverseButtons: true,
+                        focusCancel: true
+                    });
 
-    if (result.isConfirmed) {
-        try {
-            const csrf = document.querySelector('meta[name="csrf-token"]').content;
-            const deleteUrl = `{{ route('admin.reports.destroy', ':id') }}`.replace(':id', reportId);
+                    if (result.isConfirmed) {
+                        try {
+                            const csrf = document.querySelector('meta[name="csrf-token"]').content;
+                            const deleteUrl = `{{ route('admin.reports.destroy', ':id') }}`.replace(':id', reportId);
 
-            const response = await fetch(deleteUrl, {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': csrf,
-                    'Accept': 'application/json',
-                },
-            });
+                            const response = await fetch(deleteUrl, {
+                                method: 'DELETE',
+                                headers: {
+                                    'X-CSRF-TOKEN': csrf,
+                                    'Accept': 'application/json',
+                                },
+                            });
 
-            const data = await response.json();
+                            const data = await response.json();
 
-            if (data.success) {
-                Swal.fire({
-                    title: 'Deleted!',
-                    text: 'The report has been successfully deleted.',
-                    icon: 'success',
-                    timer: 1800,
-                    showConfirmButton: false
-                });
+                            if (data.success) {
+                                Swal.fire({
+                                    title: 'Deleted!',
+                                    text: 'The report has been successfully deleted.',
+                                    icon: 'success',
+                                    timer: 1800,
+                                    showConfirmButton: false
+                                });
 
-                // Refresh the current active tab automatically
-                await this.$nextTick(async () => {
-                    if (this.activeTab === 'stock') {
-                        await this.applyFilter(this.currentPage);
-                    } else if (this.activeTab === 'difference') {
-                        await this.applyDiffFilter(this.diffCurrentPage);
-                    } else if (this.activeTab === 'missing') {
-                        await this.applyMissingFilter(this.missingCurrentPage);
-                    } else if (this.activeTab === 'submitted') {
-                        await this.applySubmitFilter(this.submitCurrentPage);
+                                // Refresh the current active tab automatically
+                                await this.$nextTick(async () => {
+                                    if (this.activeTab === 'stock') {
+                                        await this.applyFilter(this.currentPage);
+                                    } else if (this.activeTab === 'difference') {
+                                        await this.applyDiffFilter(this.diffCurrentPage);
+                                    } else if (this.activeTab === 'missing') {
+                                        await this.applyMissingFilter(this.missingCurrentPage);
+                                    } else if (this.activeTab === 'submitted') {
+                                        await this.applySubmitFilter(this.submitCurrentPage);
+                                    }
+                                });
+                            } else {
+                                Swal.fire('Failed!', data.message || 'Could not delete the report.', 'error');
+                            }
+                        } catch (error) {
+                            console.error(error);
+                            Swal.fire('Error!', 'Something went wrong. Please try again later.', 'error');
+                        }
                     }
-                });
-            } else {
-                Swal.fire('Failed!', data.message || 'Could not delete the report.', 'error');
-            }
-        } catch (error) {
-            console.error(error);
-            Swal.fire('Error!', 'Something went wrong. Please try again later.', 'error');
-        }
-    }
-},
+                },
 
 
             }; // end return

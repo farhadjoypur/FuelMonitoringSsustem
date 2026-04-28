@@ -3,7 +3,6 @@
      @include('backend.admin.pages.reports.difference_table', ['divisions' => $divisions])
      Alpine state lives in parent reportApp() — see index_scripts_block.blade.php
 ════════════════════════════════════════════════════════════════ --}}
-
 {{-- ── Filter Section ──────────────────────────────────────────── --}}
 <div class="filter-section">
     <div class="filter-title">
@@ -159,7 +158,6 @@
     </div>{{-- /filter-grid --}}
 </div>{{-- /filter-section --}}
 
-
 {{-- ── Table Section ────────────────────────────────────────────── --}}
 <div class="table-section">
 
@@ -216,8 +214,9 @@
                     <tr>
 
                         {{-- Row number --}}
-                        <td class="row-number" x-text="(diffCurrentPage - 1) * diffPerPage + rowIndex + 1">
-                        </td>
+                        <td class="row-number" 
+    x-text="(diffCurrentPage - 1) * diffPerPage + rowIndex + 1">
+</td>
 
                         {{-- Date --}}
                         <td class="td-date">
@@ -339,71 +338,86 @@
     </div>{{-- /diff-table-wrapper --}}
 
     {{-- ── Pagination ────────────────────────────────────────────── --}}
-    <div x-show="diffTotalPages > 1" style="display:none;">
-        <div
-            style="display:flex; align-items:center; justify-content:space-between;
-                padding:14px 20px; border-top:1px solid #e2e8f0;
-                font-size:12px; color:#64748b; flex-wrap:wrap; gap:10px;">
+{{-- ── Per Page + Pagination ── --}}
+<div style="display:flex; align-items:center; justify-content:space-between;
+            padding:14px 20px; border-top:1px solid #e2e8f0;
+            font-size:12px; color:#64748b; flex-wrap:wrap; gap:10px;">
 
-            {{-- Records info --}}
-            <span x-text="`Showing page ${diffCurrentPage} of ${diffTotalPages} — ${diffTotalRecords} records`"></span>
+    {{-- Left: Per Page Selector --}}
+    <div style="display:flex; align-items:center; gap:8px;">
+        <span>Show:</span>
+        <select
+            x-model="diffPerPage"
+            @change="diffCurrentPage = 1; applyDiffFilter(1)"
+            style="padding:4px 10px; border:1.5px solid #e2e8f0; border-radius:6px;
+                   font-size:.78rem; color:#1e293b; background:#fff; cursor:pointer;">
+            <option value="10">10</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+            <option value="all">All</option>
+        </select>
+        <span style="color:#94a3b8;">entries per page</span>
 
-            {{-- Pagination numbers --}}
-            <nav>
-                <ul class="pagination pagination-sm mb-0">
-
-                    {{-- First --}}
-                    <li class="page-item" :class="{ disabled: diffCurrentPage <= 1 }">
-                        <button class="page-link" @click="changeDiffPage(1)" :disabled="diffCurrentPage <= 1">
-                            <i class="fa-solid fa-angles-left fa-xs"></i>
-                        </button>
-                    </li>
-
-                    {{-- Prev --}}
-                    <li class="page-item" :class="{ disabled: diffCurrentPage <= 1 }">
-                        <button class="page-link" @click="changeDiffPage(diffCurrentPage - 1)"
-                            :disabled="diffCurrentPage <= 1">
-                            <i class="fa-solid fa-chevron-left fa-xs"></i>
-                        </button>
-                    </li>
-
-                    {{-- Page Numbers (window of 5) --}}
-                    <template
-                        x-for="page in (() => {
-                    let pages = [];
-                    let start = Math.max(1, diffCurrentPage - 2);
-                    let end   = Math.min(diffTotalPages, start + 4);
-                    start     = Math.max(1, end - 4);
-                    for (let i = start; i <= end; i++) pages.push(i);
-                    return pages;
-                })()"
-                        :key="page">
-                        <li class="page-item" :class="{ active: page === diffCurrentPage }">
-                            <button class="page-link" @click="changeDiffPage(page)" x-text="page"></button>
-                        </li>
-                    </template>
-
-                    {{-- Next --}}
-                    <li class="page-item" :class="{ disabled: diffCurrentPage >= diffTotalPages }">
-                        <button class="page-link" @click="changeDiffPage(diffCurrentPage + 1)"
-                            :disabled="diffCurrentPage >= diffTotalPages">
-                            <i class="fa-solid fa-chevron-right fa-xs"></i>
-                        </button>
-                    </li>
-
-                    {{-- Last --}}
-                    <li class="page-item" :class="{ disabled: diffCurrentPage >= diffTotalPages }">
-                        <button class="page-link" @click="changeDiffPage(diffTotalPages)"
-                            :disabled="diffCurrentPage >= diffTotalPages">
-                            <i class="fa-solid fa-angles-right fa-xs"></i>
-                        </button>
-                    </li>
-
-                </ul>
-            </nav>
-
-        </div>
+        <span x-show="diffTotalRecords > 0" style="color:#94a3b8; margin-left:8px;"
+              x-text="`— ${diffTotalRecords} record${diffTotalRecords !== 1 ? 's' : ''} found`">
+        </span>
     </div>
+
+    {{-- Right: Page Navigation --}}
+    <nav x-show="diffTotalPages > 1">
+        <ul class="pagination pagination-sm mb-0">
+
+            {{-- First --}}
+            <li class="page-item" :class="{ disabled: diffCurrentPage <= 1 }">
+                <button class="page-link" @click="changeDiffPage(1)"
+                    :disabled="diffCurrentPage <= 1">
+                    <i class="fa-solid fa-angles-left fa-xs"></i>
+                </button>
+            </li>
+
+            {{-- Prev --}}
+            <li class="page-item" :class="{ disabled: diffCurrentPage <= 1 }">
+                <button class="page-link" @click="changeDiffPage(diffCurrentPage - 1)"
+                    :disabled="diffCurrentPage <= 1">
+                    <i class="fa-solid fa-chevron-left fa-xs"></i>
+                </button>
+            </li>
+
+            {{-- Page Numbers (window of 5) --}}
+            <template x-for="page in (() => {
+                let pages = [];
+                let start = Math.max(1, diffCurrentPage - 2);
+                let end   = Math.min(diffTotalPages, start + 4);
+                start     = Math.max(1, end - 4);
+                for (let i = start; i <= end; i++) pages.push(i);
+                return pages;
+            })()" :key="page">
+                <li class="page-item" :class="{ active: page === diffCurrentPage }">
+                    <button class="page-link" @click="changeDiffPage(page)"
+                        x-text="page"></button>
+                </li>
+            </template>
+
+            {{-- Next --}}
+            <li class="page-item" :class="{ disabled: diffCurrentPage >= diffTotalPages }">
+                <button class="page-link" @click="changeDiffPage(diffCurrentPage + 1)"
+                    :disabled="diffCurrentPage >= diffTotalPages">
+                    <i class="fa-solid fa-chevron-right fa-xs"></i>
+                </button>
+            </li>
+
+            {{-- Last --}}
+            <li class="page-item" :class="{ disabled: diffCurrentPage >= diffTotalPages }">
+                <button class="page-link" @click="changeDiffPage(diffTotalPages)"
+                    :disabled="diffCurrentPage >= diffTotalPages">
+                    <i class="fa-solid fa-angles-right fa-xs"></i>
+                </button>
+            </li>
+
+        </ul>
+    </nav>
+
+</div>
 
 </div>{{-- /table-section --}}
 
