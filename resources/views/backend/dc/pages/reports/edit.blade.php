@@ -209,7 +209,10 @@
         outline: none;
         box-shadow: 0 0 0 2px rgba(37,99,235,.1);
     }
-    .input-field.is-invalid { border-color: #dc2626; }
+    .input-field.is-invalid { 
+        border-color: #dc2626 !important; 
+        background-color: #fef2f2 !important;
+    }
 
     .auto-value {
         font-size: 17px;
@@ -294,6 +297,29 @@
         align-items: center;
         gap: 8px;
         font-weight: 600;
+    }
+
+    /* WARNING MESSAGE STYLES - FIXED */
+    .warn-message {
+        font-size: 11px;
+        color: #dc2626;
+        margin-top: 6px;
+        padding: 4px 8px;
+        background: #fef2f2;
+        border-radius: 4px;
+        /* border-left: 3px solid #dc2626; */
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .warn-message i {
+        font-size: 10px;
+        flex-shrink: 0;
+    }
+
+    .warn-message span {
+        line-height: 1.3;
     }
 
     @media (max-width: 1100px) {
@@ -465,48 +491,37 @@
                 {{-- 1. Previous Stock --}}
                 <div class="grid-cell" data-label="Previous Stock (L)">
                     <input type="number" step="0.01" min="0"
-                           name="{{ $fk }}_prev_stock"
-                           id="{{ $fk }}_prev_stock"
-                           class="input-field @error($fk.'_prev_stock') is-invalid @enderror"
-                           value="{{ old($fk.'_prev_stock', $fuelReport->{$fk.'_prev_stock'} ?? 0) }}"
-                           oninput="calcRow('{{ $fk }}')">
-                    @error($fk.'_prev_stock')
-                        <span class="invalid-feedback">{{ $message }}</span>
-                    @enderror
+                        name="{{ $fk }}_prev_stock"
+                        id="{{ $fk }}_prev_stock"
+                        class="input-field"
+                        value="{{ old($fk.'_prev_stock', $fuelReport->{$fk.'_prev_stock'} ?? 0) }}">
                 </div>
 
                 {{-- 2. Supply From Depot --}}
                 <div class="grid-cell" data-label="Supply From Depot (L)">
                     <input type="number" step="0.01" min="0"
-                           name="{{ $fk }}_supply"
-                           id="{{ $fk }}_supply"
-                           class="input-field @error($fk.'_supply') is-invalid @enderror"
-                           value="{{ old($fk.'_supply', $fuelReport->{$fk.'_supply'} ?? 0) }}"
-                           oninput="calcRow('{{ $fk }}')">
-                    @error($fk.'_supply')
-                        <span class="invalid-feedback">{{ $message }}</span>
-                    @enderror
+                        name="{{ $fk }}_supply"
+                        id="{{ $fk }}_supply"
+                        class="input-field"
+                        value="{{ old($fk.'_supply', $fuelReport->{$fk.'_supply'} ?? 0) }}">
                 </div>
 
                 {{-- 3. Received At Station --}}
                 <div class="grid-cell" data-label="Received At Station (L)">
                     <input type="number" step="0.01" min="0"
-                           name="{{ $fk }}_received"
-                           id="{{ $fk }}_received"
-                           class="input-field @error($fk.'_received') is-invalid @enderror"
-                           value="{{ old($fk.'_received', $fuelReport->{$fk.'_received'} ?? 0) }}"
-                           oninput="calcRow('{{ $fk }}')">
-                    <span id="{{ $fk }}_received_warn"
-                          style="display:none; font-size:11px; color:#dc2626; margin-top:4px;"></span>
-                    @error($fk.'_received')
-                        <span class="invalid-feedback">{{ $message }}</span>
-                    @enderror
+                        name="{{ $fk }}_received"
+                        id="{{ $fk }}_received"
+                        class="input-field"
+                        value="{{ old($fk.'_received', $fuelReport->{$fk.'_received'} ?? 0) }}">
+                    <div class="warn-message" id="{{ $fk }}_received_warn" style="display:none;">
+                        <!-- <i class="fa-solid fa-circle-exclamation fa-xs"></i> -->
+                        <span></span>
+                    </div>
                 </div>
 
                 {{-- 4. Difference (auto) --}}
                 <div class="grid-cell-auto diff-bg" data-label="Difference (L)">
-                    <span class="auto-value" id="{{ $fk }}_difference_display"
-                          style="color:{{ ($fuelReport->{$fk.'_difference'} ?? 0) != 0 ? '#dc2626' : '#16a34a' }};">
+                    <span class="auto-value" id="{{ $fk }}_difference_display">
                         {{ number_format(($fuelReport->{$fk.'_difference'} ?? 0), 2) }}
                     </span>
                     <span class="auto-label">Auto</span>
@@ -515,22 +530,19 @@
                 {{-- 5. Sales --}}
                 <div class="grid-cell" data-label="Sales (L)">
                     <input type="number" step="0.01" min="0"
-                           name="{{ $fk }}_sales"
-                           id="{{ $fk }}_sales"
-                           class="input-field @error($fk.'_sales') is-invalid @enderror"
-                           value="{{ old($fk.'_sales', $fuelReport->{$fk.'_sales'} ?? 0) }}"
-                           oninput="calcRow('{{ $fk }}')">
-                    <span id="{{ $fk }}_sales_warn"
-                          style="display:none; font-size:11px; color:#dc2626; margin-top:4px;"></span>
-                    @error($fk.'_sales')
-                        <span class="invalid-feedback">{{ $message }}</span>
-                    @enderror
+                        name="{{ $fk }}_sales"
+                        id="{{ $fk }}_sales"
+                        class="input-field"
+                        value="{{ old($fk.'_sales', $fuelReport->{$fk.'_sales'} ?? 0) }}">
+                    <div class="warn-message" id="{{ $fk }}_sales_warn" style="display:none;">
+                        <i class="fa-solid fa-circle-exclamation fa-xs"></i>
+                        <span></span>
+                    </div>
                 </div>
 
                 {{-- 6. Closing Stock (auto) --}}
                 <div class="grid-cell-auto close-bg" data-label="Closing Stock (L)">
-                    <span class="auto-value" id="{{ $fk }}_closing_display"
-                          style="color:{{ ($fuelReport->{$fk.'_closing_stock'} ?? 0) < 0 ? '#dc2626' : 'var(--primary)' }};">
+                    <span class="auto-value" id="{{ $fk }}_closing_display">
                         {{ number_format(($fuelReport->{$fk.'_closing_stock'} ?? 0), 2) }}
                     </span>
                     <span class="auto-label">Auto</span>
@@ -568,114 +580,132 @@
 
 @push('scripts')
 <script>
-function calcRow(fuel) {
-    const prev       = parseFloat(document.getElementById(fuel + '_prev_stock')?.value) || 0;
-    const supply     = parseFloat(document.getElementById(fuel + '_supply')?.value)     || 0;
-    const receivedEl = document.getElementById(fuel + '_received');
-    const salesEl    = document.getElementById(fuel + '_sales');
-
-    let received = parseFloat(receivedEl?.value) || 0;
-    let sales    = parseFloat(salesEl?.value)    || 0;
-
-    const receivedWarnEl = document.getElementById(fuel + '_received_warn');
-
-    if (received > supply) {
-        if (receivedWarnEl) {
-            receivedWarnEl.textContent = '⚠ Received cannot exceed supply (' + supply.toFixed(2) + ' L).';
-            receivedWarnEl.style.display = 'block';
-        }
-        if (receivedEl) {
-            receivedEl.value = supply.toFixed(2);
-            receivedEl.classList.add('is-invalid');
-        }
-        received = supply;
-    } else {
-        if (receivedWarnEl) receivedWarnEl.style.display = 'none';
-        if (receivedEl)     receivedEl.classList.remove('is-invalid');
-    }
-
-    const maxSellable = prev + received;
-    const salesWarnEl = document.getElementById(fuel + '_sales_warn');
-
-    if (sales > maxSellable) {
-        if (salesWarnEl) {
-            salesWarnEl.textContent = '⚠ Sales cannot exceed available stock (' + maxSellable.toFixed(2) + ' L).';
-            salesWarnEl.style.display = 'block';
-        }
-        sales = maxSellable;
-        if (salesEl) {
-            salesEl.value = sales.toFixed(2);
-            salesEl.classList.add('is-invalid');
-        }
-    } else {
-        if (salesWarnEl) salesWarnEl.style.display = 'none';
-        if (salesEl)     salesEl.classList.remove('is-invalid');
-    }
-
-    const diff    = supply - received;
-    const closing = prev + received - sales;
-
-    const diffEl    = document.getElementById(fuel + '_difference_display');
-    const closingEl = document.getElementById(fuel + '_closing_display');
-
-    if (diffEl) {
-        diffEl.textContent = diff.toFixed(2);
-        diffEl.style.color = diff !== 0 ? '#dc2626' : '#16a34a';
-    }
-    if (closingEl) {
-        closingEl.textContent = closing.toFixed(2);
-        closingEl.style.color = closing < 0 ? '#dc2626' : 'var(--primary)';
-    }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    ['octane', 'petrol', 'diesel', 'others'].forEach(fuel => calcRow(fuel));
-
-    ['octane', 'petrol', 'diesel', 'others'].forEach(fuel => {
-        ['prev_stock', 'supply', 'received', 'sales'].forEach(field => {
-            const el = document.getElementById(fuel + '_' + field);
-            if (el) el.addEventListener('input', () => calcRow(fuel));
-        });
-    });
-
-    document.getElementById('dcEditForm').addEventListener('submit', function (e) {
-        let blocked = false;
-
-        ['octane', 'petrol', 'diesel', 'others'].forEach(fuel => {
-            const prev     = parseFloat(document.getElementById(fuel + '_prev_stock')?.value) || 0;
-            const supply   = parseFloat(document.getElementById(fuel + '_supply')?.value)     || 0;
-            const received = parseFloat(document.getElementById(fuel + '_received')?.value)   || 0;
-            const sales    = parseFloat(document.getElementById(fuel + '_sales')?.value)      || 0;
-
-            const clampedReceived = Math.min(received, supply);
-            const maxSell         = prev + clampedReceived;
-
-            if (received > supply) {
-                blocked = true;
-                const w = document.getElementById(fuel + '_received_warn');
-                if (w) {
-                    w.textContent = '⚠ Received cannot exceed supply (' + supply.toFixed(2) + ' L).';
-                    w.style.display = 'block';
-                }
-                document.getElementById(fuel + '_received')?.classList.add('is-invalid');
+(function() {
+    'use strict';
+    
+    function calcRow(fuel) {
+        const prev = parseFloat(document.getElementById(fuel + '_prev_stock')?.value) || 0;
+        const supply = parseFloat(document.getElementById(fuel + '_supply')?.value) || 0;
+        const receivedEl = document.getElementById(fuel + '_received');
+        const salesEl = document.getElementById(fuel + '_sales');
+        
+        let received = parseFloat(receivedEl?.value) || 0;
+        let sales = parseFloat(salesEl?.value) || 0;
+        
+        // Validate Received
+        const receivedWarn = document.getElementById(fuel + '_received_warn');
+        if (received > supply) {
+            if (receivedWarn) {
+                receivedWarn.querySelector('span').textContent = '⚠ Received cannot exceed supply (' + supply.toFixed(2) + ' L)';
+                receivedWarn.style.display = 'flex';
             }
-
-            if (sales > maxSell) {
-                blocked = true;
-                const w = document.getElementById(fuel + '_sales_warn');
-                if (w) {
-                    w.textContent = '⚠ Sales cannot exceed available stock (' + maxSell.toFixed(2) + ' L).';
-                    w.style.display = 'block';
-                }
-                document.getElementById(fuel + '_sales')?.classList.add('is-invalid');
-            }
-        });
-
-        if (blocked) {
-            e.preventDefault();
-            document.querySelector('.is-invalid')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            receivedEl?.classList.add('is-invalid');
+            received = supply;
+            if (receivedEl) receivedEl.value = supply;
+        } else {
+            if (receivedWarn) receivedWarn.style.display = 'none';
+            receivedEl?.classList.remove('is-invalid');
         }
-    });
-});
+        
+        // Validate Sales
+        const maxSell = prev + received;
+        const salesWarn = document.getElementById(fuel + '_sales_warn');
+        if (sales > maxSell) {
+            if (salesWarn) {
+                salesWarn.querySelector('span').textContent = '⚠ Sales cannot exceed available stock (' + maxSell.toFixed(2) + ' L)';
+                salesWarn.style.display = 'flex';
+            }
+            salesEl?.classList.add('is-invalid');
+            sales = maxSell;
+            if (salesEl) salesEl.value = maxSell;
+        } else {
+            if (salesWarn) salesWarn.style.display = 'none';
+            salesEl?.classList.remove('is-invalid');
+        }
+        
+        // Update displays
+        const diff = supply - received;
+        const closing = prev + received - sales;
+        
+        const diffEl = document.getElementById(fuel + '_difference_display');
+        const closingEl = document.getElementById(fuel + '_closing_display');
+        
+        if (diffEl) {
+            diffEl.textContent = diff.toFixed(2);
+            diffEl.style.color = diff !== 0 ? '#dc2626' : '#16a34a';
+        }
+        if (closingEl) {
+            closingEl.textContent = closing.toFixed(2);
+            closingEl.style.color = closing < 0 ? '#dc2626' : '#2563eb';
+        }
+    }
+    
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+    
+    function init() {
+        const fuels = ['octane', 'petrol', 'diesel', 'others'];
+        
+        // Initial calculation
+        fuels.forEach(fuel => calcRow(fuel));
+        
+        // Add event listeners
+        fuels.forEach(fuel => {
+            const inputs = ['prev_stock', 'supply', 'received', 'sales'].map(field => 
+                document.getElementById(fuel + '_' + field)
+            );
+            inputs.forEach(input => {
+                if (input) {
+                    input.addEventListener('input', () => calcRow(fuel));
+                    input.addEventListener('change', () => calcRow(fuel));
+                }
+            });
+        });
+        
+        // Form submit validation
+        const form = document.getElementById('dcEditForm');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                let hasError = false;
+                fuels.forEach(fuel => {
+                    const supply = parseFloat(document.getElementById(fuel + '_supply')?.value) || 0;
+                    const received = parseFloat(document.getElementById(fuel + '_received')?.value) || 0;
+                    const prev = parseFloat(document.getElementById(fuel + '_prev_stock')?.value) || 0;
+                    const sales = parseFloat(document.getElementById(fuel + '_sales')?.value) || 0;
+                    
+                    if (received > supply) {
+                        hasError = true;
+                        const warn = document.getElementById(fuel + '_received_warn');
+                        if (warn) {
+                            warn.querySelector('span').textContent = '⚠ Received cannot exceed supply (' + supply.toFixed(2) + ' L)';
+                            warn.style.display = 'flex';
+                        }
+                    }
+                    
+                    const maxSell = prev + Math.min(received, supply);
+                    if (sales > maxSell) {
+                        hasError = true;
+                        const warn = document.getElementById(fuel + '_sales_warn');
+                        if (warn) {
+                            warn.querySelector('span').textContent = '⚠ Sales cannot exceed available stock (' + maxSell.toFixed(2) + ' L)';
+                            warn.style.display = 'flex';
+                        }
+                    }
+                });
+                
+                if (hasError) {
+                    e.preventDefault();
+                    alert('Please fix the errors before submitting.');
+                }
+            });
+        }
+        
+        console.log('DC Edit Form initialized - Warning messages enabled');
+    }
+})();
 </script>
 @endpush
