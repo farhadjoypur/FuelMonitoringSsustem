@@ -824,15 +824,15 @@
                     </div>
 
                     <!-- <div class="form-group">
-                            <label>Fuel Type</label>
-                            <select x-model="filters.fuel_type">
-                                <option value="">All Types</option>
-                                <option value="octane">Octane</option>
-                                <option value="petrol">Petrol</option>
-                                <option value="diesel">Diesel</option>
-                                <option value="others">Others</option>
-                            </select>
-                        </div> -->
+                                                        <label>Fuel Type</label>
+                                                        <select x-model="filters.fuel_type">
+                                                            <option value="">All Types</option>
+                                                            <option value="octane">Octane</option>
+                                                            <option value="petrol">Petrol</option>
+                                                            <option value="diesel">Diesel</option>
+                                                            <option value="others">Others</option>
+                                                        </select>
+                                                    </div> -->
 
                     <div class="form-group">
                         <label>Stock Status</label>
@@ -1025,8 +1025,20 @@
                 },
 
                 stationSearch: '',
+                diffStationSearch: '',
+                diffStationOpen: false,
+                diffStationSelected: null,
                 stationOpen: false,
                 stationSelected: null,
+                // Missing tab station
+                missingStationSearch: '',
+                missingStationOpen: false,
+                missingStationSelected: null,
+
+                // Submit tab station
+                submitStationSearch: '',
+                submitStationOpen: false,
+                submitStationSelected: null,
                 allStations: @json($stations->map(fn($s) => ['id' => $s->id, 'name' => $s->station_name])),
 
                 // Stock tab cascade dropdowns
@@ -1082,6 +1094,67 @@
                     isOpen: false,
                     reportId: null,
                     stationName: '',
+                },
+                get filteredDiffStations() {
+                    if (!this.diffStationSearch) return this.allStations;
+                    return this.allStations.filter(s =>
+                        s.name.toLowerCase().includes(this.diffStationSearch.toLowerCase())
+                    );
+                },
+
+                selectDiffStation(s) {
+                    this.diffStationSelected = s;
+                    this.diffStationSearch = s.name;
+                    this.diffFilter.stationId = s.id;
+                    this.diffStationOpen = false;
+                },
+
+                clearDiffStation() {
+                    this.diffStationSelected = null;
+                    this.diffStationSearch = '';
+                    this.diffFilter.stationId = '';
+                    this.diffStationOpen = true;
+                },
+                get filteredMissingStations() {
+                    if (!this.missingStationSearch) return this.allStations;
+                    return this.allStations.filter(s =>
+                        s.name.toLowerCase().includes(this.missingStationSearch.toLowerCase())
+                    );
+                },
+
+                selectMissingStation(s) {
+                    this.missingStationSelected = s;
+                    this.missingStationSearch = s.name;
+                    this.missingFilter.stationId = s.id;
+                    this.missingStationOpen = false;
+                },
+
+                clearMissingStation() {
+                    this.missingStationSelected = null;
+                    this.missingStationSearch = '';
+                    this.missingFilter.stationId = '';
+                    this.missingStationOpen = true;
+                },
+
+                get filteredSubmitStations() {
+                    if (!this.submitStationSearch) return this.allStations;
+                    return this.allStations.filter(s =>
+                        s.name.toLowerCase().includes(this.submitStationSearch.toLowerCase())
+                    );
+                },
+
+                selectSubmitStation(s) {
+                    this.submitStationSelected = s;
+                    this.submitStationSearch = s.name;
+                    this.submitFilter.stationId = s.id;
+                    this.submitStationOpen = false;
+                },
+
+                clearSubmitStation() {
+                    this.submitStationSelected = null;
+                    this.submitStationSearch = '';
+                    this.submitFilter.stationId = '';
+                    this.submitStationOpen = true;
                 },
 
                 // ── Init ───────────────────────────────────────────────────
@@ -1141,6 +1214,14 @@
                         this.perPage = e.detail.value;
                         this.currentPage = 1;
                         this.applyFilter(1);
+                    });
+                    document.addEventListener('click', (e) => {
+                        if (!e.target.closest('.form-group')) {
+                            this.stationOpen = false;
+                            this.diffStationOpen = false;
+                            this.missingStationOpen = false; // ← যোগ করো
+                            this.submitStationOpen = false; // ← যোগ করো
+                        }
                     });
                 },
 
@@ -1394,7 +1475,7 @@
                         diff_status: this.diffFilter.diffStatus,
                         min_diff_l: this.diffFilter.minDifferenceL,
                         min_diff_pct: this.diffFilter.minDifferencePercent,
-                        per_page:     this.diffPerPage,
+                        per_page: this.diffPerPage,
                     };
 
                     Object.entries(filterMap).forEach(([key, value]) => {
@@ -1456,6 +1537,9 @@
                     this.diffCurrentPage = 1;
                     this.diffTotalPages = 1;
                     this.diffPerPage = 10;
+                    this.diffStationSearch = '';
+                    this.diffStationSelected = null;
+                    this.diffStationOpen = false;
                 },
 
                 // Pagination for difference tab
@@ -1639,7 +1723,7 @@
                         company_id: this.missingFilter.companyId,
                         depot_id: this.missingFilter.depotId,
                         station_id: this.missingFilter.stationId,
-                        per_page:      this.missingPerPage,
+                        per_page: this.missingPerPage,
                     };
 
                     Object.entries(filterMap).forEach(([key, value]) => {
@@ -1665,7 +1749,7 @@
                             this.missingTotalRecords = json.total;
                             this.missingTotalPages = json.lastPage;
                             this.missingCurrentPage = json.currentPage;
-                            this.missingPerPage      = json.perPage === 'all' ? this.missingTotalRecords : json.perPage;
+                            this.missingPerPage = json.perPage === 'all' ? this.missingTotalRecords : json.perPage;
                         }
 
                     } catch (error) {
@@ -1696,6 +1780,9 @@
                     this.missingCurrentPage = 1;
                     this.missingTotalPages = 1;
                     this.missingPerPage = 10;
+                    this.missingStationSearch = '';
+                    this.missingStationSelected = null;
+                    this.missingStationOpen = false;
                 },
 
                 // Pagination
@@ -1747,7 +1834,7 @@
                         company_id: this.submitFilter.companyId,
                         depot_id: this.submitFilter.depotId,
                         station_id: this.submitFilter.stationId,
-                        per_page:      this.submitPerPage,
+                        per_page: this.submitPerPage,
                     };
 
                     Object.entries(filterMap).forEach(([key, value]) => {
@@ -1773,7 +1860,7 @@
                             this.submitTotalRecords = json.total;
                             this.submitTotalPages = json.lastPage;
                             this.submitCurrentPage = json.currentPage;
-                            this.submitPerPage      = json.perPage === 'all' ? this.submitTotalRecords : json.perPage;
+                            this.submitPerPage = json.perPage === 'all' ? this.submitTotalRecords : json.perPage;
                         }
 
                     } catch (error) {
@@ -1804,6 +1891,9 @@
                     this.submitCurrentPage = 1;
                     this.submitTotalPages = 1;
                     this.submitPerPage = 10;
+                    this.submitStationSearch = '';
+                    this.submitStationSelected = null;
+                    this.submitStationOpen = false;
                 },
 
                 // Pagination

@@ -73,57 +73,43 @@
             </select>
         </div>
 
-       <div class="form-group" style="position: relative;">
-    <label>Filling Station</label>
-    <div style="position: relative;">
-        <input
-            type="text"
-            x-model="stationSearch"
-            @input="stationOpen = true"
-            @focus="stationOpen = true"
-            @keydown.escape="stationOpen = false"
-            placeholder="Search station..."
-            autocomplete="off"
-            style="width:100%; padding-right:30px; box-sizing:border-box;"
-        />
-        <span x-show="stationSelected" @click="clearStation()" 
-            style="position:absolute; right:8px; top:50%; transform:translateY(-50%);
+        <div class="form-group" style="position: relative;">
+            <label>Filling Station</label>
+            <div style="position: relative;">
+                <input type="text" x-model="diffStationSearch" @input="diffStationOpen = true"
+                    @focus="diffStationOpen = true" @keydown.escape="diffStationOpen = false"
+                    placeholder="Search station..." autocomplete="off"
+                    style="width:100%; padding-right:30px; box-sizing:border-box;" />
+                <span x-show="diffStationSelected" @click="clearDiffStation()"
+                    style="position:absolute; right:8px; top:50%; transform:translateY(-50%);
                    cursor:pointer; color:#94a3b8; font-size:13px; user-select:none;">✕</span>
-    </div>
+            </div>
 
-    <div x-show="stationOpen"
-        style="position:absolute; top:100%; left:0; right:0; background:#fff;
+            <div x-show="diffStationOpen"
+                style="position:absolute; top:100%; left:0; right:0; background:#fff;
                border:1px solid #e2e8f0; border-radius:6px; z-index:9999;
                max-height:220px; overflow-y:auto; box-shadow:0 4px 12px rgba(0,0,0,.12);">
 
-        {{-- All Stations --}}
-        <div
-            @mousedown.prevent="clearStation(); stationOpen = false;"
-            style="padding:9px 12px; font-size:13px; cursor:pointer;
+                <div @mousedown.prevent="clearDiffStation(); diffStationOpen = false;"
+                    style="padding:9px 12px; font-size:13px; cursor:pointer;
                    color:#64748b; border-bottom:1px solid #f1f5f9;"
-            @mouseover="$el.style.background='#f8fafc'"
-            @mouseleave="$el.style.background=''">
-            All Stations
-        </div>
+                    @mouseover="$el.style.background='#f8fafc'" @mouseleave="$el.style.background=''">
+                    All Stations
+                </div>
 
-        {{-- Filtered list --}}
-        <template x-for="s in filteredStations" :key="s.id">
-            <div
-                @mousedown.prevent="selectStation(s)"
-                x-text="s.name"
-                style="padding:9px 12px; font-size:13px; cursor:pointer;"
-                @mouseover="$el.style.background='#f8fafc'"
-                @mouseleave="$el.style.background=''">
+                <template x-for="s in filteredDiffStations" :key="s.id">
+                    <div @mousedown.prevent="selectDiffStation(s)" x-text="s.name"
+                        style="padding:9px 12px; font-size:13px; cursor:pointer;"
+                        @mouseover="$el.style.background='#f8fafc'" @mouseleave="$el.style.background=''">
+                    </div>
+                </template>
+
+                <div x-show="filteredDiffStations.length === 0"
+                    style="padding:9px 12px; font-size:13px; color:#94a3b8; text-align:center;">
+                    No result found
+                </div>
             </div>
-        </template>
-
-        {{-- No result --}}
-        <div x-show="filteredStations.length === 0"
-            style="padding:9px 12px; font-size:13px; color:#94a3b8; text-align:center;">
-            No result found
         </div>
-    </div>
-</div>
 
         <div class="form-group">
             <label>Tag Officer</label>
@@ -168,8 +154,8 @@
             <span class="record-count" x-show="diffTotalRecords > 0" x-text="diffTotalRecords + ' records found'">
             </span>
             <button class="btn-diff-export-pdf" @click="exportDiffPdf()">
-    <i class="fa-solid fa-file-pdf"></i> Export to PDF
-</button>
+                <i class="fa-solid fa-file-pdf"></i> Export to PDF
+            </button>
         </div>
     </div>
 
@@ -214,9 +200,8 @@
                     <tr>
 
                         {{-- Row number --}}
-                        <td class="row-number" 
-    x-text="(diffCurrentPage - 1) * diffPerPage + rowIndex + 1">
-</td>
+                        <td class="row-number" x-text="(diffCurrentPage - 1) * diffPerPage + rowIndex + 1">
+                        </td>
 
                         {{-- Date --}}
                         <td class="td-date">
@@ -310,17 +295,16 @@
                         {{-- Actions --}}
                         <td>
                             <div class="action-btns">
-                               {{-- <button class="action-btn btn-view" 
+                                {{-- <button class="action-btn btn-view" 
                                         @click.prevent="openViewModal(row.reportId, row.stationName)">
                                     <i class="fa-solid fa-eye fa-xs"></i> View
                                 </button>
                                 <button class="action-btn btn-message"
                                     @click="openMessageModal(row.reportId, row.stationName)">
                                     <i class="fa-solid fa-envelope fa-xs"></i> Message
-                                </button>--}}
-                                <a :href="`/admin/reports/${row.reportId}/edit`"
-                                class="action-btn"
-                                 style="background:#2563eb; color:#fff; text-decoration:none; border:none;">
+                                </button> --}}
+                                <a :href="`/admin/reports/${row.reportId}/edit`" class="action-btn"
+                                    style="background:#2563eb; color:#fff; text-decoration:none; border:none;">
                                     <i class="fa-solid fa-pen-to-square fa-xs"></i> Edit
                                 </a>
                                 <button class="action-btn btn-delete"
@@ -338,86 +322,85 @@
     </div>{{-- /diff-table-wrapper --}}
 
     {{-- ── Pagination ────────────────────────────────────────────── --}}
-{{-- ── Per Page + Pagination ── --}}
-<div style="display:flex; align-items:center; justify-content:space-between;
+    {{-- ── Per Page + Pagination ── --}}
+    <div
+        style="display:flex; align-items:center; justify-content:space-between;
             padding:14px 20px; border-top:1px solid #e2e8f0;
             font-size:12px; color:#64748b; flex-wrap:wrap; gap:10px;">
 
-    {{-- Left: Per Page Selector --}}
-    <div style="display:flex; align-items:center; gap:8px;">
-        <span>Show:</span>
-        <select
-            x-model="diffPerPage"
-            @change="diffCurrentPage = 1; applyDiffFilter(1)"
-            style="padding:4px 10px; border:1.5px solid #e2e8f0; border-radius:6px;
+        {{-- Left: Per Page Selector --}}
+        <div style="display:flex; align-items:center; gap:8px;">
+            <span>Show:</span>
+            <select x-model="diffPerPage" @change="diffCurrentPage = 1; applyDiffFilter(1)"
+                style="padding:4px 10px; border:1.5px solid #e2e8f0; border-radius:6px;
                    font-size:.78rem; color:#1e293b; background:#fff; cursor:pointer;">
-            <option value="10">10</option>
-            <option value="50">50</option>
-            <option value="100">100</option>
-            <option value="all">All</option>
-        </select>
-        <span style="color:#94a3b8;">entries per page</span>
+                <option value="10">10</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                {{-- <option value="all">All</option> --}}
+            </select>
+            <span style="color:#94a3b8;">entries per page</span>
 
-        <span x-show="diffTotalRecords > 0" style="color:#94a3b8; margin-left:8px;"
-              x-text="`— ${diffTotalRecords} record${diffTotalRecords !== 1 ? 's' : ''} found`">
-        </span>
-    </div>
+            <span x-show="diffTotalRecords > 0" style="color:#94a3b8; margin-left:8px;"
+                x-text="`— ${diffTotalRecords} record${diffTotalRecords !== 1 ? 's' : ''} found`">
+            </span>
+        </div>
 
-    {{-- Right: Page Navigation --}}
-    <nav x-show="diffTotalPages > 1">
-        <ul class="pagination pagination-sm mb-0">
+        {{-- Right: Page Navigation --}}
+        <nav x-show="diffTotalPages > 1">
+            <ul class="pagination pagination-sm mb-0">
 
-            {{-- First --}}
-            <li class="page-item" :class="{ disabled: diffCurrentPage <= 1 }">
-                <button class="page-link" @click="changeDiffPage(1)"
-                    :disabled="diffCurrentPage <= 1">
-                    <i class="fa-solid fa-angles-left fa-xs"></i>
-                </button>
-            </li>
+                {{-- First --}}
+                <li class="page-item" :class="{ disabled: diffCurrentPage <= 1 }">
+                    <button class="page-link" @click="changeDiffPage(1)" :disabled="diffCurrentPage <= 1">
+                        <i class="fa-solid fa-angles-left fa-xs"></i>
+                    </button>
+                </li>
 
-            {{-- Prev --}}
-            <li class="page-item" :class="{ disabled: diffCurrentPage <= 1 }">
-                <button class="page-link" @click="changeDiffPage(diffCurrentPage - 1)"
-                    :disabled="diffCurrentPage <= 1">
-                    <i class="fa-solid fa-chevron-left fa-xs"></i>
-                </button>
-            </li>
+                {{-- Prev --}}
+                <li class="page-item" :class="{ disabled: diffCurrentPage <= 1 }">
+                    <button class="page-link" @click="changeDiffPage(diffCurrentPage - 1)"
+                        :disabled="diffCurrentPage <= 1">
+                        <i class="fa-solid fa-chevron-left fa-xs"></i>
+                    </button>
+                </li>
 
-            {{-- Page Numbers (window of 5) --}}
-            <template x-for="page in (() => {
+                {{-- Page Numbers (window of 5) --}}
+                <template
+                    x-for="page in (() => {
                 let pages = [];
                 let start = Math.max(1, diffCurrentPage - 2);
                 let end   = Math.min(diffTotalPages, start + 4);
                 start     = Math.max(1, end - 4);
                 for (let i = start; i <= end; i++) pages.push(i);
                 return pages;
-            })()" :key="page">
-                <li class="page-item" :class="{ active: page === diffCurrentPage }">
-                    <button class="page-link" @click="changeDiffPage(page)"
-                        x-text="page"></button>
+            })()"
+                    :key="page">
+                    <li class="page-item" :class="{ active: page === diffCurrentPage }">
+                        <button class="page-link" @click="changeDiffPage(page)" x-text="page"></button>
+                    </li>
+                </template>
+
+                {{-- Next --}}
+                <li class="page-item" :class="{ disabled: diffCurrentPage >= diffTotalPages }">
+                    <button class="page-link" @click="changeDiffPage(diffCurrentPage + 1)"
+                        :disabled="diffCurrentPage >= diffTotalPages">
+                        <i class="fa-solid fa-chevron-right fa-xs"></i>
+                    </button>
                 </li>
-            </template>
 
-            {{-- Next --}}
-            <li class="page-item" :class="{ disabled: diffCurrentPage >= diffTotalPages }">
-                <button class="page-link" @click="changeDiffPage(diffCurrentPage + 1)"
-                    :disabled="diffCurrentPage >= diffTotalPages">
-                    <i class="fa-solid fa-chevron-right fa-xs"></i>
-                </button>
-            </li>
+                {{-- Last --}}
+                <li class="page-item" :class="{ disabled: diffCurrentPage >= diffTotalPages }">
+                    <button class="page-link" @click="changeDiffPage(diffTotalPages)"
+                        :disabled="diffCurrentPage >= diffTotalPages">
+                        <i class="fa-solid fa-angles-right fa-xs"></i>
+                    </button>
+                </li>
 
-            {{-- Last --}}
-            <li class="page-item" :class="{ disabled: diffCurrentPage >= diffTotalPages }">
-                <button class="page-link" @click="changeDiffPage(diffTotalPages)"
-                    :disabled="diffCurrentPage >= diffTotalPages">
-                    <i class="fa-solid fa-angles-right fa-xs"></i>
-                </button>
-            </li>
+            </ul>
+        </nav>
 
-        </ul>
-    </nav>
-
-</div>
+    </div>
 
 </div>{{-- /table-section --}}
 

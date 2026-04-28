@@ -41,8 +41,7 @@
 
         <div class="form-group">
             <label>District</label>
-            <select x-model="missingFilter.district"
-                @change="onMissingDistrictChange()"
+            <select x-model="missingFilter.district" @change="onMissingDistrictChange()"
                 :disabled="!missingFilter.division">
                 <option value="">All Districts</option>
                 <template x-for="district in missingAvailableDistricts" :key="district.name_en">
@@ -81,63 +80,48 @@
             </select>
         </div>
 
-       <div class="form-group" style="position: relative;">
-    <label>Filling Station</label>
-    <div style="position: relative;">
-        <input
-            type="text"
-            x-model="stationSearch"
-            @input="stationOpen = true"
-            @focus="stationOpen = true"
-            @keydown.escape="stationOpen = false"
-            placeholder="Search station..."
-            autocomplete="off"
-            style="width:100%; padding-right:30px; box-sizing:border-box;"
-        />
-        <span x-show="stationSelected" @click="clearStation()" 
-            style="position:absolute; right:8px; top:50%; transform:translateY(-50%);
+        <div class="form-group" style="position: relative;">
+            <label>Filling Station</label>
+            <div style="position: relative;">
+                <input type="text" x-model="missingStationSearch" @input="missingStationOpen = true"
+                    @focus="missingStationOpen = true" @keydown.escape="missingStationOpen = false"
+                    placeholder="Search station..." autocomplete="off"
+                    style="width:100%; padding-right:30px; box-sizing:border-box;" />
+                <span x-show="missingStationSelected" @click="clearMissingStation()"
+                    style="position:absolute; right:8px; top:50%; transform:translateY(-50%);
                    cursor:pointer; color:#94a3b8; font-size:13px; user-select:none;">✕</span>
-    </div>
+            </div>
 
-    <div x-show="stationOpen"
-        style="position:absolute; top:100%; left:0; right:0; background:#fff;
+            <div x-show="missingStationOpen"
+                style="position:absolute; top:100%; left:0; right:0; background:#fff;
                border:1px solid #e2e8f0; border-radius:6px; z-index:9999;
                max-height:220px; overflow-y:auto; box-shadow:0 4px 12px rgba(0,0,0,.12);">
 
-        {{-- All Stations --}}
-        <div
-            @mousedown.prevent="clearStation(); stationOpen = false;"
-            style="padding:9px 12px; font-size:13px; cursor:pointer;
+                <div @mousedown.prevent="clearMissingStation(); missingStationOpen = false;"
+                    style="padding:9px 12px; font-size:13px; cursor:pointer;
                    color:#64748b; border-bottom:1px solid #f1f5f9;"
-            @mouseover="$el.style.background='#f8fafc'"
-            @mouseleave="$el.style.background=''">
-            All Stations
-        </div>
+                    @mouseover="$el.style.background='#f8fafc'" @mouseleave="$el.style.background=''">
+                    All Stations
+                </div>
 
-        {{-- Filtered list --}}
-        <template x-for="s in filteredStations" :key="s.id">
-            <div
-                @mousedown.prevent="selectStation(s)"
-                x-text="s.name"
-                style="padding:9px 12px; font-size:13px; cursor:pointer;"
-                @mouseover="$el.style.background='#f8fafc'"
-                @mouseleave="$el.style.background=''">
+                <template x-for="s in filteredMissingStations" :key="s.id">
+                    <div @mousedown.prevent="selectMissingStation(s)" x-text="s.name"
+                        style="padding:9px 12px; font-size:13px; cursor:pointer;"
+                        @mouseover="$el.style.background='#f8fafc'" @mouseleave="$el.style.background=''">
+                    </div>
+                </template>
+
+
+                <div x-show="filteredMissingStations.length === 0"
+                    style="padding:9px 12px; font-size:13px; color:#94a3b8; text-align:center;">
+                    No result found
+                </div>
             </div>
-        </template>
-
-        {{-- No result --}}
-        <div x-show="filteredStations.length === 0"
-            style="padding:9px 12px; font-size:13px; color:#94a3b8; text-align:center;">
-            No result found
         </div>
-    </div>
-</div>
 
         {{-- Apply / Reset — span full row --}}
         <div class="filter-actions" style="grid-column: 1 / -1;">
-            <button class="btn-apply"
-                @click="applyMissingFilter()"
-                :disabled="isMissingLoading">
+            <button class="btn-apply" @click="applyMissingFilter()" :disabled="isMissingLoading">
                 <template x-if="isMissingLoading">
                     <i class="fa-solid fa-spinner fa-spin"></i>
                 </template>
@@ -164,34 +148,29 @@
             Tag Officer Missing Reports
         </div>
         <div style="display:flex; align-items:center; gap:12px;">
-            <span class="record-count"
-                x-show="missingTotalRecords > 0"
-                x-text="missingTotalRecords + ' records found'">
+            <span class="record-count" x-show="missingTotalRecords > 0" x-text="missingTotalRecords + ' records found'">
             </span>
-           <button class="btn-missing-export-pdf" @click="exportMissingPdf()">
-    <i class="fa-solid fa-file-pdf"></i> Export to PDF
-</button>
+            <button class="btn-missing-export-pdf" @click="exportMissingPdf()">
+                <i class="fa-solid fa-file-pdf"></i> Export to PDF
+            </button>
         </div>
     </div>
 
     {{-- Empty state --}}
     <div x-show="!isMissingLoading && missingTotalRecords === 0"
         style="text-align:center; padding:60px 24px; color:#94a3b8; font-size:13px;">
-        <i class="fa-solid fa-inbox fa-2x"
-            style="display:block; margin-bottom:12px; opacity:.4;"></i>
+        <i class="fa-solid fa-inbox fa-2x" style="display:block; margin-bottom:12px; opacity:.4;"></i>
         No pending submissions found. Apply filters to search.
     </div>
 
     {{-- Loading state --}}
-    <div x-show="isMissingLoading"
-        style="text-align:center; padding:60px; color:#64748b; font-size:13px;">
+    <div x-show="isMissingLoading" style="text-align:center; padding:60px; color:#64748b; font-size:13px;">
         <div class="loading-spinner" style="margin:0 auto 14px;"></div>
         Loading data...
     </div>
 
     {{-- ── Data Table ── --}}
-    <div x-show="!isMissingLoading && missingTotalRecords > 0"
-        style="overflow-x:auto; overflow-y:auto;">
+    <div x-show="!isMissingLoading && missingTotalRecords > 0" style="overflow-x:auto; overflow-y:auto;">
 
         <table class="missing-table">
             <thead>
@@ -218,8 +197,7 @@
                     <tr>
 
                         {{-- # --}}
-                        <td class="row-number"
-                            x-text="(missingCurrentPage - 1) * missingPerPage + rowIndex + 1">
+                        <td class="row-number" x-text="(missingCurrentPage - 1) * missingPerPage + rowIndex + 1">
                         </td>
 
                         {{-- Missing Date --}}
@@ -271,8 +249,7 @@
                         <td>
                             <div class="fuel-rows">
                                 <div class="fuel-row">
-                                    <span class="missing-status-badge missing-status-pending"
-                                        x-text="row.status">
+                                    <span class="missing-status-badge missing-status-pending" x-text="row.status">
                                     </span>
                                 </div>
                                 <div class="fuel-row"></div>
@@ -288,67 +265,71 @@
 
     </div>{{-- /table scroll wrapper --}}
 
-   {{-- ── Pagination ── --}}
-{{-- ── Per Page + Pagination ── --}}
-<div style="display:flex; align-items:center; justify-content:space-between;
+    {{-- ── Pagination ── --}}
+    {{-- ── Per Page + Pagination ── --}}
+    <div
+        style="display:flex; align-items:center; justify-content:space-between;
             padding:14px 20px; border-top:1px solid #e2e8f0;
             font-size:12px; color:#64748b; flex-wrap:wrap; gap:10px;">
 
-    <div style="display:flex; align-items:center; gap:8px;">
-        <span>Show:</span>
-        <select
-            x-model="missingPerPage"
-            @change="missingCurrentPage = 1; applyMissingFilter(1)"
-            style="padding:4px 10px; border:1.5px solid #e2e8f0; border-radius:6px;
+        <div style="display:flex; align-items:center; gap:8px;">
+            <span>Show:</span>
+            <select x-model="missingPerPage" @change="missingCurrentPage = 1; applyMissingFilter(1)"
+                style="padding:4px 10px; border:1.5px solid #e2e8f0; border-radius:6px;
                    font-size:.78rem; color:#1e293b; background:#fff; cursor:pointer;">
-            <option value="10">10</option>
-            <option value="50">50</option>
-            <option value="100">100</option>
-            <option value="all">All</option>
-        </select>
-        <span style="color:#94a3b8;">entries per page</span>
-        <span x-show="missingTotalRecords > 0" style="color:#94a3b8; margin-left:8px;"
-              x-text="`— ${missingTotalRecords} record${missingTotalRecords !== 1 ? 's' : ''} found`">
-        </span>
-    </div>
+                <option value="10">10</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                {{-- <option value="all">All</option> --}}
+            </select>
+            <span style="color:#94a3b8;">entries per page</span>
+            <span x-show="missingTotalRecords > 0" style="color:#94a3b8; margin-left:8px;"
+                x-text="`— ${missingTotalRecords} record${missingTotalRecords !== 1 ? 's' : ''} found`">
+            </span>
+        </div>
 
-    <nav x-show="missingTotalPages > 1">
-        <ul class="pagination pagination-sm mb-0">
-            <li class="page-item" :class="{ disabled: missingCurrentPage <= 1 }">
-                <button class="page-link" @click="changeMissingPage(1)" :disabled="missingCurrentPage <= 1">
-                    <i class="fa-solid fa-angles-left fa-xs"></i>
-                </button>
-            </li>
-            <li class="page-item" :class="{ disabled: missingCurrentPage <= 1 }">
-                <button class="page-link" @click="changeMissingPage(missingCurrentPage - 1)" :disabled="missingCurrentPage <= 1">
-                    <i class="fa-solid fa-chevron-left fa-xs"></i>
-                </button>
-            </li>
-            <template x-for="page in (() => {
+        <nav x-show="missingTotalPages > 1">
+            <ul class="pagination pagination-sm mb-0">
+                <li class="page-item" :class="{ disabled: missingCurrentPage <= 1 }">
+                    <button class="page-link" @click="changeMissingPage(1)" :disabled="missingCurrentPage <= 1">
+                        <i class="fa-solid fa-angles-left fa-xs"></i>
+                    </button>
+                </li>
+                <li class="page-item" :class="{ disabled: missingCurrentPage <= 1 }">
+                    <button class="page-link" @click="changeMissingPage(missingCurrentPage - 1)"
+                        :disabled="missingCurrentPage <= 1">
+                        <i class="fa-solid fa-chevron-left fa-xs"></i>
+                    </button>
+                </li>
+                <template
+                    x-for="page in (() => {
                 let pages = [], start = Math.max(1, missingCurrentPage - 2);
                 let end = Math.min(missingTotalPages, start + 4);
                 start = Math.max(1, end - 4);
                 for (let i = start; i <= end; i++) pages.push(i);
                 return pages;
-            })()" :key="page">
-                <li class="page-item" :class="{ active: page === missingCurrentPage }">
-                    <button class="page-link" @click="changeMissingPage(page)" x-text="page"></button>
+            })()"
+                    :key="page">
+                    <li class="page-item" :class="{ active: page === missingCurrentPage }">
+                        <button class="page-link" @click="changeMissingPage(page)" x-text="page"></button>
+                    </li>
+                </template>
+                <li class="page-item" :class="{ disabled: missingCurrentPage >= missingTotalPages }">
+                    <button class="page-link" @click="changeMissingPage(missingCurrentPage + 1)"
+                        :disabled="missingCurrentPage >= missingTotalPages">
+                        <i class="fa-solid fa-chevron-right fa-xs"></i>
+                    </button>
                 </li>
-            </template>
-            <li class="page-item" :class="{ disabled: missingCurrentPage >= missingTotalPages }">
-                <button class="page-link" @click="changeMissingPage(missingCurrentPage + 1)" :disabled="missingCurrentPage >= missingTotalPages">
-                    <i class="fa-solid fa-chevron-right fa-xs"></i>
-                </button>
-            </li>
-            <li class="page-item" :class="{ disabled: missingCurrentPage >= missingTotalPages }">
-                <button class="page-link" @click="changeMissingPage(missingTotalPages)" :disabled="missingCurrentPage >= missingTotalPages">
-                    <i class="fa-solid fa-angles-right fa-xs"></i>
-                </button>
-            </li>
-        </ul>
-    </nav>
+                <li class="page-item" :class="{ disabled: missingCurrentPage >= missingTotalPages }">
+                    <button class="page-link" @click="changeMissingPage(missingTotalPages)"
+                        :disabled="missingCurrentPage >= missingTotalPages">
+                        <i class="fa-solid fa-angles-right fa-xs"></i>
+                    </button>
+                </li>
+            </ul>
+        </nav>
 
-</div>
+    </div>
 
 </div>{{-- /table-section --}}
 
@@ -363,10 +344,12 @@
         font-size: .775rem;
         background: #fff;
     }
+
     .missing-table thead {
         background: #f8fafc;
         border-bottom: 2px solid #e2e8f0;
     }
+
     .missing-table th {
         padding: 10px 10px;
         text-align: left;
@@ -377,16 +360,22 @@
         letter-spacing: .3px;
         white-space: nowrap;
     }
+
     .missing-table tbody tr {
         border-bottom: 2px solid #e2e8f0;
         transition: background .12s;
     }
-    .missing-table tbody tr:hover { background: #fafbfc; }
+
+    .missing-table tbody tr:hover {
+        background: #fafbfc;
+    }
+
     .missing-table td {
         padding: 0 10px;
         color: #1e293b;
         vertical-align: middle;
     }
+
     .missing-table td.row-number {
         font-weight: 600;
         color: #94a3b8;
@@ -394,6 +383,7 @@
         text-align: center;
         padding: 12px 4px;
     }
+
     .missing-table td.td-missing-date {
         padding: 12px 10px;
         font-weight: 600;
@@ -401,21 +391,28 @@
         color: #334155;
         white-space: nowrap;
     }
+
     .missing-table td.td-officer-name {
         padding: 12px 10px;
         font-weight: 500;
     }
+
     .missing-table td.td-phone {
         padding: 12px 10px;
         white-space: nowrap;
     }
+
     .missing-table td.td-station-name {
         padding: 12px 10px;
         font-weight: 500;
     }
 
     /* Fuel sub-rows inside missing table */
-    .missing-table .fuel-rows { display: flex; flex-direction: column; }
+    .missing-table .fuel-rows {
+        display: flex;
+        flex-direction: column;
+    }
+
     .missing-table .fuel-row {
         display: flex;
         align-items: center;
@@ -423,7 +420,11 @@
         min-height: 34px;
         border-bottom: 1px dashed #e2e8f0;
     }
-    .missing-table .fuel-row:last-child { border-bottom: none; }
+
+    .missing-table .fuel-row:last-child {
+        border-bottom: none;
+    }
+
     .missing-table .fuel-type {
         font-size: .72rem;
         color: #64748b;
@@ -439,11 +440,13 @@
         border-radius: 20px;
         white-space: nowrap;
     }
+
     .missing-status-pending {
         background: #fef2f2;
         color: #dc2626;
         border: 1px solid #fecaca;
     }
+
     .missing-status-submitted {
         background: #f0fdf4;
         color: #15803d;
@@ -465,5 +468,8 @@
         gap: 6px;
         transition: background .2s;
     }
-    .btn-missing-export-pdf:hover { background: #15803d; }
+
+    .btn-missing-export-pdf:hover {
+        background: #15803d;
+    }
 </style>

@@ -673,7 +673,7 @@
                 <option value="10" {{ request('per_page', 10) == 10 ? 'selected' : '' }}>10</option>
                 <option value="50" {{ request('per_page', 10) == 50 ? 'selected' : '' }}>50</option>
                 <option value="100" {{ request('per_page', 10) == 100 ? 'selected' : '' }}>100</option>
-                <option value="all" {{ request('per_page', 10) == 'all' ? 'selected' : '' }}>All</option>
+                {{-- <option value="all" {{ request('per_page', 10) == 'all' ? 'selected' : '' }}>All</option> --}}
             </select>
             <span style="font-size:.75rem; color:#94a3b8;">entries per page</span>
 

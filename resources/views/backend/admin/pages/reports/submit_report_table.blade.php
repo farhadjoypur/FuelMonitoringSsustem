@@ -81,56 +81,42 @@
         </div>
 
         <div class="form-group" style="position: relative;">
-    <label>Filling Station</label>
-    <div style="position: relative;">
-        <input
-            type="text"
-            x-model="stationSearch"
-            @input="stationOpen = true"
-            @focus="stationOpen = true"
-            @keydown.escape="stationOpen = false"
-            placeholder="Search station..."
-            autocomplete="off"
-            style="width:100%; padding-right:30px; box-sizing:border-box;"
-        />
-        <span x-show="stationSelected" @click="clearStation()" 
-            style="position:absolute; right:8px; top:50%; transform:translateY(-50%);
+            <label>Filling Station</label>
+            <div style="position: relative;">
+                <input type="text" x-model="submitStationSearch" @input="submitStationOpen = true"
+                    @focus="submitStationOpen = true" @keydown.escape="submitStationOpen = false"
+                    placeholder="Search station..." autocomplete="off"
+                    style="width:100%; padding-right:30px; box-sizing:border-box;" />
+                <span x-show="submitStationSelected" @click="clearSubmitStation()"
+                    style="position:absolute; right:8px; top:50%; transform:translateY(-50%);
                    cursor:pointer; color:#94a3b8; font-size:13px; user-select:none;">✕</span>
-    </div>
+            </div>
 
-    <div x-show="stationOpen"
-        style="position:absolute; top:100%; left:0; right:0; background:#fff;
+            <div x-show="submitStationOpen"
+                style="position:absolute; top:100%; left:0; right:0; background:#fff;
                border:1px solid #e2e8f0; border-radius:6px; z-index:9999;
                max-height:220px; overflow-y:auto; box-shadow:0 4px 12px rgba(0,0,0,.12);">
 
-        {{-- All Stations --}}
-        <div
-            @mousedown.prevent="clearStation(); stationOpen = false;"
-            style="padding:9px 12px; font-size:13px; cursor:pointer;
+                <div @mousedown.prevent="clearSubmitStation(); submitStationOpen = false;"
+                    style="padding:9px 12px; font-size:13px; cursor:pointer;
                    color:#64748b; border-bottom:1px solid #f1f5f9;"
-            @mouseover="$el.style.background='#f8fafc'"
-            @mouseleave="$el.style.background=''">
-            All Stations
-        </div>
+                    @mouseover="$el.style.background='#f8fafc'" @mouseleave="$el.style.background=''">
+                    All Stations
+                </div>
 
-        {{-- Filtered list --}}
-        <template x-for="s in filteredStations" :key="s.id">
-            <div
-                @mousedown.prevent="selectStation(s)"
-                x-text="s.name"
-                style="padding:9px 12px; font-size:13px; cursor:pointer;"
-                @mouseover="$el.style.background='#f8fafc'"
-                @mouseleave="$el.style.background=''">
+                <template x-for="s in filteredSubmitStations" :key="s.id">
+                    <div @mousedown.prevent="selectSubmitStation(s)" x-text="s.name"
+                        style="padding:9px 12px; font-size:13px; cursor:pointer;"
+                        @mouseover="$el.style.background='#f8fafc'" @mouseleave="$el.style.background=''">
+                    </div>
+                </template>
+
+                <div x-show="filteredSubmitStations.length === 0"
+                    style="padding:9px 12px; font-size:13px; color:#94a3b8; text-align:center;">
+                    No result found
+                </div>
             </div>
-        </template>
-
-        {{-- No result --}}
-        <div x-show="filteredStations.length === 0"
-            style="padding:9px 12px; font-size:13px; color:#94a3b8; text-align:center;">
-            No result found
         </div>
-    </div>
-</div>
 
         <div class="filter-actions" style="grid-column: 1 / -1;">
             <button class="btn-apply" @click="applySubmitFilter()" :disabled="isSubmitLoading">
@@ -295,66 +281,70 @@
 
     </div>{{-- /table scroll wrapper --}}
     {{-- ── Pagination ── --}}
-  {{-- ── Per Page + Pagination ── --}}
-<div style="display:flex; align-items:center; justify-content:space-between;
+    {{-- ── Per Page + Pagination ── --}}
+    <div
+        style="display:flex; align-items:center; justify-content:space-between;
             padding:14px 20px; border-top:1px solid #e2e8f0;
             font-size:12px; color:#64748b; flex-wrap:wrap; gap:10px;">
 
-    <div style="display:flex; align-items:center; gap:8px;">
-        <span>Show:</span>
-        <select
-            x-model="submitPerPage"
-            @change="submitCurrentPage = 1; applySubmitFilter(1)"
-            style="padding:4px 10px; border:1.5px solid #e2e8f0; border-radius:6px;
+        <div style="display:flex; align-items:center; gap:8px;">
+            <span>Show:</span>
+            <select x-model="submitPerPage" @change="submitCurrentPage = 1; applySubmitFilter(1)"
+                style="padding:4px 10px; border:1.5px solid #e2e8f0; border-radius:6px;
                    font-size:.78rem; color:#1e293b; background:#fff; cursor:pointer;">
-            <option value="10">10</option>
-            <option value="50">50</option>
-            <option value="100">100</option>
-            <option value="all">All</option>
-        </select>
-        <span style="color:#94a3b8;">entries per page</span>
-        <span x-show="submitTotalRecords > 0" style="color:#94a3b8; margin-left:8px;"
-              x-text="`— ${submitTotalRecords} record${submitTotalRecords !== 1 ? 's' : ''} found`">
-        </span>
-    </div>
+                <option value="10">10</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                {{-- <option value="all">All</option> --}}
+            </select>
+            <span style="color:#94a3b8;">entries per page</span>
+            <span x-show="submitTotalRecords > 0" style="color:#94a3b8; margin-left:8px;"
+                x-text="`— ${submitTotalRecords} record${submitTotalRecords !== 1 ? 's' : ''} found`">
+            </span>
+        </div>
 
-    <nav x-show="submitTotalPages > 1">
-        <ul class="pagination pagination-sm mb-0">
-            <li class="page-item" :class="{ disabled: submitCurrentPage <= 1 }">
-                <button class="page-link" @click="changeSubmitPage(1)" :disabled="submitCurrentPage <= 1">
-                    <i class="fa-solid fa-angles-left fa-xs"></i>
-                </button>
-            </li>
-            <li class="page-item" :class="{ disabled: submitCurrentPage <= 1 }">
-                <button class="page-link" @click="changeSubmitPage(submitCurrentPage - 1)" :disabled="submitCurrentPage <= 1">
-                    <i class="fa-solid fa-chevron-left fa-xs"></i>
-                </button>
-            </li>
-            <template x-for="page in (() => {
+        <nav x-show="submitTotalPages > 1">
+            <ul class="pagination pagination-sm mb-0">
+                <li class="page-item" :class="{ disabled: submitCurrentPage <= 1 }">
+                    <button class="page-link" @click="changeSubmitPage(1)" :disabled="submitCurrentPage <= 1">
+                        <i class="fa-solid fa-angles-left fa-xs"></i>
+                    </button>
+                </li>
+                <li class="page-item" :class="{ disabled: submitCurrentPage <= 1 }">
+                    <button class="page-link" @click="changeSubmitPage(submitCurrentPage - 1)"
+                        :disabled="submitCurrentPage <= 1">
+                        <i class="fa-solid fa-chevron-left fa-xs"></i>
+                    </button>
+                </li>
+                <template
+                    x-for="page in (() => {
                 let pages = [], start = Math.max(1, submitCurrentPage - 2);
                 let end = Math.min(submitTotalPages, start + 4);
                 start = Math.max(1, end - 4);
                 for (let i = start; i <= end; i++) pages.push(i);
                 return pages;
-            })()" :key="page">
-                <li class="page-item" :class="{ active: page === submitCurrentPage }">
-                    <button class="page-link" @click="changeSubmitPage(page)" x-text="page"></button>
+            })()"
+                    :key="page">
+                    <li class="page-item" :class="{ active: page === submitCurrentPage }">
+                        <button class="page-link" @click="changeSubmitPage(page)" x-text="page"></button>
+                    </li>
+                </template>
+                <li class="page-item" :class="{ disabled: submitCurrentPage >= submitTotalPages }">
+                    <button class="page-link" @click="changeSubmitPage(submitCurrentPage + 1)"
+                        :disabled="submitCurrentPage >= submitTotalPages">
+                        <i class="fa-solid fa-chevron-right fa-xs"></i>
+                    </button>
                 </li>
-            </template>
-            <li class="page-item" :class="{ disabled: submitCurrentPage >= submitTotalPages }">
-                <button class="page-link" @click="changeSubmitPage(submitCurrentPage + 1)" :disabled="submitCurrentPage >= submitTotalPages">
-                    <i class="fa-solid fa-chevron-right fa-xs"></i>
-                </button>
-            </li>
-            <li class="page-item" :class="{ disabled: submitCurrentPage >= submitTotalPages }">
-                <button class="page-link" @click="changeSubmitPage(submitTotalPages)" :disabled="submitCurrentPage >= submitTotalPages">
-                    <i class="fa-solid fa-angles-right fa-xs"></i>
-                </button>
-            </li>
-        </ul>
-    </nav>
+                <li class="page-item" :class="{ disabled: submitCurrentPage >= submitTotalPages }">
+                    <button class="page-link" @click="changeSubmitPage(submitTotalPages)"
+                        :disabled="submitCurrentPage >= submitTotalPages">
+                        <i class="fa-solid fa-angles-right fa-xs"></i>
+                    </button>
+                </li>
+            </ul>
+        </nav>
 
-</div>
+    </div>
 
 </div>{{-- /table-section --}}
 
