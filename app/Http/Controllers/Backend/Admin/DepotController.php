@@ -74,7 +74,7 @@ class DepotController extends Controller
             'depot_code'    => 'required|string|unique:depots,depot_code|max:50',
             'district'      => 'required|string|max:100',
             'contact_number' => 'required|string|max:20',
-            'capacity'      => 'required|numeric|min:1',
+            'capacity'      => 'required|numeric|min:0',
         ]);
 
         Depot::create([
@@ -104,7 +104,7 @@ class DepotController extends Controller
             'depot_code'    => 'required|string|max:50|unique:depots,depot_code,' . $depot->id,
             'district'      => 'required|string|max:100',
             'contact_number' => 'required|string|max:20',
-            'capacity'      => 'required|numeric|min:1',
+            'capacity'      => 'required|numeric|min:0',
         ]);
 
         $depot->update([
