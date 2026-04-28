@@ -1,6 +1,6 @@
 @extends('backend.uno.layouts.app')
 
-@section('title', 'Edit Fuel Report — Admin')
+@section('title', 'Edit Fuel Report — UNO')
 
 @push('styles')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -16,7 +16,6 @@
         padding: 30px;
     }
 
-    /* ── Page Header ── */
     .page-header {
         display: flex;
         justify-content: space-between;
@@ -31,7 +30,6 @@
     }
     .page-header h4 i { color: var(--primary); margin-right: 8px; }
 
-    /* ── Cards ── */
     .custom-card {
         background: #fff;
         border-radius: 10px;
@@ -65,7 +63,6 @@
     }
     .edit-badge i { margin-right: 4px; }
 
-    /* ── Station Form ── */
     .station-form {
         padding: 20px;
         background: #f8fafc;
@@ -117,7 +114,6 @@
         display: block;
     }
 
-    /* Officer read-only display */
     .officer-readonly-box {
         display: flex;
         align-items: center;
@@ -143,7 +139,6 @@
         letter-spacing: .3px;
     }
 
-    /* ── Fuel Grid ── */
     .category-bar {
         padding: 11px 18px;
         font-size: 13px;
@@ -214,24 +209,24 @@
         outline: none;
         box-shadow: 0 0 0 2px rgba(37,99,235,.1);
     }
-    .input-field.is-invalid { border-color: #dc2626; }
+    .input-field.is-invalid { 
+        border-color: #dc2626 !important; 
+        background-color: #fef2f2 !important;
+    }
 
     .auto-value {
-        font-size: 18px;
+        font-size: 17px;
         font-weight: 700;
+        color: var(--primary);
         line-height: 1;
     }
-    .auto-value.diff  { color: #dc2626; }
-    .auto-value.close { color: #2563eb; }
     .auto-label {
         font-size: 10px;
         color: #94a3b8;
         text-transform: uppercase;
         letter-spacing: .3px;
-        margin-top: 2px;
     }
 
-    /* ── Buttons ── */
     .btn-update {
         background: #16a34a;
         color: #fff;
@@ -264,7 +259,6 @@
     }
     .btn-back:hover { background: #e2e8f0; color: var(--dark); }
 
-    /* ── Alerts ── */
     .alert-error {
         background: #fef2f2;
         border: 1px solid #fecaca;
@@ -291,8 +285,7 @@
         font-weight: 600;
     }
 
-    /* ── Admin privilege banner ── */
-    .admin-banner {
+    .uno-banner {
         background: #eff6ff;
         border: 1px solid #bfdbfe;
         border-radius: 8px;
@@ -306,7 +299,29 @@
         font-weight: 600;
     }
 
-    /* ── Responsive ── */
+    /* WARNING MESSAGE STYLES */
+    .warn-message {
+        font-size: 11px;
+        color: #dc2626;
+        margin-top: 6px;
+        padding: 4px 8px;
+        background: #fef2f2;
+        border-radius: 4px;
+        /* border-left: 3px solid #dc2626; */
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .warn-message i {
+        font-size: 10px;
+        flex-shrink: 0;
+    }
+
+    .warn-message span {
+        line-height: 1.3;
+    }
+
     @media (max-width: 1100px) {
         .grid-head { display: none; }
         .input-grid { grid-template-columns: repeat(3, 1fr); }
@@ -332,16 +347,12 @@
         .input-grid { grid-template-columns: 1fr; }
         .grid-cell, .grid-cell-auto { border-right: none; }
     }
-    .auto-value.closing-value {
-        color: #2563eb;
-    }
 </style>
 @endpush
 
 @section('content')
 <div class="report-container">
 
-    {{-- ── Alerts ── --}}
     @if(session('error'))
         <div class="alert-error">
             <i class="fa-solid fa-circle-exclamation"></i> {{ session('error') }}
@@ -354,15 +365,13 @@
         </div>
     @endif
 
-    {{-- ── Admin Privilege Banner ── --}}
-    <div class="admin-banner">
+    <div class="uno-banner">
         <i class="fa-solid fa-shield-halved"></i>
         UNO Mode — You can edit reports from your upazila: 
-        <strong>{{ Auth::user()->profile?->upazila }}</strong>,
-        <strong>{{ Auth::user()->profile?->district }}</strong>
+        <strong>{{ Auth::user()->profile?->upazila ?? 'N/A' }}</strong>,
+        <strong>{{ Auth::user()->profile?->district ?? 'N/A' }}</strong>
     </div>
 
-    {{-- ── Page Header ── --}}
     <div class="page-header">
         <h4>
             <i class="fa-solid fa-pen-to-square"></i> Edit Fuel Report
@@ -372,26 +381,24 @@
         </a>
     </div>
 
-    {{-- ══ FORM ══ --}}
-    <form action="{{ route('uno.reports.update', $fuelReport) }}" method="POST">
+    <form action="{{ route('uno.reports.update', $fuelReport) }}" method="POST" id="unoEditForm">
         @csrf
         @method('PUT')
 
-        {{-- ── Station & Meta Info Card ── --}}
+        {{-- Station & Meta Info --}}
         <div class="custom-card">
             <div class="report-header">
                 <h5>
                     <i class="fa-solid fa-file-lines"></i> Daily Fuel Summary Report
                 </h5>
                 <span class="edit-badge">
-                    <i class="fa-regular fa-pen-to-square"></i> Admin Editing
+                    <i class="fa-regular fa-pen-to-square"></i> UNO Editing
                 </span>
             </div>
 
             <div class="station-form">
                 <div class="row g-3">
 
-                    {{-- Filling Station — read only --}}
                     <div class="col-md-3">
                         <label class="form-label-custom">
                             <i class="fa-solid fa-gas-pump fa-xs"></i> Filling Station
@@ -400,7 +407,6 @@
                                value="{{ $fuelReport->station_name }}" readonly>
                     </div>
 
-                    {{-- Division — read only --}}
                     <div class="col-md-2">
                         <label class="form-label-custom">
                             <i class="fa-solid fa-building fa-xs"></i> Division
@@ -409,7 +415,6 @@
                                value="{{ $fuelReport->division }}" readonly>
                     </div>
 
-                    {{-- District — read only --}}
                     <div class="col-md-2">
                         <label class="form-label-custom">
                             <i class="fa-solid fa-location-dot fa-xs"></i> District
@@ -418,7 +423,6 @@
                                value="{{ $fuelReport->district }}" readonly>
                     </div>
 
-                    {{-- Upazila — read only --}}
                     <div class="col-md-2">
                         <label class="form-label-custom">
                             <i class="fa-solid fa-map-pin fa-xs"></i> Thana / Upazila
@@ -427,7 +431,6 @@
                                value="{{ $fuelReport->thana_upazila }}" readonly>
                     </div>
 
-                    {{-- Report Date — editable --}}
                     <div class="col-md-2">
                         <label class="form-label-custom">
                             <i class="fa-regular fa-calendar fa-xs"></i> Report Date
@@ -441,7 +444,6 @@
                         @enderror
                     </div>
 
-                    {{-- Tag Officer — read only, shows who submitted --}}
                     <div class="col-md-3">
                         <label class="form-label-custom">
                             <i class="fa-solid fa-user-tie fa-xs"></i> Submitted By (Tag Officer)
@@ -459,13 +461,13 @@
             </div>
         </div>
 
-        {{-- ══ Fuel Cards ══ --}}
+        {{-- Fuel Cards --}}
         @php
             $fuelDefs = [
-                ['key' => 'octane', 'label' => 'Octane', 'icon' => 'fa-droplet',   'cls' => 'octane'],
-                ['key' => 'petrol', 'label' => 'Petrol', 'icon' => 'fa-gas-pump',  'cls' => 'petrol'],
-                ['key' => 'diesel', 'label' => 'Diesel', 'icon' => 'fa-cube',      'cls' => 'diesel'],
-                ['key' => 'others', 'label' => 'Others', 'icon' => 'fa-industry',  'cls' => 'others'],
+                ['key' => 'octane', 'label' => 'Octane', 'icon' => 'fa-droplet',  'cls' => 'octane'],
+                ['key' => 'petrol', 'label' => 'Petrol', 'icon' => 'fa-gas-pump', 'cls' => 'petrol'],
+                ['key' => 'diesel', 'label' => 'Diesel', 'icon' => 'fa-cube',     'cls' => 'diesel'],
+                ['key' => 'others', 'label' => 'Others', 'icon' => 'fa-industry', 'cls' => 'others'],
             ];
         @endphp
 
@@ -479,89 +481,69 @@
 
             <div class="input-grid">
 
-                {{-- Column Headers --}}
-                <div class="grid-head">
-                    <i class="fa-solid fa-clock-rotate-left fa-xs"></i> Previous Stock (L)
-                </div>
-                <div class="grid-head">
-                    <i class="fa-solid fa-truck fa-xs"></i> Supply From Depot (L)
-                </div>
-                <div class="grid-head">
-                    <i class="fa-solid fa-arrow-down fa-xs"></i> Received At Station (L)
-                </div>
-                <div class="grid-head">
-                    <i class="fa-solid fa-calculator fa-xs"></i> Difference (L)
-                </div>
-                <div class="grid-head">
-                    <i class="fa-solid fa-chart-line fa-xs"></i> Sales (L)
-                </div>
-                <div class="grid-head">
-                    <i class="fa-solid fa-warehouse fa-xs"></i> Closing Stock (L)
-                </div>
+                {{-- Headers --}}
+                <div class="grid-head"><i class="fa-solid fa-clock-rotate-left fa-xs"></i> Previous Stock (L)</div>
+                <div class="grid-head"><i class="fa-solid fa-truck fa-xs"></i> Supply From Depot (L)</div>
+                <div class="grid-head"><i class="fa-solid fa-arrow-down fa-xs"></i> Received At Station (L)</div>
+                <div class="grid-head"><i class="fa-solid fa-calculator fa-xs"></i> Difference (L)</div>
+                <div class="grid-head"><i class="fa-solid fa-chart-line fa-xs"></i> Sales (L)</div>
+                <div class="grid-head"><i class="fa-solid fa-warehouse fa-xs"></i> Closing Stock (L)</div>
 
-                {{-- Previous Stock --}}
+                {{-- 1. Previous Stock --}}
                 <div class="grid-cell" data-label="Previous Stock (L)">
                     <input type="number" step="0.01" min="0"
-                           name="{{ $fk }}_prev_stock"
-                           id="{{ $fk }}_prev_stock"
-                           class="input-field @error($fk.'_prev_stock') is-invalid @enderror"
-                           value="{{ old($fk.'_prev_stock', $fuelReport->{$fk.'_prev_stock'} ?? 0) }}"
-                           oninput="calcRow('{{ $fk }}')">
-                    @error($fk.'_prev_stock')
-                        <span class="invalid-feedback">{{ $message }}</span>
-                    @enderror
+                        name="{{ $fk }}_prev_stock"
+                        id="{{ $fk }}_prev_stock"
+                        class="input-field"
+                        value="{{ old($fk.'_prev_stock', $fuelReport->{$fk.'_prev_stock'} ?? 0) }}">
                 </div>
 
-                {{-- Supply --}}
+                {{-- 2. Supply From Depot --}}
                 <div class="grid-cell" data-label="Supply From Depot (L)">
                     <input type="number" step="0.01" min="0"
-                           name="{{ $fk }}_supply"
-                           id="{{ $fk }}_supply"
-                           class="input-field @error($fk.'_supply') is-invalid @enderror"
-                           value="{{ old($fk.'_supply', $fuelReport->{$fk.'_supply'} ?? 0) }}"
-                           oninput="calcRow('{{ $fk }}')">
-                    @error($fk.'_supply')
-                        <span class="invalid-feedback">{{ $message }}</span>
-                    @enderror
+                        name="{{ $fk }}_supply"
+                        id="{{ $fk }}_supply"
+                        class="input-field"
+                        value="{{ old($fk.'_supply', $fuelReport->{$fk.'_supply'} ?? 0) }}">
                 </div>
 
-                {{-- Received --}}
+                {{-- 3. Received At Station --}}
                 <div class="grid-cell" data-label="Received At Station (L)">
                     <input type="number" step="0.01" min="0"
-                           name="{{ $fk }}_received"
-                           id="{{ $fk }}_received"
-                           class="input-field @error($fk.'_received') is-invalid @enderror"
-                           value="{{ old($fk.'_received', $fuelReport->{$fk.'_received'} ?? 0) }}"
-                           oninput="calcRow('{{ $fk }}')">
-                    @error($fk.'_received')
-                        <span class="invalid-feedback">{{ $message }}</span>
-                    @enderror
+                        name="{{ $fk }}_received"
+                        id="{{ $fk }}_received"
+                        class="input-field"
+                        value="{{ old($fk.'_received', $fuelReport->{$fk.'_received'} ?? 0) }}">
+                    <div class="warn-message" id="{{ $fk }}_received_warn" style="display:none;">
+                        <!-- <i class="fa-solid fa-circle-exclamation fa-xs"></i> -->
+                        <span></span>
+                    </div>
                 </div>
 
-                {{-- Difference (auto-calculated) --}}
+                {{-- 4. Difference (auto) --}}
                 <div class="grid-cell-auto diff-bg" data-label="Difference (L)">
-                    <span class="auto-value diff" id="{{ $fk }}_difference_display">
+                    <span class="auto-value" id="{{ $fk }}_difference_display">
                         {{ number_format(($fuelReport->{$fk.'_difference'} ?? 0), 2) }}
                     </span>
                     <span class="auto-label">Auto</span>
                 </div>
 
-                {{-- Sales --}}
+                {{-- 5. Sales --}}
                 <div class="grid-cell" data-label="Sales (L)">
                     <input type="number" step="0.01" min="0"
-                           name="{{ $fk }}_sales"
-                           id="{{ $fk }}_sales"
-                           class="input-field @error($fk.'_sales') is-invalid @enderror"
-                           value="{{ old($fk.'_sales', $fuelReport->{$fk.'_sales'} ?? 0) }}"
-                           oninput="calcRow('{{ $fk }}')">
-                    @error($fk.'_sales')
-                        <span class="invalid-feedback">{{ $message }}</span>
-                    @enderror
+                        name="{{ $fk }}_sales"
+                        id="{{ $fk }}_sales"
+                        class="input-field"
+                        value="{{ old($fk.'_sales', $fuelReport->{$fk.'_sales'} ?? 0) }}">
+                    <div class="warn-message" id="{{ $fk }}_sales_warn" style="display:none;">
+                        <i class="fa-solid fa-circle-exclamation fa-xs"></i>
+                        <span></span>
+                    </div>
                 </div>
 
-                {{-- Closing Stock (auto-calculated) --}}
+                {{-- 6. Closing Stock (auto) --}}
                 <div class="grid-cell-auto close-bg" data-label="Closing Stock (L)">
-                    <span class="auto-value closing-value" id="{{ $fk }}_closing_display">
+                    <span class="auto-value" id="{{ $fk }}_closing_display">
                         {{ number_format(($fuelReport->{$fk.'_closing_stock'} ?? 0), 2) }}
                     </span>
                     <span class="auto-label">Auto</span>
@@ -571,7 +553,7 @@
         </div>
         @endforeach
 
-        {{-- ── Comment ── --}}
+        {{-- Comment --}}
         <div class="custom-card">
             <div style="padding:10px 16px; font-size:10px; font-weight:700;
                         text-transform:uppercase; letter-spacing:.5px; color:#64748b;
@@ -585,7 +567,7 @@
                       placeholder="Enter any comments or notes here...">{{ old('comment', $fuelReport->comment) }}</textarea>
         </div>
 
-        {{-- ── Submit Buttons ── --}}
+        {{-- Submit --}}
         <div style="display:flex; gap:14px; margin-bottom:40px; align-items:center;">
             <button type="submit" class="btn-update">
                 <i class="fa-solid fa-floppy-disk"></i> Update Report
@@ -599,34 +581,132 @@
 
 @push('scripts')
 <script>
-function calcRow(fuel) {
-    const prev     = parseFloat(document.getElementById(fuel + '_prev_stock')?.value)  || 0;
-    const supply   = parseFloat(document.getElementById(fuel + '_supply')?.value)      || 0;
-    const received = parseFloat(document.getElementById(fuel + '_received')?.value)    || 0;
-    const sales    = parseFloat(document.getElementById(fuel + '_sales')?.value)       || 0;
-
-    const diff    = supply - received;
-    const closing = prev + received - sales;
-
-    const diffEl    = document.getElementById(fuel + '_difference_display');
-    const closingEl = document.getElementById(fuel + '_closing_display');
-
-    if (diffEl) {
-        diffEl.textContent = diff.toFixed(2);
-        // positive diff = supply > received = loss → red
-        // negative diff = received > supply = surplus → green
-        diffEl.style.color = diff > 0 ? '#dc2626' : diff < 0 ? '#16a34a' : '#94a3b8';
+(function() {
+    'use strict';
+    
+    function calcRow(fuel) {
+        const prev = parseFloat(document.getElementById(fuel + '_prev_stock')?.value) || 0;
+        const supply = parseFloat(document.getElementById(fuel + '_supply')?.value) || 0;
+        const receivedEl = document.getElementById(fuel + '_received');
+        const salesEl = document.getElementById(fuel + '_sales');
+        
+        let received = parseFloat(receivedEl?.value) || 0;
+        let sales = parseFloat(salesEl?.value) || 0;
+        
+        // Validate Received
+        const receivedWarn = document.getElementById(fuel + '_received_warn');
+        if (received > supply) {
+            if (receivedWarn) {
+                receivedWarn.querySelector('span').textContent = '⚠ Received cannot exceed supply (' + supply.toFixed(2) + ' L)';
+                receivedWarn.style.display = 'flex';
+            }
+            receivedEl?.classList.add('is-invalid');
+            received = supply;
+            if (receivedEl) receivedEl.value = supply;
+        } else {
+            if (receivedWarn) receivedWarn.style.display = 'none';
+            receivedEl?.classList.remove('is-invalid');
+        }
+        
+        // Validate Sales
+        const maxSell = prev + received;
+        const salesWarn = document.getElementById(fuel + '_sales_warn');
+        if (sales > maxSell) {
+            if (salesWarn) {
+                salesWarn.querySelector('span').textContent = '⚠ Sales cannot exceed available stock (' + maxSell.toFixed(2) + ' L)';
+                salesWarn.style.display = 'flex';
+            }
+            salesEl?.classList.add('is-invalid');
+            sales = maxSell;
+            if (salesEl) salesEl.value = maxSell;
+        } else {
+            if (salesWarn) salesWarn.style.display = 'none';
+            salesEl?.classList.remove('is-invalid');
+        }
+        
+        // Update displays
+        const diff = supply - received;
+        const closing = prev + received - sales;
+        
+        const diffEl = document.getElementById(fuel + '_difference_display');
+        const closingEl = document.getElementById(fuel + '_closing_display');
+        
+        if (diffEl) {
+            diffEl.textContent = diff.toFixed(2);
+            diffEl.style.color = diff !== 0 ? '#dc2626' : '#16a34a';
+        }
+        if (closingEl) {
+            closingEl.textContent = closing.toFixed(2);
+            closingEl.style.color = closing < 0 ? '#dc2626' : '#2563eb';
+        }
     }
-
-    if (closingEl) {
-        closingEl.textContent = closing.toFixed(2);
-        closingEl.style.color = closing < 0 ? '#dc2626' : '#2563eb';
+    
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
     }
-}
-
-// Recalculate all rows on page load so displayed values match inputs
-document.addEventListener('DOMContentLoaded', () => {
-    ['petrol', 'diesel', 'octane', 'others'].forEach(fuel => calcRow(fuel));
-});
+    
+    function init() {
+        const fuels = ['octane', 'petrol', 'diesel', 'others'];
+        
+        // Initial calculation
+        fuels.forEach(fuel => calcRow(fuel));
+        
+        // Add event listeners
+        fuels.forEach(fuel => {
+            const inputs = ['prev_stock', 'supply', 'received', 'sales'].map(field => 
+                document.getElementById(fuel + '_' + field)
+            );
+            inputs.forEach(input => {
+                if (input) {
+                    input.addEventListener('input', () => calcRow(fuel));
+                    input.addEventListener('change', () => calcRow(fuel));
+                }
+            });
+        });
+        
+        // Form submit validation
+        const form = document.getElementById('unoEditForm');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                let hasError = false;
+                fuels.forEach(fuel => {
+                    const supply = parseFloat(document.getElementById(fuel + '_supply')?.value) || 0;
+                    const received = parseFloat(document.getElementById(fuel + '_received')?.value) || 0;
+                    const prev = parseFloat(document.getElementById(fuel + '_prev_stock')?.value) || 0;
+                    const sales = parseFloat(document.getElementById(fuel + '_sales')?.value) || 0;
+                    
+                    if (received > supply) {
+                        hasError = true;
+                        const warn = document.getElementById(fuel + '_received_warn');
+                        if (warn) {
+                            warn.querySelector('span').textContent = '⚠ Received cannot exceed supply (' + supply.toFixed(2) + ' L)';
+                            warn.style.display = 'flex';
+                        }
+                    }
+                    
+                    const maxSell = prev + Math.min(received, supply);
+                    if (sales > maxSell) {
+                        hasError = true;
+                        const warn = document.getElementById(fuel + '_sales_warn');
+                        if (warn) {
+                            warn.querySelector('span').textContent = '⚠ Sales cannot exceed available stock (' + maxSell.toFixed(2) + ' L)';
+                            warn.style.display = 'flex';
+                        }
+                    }
+                });
+                
+                if (hasError) {
+                    e.preventDefault();
+                    alert('Please fix the errors before submitting.');
+                }
+            });
+        }
+        
+        console.log('UNO Edit Form initialized - Warning messages enabled');
+    }
+})();
 </script>
 @endpush

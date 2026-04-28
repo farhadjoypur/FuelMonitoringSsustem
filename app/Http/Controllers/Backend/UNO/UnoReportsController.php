@@ -782,6 +782,33 @@ class UnoReportsController extends Controller
             'comment'           => 'nullable|string|max:500',
         ]);
 
+        // ── Sales cannot exceed prev_stock + received ─────────────────
+        // ── Received cannot exceed supply ────────────────────────────
+        $validationErrors = [];
+        foreach (['petrol', 'diesel', 'octane', 'others'] as $fuel) {
+            $prev    = (float) $request->input("{$fuel}_prev_stock", 0);
+            $supply  = (float) $request->input("{$fuel}_supply", 0);
+            $recv    = (float) $request->input("{$fuel}_received", 0);
+            $sales   = (float) $request->input("{$fuel}_sales", 0);
+            
+            // Check received cannot exceed supply
+            if ($recv > $supply) {
+                $validationErrors["{$fuel}_received"] = 
+                    ucfirst($fuel) . " received ({$recv} L) cannot exceed supply ({$supply} L).";
+            }
+            
+            // Check sales cannot exceed available stock
+            $maxSell = $prev + $recv;
+            if ($sales > $maxSell) {
+                $validationErrors["{$fuel}_sales"] = 
+                    ucfirst($fuel) . " sales ({$sales} L) cannot exceed available stock ({$maxSell} L).";
+            }
+        }
+
+        if (!empty($validationErrors)) {
+            return back()->withInput()->withErrors($validationErrors);
+        }
+
         $petrolDiff    = $request->petrol_supply  - $request->petrol_received;
         $petrolClosing = $request->petrol_prev_stock + $request->petrol_received - $request->petrol_sales;
 
