@@ -295,72 +295,66 @@
 
     </div>{{-- /table scroll wrapper --}}
     {{-- ── Pagination ── --}}
-    <div x-show="submitTotalPages > 1" style="display:none;">
-        <div
-            style="display:flex; align-items:center; justify-content:space-between;
-                padding:14px 20px; border-top:1px solid #e2e8f0;
-                font-size:12px; color:#64748b; flex-wrap:wrap; gap:10px;">
+  {{-- ── Per Page + Pagination ── --}}
+<div style="display:flex; align-items:center; justify-content:space-between;
+            padding:14px 20px; border-top:1px solid #e2e8f0;
+            font-size:12px; color:#64748b; flex-wrap:wrap; gap:10px;">
 
-            {{-- Records info --}}
-            <span
-                x-text="`Showing page ${submitCurrentPage} of ${submitTotalPages} — ${submitTotalRecords} records`"></span>
-
-            {{-- Pagination numbers --}}
-            <nav>
-                <ul class="pagination pagination-sm mb-0">
-
-                    {{-- First --}}
-                    <li class="page-item" :class="{ disabled: submitCurrentPage <= 1 }">
-                        <button class="page-link" @click="changeSubmitPage(1)" :disabled="submitCurrentPage <= 1">
-                            <i class="fa-solid fa-angles-left fa-xs"></i>
-                        </button>
-                    </li>
-
-                    {{-- Prev --}}
-                    <li class="page-item" :class="{ disabled: submitCurrentPage <= 1 }">
-                        <button class="page-link" @click="changeSubmitPage(submitCurrentPage - 1)"
-                            :disabled="submitCurrentPage <= 1">
-                            <i class="fa-solid fa-chevron-left fa-xs"></i>
-                        </button>
-                    </li>
-
-                    {{-- Page Numbers (window of 5) --}}
-                    <template
-                        x-for="page in (() => {
-                    let pages = [];
-                    let start = Math.max(1, submitCurrentPage - 2);
-                    let end   = Math.min(submitTotalPages, start + 4);
-                    start     = Math.max(1, end - 4);
-                    for (let i = start; i <= end; i++) pages.push(i);
-                    return pages;
-                })()"
-                        :key="page">
-                        <li class="page-item" :class="{ active: page === submitCurrentPage }">
-                            <button class="page-link" @click="changeSubmitPage(page)" x-text="page"></button>
-                        </li>
-                    </template>
-
-                    {{-- Next --}}
-                    <li class="page-item" :class="{ disabled: submitCurrentPage >= submitTotalPages }">
-                        <button class="page-link" @click="changeSubmitPage(submitCurrentPage + 1)"
-                            :disabled="submitCurrentPage >= submitTotalPages">
-                            <i class="fa-solid fa-chevron-right fa-xs"></i>
-                        </button>
-                    </li>
-
-                    {{-- Last --}}
-                    <li class="page-item" :class="{ disabled: submitCurrentPage >= submitTotalPages }">
-                        <button class="page-link" @click="changeSubmitPage(submitTotalPages)"
-                            :disabled="submitCurrentPage >= submitTotalPages">
-                            <i class="fa-solid fa-angles-right fa-xs"></i>
-                        </button>
-                    </li>
-
-                </ul>
-            </nav>
-
-        </div>
+    <div style="display:flex; align-items:center; gap:8px;">
+        <span>Show:</span>
+        <select
+            x-model="submitPerPage"
+            @change="submitCurrentPage = 1; applySubmitFilter(1)"
+            style="padding:4px 10px; border:1.5px solid #e2e8f0; border-radius:6px;
+                   font-size:.78rem; color:#1e293b; background:#fff; cursor:pointer;">
+            <option value="10">10</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+            <option value="all">All</option>
+        </select>
+        <span style="color:#94a3b8;">entries per page</span>
+        <span x-show="submitTotalRecords > 0" style="color:#94a3b8; margin-left:8px;"
+              x-text="`— ${submitTotalRecords} record${submitTotalRecords !== 1 ? 's' : ''} found`">
+        </span>
     </div>
+
+    <nav x-show="submitTotalPages > 1">
+        <ul class="pagination pagination-sm mb-0">
+            <li class="page-item" :class="{ disabled: submitCurrentPage <= 1 }">
+                <button class="page-link" @click="changeSubmitPage(1)" :disabled="submitCurrentPage <= 1">
+                    <i class="fa-solid fa-angles-left fa-xs"></i>
+                </button>
+            </li>
+            <li class="page-item" :class="{ disabled: submitCurrentPage <= 1 }">
+                <button class="page-link" @click="changeSubmitPage(submitCurrentPage - 1)" :disabled="submitCurrentPage <= 1">
+                    <i class="fa-solid fa-chevron-left fa-xs"></i>
+                </button>
+            </li>
+            <template x-for="page in (() => {
+                let pages = [], start = Math.max(1, submitCurrentPage - 2);
+                let end = Math.min(submitTotalPages, start + 4);
+                start = Math.max(1, end - 4);
+                for (let i = start; i <= end; i++) pages.push(i);
+                return pages;
+            })()" :key="page">
+                <li class="page-item" :class="{ active: page === submitCurrentPage }">
+                    <button class="page-link" @click="changeSubmitPage(page)" x-text="page"></button>
+                </li>
+            </template>
+            <li class="page-item" :class="{ disabled: submitCurrentPage >= submitTotalPages }">
+                <button class="page-link" @click="changeSubmitPage(submitCurrentPage + 1)" :disabled="submitCurrentPage >= submitTotalPages">
+                    <i class="fa-solid fa-chevron-right fa-xs"></i>
+                </button>
+            </li>
+            <li class="page-item" :class="{ disabled: submitCurrentPage >= submitTotalPages }">
+                <button class="page-link" @click="changeSubmitPage(submitTotalPages)" :disabled="submitCurrentPage >= submitTotalPages">
+                    <i class="fa-solid fa-angles-right fa-xs"></i>
+                </button>
+            </li>
+        </ul>
+    </nav>
+
+</div>
 
 </div>{{-- /table-section --}}
 

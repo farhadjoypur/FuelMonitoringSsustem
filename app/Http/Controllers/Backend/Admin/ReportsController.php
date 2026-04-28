@@ -72,6 +72,7 @@ class ReportsController extends Controller
                 'currentPage' => $currentPage,
                 'lastPage' => $perPage >= $total ? 1 : (int) ceil($total / $perPage),
                 'total'       => $total,
+                'perPage'     => $perPage,
                 'filters'     => $request->only([
                     'from_date',
                     'to_date',
@@ -394,7 +395,16 @@ class ReportsController extends Controller
             'min_diff_l'    => 'nullable|numeric|min:0',
             'min_diff_pct'  => 'nullable|numeric|min:0',
             'page'          => 'nullable|integer|min:1',
+            'per_page'      => 'nullable|string',
         ]);
+
+        // Pagination
+        $rawPerPage  = $request->get('per_page', 10);
+        $perPage     = ($rawPerPage === 'all' || (int) $rawPerPage <= 0)
+            ? PHP_INT_MAX
+            : (int) $rawPerPage;
+
+        $currentPage = (int) ($validated['page'] ?? 1);
 
         $query = Fuelreport::query()
             ->with(['fillingStation.company']);
@@ -422,16 +432,14 @@ class ReportsController extends Controller
             );
         }
 
-        $fuelTypes   = ['octane', 'petrol', 'diesel', 'others'];
-        $perPage     = 10;
-        $currentPage = (int) ($validated['page'] ?? 1);
+        $fuelTypes  = ['octane', 'petrol', 'diesel', 'others'];
 
         $officerMap = AssignTagOfficer::with(['officer.profile'])
             ->where('status', 'active')->get()->keyBy('filling_station_id');
 
         $allRawReports = $query->orderBy('report_date', 'desc')->orderBy('station_id')->get();
 
-        // Build per-row (daily) difference data — NO groupBy
+        // ✅ FIX 3: perPage map() return-ed array
         $rows = $allRawReports->map(function ($report) use ($fuelTypes, $officerMap) {
             $stationId          = $report->station_id;
             $assignment         = $officerMap->get($stationId);
@@ -445,8 +453,10 @@ class ReportsController extends Controller
                 $totalSupply       = (float) ($report->{"{$fuel}_supply"} ?? 0);
                 $totalReceived     = (float) ($report->{"{$fuel}_received"} ?? 0);
                 $differenceL       = $totalSupply - $totalReceived;
-                $differencePercent = $totalSupply > 0 ? round(($differenceL / $totalSupply) * 100, 2) : 0;
-                $diffStatus        = match (true) {
+                $differencePercent = $totalSupply > 0
+                    ? round(($differenceL / $totalSupply) * 100, 2)
+                    : 0;
+                $diffStatus = match (true) {
                     abs($differencePercent) >= 5 => 'High',
                     abs($differencePercent) >= 1 => 'Low',
                     default                      => 'Normal',
@@ -497,12 +507,13 @@ class ReportsController extends Controller
         if (!empty($validated['diff_status'])) {
             $targetStatus = ucfirst($validated['diff_status']);
             $rows         = $rows->filter(
-                fn($row) => collect($row['fuelBreakdown'])->contains(fn($f) => $f['diffStatus'] === $targetStatus)
+                fn($row) => collect($row['fuelBreakdown'])
+                    ->contains(fn($f) => $f['diffStatus'] === $targetStatus)
             )->values();
         }
 
         $totalRecords  = $rows->count();
-        $totalPages    = (int) ceil($totalRecords / $perPage) ?: 1;
+        $totalPages    = $perPage >= PHP_INT_MAX ? 1 : ((int) ceil($totalRecords / $perPage) ?: 1);
         $paginatedRows = $rows->forPage($currentPage, $perPage)->values();
 
         return response()->json([
@@ -511,6 +522,7 @@ class ReportsController extends Controller
             'total'       => $totalRecords,
             'currentPage' => $currentPage,
             'lastPage'    => $totalPages,
+            'perPage'     => $perPage >= PHP_INT_MAX ? 'all' : $perPage,  // 
         ]);
     }
 
@@ -520,7 +532,10 @@ class ReportsController extends Controller
 
     public function missingReport(Request $request)
     {
-        $perPage     = 10;
+        $rawPerPage = $request->get('per_page', 10);
+        $perPage    = ($rawPerPage === 'all' || (int)$rawPerPage <= 0)
+            ? PHP_INT_MAX
+            : (int) $rawPerPage;
         $currentPage = (int) $request->get('page', 1);
 
         $assignmentsQuery = AssignTagOfficer::with([
@@ -583,7 +598,7 @@ class ReportsController extends Controller
             })->values();
 
         $total      = $missingRows->count();
-        $totalPages = (int) ceil($total / $perPage) ?: 1;
+        $totalPages = $perPage >= PHP_INT_MAX ? 1 : ((int) ceil($total / $perPage) ?: 1);
         $rows       = $missingRows->forPage($currentPage, $perPage)->values();
 
         return response()->json([
@@ -592,6 +607,7 @@ class ReportsController extends Controller
             'total'       => $total,
             'currentPage' => $currentPage,
             'lastPage'    => $totalPages,
+            'perPage'     => $perPage >= PHP_INT_MAX ? 'all' : $perPage,
         ]);
     }
 
@@ -601,7 +617,10 @@ class ReportsController extends Controller
 
     public function submittedReport(Request $request)
     {
-        $perPage     = 10;
+        $rawPerPage = $request->get('per_page', 10);
+        $perPage    = ($rawPerPage === 'all' || (int)$rawPerPage <= 0)
+            ? PHP_INT_MAX
+            : (int) $rawPerPage;
         $currentPage = (int) $request->get('page', 1);
 
         $query = Fuelreport::query()->with([
@@ -660,7 +679,7 @@ class ReportsController extends Controller
         });
 
         $total      = $rows->count();
-        $totalPages = (int) ceil($total / $perPage) ?: 1;
+        $totalPages = $perPage >= PHP_INT_MAX ? 1 : ((int) ceil($total / $perPage) ?: 1);
         $paged      = $rows->forPage($currentPage, $perPage)->values();
 
         return response()->json([
@@ -669,6 +688,7 @@ class ReportsController extends Controller
             'total'       => $total,
             'currentPage' => $currentPage,
             'lastPage'    => $totalPages,
+            'perPage'     => $perPage >= PHP_INT_MAX ? 'all' : $perPage,
         ]);
     }
 
