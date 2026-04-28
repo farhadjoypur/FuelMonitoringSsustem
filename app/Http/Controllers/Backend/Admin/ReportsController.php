@@ -725,7 +725,7 @@ class ReportsController extends Controller
         return view('backend.admin.pages.reports.edit', compact('fuelReport', 'tagOfficerName'));
     }
 
-    public function update(Request $request, Fuelreport $fuelReport)
+   public function update(Request $request, Fuelreport $fuelReport)
     {
         $request->validate([
             'report_date'       => 'required|date',
@@ -733,38 +733,61 @@ class ReportsController extends Controller
 
             'petrol_prev_stock' => 'required|numeric|min:0',
             'petrol_supply'     => 'required|numeric|min:0',
-            'petrol_received'   => 'required|numeric|min:0',
+            'petrol_received'   => 'required|numeric|min:0|lte:petrol_supply',
             'petrol_sales'      => 'required|numeric|min:0',
 
             'diesel_prev_stock' => 'required|numeric|min:0',
             'diesel_supply'     => 'required|numeric|min:0',
-            'diesel_received'   => 'required|numeric|min:0',
+            'diesel_received'   => 'required|numeric|min:0|lte:diesel_supply',
             'diesel_sales'      => 'required|numeric|min:0',
 
             'octane_prev_stock' => 'required|numeric|min:0',
             'octane_supply'     => 'required|numeric|min:0',
-            'octane_received'   => 'required|numeric|min:0',
+            'octane_received'   => 'required|numeric|min:0|lte:octane_supply',
             'octane_sales'      => 'required|numeric|min:0',
 
             'others_prev_stock' => 'required|numeric|min:0',
             'others_supply'     => 'required|numeric|min:0',
-            'others_received'   => 'required|numeric|min:0',
+            'others_received'   => 'required|numeric|min:0|lte:others_supply',
             'others_sales'      => 'required|numeric|min:0',
 
             'comment'           => 'nullable|string|max:500',
+        ], [
+            'petrol_received.lte' => 'Petrol received cannot exceed supply from depot.',
+            'diesel_received.lte' => 'Diesel received cannot exceed supply from depot.',
+            'octane_received.lte' => 'Octane received cannot exceed supply from depot.',
+            'others_received.lte' => 'Others received cannot exceed supply from depot.',
         ]);
 
-        // Auto-calculate
-        $petrolDiff    = $request->petrol_supply  - $request->petrol_received;
+        // ── Sales cannot exceed prev_stock + received ─────────────────
+        $salesErrors = [];
+        foreach (['petrol', 'diesel', 'octane', 'others'] as $fuel) {
+            $prev    = (float) $request->input("{$fuel}_prev_stock", 0);
+            $recv    = (float) $request->input("{$fuel}_received",   0);
+            $sales   = (float) $request->input("{$fuel}_sales",      0);
+            $maxSell = $prev + $recv;
+
+            if ($sales > $maxSell) {
+                $salesErrors["{$fuel}_sales"] =
+                    ucfirst($fuel) . " sales ({$sales} L) cannot exceed available stock ({$maxSell} L).";
+            }
+        }
+
+        if (!empty($salesErrors)) {
+            return back()->withInput()->withErrors($salesErrors);
+        }
+
+        // ── Auto-calculate ────────────────────────────────────────────
+        $petrolDiff    = $request->petrol_supply - $request->petrol_received;
         $petrolClosing = $request->petrol_prev_stock + $request->petrol_received - $request->petrol_sales;
 
-        $dieselDiff    = $request->diesel_supply  - $request->diesel_received;
+        $dieselDiff    = $request->diesel_supply - $request->diesel_received;
         $dieselClosing = $request->diesel_prev_stock + $request->diesel_received - $request->diesel_sales;
 
-        $octaneDiff    = $request->octane_supply  - $request->octane_received;
+        $octaneDiff    = $request->octane_supply - $request->octane_received;
         $octaneClosing = $request->octane_prev_stock + $request->octane_received - $request->octane_sales;
 
-        $othersDiff    = $request->others_supply  - $request->others_received;
+        $othersDiff    = $request->others_supply - $request->others_received;
         $othersClosing = $request->others_prev_stock + $request->others_received - $request->others_sales;
 
         $data = [
@@ -777,6 +800,7 @@ class ReportsController extends Controller
             'petrol_difference'    => $petrolDiff,
             'petrol_sales'         => $request->petrol_sales,
             'petrol_closing_stock' => $petrolClosing,
+            'petrol_status'        => $this->resolveFuelStatusLabel($petrolClosing),
 
             'diesel_prev_stock'    => $request->diesel_prev_stock,
             'diesel_supply'        => $request->diesel_supply,
@@ -784,6 +808,7 @@ class ReportsController extends Controller
             'diesel_difference'    => $dieselDiff,
             'diesel_sales'         => $request->diesel_sales,
             'diesel_closing_stock' => $dieselClosing,
+            'diesel_status'        => $this->resolveFuelStatusLabel($dieselClosing),
 
             'octane_prev_stock'    => $request->octane_prev_stock,
             'octane_supply'        => $request->octane_supply,
@@ -791,6 +816,7 @@ class ReportsController extends Controller
             'octane_difference'    => $octaneDiff,
             'octane_sales'         => $request->octane_sales,
             'octane_closing_stock' => $octaneClosing,
+            'octane_status'        => $this->resolveFuelStatusLabel($octaneClosing),
 
             'others_prev_stock'    => $request->others_prev_stock,
             'others_supply'        => $request->others_supply,
@@ -798,14 +824,9 @@ class ReportsController extends Controller
             'others_difference'    => $othersDiff,
             'others_sales'         => $request->others_sales,
             'others_closing_stock' => $othersClosing,
-
-            'petrol_status' => $this->resolveFuelStatusLabel($petrolClosing),
-            'diesel_status' => $this->resolveFuelStatusLabel($dieselClosing),
-            'octane_status' => $this->resolveFuelStatusLabel($octaneClosing),
-            'others_status' => $this->resolveFuelStatusLabel($othersClosing),
+            'others_status'        => $this->resolveFuelStatusLabel($othersClosing),
         ];
 
-        // Update tag officer if changed
         if ($request->filled('tag_officer_id')) {
             $data['tag_officer_id'] = $request->tag_officer_id;
         }
