@@ -688,25 +688,54 @@ class DcReportsController extends Controller
 
         $request->validate([
             'report_date'       => 'required|date',
+
             'petrol_prev_stock' => 'required|numeric|min:0',
             'petrol_supply'     => 'required|numeric|min:0',
-            'petrol_received'   => 'required|numeric|min:0',
+            'petrol_received'   => 'required|numeric|min:0|lte:petrol_supply',
             'petrol_sales'      => 'required|numeric|min:0',
+
             'diesel_prev_stock' => 'required|numeric|min:0',
             'diesel_supply'     => 'required|numeric|min:0',
-            'diesel_received'   => 'required|numeric|min:0',
+            'diesel_received'   => 'required|numeric|min:0|lte:diesel_supply',
             'diesel_sales'      => 'required|numeric|min:0',
+
             'octane_prev_stock' => 'required|numeric|min:0',
             'octane_supply'     => 'required|numeric|min:0',
-            'octane_received'   => 'required|numeric|min:0',
+            'octane_received'   => 'required|numeric|min:0|lte:octane_supply',
             'octane_sales'      => 'required|numeric|min:0',
+
             'others_prev_stock' => 'required|numeric|min:0',
             'others_supply'     => 'required|numeric|min:0',
-            'others_received'   => 'required|numeric|min:0',
+            'others_received'   => 'required|numeric|min:0|lte:others_supply',
             'others_sales'      => 'required|numeric|min:0',
+
             'comment'           => 'nullable|string|max:500',
+        ], [
+            'petrol_received.lte' => 'Petrol received cannot exceed supply from depot.',
+            'diesel_received.lte' => 'Diesel received cannot exceed supply from depot.',
+            'octane_received.lte' => 'Octane received cannot exceed supply from depot.',
+            'others_received.lte' => 'Others received cannot exceed supply from depot.',
         ]);
 
+        // ── Sales cannot exceed prev_stock + received ─────────────────
+        $salesErrors = [];
+        foreach (['petrol', 'diesel', 'octane', 'others'] as $fuel) {
+            $prev    = (float) $request->input("{$fuel}_prev_stock", 0);
+            $recv    = (float) $request->input("{$fuel}_received",   0);
+            $sales   = (float) $request->input("{$fuel}_sales",      0);
+            $maxSell = $prev + $recv;
+
+            if ($sales > $maxSell) {
+                $salesErrors["{$fuel}_sales"] =
+                    ucfirst($fuel) . " sales ({$sales} L) cannot exceed available stock ({$maxSell} L).";
+            }
+        }
+
+        if (!empty($salesErrors)) {
+            return back()->withInput()->withErrors($salesErrors);
+        }
+
+        // ── Auto-calculate ────────────────────────────────────────────
         $petrolDiff    = $request->petrol_supply  - $request->petrol_received;
         $petrolClosing = $request->petrol_prev_stock + $request->petrol_received - $request->petrol_sales;
 

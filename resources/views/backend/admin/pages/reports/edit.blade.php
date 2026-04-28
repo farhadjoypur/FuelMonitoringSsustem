@@ -321,6 +321,49 @@
         .input-grid { grid-template-columns: 1fr; }
         .grid-cell, .grid-cell-auto { border-right: none; }
     }
+    /* Warning message styles */
+.warn-message {
+    font-size: 11px;
+    color: #dc2626;
+    margin-top: 6px;
+    padding: 4px 8px;
+    background: #fef2f2;
+    border-radius: 4px;
+    /* border-left: 3px solid #dc2626; */
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.warn-message i {
+    font-size: 10px;
+    flex-shrink: 0;
+}
+
+.warn-message span {
+    line-height: 1.3;
+}
+
+.input-field.is-invalid {
+    border-color: #dc2626;
+    background-color: #fef2f2;
+}
+
+/* Optional: Animation for warning appearance */
+.warn-message {
+    animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 </style>
 @endpush
 
@@ -464,11 +507,11 @@
                 {{-- 1. Previous Stock --}}
                 <div class="grid-cell" data-label="Previous Stock (L)">
                     <input type="number" step="0.01" min="0"
-                           name="{{ $fk }}_prev_stock"
-                           id="{{ $fk }}_prev_stock"
-                           class="input-field @error($fk.'_prev_stock') is-invalid @enderror"
-                           value="{{ old($fk.'_prev_stock', $fuelReport->{$fk.'_prev_stock'} ?? 0) }}"
-                           oninput="calcRow('{{ $fk }}')">
+                        name="{{ $fk }}_prev_stock"
+                        id="{{ $fk }}_prev_stock"
+                        class="input-field @error($fk.'_prev_stock') is-invalid @enderror"
+                        value="{{ old($fk.'_prev_stock', $fuelReport->{$fk.'_prev_stock'} ?? 0) }}"
+                        oninput="calcRow('{{ $fk }}')">
                     @error($fk.'_prev_stock')
                         <span class="invalid-feedback">{{ $message }}</span>
                     @enderror
@@ -477,11 +520,11 @@
                 {{-- 2. Supply From Depot --}}
                 <div class="grid-cell" data-label="Supply From Depot (L)">
                     <input type="number" step="0.01" min="0"
-                           name="{{ $fk }}_supply"
-                           id="{{ $fk }}_supply"
-                           class="input-field @error($fk.'_supply') is-invalid @enderror"
-                           value="{{ old($fk.'_supply', $fuelReport->{$fk.'_supply'} ?? 0) }}"
-                           oninput="calcRow('{{ $fk }}')">
+                        name="{{ $fk }}_supply"
+                        id="{{ $fk }}_supply"
+                        class="input-field @error($fk.'_supply') is-invalid @enderror"
+                        value="{{ old($fk.'_supply', $fuelReport->{$fk.'_supply'} ?? 0) }}"
+                        oninput="calcRow('{{ $fk }}')">
                     @error($fk.'_supply')
                         <span class="invalid-feedback">{{ $message }}</span>
                     @enderror
@@ -490,13 +533,15 @@
                 {{-- 3. Received At Station --}}
                 <div class="grid-cell" data-label="Received At Station (L)">
                     <input type="number" step="0.01" min="0"
-                           name="{{ $fk }}_received"
-                           id="{{ $fk }}_received"
-                           class="input-field @error($fk.'_received') is-invalid @enderror"
-                           value="{{ old($fk.'_received', $fuelReport->{$fk.'_received'} ?? 0) }}"
-                           oninput="calcRow('{{ $fk }}')">
-                    <span id="{{ $fk }}_received_warn"
-                          style="display:none; font-size:11px; color:#dc2626; margin-top:4px;"></span>
+                        name="{{ $fk }}_received"
+                        id="{{ $fk }}_received"
+                        class="input-field @error($fk.'_received') is-invalid @enderror"
+                        value="{{ old($fk.'_received', $fuelReport->{$fk.'_received'} ?? 0) }}"
+                        oninput="calcRow('{{ $fk }}')">
+                    {{-- WARNING MESSAGE FOR RECEIVED --}}
+                    <div class="warn-message" id="{{ $fk }}_received_warn" style="display:none;">
+                        <span></span>
+                    </div>
                     @error($fk.'_received')
                         <span class="invalid-feedback">{{ $message }}</span>
                     @enderror
@@ -505,7 +550,7 @@
                 {{-- 4. Difference (auto) --}}
                 <div class="grid-cell-auto diff-bg" data-label="Difference (L)">
                     <span class="auto-value" id="{{ $fk }}_difference_display"
-                          style="color:{{ ($fuelReport->{$fk.'_difference'} ?? 0) != 0 ? '#dc2626' : '#16a34a' }};">
+                        style="color:{{ ($fuelReport->{$fk.'_difference'} ?? 0) != 0 ? '#dc2626' : '#16a34a' }};">
                         {{ number_format(($fuelReport->{$fk.'_difference'} ?? 0), 2) }}
                     </span>
                     <span class="auto-label">Auto</span>
@@ -514,13 +559,16 @@
                 {{-- 5. Sales --}}
                 <div class="grid-cell" data-label="Sales (L)">
                     <input type="number" step="0.01" min="0"
-                           name="{{ $fk }}_sales"
-                           id="{{ $fk }}_sales"
-                           class="input-field @error($fk.'_sales') is-invalid @enderror"
-                           value="{{ old($fk.'_sales', $fuelReport->{$fk.'_sales'} ?? 0) }}"
-                           oninput="calcRow('{{ $fk }}')">
-                    <span id="{{ $fk }}_sales_warn"
-                          style="display:none; font-size:11px; color:#dc2626; margin-top:4px;"></span>
+                        name="{{ $fk }}_sales"
+                        id="{{ $fk }}_sales"
+                        class="input-field @error($fk.'_sales') is-invalid @enderror"
+                        value="{{ old($fk.'_sales', $fuelReport->{$fk.'_sales'} ?? 0) }}"
+                        oninput="calcRow('{{ $fk }}')">
+                    {{-- WARNING MESSAGE FOR SALES --}}
+                    <div class="warn-message" id="{{ $fk }}_sales_warn" style="display:none;">
+                        <i class="fa-solid fa-circle-exclamation fa-xs"></i>
+                        <span></span>
+                    </div>
                     @error($fk.'_sales')
                         <span class="invalid-feedback">{{ $message }}</span>
                     @enderror
@@ -529,7 +577,7 @@
                 {{-- 6. Closing Stock (auto) --}}
                 <div class="grid-cell-auto close-bg" data-label="Closing Stock (L)">
                     <span class="auto-value" id="{{ $fk }}_closing_display"
-                          style="color:{{ ($fuelReport->{$fk.'_closing_stock'} ?? 0) < 0 ? '#dc2626' : 'var(--primary)' }};">
+                        style="color:{{ ($fuelReport->{$fk.'_closing_stock'} ?? 0) < 0 ? '#dc2626' : 'var(--primary)' }};">
                         {{ number_format(($fuelReport->{$fk.'_closing_stock'} ?? 0), 2) }}
                     </span>
                     <span class="auto-label">Auto</span>
@@ -576,49 +624,78 @@ function calcRow(fuel) {
     let received = parseFloat(receivedEl?.value) || 0;
     let sales    = parseFloat(salesEl?.value)    || 0;
 
-    // ── 1. Received cannot exceed Supply — clamp + warn ───────────
-    const receivedWarnEl = document.getElementById(fuel + '_received_warn');
-
+    // VALIDATION 1: Received cannot exceed supply
+    const receivedWarnDiv = document.getElementById(fuel + '_received_warn');
+    
     if (received > supply) {
-        if (receivedWarnEl) {
-            receivedWarnEl.textContent =
-                `⚠ Received cannot exceed Supply from Depot (${supply.toFixed(2)} L). Adjusted automatically.`;
-            receivedWarnEl.style.display = 'block';
+        // Show warning message
+        if (receivedWarnDiv) {
+            const warnSpan = receivedWarnDiv.querySelector('span');
+            if (warnSpan) {
+                warnSpan.textContent = '⚠ Received cannot exceed supply (' + supply.toFixed(2) + ' L).';
+            }
+            receivedWarnDiv.style.display = 'flex';
         }
+        
+        // Add error class to input
         if (receivedEl) {
-            receivedEl.value = supply.toFixed(2);
             receivedEl.classList.add('is-invalid');
         }
-        received = supply; // use clamped value for further calc
+        
+        // Auto-correct the value
+        received = supply;
+        if (receivedEl) {
+            receivedEl.value = supply.toFixed(2);
+        }
     } else {
-        if (receivedWarnEl) receivedWarnEl.style.display = 'none';
-        if (receivedEl)     receivedEl.classList.remove('is-invalid');
+        // Hide warning if valid
+        if (receivedWarnDiv) {
+            receivedWarnDiv.style.display = 'none';
+        }
+        if (receivedEl) {
+            receivedEl.classList.remove('is-invalid');
+        }
     }
 
-    // ── 2. Sales cannot exceed (prev + received) — clamp + warn ───
+    // VALIDATION 2: Sales cannot exceed available stock (prev + received)
     const maxSellable = prev + received;
-    const salesWarnEl = document.getElementById(fuel + '_sales_warn');
+    const salesWarnDiv = document.getElementById(fuel + '_sales_warn');
 
     if (sales > maxSellable) {
-        if (salesWarnEl) {
-            salesWarnEl.textContent =
-                `⚠ Sales cannot exceed available stock (${maxSellable.toFixed(2)} L). Adjusted automatically.`;
-            salesWarnEl.style.display = 'block';
+        // Show warning message
+        if (salesWarnDiv) {
+            const warnSpan = salesWarnDiv.querySelector('span');
+            if (warnSpan) {
+                warnSpan.textContent = '⚠ Sales cannot exceed available stock (' + maxSellable.toFixed(2) + ' L).';
+            }
+            salesWarnDiv.style.display = 'flex';
         }
+        
+        // Add error class to input
+        if (salesEl) {
+            salesEl.classList.add('is-invalid');
+        }
+        
+        // Auto-correct the value
         sales = maxSellable;
         if (salesEl) {
             salesEl.value = sales.toFixed(2);
-            salesEl.classList.add('is-invalid');
         }
     } else {
-        if (salesWarnEl) salesWarnEl.style.display = 'none';
-        if (salesEl)     salesEl.classList.remove('is-invalid');
+        // Hide warning if valid
+        if (salesWarnDiv) {
+            salesWarnDiv.style.display = 'none';
+        }
+        if (salesEl) {
+            salesEl.classList.remove('is-invalid');
+        }
     }
 
-    // ── 3. Difference & Closing ───────────────────────────────────
+    // Calculate difference and closing stock
     const diff    = supply - received;
     const closing = prev + received - sales;
 
+    // Update displays
     const diffEl    = document.getElementById(fuel + '_difference_display');
     const closingEl = document.getElementById(fuel + '_closing_display');
 
@@ -626,68 +703,10 @@ function calcRow(fuel) {
         diffEl.textContent = diff.toFixed(2);
         diffEl.style.color = diff !== 0 ? '#dc2626' : '#16a34a';
     }
-
     if (closingEl) {
         closingEl.textContent = closing.toFixed(2);
         closingEl.style.color = closing < 0 ? '#dc2626' : 'var(--primary)';
     }
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-
-    // Initial calculation on page load
-    ['octane', 'petrol', 'diesel', 'others'].forEach(fuel => calcRow(fuel));
-
-    // Live recalc on every input change
-    ['octane', 'petrol', 'diesel', 'others'].forEach(fuel => {
-        ['prev_stock', 'supply', 'received', 'sales'].forEach(field => {
-            const el = document.getElementById(`${fuel}_${field}`);
-            if (el) el.addEventListener('input', () => calcRow(fuel));
-        });
-    });
-
-    // ── Final guard on submit ─────────────────────────────────────
-    document.getElementById('adminEditForm').addEventListener('submit', function (e) {
-        let blocked = false;
-
-        ['octane', 'petrol', 'diesel', 'others'].forEach(fuel => {
-            const prev     = parseFloat(document.getElementById(fuel + '_prev_stock')?.value) || 0;
-            const supply   = parseFloat(document.getElementById(fuel + '_supply')?.value)     || 0;
-            const received = parseFloat(document.getElementById(fuel + '_received')?.value)   || 0;
-            const sales    = parseFloat(document.getElementById(fuel + '_sales')?.value)      || 0;
-
-            const clampedReceived = Math.min(received, supply);
-            const maxSell         = prev + clampedReceived;
-
-            if (received > supply) {
-                blocked = true;
-                const w = document.getElementById(fuel + '_received_warn');
-                if (w) {
-                    w.textContent = `⚠ ${fuel.charAt(0).toUpperCase() + fuel.slice(1)} received (${received.toFixed(2)} L) exceeds supply (${supply.toFixed(2)} L).`;
-                    w.style.display = 'block';
-                }
-                document.getElementById(fuel + '_received')?.classList.add('is-invalid');
-            }
-
-            if (sales > maxSell) {
-                blocked = true;
-                const w = document.getElementById(fuel + '_sales_warn');
-                if (w) {
-                    w.textContent = `⚠ ${fuel.charAt(0).toUpperCase() + fuel.slice(1)} sales (${sales.toFixed(2)} L) exceeds available stock (${maxSell.toFixed(2)} L).`;
-                    w.style.display = 'block';
-                }
-                document.getElementById(fuel + '_sales')?.classList.add('is-invalid');
-            }
-        });
-
-        if (blocked) {
-            e.preventDefault();
-            document.querySelector('.is-invalid')?.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center'
-            });
-        }
-    });
-});
 </script>
 @endpush
