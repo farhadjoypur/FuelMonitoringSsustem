@@ -576,33 +576,29 @@ function calcRow(fuel) {
     let received = parseFloat(receivedEl?.value) || 0;
     let sales    = parseFloat(salesEl?.value)    || 0;
 
-    // ── 1. Received cannot exceed Supply — clamp + warn ───────────
     const receivedWarnEl = document.getElementById(fuel + '_received_warn');
 
     if (received > supply) {
         if (receivedWarnEl) {
-            receivedWarnEl.textContent =
-                `⚠ Received cannot exceed Supply from Depot (${supply.toFixed(2)} L). Adjusted automatically.`;
+            receivedWarnEl.textContent = '⚠ Received cannot exceed supply (' + supply.toFixed(2) + ' L).';
             receivedWarnEl.style.display = 'block';
         }
         if (receivedEl) {
             receivedEl.value = supply.toFixed(2);
             receivedEl.classList.add('is-invalid');
         }
-        received = supply; // use clamped value for further calc
+        received = supply;
     } else {
         if (receivedWarnEl) receivedWarnEl.style.display = 'none';
         if (receivedEl)     receivedEl.classList.remove('is-invalid');
     }
 
-    // ── 2. Sales cannot exceed (prev + received) — clamp + warn ───
     const maxSellable = prev + received;
     const salesWarnEl = document.getElementById(fuel + '_sales_warn');
 
     if (sales > maxSellable) {
         if (salesWarnEl) {
-            salesWarnEl.textContent =
-                `⚠ Sales cannot exceed available stock (${maxSellable.toFixed(2)} L). Adjusted automatically.`;
+            salesWarnEl.textContent = '⚠ Sales cannot exceed available stock (' + maxSellable.toFixed(2) + ' L).';
             salesWarnEl.style.display = 'block';
         }
         sales = maxSellable;
@@ -615,7 +611,6 @@ function calcRow(fuel) {
         if (salesEl)     salesEl.classList.remove('is-invalid');
     }
 
-    // ── 3. Difference & Closing ───────────────────────────────────
     const diff    = supply - received;
     const closing = prev + received - sales;
 
@@ -626,7 +621,6 @@ function calcRow(fuel) {
         diffEl.textContent = diff.toFixed(2);
         diffEl.style.color = diff !== 0 ? '#dc2626' : '#16a34a';
     }
-
     if (closingEl) {
         closingEl.textContent = closing.toFixed(2);
         closingEl.style.color = closing < 0 ? '#dc2626' : 'var(--primary)';
@@ -634,19 +628,15 @@ function calcRow(fuel) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-
-    // Initial calculation on page load
     ['octane', 'petrol', 'diesel', 'others'].forEach(fuel => calcRow(fuel));
 
-    // Live recalc on every input change
     ['octane', 'petrol', 'diesel', 'others'].forEach(fuel => {
         ['prev_stock', 'supply', 'received', 'sales'].forEach(field => {
-            const el = document.getElementById(`${fuel}_${field}`);
+            const el = document.getElementById(fuel + '_' + field);
             if (el) el.addEventListener('input', () => calcRow(fuel));
         });
     });
 
-    // ── Final guard on submit ─────────────────────────────────────
     document.getElementById('adminEditForm').addEventListener('submit', function (e) {
         let blocked = false;
 
@@ -663,7 +653,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 blocked = true;
                 const w = document.getElementById(fuel + '_received_warn');
                 if (w) {
-                    w.textContent = `⚠ ${fuel.charAt(0).toUpperCase() + fuel.slice(1)} received (${received.toFixed(2)} L) exceeds supply (${supply.toFixed(2)} L).`;
+                    w.textContent = '⚠ Received cannot exceed supply (' + supply.toFixed(2) + ' L).';
                     w.style.display = 'block';
                 }
                 document.getElementById(fuel + '_received')?.classList.add('is-invalid');
@@ -673,7 +663,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 blocked = true;
                 const w = document.getElementById(fuel + '_sales_warn');
                 if (w) {
-                    w.textContent = `⚠ ${fuel.charAt(0).toUpperCase() + fuel.slice(1)} sales (${sales.toFixed(2)} L) exceeds available stock (${maxSell.toFixed(2)} L).`;
+                    w.textContent = '⚠ Sales cannot exceed available stock (' + maxSell.toFixed(2) + ' L).';
                     w.style.display = 'block';
                 }
                 document.getElementById(fuel + '_sales')?.classList.add('is-invalid');
@@ -682,10 +672,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (blocked) {
             e.preventDefault();
-            document.querySelector('.is-invalid')?.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center'
-            });
+            document.querySelector('.is-invalid')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
     });
 });

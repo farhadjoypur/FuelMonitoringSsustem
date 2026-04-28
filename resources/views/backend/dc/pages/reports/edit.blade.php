@@ -1,6 +1,6 @@
 @extends('backend.dc.layouts.app')
 
-@section('title', 'Edit Fuel Report — Admin')
+@section('title', 'Edit Fuel Report — DC')
 
 @push('styles')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -16,7 +16,6 @@
         padding: 30px;
     }
 
-    /* ── Page Header ── */
     .page-header {
         display: flex;
         justify-content: space-between;
@@ -31,7 +30,6 @@
     }
     .page-header h4 i { color: var(--primary); margin-right: 8px; }
 
-    /* ── Cards ── */
     .custom-card {
         background: #fff;
         border-radius: 10px;
@@ -65,7 +63,6 @@
     }
     .edit-badge i { margin-right: 4px; }
 
-    /* ── Station Form ── */
     .station-form {
         padding: 20px;
         background: #f8fafc;
@@ -117,7 +114,6 @@
         display: block;
     }
 
-    /* Officer read-only display */
     .officer-readonly-box {
         display: flex;
         align-items: center;
@@ -143,7 +139,6 @@
         letter-spacing: .3px;
     }
 
-    /* ── Fuel Grid ── */
     .category-bar {
         padding: 11px 18px;
         font-size: 13px;
@@ -217,21 +212,18 @@
     .input-field.is-invalid { border-color: #dc2626; }
 
     .auto-value {
-        font-size: 18px;
+        font-size: 17px;
         font-weight: 700;
+        color: var(--primary);
         line-height: 1;
     }
-    .auto-value.diff  { color: #dc2626; }
-    .auto-value.close { color: #2563eb; }
     .auto-label {
         font-size: 10px;
         color: #94a3b8;
         text-transform: uppercase;
         letter-spacing: .3px;
-        margin-top: 2px;
     }
 
-    /* ── Buttons ── */
     .btn-update {
         background: #16a34a;
         color: #fff;
@@ -264,7 +256,6 @@
     }
     .btn-back:hover { background: #e2e8f0; color: var(--dark); }
 
-    /* ── Alerts ── */
     .alert-error {
         background: #fef2f2;
         border: 1px solid #fecaca;
@@ -291,8 +282,7 @@
         font-weight: 600;
     }
 
-    /* ── Admin privilege banner ── */
-    .admin-banner {
+    .dc-banner {
         background: #eff6ff;
         border: 1px solid #bfdbfe;
         border-radius: 8px;
@@ -306,7 +296,6 @@
         font-weight: 600;
     }
 
-    /* ── Responsive ── */
     @media (max-width: 1100px) {
         .grid-head { display: none; }
         .input-grid { grid-template-columns: repeat(3, 1fr); }
@@ -332,16 +321,12 @@
         .input-grid { grid-template-columns: 1fr; }
         .grid-cell, .grid-cell-auto { border-right: none; }
     }
-    .auto-value.closing-value {
-        color: #2563eb;
-    }
 </style>
 @endpush
 
 @section('content')
 <div class="report-container">
 
-    {{-- ── Alerts ── --}}
     @if(session('error'))
         <div class="alert-error">
             <i class="fa-solid fa-circle-exclamation"></i> {{ session('error') }}
@@ -354,13 +339,12 @@
         </div>
     @endif
 
-    {{-- ── Admin Privilege Banner ── --}}
-    <div class="admin-banner">
+    <div class="dc-banner">
         <i class="fa-solid fa-shield-halved"></i>
-        DC Mode — You can edit reports from your district: <strong>{{ Auth::user()->district ?? Auth::user()->profile?->district }}</strong>
+        DC Mode — You can edit reports from your district:
+        <strong>{{ Auth::user()->district ?? Auth::user()->profile?->district }}</strong>
     </div>
 
-    {{-- ── Page Header ── --}}
     <div class="page-header">
         <h4>
             <i class="fa-solid fa-pen-to-square"></i> Edit Fuel Report
@@ -370,26 +354,24 @@
         </a>
     </div>
 
-    {{-- ══ FORM ══ --}}
-    <form action="{{ route('dc.reports.update', $fuelReport) }}" method="POST">
+    <form action="{{ route('dc.reports.update', $fuelReport) }}" method="POST" id="dcEditForm">
         @csrf
         @method('PUT')
 
-        {{-- ── Station & Meta Info Card ── --}}
+        {{-- Station & Meta Info --}}
         <div class="custom-card">
             <div class="report-header">
                 <h5>
                     <i class="fa-solid fa-file-lines"></i> Daily Fuel Summary Report
                 </h5>
                 <span class="edit-badge">
-                    <i class="fa-regular fa-pen-to-square"></i> Admin Editing
+                    <i class="fa-regular fa-pen-to-square"></i> DC Editing
                 </span>
             </div>
 
             <div class="station-form">
                 <div class="row g-3">
 
-                    {{-- Filling Station — read only --}}
                     <div class="col-md-3">
                         <label class="form-label-custom">
                             <i class="fa-solid fa-gas-pump fa-xs"></i> Filling Station
@@ -398,7 +380,6 @@
                                value="{{ $fuelReport->station_name }}" readonly>
                     </div>
 
-                    {{-- Division — read only --}}
                     <div class="col-md-2">
                         <label class="form-label-custom">
                             <i class="fa-solid fa-building fa-xs"></i> Division
@@ -407,7 +388,6 @@
                                value="{{ $fuelReport->division }}" readonly>
                     </div>
 
-                    {{-- District — read only --}}
                     <div class="col-md-2">
                         <label class="form-label-custom">
                             <i class="fa-solid fa-location-dot fa-xs"></i> District
@@ -416,7 +396,6 @@
                                value="{{ $fuelReport->district }}" readonly>
                     </div>
 
-                    {{-- Upazila — read only --}}
                     <div class="col-md-2">
                         <label class="form-label-custom">
                             <i class="fa-solid fa-map-pin fa-xs"></i> Thana / Upazila
@@ -425,7 +404,6 @@
                                value="{{ $fuelReport->thana_upazila }}" readonly>
                     </div>
 
-                    {{-- Report Date — editable --}}
                     <div class="col-md-2">
                         <label class="form-label-custom">
                             <i class="fa-regular fa-calendar fa-xs"></i> Report Date
@@ -439,7 +417,6 @@
                         @enderror
                     </div>
 
-                    {{-- Tag Officer — read only, shows who submitted --}}
                     <div class="col-md-3">
                         <label class="form-label-custom">
                             <i class="fa-solid fa-user-tie fa-xs"></i> Submitted By (Tag Officer)
@@ -457,13 +434,13 @@
             </div>
         </div>
 
-        {{-- ══ Fuel Cards ══ --}}
+        {{-- Fuel Cards --}}
         @php
             $fuelDefs = [
-                ['key' => 'octane', 'label' => 'Octane', 'icon' => 'fa-droplet',   'cls' => 'octane'],
-                ['key' => 'petrol', 'label' => 'Petrol', 'icon' => 'fa-gas-pump',  'cls' => 'petrol'],
-                ['key' => 'diesel', 'label' => 'Diesel', 'icon' => 'fa-cube',      'cls' => 'diesel'],
-                ['key' => 'others', 'label' => 'Others', 'icon' => 'fa-industry',  'cls' => 'others'],
+                ['key' => 'octane', 'label' => 'Octane', 'icon' => 'fa-droplet',  'cls' => 'octane'],
+                ['key' => 'petrol', 'label' => 'Petrol', 'icon' => 'fa-gas-pump', 'cls' => 'petrol'],
+                ['key' => 'diesel', 'label' => 'Diesel', 'icon' => 'fa-cube',     'cls' => 'diesel'],
+                ['key' => 'others', 'label' => 'Others', 'icon' => 'fa-industry', 'cls' => 'others'],
             ];
         @endphp
 
@@ -477,27 +454,15 @@
 
             <div class="input-grid">
 
-                {{-- Column Headers --}}
-                <div class="grid-head">
-                    <i class="fa-solid fa-clock-rotate-left fa-xs"></i> Previous Stock (L)
-                </div>
-                <div class="grid-head">
-                    <i class="fa-solid fa-truck fa-xs"></i> Supply From Depot (L)
-                </div>
-                <div class="grid-head">
-                    <i class="fa-solid fa-arrow-down fa-xs"></i> Received At Station (L)
-                </div>
-                <div class="grid-head">
-                    <i class="fa-solid fa-calculator fa-xs"></i> Difference (L)
-                </div>
-                <div class="grid-head">
-                    <i class="fa-solid fa-chart-line fa-xs"></i> Sales (L)
-                </div>
-                <div class="grid-head">
-                    <i class="fa-solid fa-warehouse fa-xs"></i> Closing Stock (L)
-                </div>
+                {{-- Headers --}}
+                <div class="grid-head"><i class="fa-solid fa-clock-rotate-left fa-xs"></i> Previous Stock (L)</div>
+                <div class="grid-head"><i class="fa-solid fa-truck fa-xs"></i> Supply From Depot (L)</div>
+                <div class="grid-head"><i class="fa-solid fa-arrow-down fa-xs"></i> Received At Station (L)</div>
+                <div class="grid-head"><i class="fa-solid fa-calculator fa-xs"></i> Difference (L)</div>
+                <div class="grid-head"><i class="fa-solid fa-chart-line fa-xs"></i> Sales (L)</div>
+                <div class="grid-head"><i class="fa-solid fa-warehouse fa-xs"></i> Closing Stock (L)</div>
 
-                {{-- Previous Stock --}}
+                {{-- 1. Previous Stock --}}
                 <div class="grid-cell" data-label="Previous Stock (L)">
                     <input type="number" step="0.01" min="0"
                            name="{{ $fk }}_prev_stock"
@@ -510,7 +475,7 @@
                     @enderror
                 </div>
 
-                {{-- Supply --}}
+                {{-- 2. Supply From Depot --}}
                 <div class="grid-cell" data-label="Supply From Depot (L)">
                     <input type="number" step="0.01" min="0"
                            name="{{ $fk }}_supply"
@@ -523,7 +488,7 @@
                     @enderror
                 </div>
 
-                {{-- Received --}}
+                {{-- 3. Received At Station --}}
                 <div class="grid-cell" data-label="Received At Station (L)">
                     <input type="number" step="0.01" min="0"
                            name="{{ $fk }}_received"
@@ -531,20 +496,23 @@
                            class="input-field @error($fk.'_received') is-invalid @enderror"
                            value="{{ old($fk.'_received', $fuelReport->{$fk.'_received'} ?? 0) }}"
                            oninput="calcRow('{{ $fk }}')">
+                    <span id="{{ $fk }}_received_warn"
+                          style="display:none; font-size:11px; color:#dc2626; margin-top:4px;"></span>
                     @error($fk.'_received')
                         <span class="invalid-feedback">{{ $message }}</span>
                     @enderror
                 </div>
 
-                {{-- Difference (auto-calculated) --}}
+                {{-- 4. Difference (auto) --}}
                 <div class="grid-cell-auto diff-bg" data-label="Difference (L)">
-                    <span class="auto-value diff" id="{{ $fk }}_difference_display">
+                    <span class="auto-value" id="{{ $fk }}_difference_display"
+                          style="color:{{ ($fuelReport->{$fk.'_difference'} ?? 0) != 0 ? '#dc2626' : '#16a34a' }};">
                         {{ number_format(($fuelReport->{$fk.'_difference'} ?? 0), 2) }}
                     </span>
                     <span class="auto-label">Auto</span>
                 </div>
 
-                {{-- Sales --}}
+                {{-- 5. Sales --}}
                 <div class="grid-cell" data-label="Sales (L)">
                     <input type="number" step="0.01" min="0"
                            name="{{ $fk }}_sales"
@@ -552,14 +520,17 @@
                            class="input-field @error($fk.'_sales') is-invalid @enderror"
                            value="{{ old($fk.'_sales', $fuelReport->{$fk.'_sales'} ?? 0) }}"
                            oninput="calcRow('{{ $fk }}')">
+                    <span id="{{ $fk }}_sales_warn"
+                          style="display:none; font-size:11px; color:#dc2626; margin-top:4px;"></span>
                     @error($fk.'_sales')
                         <span class="invalid-feedback">{{ $message }}</span>
                     @enderror
                 </div>
 
-                {{-- Closing Stock (auto-calculated) --}}
+                {{-- 6. Closing Stock (auto) --}}
                 <div class="grid-cell-auto close-bg" data-label="Closing Stock (L)">
-                    <span class="auto-value closing-value" id="{{ $fk }}_closing_display">
+                    <span class="auto-value" id="{{ $fk }}_closing_display"
+                          style="color:{{ ($fuelReport->{$fk.'_closing_stock'} ?? 0) < 0 ? '#dc2626' : 'var(--primary)' }};">
                         {{ number_format(($fuelReport->{$fk.'_closing_stock'} ?? 0), 2) }}
                     </span>
                     <span class="auto-label">Auto</span>
@@ -569,7 +540,7 @@
         </div>
         @endforeach
 
-        {{-- ── Comment ── --}}
+        {{-- Comment --}}
         <div class="custom-card">
             <div style="padding:10px 16px; font-size:10px; font-weight:700;
                         text-transform:uppercase; letter-spacing:.5px; color:#64748b;
@@ -583,7 +554,7 @@
                       placeholder="Enter any comments or notes here...">{{ old('comment', $fuelReport->comment) }}</textarea>
         </div>
 
-        {{-- ── Submit Buttons ── --}}
+        {{-- Submit --}}
         <div style="display:flex; gap:14px; margin-bottom:40px; align-items:center;">
             <button type="submit" class="btn-update">
                 <i class="fa-solid fa-floppy-disk"></i> Update Report
@@ -598,10 +569,48 @@
 @push('scripts')
 <script>
 function calcRow(fuel) {
-    const prev     = parseFloat(document.getElementById(fuel + '_prev_stock')?.value)  || 0;
-    const supply   = parseFloat(document.getElementById(fuel + '_supply')?.value)      || 0;
-    const received = parseFloat(document.getElementById(fuel + '_received')?.value)    || 0;
-    const sales    = parseFloat(document.getElementById(fuel + '_sales')?.value)       || 0;
+    const prev       = parseFloat(document.getElementById(fuel + '_prev_stock')?.value) || 0;
+    const supply     = parseFloat(document.getElementById(fuel + '_supply')?.value)     || 0;
+    const receivedEl = document.getElementById(fuel + '_received');
+    const salesEl    = document.getElementById(fuel + '_sales');
+
+    let received = parseFloat(receivedEl?.value) || 0;
+    let sales    = parseFloat(salesEl?.value)    || 0;
+
+    const receivedWarnEl = document.getElementById(fuel + '_received_warn');
+
+    if (received > supply) {
+        if (receivedWarnEl) {
+            receivedWarnEl.textContent = '⚠ Received cannot exceed supply (' + supply.toFixed(2) + ' L).';
+            receivedWarnEl.style.display = 'block';
+        }
+        if (receivedEl) {
+            receivedEl.value = supply.toFixed(2);
+            receivedEl.classList.add('is-invalid');
+        }
+        received = supply;
+    } else {
+        if (receivedWarnEl) receivedWarnEl.style.display = 'none';
+        if (receivedEl)     receivedEl.classList.remove('is-invalid');
+    }
+
+    const maxSellable = prev + received;
+    const salesWarnEl = document.getElementById(fuel + '_sales_warn');
+
+    if (sales > maxSellable) {
+        if (salesWarnEl) {
+            salesWarnEl.textContent = '⚠ Sales cannot exceed available stock (' + maxSellable.toFixed(2) + ' L).';
+            salesWarnEl.style.display = 'block';
+        }
+        sales = maxSellable;
+        if (salesEl) {
+            salesEl.value = sales.toFixed(2);
+            salesEl.classList.add('is-invalid');
+        }
+    } else {
+        if (salesWarnEl) salesWarnEl.style.display = 'none';
+        if (salesEl)     salesEl.classList.remove('is-invalid');
+    }
 
     const diff    = supply - received;
     const closing = prev + received - sales;
@@ -611,20 +620,62 @@ function calcRow(fuel) {
 
     if (diffEl) {
         diffEl.textContent = diff.toFixed(2);
-        // positive diff = supply > received = loss → red
-        // negative diff = received > supply = surplus → green
-        diffEl.style.color = diff > 0 ? '#dc2626' : diff < 0 ? '#16a34a' : '#94a3b8';
+        diffEl.style.color = diff !== 0 ? '#dc2626' : '#16a34a';
     }
-
     if (closingEl) {
         closingEl.textContent = closing.toFixed(2);
-        closingEl.style.color = closing < 0 ? '#dc2626' : '#2563eb';
+        closingEl.style.color = closing < 0 ? '#dc2626' : 'var(--primary)';
     }
 }
 
-// Recalculate all rows on page load so displayed values match inputs
 document.addEventListener('DOMContentLoaded', () => {
-    ['petrol', 'diesel', 'octane', 'others'].forEach(fuel => calcRow(fuel));
+    ['octane', 'petrol', 'diesel', 'others'].forEach(fuel => calcRow(fuel));
+
+    ['octane', 'petrol', 'diesel', 'others'].forEach(fuel => {
+        ['prev_stock', 'supply', 'received', 'sales'].forEach(field => {
+            const el = document.getElementById(fuel + '_' + field);
+            if (el) el.addEventListener('input', () => calcRow(fuel));
+        });
+    });
+
+    document.getElementById('dcEditForm').addEventListener('submit', function (e) {
+        let blocked = false;
+
+        ['octane', 'petrol', 'diesel', 'others'].forEach(fuel => {
+            const prev     = parseFloat(document.getElementById(fuel + '_prev_stock')?.value) || 0;
+            const supply   = parseFloat(document.getElementById(fuel + '_supply')?.value)     || 0;
+            const received = parseFloat(document.getElementById(fuel + '_received')?.value)   || 0;
+            const sales    = parseFloat(document.getElementById(fuel + '_sales')?.value)      || 0;
+
+            const clampedReceived = Math.min(received, supply);
+            const maxSell         = prev + clampedReceived;
+
+            if (received > supply) {
+                blocked = true;
+                const w = document.getElementById(fuel + '_received_warn');
+                if (w) {
+                    w.textContent = '⚠ Received cannot exceed supply (' + supply.toFixed(2) + ' L).';
+                    w.style.display = 'block';
+                }
+                document.getElementById(fuel + '_received')?.classList.add('is-invalid');
+            }
+
+            if (sales > maxSell) {
+                blocked = true;
+                const w = document.getElementById(fuel + '_sales_warn');
+                if (w) {
+                    w.textContent = '⚠ Sales cannot exceed available stock (' + maxSell.toFixed(2) + ' L).';
+                    w.style.display = 'block';
+                }
+                document.getElementById(fuel + '_sales')?.classList.add('is-invalid');
+            }
+        });
+
+        if (blocked) {
+            e.preventDefault();
+            document.querySelector('.is-invalid')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    });
 });
 </script>
 @endpush
