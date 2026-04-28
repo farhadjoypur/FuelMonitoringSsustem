@@ -477,7 +477,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="modal-label">Linked Depot</label>
+                            <label class="modal-label required">Linked Depot</label>
                             <select name="linked_depot" class="form-select @error('linked_depot') is-invalid @enderror">
                                 <option value="">Select Linked Depot</option>
                                 @foreach ($depots as $depot)
@@ -493,7 +493,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="modal-label">Tank Capacity</label>
+                            <label class="modal-label required">Tank Capacity</label>
                             <input type="text" class="form-control @error('tank_capacity') is-invalid @enderror"
                                 name="tank_capacity" placeholder="e.g., 10,000" value="{{ old('tank_capacity') }}">
                             @error('tank_capacity')
@@ -502,7 +502,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="modal-label">Fuel Types</label>
+                            <label class="modal-label required">Fuel Types</label>
                             <div class="d-flex flex-column gap-2 mt-1">
                                 @php $oldFuels = old('fuel_types', []); @endphp
                                 <div class="form-check">
@@ -655,7 +655,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="modal-label">Linked Depot</label>
+                            <label class="modal-label required">Linked Depot</label>
                             <select name="linked_depot" id="edit_linked_depot"
                                 class="form-select @error('linked_depot') is-invalid @enderror">
                                 <option value="">Select Linked Depot</option>
@@ -666,12 +666,12 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="modal-label">Tank Capacity</label>
+                            <label class="modal-label required">Tank Capacity</label>
                             <input type="text" class="form-control" name="tank_capacity" id="edit_tank_capacity">
                         </div>
 
                         <div class="mb-3">
-                            <label class="modal-label">Fuel Types</label>
+                            <label class="modal-label required">Fuel Types</label>
                             <div class="d-flex flex-column gap-2 mt-1">
                                 <div class="form-check">
                                     <input class="form-check-input edit-fuel-checkbox" type="checkbox"

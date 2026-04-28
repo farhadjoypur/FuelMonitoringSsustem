@@ -136,9 +136,9 @@ class FillingStationController extends Controller
             'district' => 'required|string',
             'upazila' => 'required|string',
             'address' => 'nullable|string',
-            'linked_depot' => 'nullable|exists:depots,id',
-            'tank_capacity' => 'nullable|numeric|gt:0',
-            'fuel_types' => 'nullable|array',
+            'linked_depot' => 'required|exists:depots,id',
+            'tank_capacity' => 'required|numeric|gt:0',
+            'fuel_types' => 'required|array',
             'license_file' => 'nullable|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
 
@@ -201,9 +201,9 @@ class FillingStationController extends Controller
             'district' => 'required|string',
             'upazila' => 'required|string',
             'address' => 'nullable|string',
-            'linked_depot' => 'nullable|exists:depots,id',
-            'tank_capacity' => 'nullable|numeric|gt:0',
-            'fuel_types' => 'nullable|array',
+            'linked_depot' => 'required|exists:depots,id',
+            'tank_capacity' => 'required|numeric|gt:0',
+            'fuel_types' => 'required|array',
             'license_file' => 'nullable|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
 
