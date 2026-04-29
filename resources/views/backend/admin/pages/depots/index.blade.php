@@ -1,104 +1,226 @@
 @extends('backend.admin.layouts.app')
-
 @section('title', 'Depot Management')
 
+{{-- ═══════════════════════════════════════════════════════════
+     STYLES
+═══════════════════════════════════════════════════════════════ --}}
 @push('styles')
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <style>
-        /* ── Select2 ── */
-        .select2-container--default .select2-selection--single {
-            background-color: #f8f9fa !important;
-            border: none !important;
-            border-radius: 8px !important;
-            height: 38px !important;
-            display: flex;
-            align-items: center;
-        }
-        .select2-container--default .select2-selection--single .select2-selection__arrow {
-            height: 36px !important; right: 8px !important;
-        }
-        .select2-container--default .select2-selection--single .select2-selection__rendered {
-            color: #212529 !important; padding-left: 12px !important;
-            font-size: 0.9rem !important; line-height: 38px !important;
-        }
-        .select2-container--default.select2-container--focus .select2-selection--single {
-            outline: none !important; box-shadow: none !important;
-        }
-        .select2-dropdown {
-            border: 1px solid #eee !important; border-radius: 8px !important;
-            box-shadow: 0 4px 6px rgba(0,0,0,.1);
-        }
+<style>
+/* ── Design tokens ─────────────────────────────────────────── */
+:root {
+    --brand      : #006699;
+    --brand-dark : #004d73;
+    --brand-ring : rgba(0,102,153,.15);
+    --ok         : #16a34a;
+    --ok-bg      : #dcfce7;
+    --err        : #dc2626;
+    --err-bg     : #fee2e2;
+    --warn       : #d97706;
+    --border     : #e2e8f0;
+    --surface    : #f8fafc;
+    --text       : #0f172a;
+    --muted      : #64748b;
+    --radius     : 10px;
+    --shadow     : 0 4px 20px rgba(0,0,0,.07);
+}
 
-        /* ── Layout ── */
-        .table-container {
-            background: white; border-radius: 12px;
-            padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,.05);
-        }
-        .form-control, .form-select { border-radius: 6px; border: 1px solid #ddd; height: 38px; }
-        textarea.form-control { height: auto; }
+/* ── Utilities ─────────────────────────────────────────────── */
+[x-cloak] { display: none !important; }
 
-        /* ── Table actions ── */
-        .btn-action { border: none; background: transparent; font-size: 1.1rem; cursor: pointer; }
-        .btn-edit   { color: #03a9f4; }
-        .btn-delete { color: #f44336; }
-        .btn-action:hover { opacity: .75; }
-        .table tbody td { vertical-align: middle; font-size: 14px; }
-        .table thead tr { font-size: .85rem; text-transform: uppercase; }
+/* ── Layout cards ──────────────────────────────────────────── */
+.card-surface {
+    background: #fff;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
 
-        /* ── Modal ── */
-        .modal-label { font-weight: 500; color: #333; margin-bottom: 5px; font-size: 14px; display: block; }
-        .required::after { content: " *"; color: red; }
+/* ── Table ─────────────────────────────────────────────────── */
+.data-table thead th {
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--muted);
+    border-bottom: 2px solid var(--border);
+    padding: 11px 14px;
+    white-space: nowrap;
+}
+.data-table tbody tr { transition: background .12s; }
+.data-table tbody tr:hover { background: var(--surface); }
+.data-table tbody td {
+    vertical-align: middle;
+    font-size: 13.5px;
+    padding: 5px 7px;
+    color: #374151;
+    border-bottom: 1px solid #f1f5f9;
+}
 
-        /* ── Error box ── */
-        #createErrorBox, #editErrorBox { font-size: 0.88rem; }
-    </style>
+/* ── Status pills ──────────────────────────────────────────── */
+.pill { display: inline-block; border-radius: 20px; padding: 3px 12px; font-size: 11.5px; font-weight: 600; }
+.pill-active   { background: var(--ok-bg);  color: var(--ok);  }
+.pill-inactive { background: var(--err-bg); color: var(--err); }
+
+/* ── Code badge ────────────────────────────────────────────── */
+.code-badge {
+    background: #e0f2fe; color: #0369a1;
+    border-radius: 6px; padding: 3px 10px;
+    font-size: 11.5px; font-weight: 600;
+}
+
+/* ── Icon action buttons ───────────────────────────────────── */
+.btn-icon {
+    border: none; background: transparent;
+    border-radius: 6px; padding: 5px 8px;
+    font-size: 1rem; cursor: pointer;
+    transition: background .12s, color .12s;
+    line-height: 1;
+}
+.btn-icon-edit   { color: #0ea5e9; } .btn-icon-edit:hover   { background: #e0f2fe; }
+.btn-icon-delete { color: #ef4444; } .btn-icon-delete:hover { background: var(--err-bg); }
+
+/* ── Form controls ─────────────────────────────────────────── */
+.form-control, .form-select {
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    height: 40px;
+    font-size: .875rem;
+    transition: border-color .18s, box-shadow .18s;
+}
+.form-control:focus, .form-select:focus {
+    border-color: var(--brand);
+    box-shadow: 0 0 0 3px var(--brand-ring);
+    outline: none;
+}
+textarea.form-control { height: auto; resize: vertical; }
+.form-control.is-invalid, .form-select.is-invalid { border-color: var(--err) !important; box-shadow: 0 0 0 3px rgba(220,38,38,.1); }
+.form-control.is-valid,   .form-select.is-valid   { border-color: var(--ok) !important; }
+.field-error { font-size: .78rem; color: var(--err); margin-top: 4px; }
+
+/* ── Modal polish ──────────────────────────────────────────── */
+.modal-content  { border-radius: 14px; border: none; box-shadow: 0 24px 64px rgba(0,0,0,.18); }
+.modal-header   { padding: 18px 24px; border-bottom: 1px solid var(--border); }
+.modal-body     { padding: 24px; }
+.modal-footer   { padding: 14px 24px; border-top: 1px solid var(--border); }
+.field-label    { font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px; display: block; }
+.field-label.req::after { content: ' *'; color: var(--err); }
+
+/* ── Server error banner ───────────────────────────────────── */
+.error-banner {
+    background: #fef2f2;
+    border: 1.5px solid #fecaca;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 18px;
+}
+.error-banner ul { margin: 6px 0 0; padding-left: 18px; font-size: 12.5px; color: #b91c1c; }
+
+/* ── Spinner overlay ───────────────────────────────────────── */
+.fetch-loader { display: flex; flex-direction: column; align-items: center; padding: 56px 0; gap: 12px; }
+
+/* ── Toast stack ───────────────────────────────────────────── */
+.toast-stack {
+    position: fixed; bottom: 24px; right: 24px;
+    z-index: 9999;
+    display: flex; flex-direction: column-reverse; gap: 10px;
+    pointer-events: none;
+}
+.toast-item {
+    pointer-events: all;
+    min-width: 280px; max-width: 360px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 13.5px; font-weight: 500;
+    display: flex; align-items: center; gap: 10px;
+    box-shadow: 0 8px 32px rgba(0,0,0,.16);
+    animation: toastIn .25s ease both;
+}
+.toast-item.success { background: var(--ok);  color: #fff; }
+.toast-item.error   { background: var(--err); color: #fff; }
+.toast-item.warning { background: var(--warn); color: #fff; }
+.toast-item.out     { animation: toastOut .3s ease forwards; }
+@keyframes toastIn  { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes toastOut { to   { transform: translateX(110%); opacity: 0; } }
+
+/* ── Page-level button ─────────────────────────────────────── */
+.btn-brand {
+    background: var(--brand); color: #fff;
+    border: none; border-radius: 8px;
+    padding: 9px 20px; font-size: .875rem; font-weight: 600;
+    transition: background .18s;
+    cursor: pointer;
+}
+.btn-brand:hover { background: var(--brand-dark); }
+.btn-brand:disabled { opacity: .65; cursor: not-allowed; }
+</style>
 @endpush
 
+
+{{-- ═══════════════════════════════════════════════════════════
+     CONTENT
+═══════════════════════════════════════════════════════════════ --}}
 @section('content')
+
+{{-- ── Toast Stack ─────────────────────────────────────────── --}}
+<div x-data="ToastManager()" x-cloak
+     class="toast-stack"
+     @toast.window="push($event.detail)">
+    <template x-for="t in list" :key="t.id">
+        <div class="toast-item" :class="[t.type, t.out ? 'out' : '']" :id="'t'+t.id">
+            <i class="bi flex-shrink-0"
+               :class="{ 'bi-check-circle-fill': t.type==='success',
+                         'bi-x-circle-fill'    : t.type==='error',
+                         'bi-exclamation-circle-fill': t.type==='warning' }"></i>
+            <span class="flex-grow-1" x-text="t.msg"></span>
+            <button @click="dismiss(t.id)"
+                    style="background:none;border:none;color:inherit;opacity:.8;cursor:pointer;padding:0;font-size:.9rem;">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+    </template>
+</div>
+
+
 <div class="container-fluid p-4">
 
-    {{-- ── PAGE HEADER ── --}}
+    {{-- ── Page header ─────────────────────────────────────── --}}
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <div>
-            <h4 class="fw-bold">Depot Management</h4>
+            <h4 class="fw-bold mb-1" style="color:var(--text);">Depot Management</h4>
             <p class="text-muted small mb-0">Manage all fuel depots across Bangladesh</p>
         </div>
-        <button class="btn btn-primary px-4 py-2"
-                data-bs-toggle="modal" data-bs-target="#createDepotModal"
-                style="background-color:#006699;border-radius:8px;border:none;">
-            <i class="bi bi-plus-lg me-2"></i> Add New Depot
+        <button class="btn-brand" data-bs-toggle="modal" data-bs-target="#createModal">
+            <i class="bi bi-plus-lg me-2"></i>Add New Depot
         </button>
     </div>
 
-    {{-- ── FILTERS ── --}}
+    {{-- ── Filter bar ──────────────────────────────────────── --}}
     <form action="{{ route('admin.depots.index') }}" method="GET"
-          class="bg-white p-3 rounded shadow-sm border mb-4">
+          class="card-surface p-3 mb-4">
         <div class="row g-2 align-items-end">
 
             <div class="col-md-3">
-                <label class="form-label small fw-bold text-muted">Search</label>
+                <label class="form-label small fw-semibold text-muted mb-1">Search</label>
                 <div class="input-group">
-                    <input type="text" name="q" class="form-control border-0 bg-light"
-                           style="border-radius:8px 0 0 8px;font-size:.9rem;"
-                           value="{{ request('q') }}" placeholder="Name, code or district...">
-                    <button class="btn border-0 px-3" type="submit"
-                            style="border-radius:0 8px 8px 0;background-color:#006699;color:#fff;">
+                    <input type="text" name="q" value="{{ request('q') }}"
+                           class="form-control border-0 bg-light"
+                           style="border-radius:8px 0 0 8px;"
+                           placeholder="Name, code or district…">
+                    <button type="submit" class="btn px-3 border-0"
+                            style="background:var(--brand);color:#fff;border-radius:0 8px 8px 0;">
                         <i class="bi bi-search"></i>
                     </button>
                 </div>
             </div>
 
             <div class="col-md-3">
-                <label class="form-label small fw-bold text-muted">District</label>
-                <select name="district" class="form-select border-0 bg-light"
-                        style="border-radius:8px;" onchange="this.form.submit()">
+                <label class="form-label small fw-semibold text-muted mb-1">District</label>
+                <select name="district" class="form-select border-0 bg-light" onchange="this.form.submit()">
                     <option value="">All Districts</option>
-                    @foreach ($locations['divisions'] as $division)
-                        <optgroup label="{{ $division['name_en'] }}">
-                            @foreach ($division['districts'] as $district)
-                                <option value="{{ $district['name_en'] }}"
-                                    {{ request('district') == $district['name_en'] ? 'selected' : '' }}>
-                                    {{ $district['name_en'] }}
+                    @foreach ($locations['divisions'] as $div)
+                        <optgroup label="{{ $div['name_en'] }}">
+                            @foreach ($div['districts'] as $d)
+                                <option value="{{ $d['name_en'] }}"
+                                    {{ request('district') == $d['name_en'] ? 'selected' : '' }}>
+                                    {{ $d['name_en'] }}
                                 </option>
                             @endforeach
                         </optgroup>
@@ -107,9 +229,8 @@
             </div>
 
             <div class="col-md-2">
-                <label class="form-label small fw-bold text-muted">Status</label>
-                <select name="status" class="form-select border-0 bg-light"
-                        style="border-radius:8px;" onchange="this.form.submit()">
+                <label class="form-label small fw-semibold text-muted mb-1">Status</label>
+                <select name="status" class="form-select border-0 bg-light" onchange="this.form.submit()">
                     <option value="">All Status</option>
                     <option value="active"   {{ request('status') == 'active'   ? 'selected' : '' }}>Active</option>
                     <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
@@ -117,13 +238,13 @@
             </div>
 
             <div class="col-md-2 d-flex gap-2">
-                <button type="submit" class="btn btn-primary flex-grow-1 shadow-sm"
-                        style="background-color:#006699;border:none;border-radius:8px;height:38px;">
-                    <i class="bi bi-funnel-fill me-1"></i> Filter
+                <button type="submit" class="btn-brand flex-grow-1 d-flex align-items-center justify-content-center gap-1"
+                        style="height:40px;">
+                    <i class="bi bi-funnel-fill"></i> Filter
                 </button>
                 <a href="{{ route('admin.depots.index') }}"
-                   class="btn btn-outline-secondary shadow-sm d-flex align-items-center justify-content-center"
-                   style="border-radius:8px;height:38px;" title="Reset">
+                   class="btn btn-outline-secondary d-flex align-items-center justify-content-center"
+                   style="border-radius:8px;height:40px;width:42px;" title="Reset filters">
                     <i class="bi bi-arrow-clockwise"></i>
                 </a>
             </div>
@@ -131,181 +252,107 @@
         </div>
     </form>
 
-    {{-- ── TABLE ── --}}
-    <div class="table-container">
+    {{-- ── Data table ───────────────────────────────────────── --}}
+    <div class="card-surface p-3">
         <div class="table-responsive">
-            <table class="table align-middle">
-                <thead class="text-muted">
+            <table class="table data-table mb-0">
+                <thead>
                     <tr>
-                        <th>SL</th>
+                        <th style="width:50px;">#</th>
                         <th>Depot Name</th>
                         <th>Code</th>
                         <th>District</th>
                         <th>Contact</th>
                         <th>Capacity</th>
                         <th>Status</th>
-                        <th class="text-center">Action</th>
+                        <th class="text-center" style="width:90px;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($depots as $key => $depot)
-                        <tr>
-                            <td>{{ $depots->firstItem() + $key }}</td>
-                            <td class="fw-semibold">{{ $depot->depot_name }}</td>
-                            <td><span class="badge bg-primary">{{ $depot->depot_code }}</span></td>
-                            <td>{{ $depot->district }}</td>
-                            <td>{{ $depot->contact_number }}</td>
-                            <td>{{ number_format($depot->capacity) }} L</td>
-                            <td>
-                                @if(strtolower($depot->status) == 'active')
-                                    <span style="background-color:#e6fffa;color:#38a169;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;display:inline-block;">
-                                        Active
-                                    </span>
-                                @else
-                                    <span style="background-color:#fff5f5;color:#e53e3e;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;display:inline-block;">
-                                        Inactive
-                                    </span>
-                                @endif
-                            </td>
-                            <td class="text-center">
-                                <div class="d-flex justify-content-center">
-                                    <button class="btn-action btn-edit me-2"
-                                            onclick="openEditModal({{ $depot->id }})" title="Edit">
-                                        <i class="bi bi-pencil-square"></i>
-                                    </button>
-                                    <form action="{{ route('admin.depots.destroy', $depot->id) }}"
-                                          method="POST" class="d-inline delete-form">
-                                        @csrf @method('DELETE')
-                                        <button type="button"
-                                                class="btn-action btn-delete delete-confirm" title="Delete">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
+                    @forelse($depots as $i => $depot)
+                    <tr>
+                        <td class="text-muted">{{ $depots->firstItem() + $i }}</td>
+                        <td class="fw-semibold" style="color:var(--text);">{{ $depot->depot_name }}</td>
+                        <td><span class="code-badge">{{ $depot->depot_code }}</span></td>
+                        <td>{{ $depot->district }}</td>
+                        <td>{{ $depot->contact_number }}</td>
+                        <td>{{ number_format($depot->capacity) }}
+                            <span class="text-muted" style="font-size:11px;">L</span>
+                        </td>
+                        <td>
+                            <span class="pill {{ strtolower($depot->status) === 'active' ? 'pill-active' : 'pill-inactive' }}">
+                                {{ ucfirst($depot->status) }}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            {{-- Edit --}}
+                            <button class="btn-icon btn-icon-edit"
+                                    title="Edit depot"
+                                    onclick="DepotEdit.open({{ $depot->id }})">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+
+                            {{-- Delete --}}
+                            <button class="btn-icon btn-icon-delete"
+                                    title="Delete depot"
+                                    onclick="confirmDelete({{ $depot->id }}, '{{ addslashes($depot->depot_name) }}')">
+                                <i class="bi bi-trash3"></i>
+                            </button>
+
+                            {{-- Hidden delete form --}}
+                            <form id="del-{{ $depot->id }}"
+                                  action="{{ route('admin.depots.destroy', $depot->id) }}"
+                                  method="POST" class="d-none">
+                                @csrf @method('DELETE')
+                            </form>
+                        </td>
+                    </tr>
                     @empty
-                        <tr>
-                            <td colspan="8" class="text-center py-5 text-muted">
-                                <i class="bi bi-archive" style="font-size:2rem;display:block;opacity:.25;margin-bottom:.5rem;"></i>
-                                No depots found.
-                            </td>
-                        </tr>
+                    <tr>
+                        <td colspan="8" class="text-center py-5 text-muted">
+                            <i class="bi bi-building-slash d-block mb-2" style="font-size:2.5rem;opacity:.2;"></i>
+                            No depots found matching your criteria.
+                        </td>
+                    </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
     </div>
 
-    <div class="my-4">
-        {{ $depots->links('pagination::bootstrap-5') }}
-    </div>
+    <div class="mt-4">{{ $depots->links('pagination::bootstrap-5') }}</div>
 
-</div>
+</div>{{-- /container --}}
 
 
-{{-- ══════════════ CREATE MODAL ══════════════ --}}
-<div class="modal fade" id="createDepotModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content" style="border-radius:12px;border:none;">
+{{-- ═══════════════════════════════════════════════════════════
+     CREATE MODAL
+═══════════════════════════════════════════════════════════════ --}}
+<div class="modal fade" id="createModal" tabindex="-1" aria-hidden="true"
+     x-data="DepotForm({ url: '{{ route('admin.depots.store') }}', method: 'POST' })"
+     @hidden.bs.modal="reset()">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
 
-            <div class="modal-header border-bottom px-4">
-                <h5 class="modal-title fw-bold" style="font-size:1.1rem;">
-                    <i class="bi bi-building me-2"></i> Add New Depot
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" style="font-size:1rem;">
+                    <i class="bi bi-building-add me-2" style="color:var(--brand);"></i>Add New Depot
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
 
-            <div class="modal-body p-4">
-                <div id="createErrorBox" class="alert alert-danger d-none mb-3">
-                    <strong><i class="bi bi-exclamation-triangle-fill me-1"></i> Please fix the following:</strong>
-                    <ul id="createErrorList" class="mb-0 mt-2"></ul>
-                </div>
-
-                <form id="createDepotForm" novalidate>
-                    @csrf
-                    <div class="row g-3">
-
-                        <div class="col-md-6">
-                            <label class="modal-label required">Depot Name</label>
-                            <input type="text" name="depot_name" class="form-control" placeholder="Enter depot name">
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="modal-label required">Depot Code</label>
-                            <input type="text" name="depot_code" class="form-control" placeholder="e.g. DEP-001">
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="modal-label required">District</label>
-                            <select name="district" class="form-select">
-                                <option value="">-- Select District --</option>
-                                @foreach ($locations['divisions'] as $division)
-                                    <optgroup label="{{ $division['name_en'] }}">
-                                        @foreach ($division['districts'] as $district)
-                                            <option value="{{ $district['name_en'] }}">{{ $district['name_en'] }}</option>
-                                        @endforeach
-                                    </optgroup>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="modal-label required">Contact Number</label>
-                            <input type="text" name="contact_number" class="form-control" placeholder="+8801XXXXXXXXX">
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="modal-label">Email</label>
-                            <input type="email" name="email" class="form-control" placeholder="depot@example.com">
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="modal-label required">Capacity (Litres)</label>
-                            <div class="input-group">
-                                <input type="number" step="0.01" min="1" name="capacity"
-                                       class="form-control" placeholder="50000">
-                                <span class="input-group-text">L</span>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="modal-label">Number of Tanks</label>
-                            <input type="number" min="0" name="number_of_tanks" class="form-control" placeholder="e.g. 8">
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="modal-label">Status</label>
-                            <select name="status" class="form-select">
-                                <option value="active">Active</option>
-                                <option value="inactive">Inactive</option>
-                            </select>
-                        </div>
-
-                        <div class="col-12">
-                            <label class="modal-label">Full Address</label>
-                            <textarea name="full_address" class="form-control" rows="2"
-                                      placeholder="Full address of the depot..."></textarea>
-                        </div>
-
-                        <div class="col-12">
-                            <label class="modal-label">Remarks / Notes</label>
-                            <textarea name="remarks" class="form-control" rows="2"
-                                      placeholder="Any additional notes..."></textarea>
-                        </div>
-
-                    </div>
-                </form>
+            <div class="modal-body">
+                @include('backend.admin.pages.depots._form')
             </div>
 
-            <div class="modal-footer border-0 px-4 pb-4">
-                <button type="button" class="btn btn-outline-secondary px-4 py-2"
-                        data-bs-dismiss="modal">Cancel</button>
-                <button type="button" id="createSubmitBtn"
-                        class="btn btn-primary px-5 py-2"
-                        style="background-color:#006699;border:none;"
-                        onclick="submitCreateForm()">
-                    <i class="bi bi-floppy me-1"></i> Save Depot
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn-brand px-5" style="min-width:140px;"
+                        :disabled="busy" @click="submit()">
+                    <span x-show="!busy"><i class="bi bi-floppy me-1"></i> Save Depot</span>
+                    <span x-show="busy" x-cloak>
+                        <span class="spinner-border spinner-border-sm me-1"></span> Saving…
+                    </span>
                 </button>
             </div>
 
@@ -314,33 +361,53 @@
 </div>
 
 
-{{-- ══════════════ EDIT MODAL ══════════════ --}}
-<div class="modal fade" id="editDepotModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content" style="border-radius:12px;border:none;">
+{{-- ═══════════════════════════════════════════════════════════
+     EDIT MODAL
+═══════════════════════════════════════════════════════════════ --}}
+<div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true"
+     x-data="DepotForm({ url: '', method: 'PUT' })"
+     @hidden.bs.modal="reset()"
+     id="editModal">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
 
-            <div class="modal-header border-bottom px-4">
-                <h5 class="modal-title fw-bold" style="font-size:1.1rem;">
-                    <i class="bi bi-pencil-square me-2"></i> Edit Depot
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" style="font-size:1rem;">
+                    <i class="bi bi-pencil-square me-2" style="color:var(--brand);"></i>Edit Depot
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
 
-            <div class="modal-body p-4" id="editModalBody">
-                <div class="text-center py-5">
-                    <div class="spinner-border text-primary"></div>
-                    <p class="mt-2 text-muted small">Loading depot data...</p>
+            <div class="modal-body">
+
+                {{-- Fetch loader --}}
+                <div x-show="fetching" class="fetch-loader">
+                    <div class="spinner-border text-primary" style="width:2.2rem;height:2.2rem;"></div>
+                    <p class="text-muted small mb-0">Loading depot data…</p>
                 </div>
+
+                {{-- Fetch error --}}
+                {{-- <div x-show="fetchFailed && !fetching" x-cloak
+                     class="alert alert-danger d-flex align-items-center gap-2 mb-0">
+                    <i class="bi bi-wifi-off"></i>
+                    Failed to load depot. Please close and try again.
+                </div> --}}
+
+                {{-- The shared form partial --}}
+                <div x-show="!fetching && !fetchFailed">
+                    @include('backend.admin.pages.depots._form')
+                </div>
+
             </div>
 
-            <div class="modal-footer border-0 px-4 pb-4" id="editModalFooter" style="display:none;">
-                <button type="button" class="btn btn-outline-secondary px-4 py-2"
-                        data-bs-dismiss="modal">Cancel</button>
-                <button type="button" id="editSubmitBtn"
-                        class="btn btn-primary px-5 py-2"
-                        style="background-color:#006699;border:none;"
-                        onclick="submitEditForm()">
-                    <i class="bi bi-floppy me-1"></i> Save Changes
+            <div class="modal-footer" x-show="!fetching && !fetchFailed">
+                <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn-brand px-5" style="min-width:155px;"
+                        :disabled="busy" @click="submit()">
+                    <span x-show="!busy"><i class="bi bi-floppy me-1"></i> Save Changes</span>
+                    <span x-show="busy" x-cloak>
+                        <span class="spinner-border spinner-border-sm me-1"></span> Saving…
+                    </span>
                 </button>
             </div>
 
@@ -351,264 +418,244 @@
 @endsection
 
 
+{{-- ═══════════════════════════════════════════════════════════
+     SCRIPTS
+═══════════════════════════════════════════════════════════════ --}}
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 <script>
+'use strict';
 
-// ── District helper (server-built JS array) ──────────────────────────────
-const allDistricts = [
-    @foreach ($locations['divisions'] as $division)
-        @foreach ($division['districts'] as $district)
-            { division: "{{ addslashes($division['name_en']) }}", name: "{{ addslashes($district['name_en']) }}" },
-        @endforeach
-    @endforeach
-];
+/* ── helpers ──────────────────────────────────────────────── */
+const csrf = () => document.querySelector('meta[name="csrf-token"]').content;
 
-function buildDistrictOptions(selected) {
-    const grouped = {};
-    allDistricts.forEach(d => {
-        if (!grouped[d.division]) grouped[d.division] = [];
-        grouped[d.division].push(d.name);
-    });
-    let html = '<option value="">-- Select District --</option>';
-    Object.keys(grouped).forEach(div => {
-        html += `<optgroup label="${div}">`;
-        grouped[div].forEach(name => {
-            html += `<option value="${name}" ${name === selected ? 'selected' : ''}>${name}</option>`;
-        });
-        html += '</optgroup>';
-    });
-    return html;
+function toast(msg, type = 'success') {
+    window.dispatchEvent(new CustomEvent('toast', { detail: { msg, type } }));
 }
 
-// ── Utilities ────────────────────────────────────────────────────────────
-function escHtml(str) {
-    return String(str ?? '')
-        .replace(/&/g,'&amp;').replace(/"/g,'&quot;')
-        .replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
+/* ── Validation rules ─────────────────────────────────────── */
+const RULES = {
+    depot_name:     v => !v?.trim()            ? 'Depot name is required.'
+                       : v.trim().length > 255 ? 'Max 255 characters.'
+                       : null,
 
-function showErrors(boxId, listId, errors) {
-    const box = document.getElementById(boxId);
-    const list = document.getElementById(listId);
-    list.innerHTML = '';
-    Object.values(errors).flat().forEach(msg => {
-        const li = document.createElement('li');
-        li.textContent = msg;
-        list.appendChild(li);
-    });
-    box.classList.remove('d-none');
-    box.scrollIntoView({ behavior:'smooth', block:'nearest' });
-}
+    depot_code:     v => !v?.trim()           ? 'Depot code is required.'
+                       : v.trim().length > 50 ? 'Max 50 characters.'
+                       : null,
 
-function hideErrors(id) { document.getElementById(id)?.classList.add('d-none'); }
+    district:       v => !v ? 'Please select a district.' : null,
 
-function showToast(message, type = 'success') {
-    const id    = 'toast_' + Date.now();
-    const color = type === 'success' ? 'bg-success' : 'bg-danger';
-    document.body.insertAdjacentHTML('beforeend', `
-        <div id="${id}" class="toast align-items-center text-white ${color} border-0 position-fixed bottom-0 end-0 m-3"
-             role="alert" style="z-index:9999">
-            <div class="d-flex">
-                <div class="toast-body fw-semibold">${message}</div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-            </div>
-        </div>`);
-    const el = document.getElementById(id);
-    new bootstrap.Toast(el, { delay: 3000 }).show();
-    el.addEventListener('hidden.bs.toast', () => el.remove());
-}
+    contact_number: v => !v?.trim()                              ? 'Contact number is required.'
+                       : !/^[+]?[\d\s\-]{7,20}$/.test(v.trim()) ? 'Enter a valid contact number.'
+                       : null,
 
-function setBtnLoading(id, loading, label) {
-    const btn = document.getElementById(id);
-    if (!btn) return;
-    btn.disabled = loading;
-    btn.innerHTML = loading
-        ? '<span class="spinner-border spinner-border-sm me-1"></span> Saving...'
-        : label;
-}
+    email:          v => v && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim())
+                           ? 'Enter a valid email address.' : null,
 
-// ── CREATE ───────────────────────────────────────────────────────────────
-function submitCreateForm() {
-    hideErrors('createErrorBox');
-    setBtnLoading('createSubmitBtn', true, '');
+    capacity:       v => (v === '' || v == null) ? 'Capacity is required.'
+                       : isNaN(v) || Number(v) < 1 ? 'Capacity must be at least 1 litre.'
+                       : null,
+};
 
-    const formData = new FormData(document.getElementById('createDepotForm'));
-
-    fetch('{{ route('admin.depots.store') }}', {
-        method: 'POST',
-        headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
-        body: formData
-    })
-    .then(async res => {
-        const data = await res.json();
-        if (res.status === 422) {
-            showErrors('createErrorBox', 'createErrorList', data.errors);
-            setBtnLoading('createSubmitBtn', false, '<i class="bi bi-floppy me-1"></i> Save Depot');
-            return;
-        }
-        if (data.success) {
-            showToast(data.message);
-            setTimeout(() => location.reload(), 800);
-        } else {
-            alert(data.message || 'Something went wrong!');
-            setBtnLoading('createSubmitBtn', false, '<i class="bi bi-floppy me-1"></i> Save Depot');
-        }
-    })
-    .catch(() => {
-        alert('Network error. Please try again.');
-        setBtnLoading('createSubmitBtn', false, '<i class="bi bi-floppy me-1"></i> Save Depot');
-    });
-}
-
-// ── EDIT ─────────────────────────────────────────────────────────────────
-let currentEditId = null;
-
-function openEditModal(id) {
-    currentEditId = id;
-    document.getElementById('editModalBody').innerHTML = `
-        <div class="text-center py-5">
-            <div class="spinner-border text-primary"></div>
-            <p class="mt-2 text-muted small">Loading depot data...</p>
-        </div>`;
-    document.getElementById('editModalFooter').style.display = 'none';
-    new bootstrap.Modal(document.getElementById('editDepotModal')).show();
-
-    fetch(`/admin/depots/${id}/get`)
-        .then(r => r.json())
-        .then(d => {
-            document.getElementById('editModalBody').innerHTML = `
-                <div id="editErrorBox" class="alert alert-danger d-none mb-3">
-                    <strong><i class="bi bi-exclamation-triangle-fill me-1"></i> Please fix the following:</strong>
-                    <ul id="editErrorList" class="mb-0 mt-2"></ul>
-                </div>
-                <form id="editDepotForm">
-                    <div class="row g-3">
-
-                        <div class="col-md-6">
-                            <label class="modal-label required">Depot Name</label>
-                            <input type="text" name="depot_name" class="form-control"
-                                   value="${escHtml(d.depot_name)}">
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="modal-label required">Depot Code</label>
-                            <input type="text" name="depot_code" class="form-control"
-                                   value="${escHtml(d.depot_code)}">
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="modal-label required">District</label>
-                            <select name="district" class="form-select">
-                                ${buildDistrictOptions(d.district)}
-                            </select>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="modal-label required">Contact Number</label>
-                            <input type="text" name="contact_number" class="form-control"
-                                   value="${escHtml(d.contact_number)}">
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="modal-label">Email</label>
-                            <input type="email" name="email" class="form-control"
-                                   value="${escHtml(d.email)}">
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="modal-label required">Capacity (Litres)</label>
-                            <div class="input-group">
-                                <input type="number" step="0.01" min="1" name="capacity"
-                                       class="form-control" value="${d.capacity}">
-                                <span class="input-group-text">L</span>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="modal-label">Number of Tanks</label>
-                            <input type="number" min="0" name="number_of_tanks" class="form-control"
-                                   value="${escHtml(d.number_of_tanks)}">
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="modal-label">Status</label>
-                            <select name="status" class="form-select">
-                                <option value="active"   ${d.status === 'active'   ? 'selected' : ''}>Active</option>
-                                <option value="inactive" ${d.status === 'inactive' ? 'selected' : ''}>Inactive</option>
-                            </select>
-                        </div>
-
-                        <div class="col-12">
-                            <label class="modal-label">Full Address</label>
-                            <textarea name="full_address" class="form-control" rows="2">${escHtml(d.full_address)}</textarea>
-                        </div>
-
-                        <div class="col-12">
-                            <label class="modal-label">Remarks / Notes</label>
-                            <textarea name="remarks" class="form-control" rows="2">${escHtml(d.remarks)}</textarea>
-                        </div>
-
-                    </div>
-                </form>`;
-
-            document.getElementById('editModalFooter').style.display = 'flex';
-            setBtnLoading('editSubmitBtn', false, '<i class="bi bi-floppy me-1"></i> Save Changes');
-        })
-        .catch(() => {
-            document.getElementById('editModalBody').innerHTML =
-                `<div class="alert alert-danger">Failed to load depot. Please try again.</div>`;
-        });
-}
-
-function submitEditForm() {
-    hideErrors('editErrorBox');
-    setBtnLoading('editSubmitBtn', true, '');
-
-    const formData = new FormData(document.getElementById('editDepotForm'));
-    formData.append('_method', 'PUT');
-
-    fetch(`/admin/depots/${currentEditId}`, {
-        method: 'POST',
-        headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
-        body: formData
-    })
-    .then(async res => {
-        const data = await res.json();
-        if (res.status === 422) {
-            showErrors('editErrorBox', 'editErrorList', data.errors);
-            setBtnLoading('editSubmitBtn', false, '<i class="bi bi-floppy me-1"></i> Save Changes');
-            return;
-        }
-        if (data.success) {
-            showToast(data.message);
-            setTimeout(() => location.reload(), 800);
-        } else {
-            alert(data.message || 'Update failed!');
-            setBtnLoading('editSubmitBtn', false, '<i class="bi bi-floppy me-1"></i> Save Changes');
-        }
-    })
-    .catch(() => {
-        alert('Network error. Please try again.');
-        setBtnLoading('editSubmitBtn', false, '<i class="bi bi-floppy me-1"></i> Save Changes');
-    });
-}
-
-// ── DELETE with SweetAlert ───────────────────────────────────────────────
-$(document).on('click', '.delete-confirm', function () {
-    const form = $(this).closest('form');
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "You won't be able to revert this!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Yes, delete it!'
-    }).then(result => {
-        if (result.isConfirmed) form.submit();
-    });
+/* ── Blank form skeleton ──────────────────────────────────── */
+const blankForm = () => ({
+    depot_name: '', depot_code: '', district: '',
+    contact_number: '', email: '', capacity: '',
+    number_of_tanks: '', status: 'active',
+    full_address: '', remarks: '',
 });
 
+/* ═══════════════════════════════════════════════════════════
+   DepotForm — shared Alpine component for create & edit
+══════════════════════════════════════════════════════════════ */
+function DepotForm({ url, method }) {
+    return {
+        /* config */
+        url, method,
+
+        /* state */
+        form        : blankForm(),
+        errors      : {},       // field-level errors (frontend + backend mapped)
+        serverErrors: [],       // flat list for the banner
+        touched     : {},       // which fields have been interacted with
+        busy        : false,    // submit spinner
+
+        /* edit-only state */
+        fetching    : method === 'PUT',  // show loader by default for edit modal
+        fetchFailed : false,
+
+        /* ── Validation helpers ────────────────────────────── */
+        validate(field) {
+            const rule = RULES[field];
+            const msg  = rule ? rule(this.form[field]) : null;
+            if (msg) this.errors[field] = msg;
+            else     delete this.errors[field];
+        },
+
+        touch(field) {
+            this.touched[field] = true;
+            this.validate(field);
+        },
+
+        validateAll() {
+            Object.keys(RULES).forEach(f => {
+                this.touched[f] = true;
+                this.validate(f);
+            });
+            return Object.keys(this.errors).length === 0;
+        },
+
+        fieldClass(field) {
+            if (!this.touched[field]) return '';
+            return this.errors[field] ? 'is-invalid' : 'is-valid';
+        },
+
+        /* ── Load data for edit ────────────────────────────── */
+        async load(id) {
+            this.url        = `/admin/depots/${id}`;   // update PUT target
+            this.fetching   = true;
+            this.fetchFailed = false;
+            this.reset(false);                          // clear form but keep fetching=true
+
+            try {
+                const res = await fetch(`/admin/depots/${id}/get`);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const d = await res.json();
+
+                this.form = {
+                    depot_name:      d.depot_name      ?? '',
+                    depot_code:      d.depot_code      ?? '',
+                    district:        d.district        ?? '',
+                    contact_number:  d.contact_number  ?? '',
+                    email:           d.email           ?? '',
+                    capacity:        d.capacity        ?? '',
+                    number_of_tanks: d.number_of_tanks ?? '',
+                    status:          d.status          ?? 'active',
+                    full_address:    d.full_address    ?? '',
+                    remarks:         d.remarks         ?? '',
+                };
+            } catch {
+                this.fetchFailed = true;
+            } finally {
+                this.fetching = false;
+            }
+        },
+
+        /* ── Submit ────────────────────────────────────────── */
+        async submit() {
+            if (!this.validateAll()) {
+                toast('Please fix the highlighted errors.', 'error');
+                return;
+            }
+
+            this.busy         = true;
+            this.serverErrors = [];
+
+            const fd = new FormData();
+            if (this.method === 'PUT') fd.append('_method', 'PUT');
+            Object.entries(this.form).forEach(([k, v]) => fd.append(k, v ?? ''));
+
+            try {
+                const res  = await fetch(this.url, {
+                    method : 'POST',           // always POST; _method spoofing for PUT
+                    headers: { 'X-CSRF-TOKEN': csrf() },
+                    body   : fd,
+                });
+                const data = await res.json();
+
+                if (res.status === 422) {
+                    /* Map Laravel errors → inline field errors + banner list */
+                    this.serverErrors = Object.values(data.errors ?? {}).flat();
+                    Object.entries(data.errors ?? {}).forEach(([field, msgs]) => {
+                        this.errors[field]  = msgs[0];
+                        this.touched[field] = true;
+                    });
+                    toast('Validation failed — please check the form.', 'error');
+                    return;
+                }
+
+                if (data.success) {
+                    toast(data.message, 'success');
+                    bootstrap.Modal.getInstance(
+                        document.getElementById(this.method === 'POST' ? 'createModal' : 'editModal')
+                    )?.hide();
+                    setTimeout(() => location.reload(), 950);
+                } else {
+                    toast(data.message || 'Something went wrong.', 'error');
+                }
+            } catch {
+                toast('Network error — please check your connection.', 'error');
+            } finally {
+                this.busy = false;
+            }
+        },
+
+        /* ── Reset (called on modal close) ────────────────── */
+        reset(resetFetching = true) {
+            this.form         = blankForm();
+            this.errors       = {};
+            this.touched      = {};
+            this.serverErrors = [];
+            this.busy         = false;
+            if (resetFetching) {
+                this.fetching    = this.method === 'PUT';
+                this.fetchFailed = false;
+            }
+        },
+    };
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ToastManager Alpine component
+══════════════════════════════════════════════════════════════ */
+function ToastManager() {
+    return {
+        list: [],
+        push({ msg, type = 'success' }) {
+            const id = Date.now();
+            this.list.push({ id, msg, type, out: false });
+            setTimeout(() => this.dismiss(id), 4200);
+        },
+        dismiss(id) {
+            const t = this.list.find(x => x.id === id);
+            if (!t) return;
+            t.out = true;
+            setTimeout(() => this.list = this.list.filter(x => x.id !== id), 320);
+        },
+    };
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Global bridge — lets onclick attributes reach Alpine data
+══════════════════════════════════════════════════════════════ */
+const DepotEdit = {
+    open(id) {
+        const el   = document.getElementById('editModal');
+        const comp = Alpine.$data(el);
+        bootstrap.Modal.getOrCreateInstance(el).show();
+        // slight delay so modal is visible before fetch spinner shows
+        setTimeout(() => comp.load(id), 60);
+    }
+};
+
+/* ═══════════════════════════════════════════════════════════
+   Delete with SweetAlert2
+══════════════════════════════════════════════════════════════ */
+function confirmDelete(id, name) {
+    Swal.fire({
+        title          : `Delete "${name}"?`,
+        text           : 'This action cannot be undone.',
+        icon           : 'warning',
+        showCancelButton: true,
+        reverseButtons : true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor : '#64748b',
+        confirmButtonText : '<i class="bi bi-trash3 me-1"></i> Yes, Delete',
+        cancelButtonText  : 'Cancel',
+        customClass    : { popup: 'rounded-3', confirmButton: 'fw-semibold', cancelButton: 'fw-semibold' }
+    }).then(({ isConfirmed }) => {
+        if (isConfirmed) document.getElementById(`del-${id}`).submit();
+    });
+}
 </script>
 @endpush
