@@ -46,14 +46,27 @@ Route::prefix('admin')->middleware(['role:' . UserRole::ADMIN])->as('admin.')->g
 
     Route::get('admin/reports/submitted', [ReportsController::class, 'submittedReport'])
         ->name('reports.submitted');
-    
-    Route::get('reports/{fuelReport}/edit', [ReportsController::class, 'edit'])->name('reports.edit');
-    Route::put('reports/{fuelReport}', [ReportsController::class, 'update'])->name('reports.update');  
 
-        // export pdf routes
+    Route::get('reports/{fuelReport}/edit', [ReportsController::class, 'edit'])->name('reports.edit');
+    Route::put('reports/{fuelReport}', [ReportsController::class, 'update'])->name('reports.update');
+
+    // export pdf routes
     Route::get('reports/export-pdf', [ReportsController::class, 'exportPdf'])->name('reports.export.pdf');
 
     Route::get('reports/export-difference-pdf', [ReportsController::class, 'exportDifferencePdf'])->name('reports.export.difference.pdf');
     Route::get('reports/export-missing-pdf',    [ReportsController::class, 'exportMissingPdf'])->name('reports.export.missing.pdf');
     Route::get('reports/export-submitted-pdf',  [ReportsController::class, 'exportSubmittedPdf'])->name('reports.export.submitted.pdf');
+
+
+    // Stock & Sales Reports
+    Route::get('/admin/reports/export/csv', [ReportsController::class, 'exportCsv'])->name('reports.export.csv');
+
+    // Difference Report
+    Route::get('/admin/reports/difference/export/csv', [ReportsController::class, 'exportDifferenceCsv'])->name('reports.difference.export.csv');
+
+    // Missing Report
+    Route::get('/admin/reports/missing/export/csv', [ReportsController::class, 'exportMissingCsv'])->name('reports.missing.export.csv');
+
+    // Submitted Report
+    Route::get('/admin/reports/submitted/export/csv', [ReportsController::class, 'exportSubmittedCsv'])->name('reports.submitted.export.csv');
 });

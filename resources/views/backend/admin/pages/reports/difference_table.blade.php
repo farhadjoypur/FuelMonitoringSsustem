@@ -153,8 +153,11 @@
         <div style="display:flex; align-items:center; gap:12px;">
             <span class="record-count" x-show="diffTotalRecords > 0" x-text="diffTotalRecords + ' records found'">
             </span>
-            <button class="btn-diff-export-pdf" @click="exportDiffPdf()">
+            <button class="btn-export btn-export-pdf" @click="exportDiffPdf()">
                 <i class="fa-solid fa-file-pdf"></i> Export to PDF
+            </button>
+            <button class="btn-export btn-export-pdf" @click="exportDiffCsv()">
+                <i class="fa-solid fa-file-csv"></i> Export to CSV
             </button>
         </div>
     </div>
@@ -311,6 +314,7 @@
                                     @click="openDeleteModal(row.reportId, row.stationName)">
                                     <i class="fa-solid fa-trash fa-xs"></i> Delete
                                 </button>
+
                             </div>
                         </td>
 

@@ -1184,4 +1184,475 @@ class ReportsController extends Controller
             ['Content-Type' => 'application/pdf']
         );
     }
+
+    // ─────────────────────────────────────────────────────────────
+    // CSV HELPER - UTF-8 BOM with proper escaping
+    // ─────────────────────────────────────────────────────────────
+
+    private function streamCsv(string $filename, array $headers, iterable $rows): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        return response()->streamDownload(function () use ($headers, $rows) {
+            // UTF-8 BOM for Excel Bangla support
+            echo "\xEF\xBB\xBF";
+
+            $output = fopen('php://output', 'w');
+
+            // Write headers
+            fputcsv($output, $headers);
+
+            // Write rows
+            foreach ($rows as $row) {
+                // Escape values: remove newlines, trim, handle null
+                $escaped = array_map(fn($val) => $val === null ? '' : str_replace(["\r", "\n"], ' ', trim($val)), $row);
+                fputcsv($output, $escaped);
+            }
+
+            fclose($output);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Encoding' => 'UTF-8',
+        ]);
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // EXPORT CSV — STOCK & SALES
+    // ─────────────────────────────────────────────────────────────
+
+    // ─────────────────────────────────────────────────────────────
+    // EXPORT CSV — STOCK & SALES (PDF Format Match)
+    // ─────────────────────────────────────────────────────────────
+
+    public function exportCsv(Request $request)
+    {
+        $filters = $request->only([
+            'from_date',
+            'to_date',
+            'division',
+            'district',
+            'thana_upazila',
+            'company_id',
+            'depot_id',
+            'station_id',
+            'fuel_type',
+            'stock_status',
+        ]);
+
+        $rawReports = $this->buildFilteredQuery($request)
+            ->orderBy('report_date', 'desc')
+            ->orderBy('station_id')
+            ->get();
+
+        $officerMap       = $this->loadOfficerMap();
+        $formattedReports = $rawReports->map(fn($r) => $this->formatSingleReport($r, $officerMap));
+
+        // CSV Headers - PDF এর মতো
+        $headers = [
+            '#',
+            'Date',
+            'Filling Station',
+            'Company',
+            'Tag Officer',
+            'Fuel',
+            'Prev. Stock (L)',
+            'Supply From Depot (L)',
+            'Received At Station (L)',
+            'Difference (L)',
+            'Sales (L)',
+            'Closing Stock (L)',
+            'Status',
+            'Comment'
+        ];
+
+        $rows = [];
+        $serial = 1;
+
+        foreach ($formattedReports as $report) {
+            $fuelTypes = ['diesel', 'petrol', 'octane', 'others'];
+            $firstRow = true;
+
+            foreach ($fuelTypes as $fuel) {
+                $fuelLabel = ucfirst($fuel);
+
+                // First row এ সব তথ্য, পরের rows এ শুধু fuel data
+                $row = [
+                    $firstRow ? $serial : '',  // #
+                    $firstRow ? $report['report_date_from'] : '',  // Date
+                    $firstRow ? $report['station_name'] : '',  // Filling Station
+                    $firstRow ? $report['company_name'] : '',  // Company
+                    $firstRow ? $report['tag_officer'] : '',  // Tag Officer
+                    $fuelLabel,  // Fuel
+                    $report["{$fuel}_prev_stock"],  // Prev. Stock (L)
+                    $report["{$fuel}_supply"],  // Supply From Depot (L)
+                    $report["{$fuel}_received"],  // Received At Station (L)
+                    $report["{$fuel}_difference"],  // Difference (L)
+                    $report["{$fuel}_sales"],  // Sales (L)
+                    $report["{$fuel}_closing_stock"],  // Closing Stock (L)
+                    $report['fuel_statuses'][$fuel]['label'],  // Status
+                    $firstRow ? $report['comment'] : '',  // Comment
+                ];
+
+                $rows[] = $row;
+
+                if ($firstRow) {
+                    $serial++;
+                    $firstRow = false;
+                }
+            }
+        }
+
+        return $this->streamCsv(
+            'stock-sales-report-' . now()->format('Y-m-d') . '.csv',
+            $headers,
+            $rows
+        );
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // EXPORT CSV — DIFFERENCE REPORT (PDF Format Match)
+    // ─────────────────────────────────────────────────────────────
+
+    public function exportDifferenceCsv(Request $request)
+    {
+        $filters = $request->only([
+            'from_date',
+            'to_date',
+            'division',
+            'district',
+            'thana_upazila',
+            'company_id',
+            'station_id',
+            'tag_officer',
+            'diff_status',
+            'min_diff_l',
+            'min_diff_pct',
+        ]);
+
+        $query = Fuelreport::query()->with(['fillingStation.company']);
+
+        if (!empty($filters['from_date']) && empty($filters['to_date']))
+            $query->whereDate('report_date', $filters['from_date']);
+        elseif (!empty($filters['from_date']) && !empty($filters['to_date']))
+            $query->whereBetween('report_date', [$filters['from_date'], $filters['to_date']]);
+
+        if (!empty($filters['division']))
+            $query->whereHas('fillingStation', fn($q) => $q->where('division', $filters['division']));
+        if (!empty($filters['district']))
+            $query->where('district', $filters['district']);
+        if (!empty($filters['thana_upazila']))
+            $query->where('thana_upazila', $filters['thana_upazila']);
+        if (!empty($filters['company_id']))
+            $query->whereHas('fillingStation', fn($q) => $q->where('company_id', $filters['company_id']));
+        if (!empty($filters['station_id']))
+            $query->where('station_id', $filters['station_id']);
+
+        $fuelTypes  = ['octane', 'petrol', 'diesel', 'others'];
+        $officerMap = AssignTagOfficer::with(['officer.profile'])
+            ->where('status', 'active')->get()->keyBy('filling_station_id');
+
+        $allRawReports = $query->orderBy('report_date', 'desc')->orderBy('station_id')->get();
+
+        $rows = [];
+        $serial = 1;
+
+        foreach ($allRawReports as $report) {
+            $stationId          = $report->station_id;
+            $assignment         = $officerMap->get($stationId);
+            $officerProfile     = $assignment?->officer?->profile;
+            $tagOfficerName     = $officerProfile?->name ?? $assignment?->officer?->name ?? '—';
+            $officerDesignation = $officerProfile?->designation ?? '—';
+            $officerPhone       = $officerProfile?->phone ?? $assignment?->officer?->phone ?? '—';
+
+            $firstRow = true;
+            $fuelData = [];
+
+            foreach ($fuelTypes as $fuel) {
+                $totalSupply       = (float) ($report->{"{$fuel}_supply"} ?? 0);
+                $totalReceived     = (float) ($report->{"{$fuel}_received"} ?? 0);
+                $differenceL       = $totalSupply - $totalReceived;
+                $differencePercent = $totalSupply > 0 ? round(($differenceL / $totalSupply) * 100, 2) : 0;
+                $diffStatus        = match (true) {
+                    abs($differencePercent) >= 5 => 'High',
+                    abs($differencePercent) >= 1 => 'Low',
+                    default                      => 'Normal',
+                };
+
+                $fuelData[] = [
+                    'fuel'              => ucfirst($fuel),
+                    'differenceL'       => number_format($differenceL, 0),
+                    'differencePercent' => $differencePercent,
+                    'diffStatus'        => $diffStatus,
+                ];
+            }
+
+            // Apply filters
+            if (!empty($filters['min_diff_l'])) {
+                $minL = (float) $filters['min_diff_l'];
+                $hasMinL = collect($fuelData)->contains(fn($f) => abs((float) str_replace(',', '', $f['differenceL'])) >= $minL);
+                if (!$hasMinL) continue;
+            }
+
+            if (!empty($filters['min_diff_pct'])) {
+                $minPct = (float) $filters['min_diff_pct'];
+                $hasMinPct = collect($fuelData)->contains(fn($f) => abs($f['differencePercent']) >= $minPct);
+                if (!$hasMinPct) continue;
+            }
+
+            if (!empty($filters['diff_status'])) {
+                $target = ucfirst($filters['diff_status']);
+                $hasStatus = collect($fuelData)->contains(fn($f) => $f['diffStatus'] === $target);
+                if (!$hasStatus) continue;
+            }
+
+            // Create rows for each fuel type
+            foreach ($fuelData as $fuel) {
+                $rows[] = [
+                    $firstRow ? $serial : '',                              // #
+                    $firstRow ? \Carbon\Carbon::parse($report->report_date)->format('d M Y') : '',  // Date
+                    $firstRow ? ($report->station_name ?? $report->fillingStation?->station_name ?? '—') : '',  // Station
+                    $firstRow ? ($report->fillingStation?->company?->code ?? '—') : '',  // Company
+                    $firstRow ? $tagOfficerName : '',                       // Tag Officer
+                    $firstRow ? $officerDesignation : '',                   // Designation
+                    $firstRow ? $officerPhone : '',                          // Phone
+                    $firstRow ? ($report->district ?? '—') : '',            // District
+                    $firstRow ? ($report->thana_upazila ?? '—') : '',       // Upazila
+                    $fuel['fuel'],                                          // Fuel
+                    $fuel['differenceL'],                                   // Diff (L)
+                    $fuel['differencePercent'] . '%',                       // Diff (%)
+                    $fuel['diffStatus'],                                    // Status
+                ];
+
+                if ($firstRow) {
+                    $serial++;
+                    $firstRow = false;
+                }
+            }
+        }
+
+        $headers = [
+            '#',
+            'Date',
+            'Station',
+            'Company',
+            'Tag Officer',
+            'Designation',
+            'Phone',
+            'District',
+            'Upazila',
+            'Fuel',
+            'Diff (L)',
+            'Diff (%)',
+            'Status'
+        ];
+
+        return $this->streamCsv(
+            'difference-report-' . now()->format('Y-m-d') . '.csv',
+            $headers,
+            $rows
+        );
+    }
+    // ────────────────────────────────────────────────────────────
+    // EXPORT CSV — MISSING REPORT (PDF Format Match)
+    // ─────────────────────────────────────────────────────────────
+
+    public function exportMissingCsv(Request $request)
+    {
+        $filters = $request->only([
+            'from_date',
+            'to_date',
+            'division',
+            'district',
+            'thana_upazila',
+            'company_id',
+            'depot_id',
+            'station_id',
+        ]);
+
+        // 1. Get Assignments with all necessary relations
+        $assignmentsQuery = AssignTagOfficer::with([
+            'officer.profile',
+            'fillingStation.company',
+            'fillingStation.depot',
+        ])->where('status', 'active');
+
+        // Apply Filters
+        if (!empty($filters['division']))
+            $assignmentsQuery->whereHas('fillingStation', fn($q) => $q->where('division', $filters['division']));
+        if (!empty($filters['district']))
+            $assignmentsQuery->whereHas('fillingStation', fn($q) => $q->where('district', $filters['district']));
+        if (!empty($filters['thana_upazila']))
+            $assignmentsQuery->whereHas('fillingStation', fn($q) => $q->where('upazila', $filters['thana_upazila']));
+        if (!empty($filters['company_id']))
+            $assignmentsQuery->whereHas('fillingStation', fn($q) => $q->where('company_id', $filters['company_id']));
+        if (!empty($filters['depot_id']))
+            $assignmentsQuery->whereHas('fillingStation', fn($q) => $q->where('depot_id', $filters['depot_id']));
+        if (!empty($filters['station_id']))
+            $assignmentsQuery->where('filling_station_id', $filters['station_id']);
+
+        $allAssignments = $assignmentsQuery->get();
+
+        // 2. Determine Date Range for "Missing" check
+        if (!empty($filters['from_date']) && empty($filters['to_date'])) {
+            $fromDate = \Carbon\Carbon::parse($filters['from_date'])->startOfDay();
+            $toDate   = \Carbon\Carbon::parse($filters['from_date'])->endOfDay();
+        } elseif (!empty($filters['from_date']) && !empty($filters['to_date'])) {
+            $fromDate = \Carbon\Carbon::parse($filters['from_date'])->startOfDay();
+            $toDate   = \Carbon\Carbon::parse($filters['to_date'])->endOfDay();
+        } else {
+            // Default to current date if no filter provided
+            $fromDate = now()->startOfDay();
+            $toDate   = now()->endOfDay();
+        }
+
+        // 3. Find IDs of stations that HAVE reported
+        $reportedStationIds = Fuelreport::whereBetween('report_date', [$fromDate, $toDate])
+            ->whereNotNull('station_id')
+            ->pluck('station_id')
+            ->unique()
+            ->toArray();
+
+        // 4. Filter out those that reported, keeping only the MISSING ones
+        $rows = $allAssignments
+            ->filter(fn($assignment) => !in_array($assignment->filling_station_id, $reportedStationIds))
+            ->values() // Reset keys
+            ->map(function ($assignment, $index) use ($fromDate) {
+                $officer = $assignment->officer;
+                $profile = $officer?->profile;
+                $station = $assignment->fillingStation;
+
+                return [
+                    '#'              => $index + 1, // Serial number
+                    'Missing Date'   => $fromDate->format('d M Y'), // Match PDF date format
+                    'Officer Name'   => $profile?->name ?? $officer?->name ?? '—',
+                    'Phone'          => $profile?->phone ?? $officer?->phone ?? '—',
+                    'Division'       => $station?->division ?? '—',
+                    'District'       => $station?->district ?? '—',
+                    'Upazila'        => $station?->upazila ?? '—',
+                    'Filling Station' => $station?->station_name ?? '—',
+                    'Company'        => $station?->company?->code ?? '—',
+                    'Depot'          => $station?->depot?->depot_name ?? '—',
+                    'Status'         => 'Pending', // As shown in PDF
+                ];
+            });
+
+        $headers = [
+            '#',
+            'Missing Date',
+            'Officer Name',
+            'Phone',
+            'Division',
+            'District',
+            'Upazila',
+            'Filling Station',
+            'Company',
+            'Depot',
+            'Status'
+        ];
+
+        return $this->streamCsv(
+            'missing-report-' . now()->format('Y-m-d') . '.csv',
+            $headers,
+            $rows
+        );
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // EXPORT CSV — SUBMITTED REPORT (PDF Format Match)
+    // ─────────────────────────────────────────────────────────────
+
+    public function exportSubmittedCsv(Request $request)
+    {
+        $filters = $request->only([
+            'from_date',
+            'to_date',
+            'division',
+            'district',
+            'thana_upazila',
+            'company_id',
+            'depot_id',
+            'station_id',
+        ]);
+
+        $fuelTypes = ['octane', 'petrol', 'diesel', 'others'];
+
+        $query = Fuelreport::query()->with([
+            'fillingStation.company',
+            'fillingStation.depot',
+        ]);
+
+        // Apply Filters
+        if (!empty($filters['from_date']) && empty($filters['to_date']))
+            $query->whereDate('report_date', $filters['from_date']);
+        elseif (!empty($filters['from_date']) && !empty($filters['to_date']))
+            $query->whereBetween('report_date', [$filters['from_date'], $filters['to_date']]);
+
+        if (!empty($filters['division']))
+            $query->whereHas('fillingStation', fn($q) => $q->where('division', $filters['division']));
+        if (!empty($filters['district']))
+            $query->where('district', $filters['district']);
+        if (!empty($filters['thana_upazila']))
+            $query->where('thana_upazila', $filters['thana_upazila']);
+        if (!empty($filters['company_id']))
+            $query->whereHas('fillingStation', fn($q) => $q->where('company_id', $filters['company_id']));
+        if (!empty($filters['depot_id']))
+            $query->whereHas('fillingStation', fn($q) => $q->where('depot_id', $filters['depot_id']));
+        if (!empty($filters['station_id']))
+            $query->where('station_id', $filters['station_id']);
+
+        $allReports = $query->orderBy('report_date', 'desc')->get();
+
+        $officerMap = AssignTagOfficer::with(['officer.profile'])
+            ->where('status', 'active')->get()->keyBy('filling_station_id');
+
+        $rows = $allReports->map(function ($report, $index) use ($fuelTypes, $officerMap) {
+            $assignment     = $officerMap->get($report->station_id);
+            $officerProfile = $assignment?->officer?->profile;
+
+            $rowData = [
+                '#'                 => $index + 1,
+                'Submit Date'       => \Carbon\Carbon::parse($report->report_date)->format('d M Y'),
+                'Officer Name'      => $officerProfile?->name ?? $assignment?->officer?->name ?? '—',
+                'Officer Phone'     => $officerProfile?->phone ?? $assignment?->officer?->phone ?? '—',
+                'Division'          => $report->fillingStation?->division ?? '—',
+                'District'          => $report->district ?? '—',
+                'Upazila'           => $report->thana_upazila ?? '—',
+                'Station Name'      => $report->station_name ?? $report->fillingStation?->station_name ?? '—',
+                'Company'           => $report->fillingStation?->company?->code ?? '—',
+                'Depot'             => $report->depot_name ?? $report->fillingStation?->depot?->depot_name ?? '—',
+            ];
+
+            // Add fuel closing stocks
+            foreach ($fuelTypes as $fuel) {
+                $fuelLabel = ucfirst($fuel);
+                $rowData["{$fuelLabel} Closing Stock"] = number_format((float) ($report->{"{$fuel}_closing_stock"} ?? 0), 0);
+            }
+
+            $rowData['Status'] = 'Submitted';
+
+            return $rowData;
+        });
+
+        $headers = [
+            '#',
+            'Submit Date',
+            'Officer Name',
+            'Officer Phone',
+            'Division',
+            'District',
+            'Upazila',
+            'Station Name',
+            'Company',
+            'Depot',
+            'Diesel Closing Stock',
+            'Petrol Closing Stock',
+            'Octane Closing Stock',
+            'Others Closing Stock',
+            'Status'
+        ];
+
+        return $this->streamCsv(
+            'submitted-report-' . now()->format('Y-m-d') . '.csv',
+            $headers,
+            $rows
+        );
+    }
 }
