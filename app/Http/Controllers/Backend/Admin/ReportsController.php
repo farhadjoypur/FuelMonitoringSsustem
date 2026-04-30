@@ -532,70 +532,94 @@ class ReportsController extends Controller
 
     public function missingReport(Request $request)
     {
-        $rawPerPage = $request->get('per_page', 10);
-        $perPage    = ($rawPerPage === 'all' || (int)$rawPerPage <= 0)
-            ? PHP_INT_MAX
-            : (int) $rawPerPage;
+        $validated = $request->validate([
+            'from_date'     => 'nullable|date',
+            'to_date'       => 'nullable|date|after_or_equal:from_date',
+            'division'      => 'nullable|string|max:100',
+            'district'      => 'nullable|string|max:100',
+            'thana_upazila' => 'nullable|string|max:100',
+            'company_id'    => 'nullable|integer|exists:companies,id',
+            'depot_id'      => 'nullable|integer',
+            'station_id'    => 'nullable|integer|exists:filling_stations,id',
+            'page'          => 'nullable|integer|min:1',
+            'per_page'      => 'nullable|string',
+        ]);
+
+        $rawPerPage  = $request->get('per_page', 10);
+        $perPage     = ($rawPerPage === 'all' || (int) $rawPerPage <= 0) ? PHP_INT_MAX : (int) $rawPerPage;
         $currentPage = (int) $request->get('page', 1);
 
+        $fromDate = !empty($validated['from_date'])
+            ? \Carbon\Carbon::parse($validated['from_date'])->startOfDay()
+            : \Carbon\Carbon::today()->startOfDay();
+
+        $toDate = !empty($validated['to_date'])
+            ? \Carbon\Carbon::parse($validated['to_date'])->endOfDay()
+            : $fromDate->copy()->endOfDay();
+
+        // ✅ সব active assignments
         $assignmentsQuery = AssignTagOfficer::with([
             'officer.profile',
             'fillingStation.company',
-            'fillingStation.depot'
+            'fillingStation.depot',
         ])->where('status', 'active');
 
-        if ($request->filled('division'))
-            $assignmentsQuery->whereHas('fillingStation', fn($q) => $q->where('division', $request->division));
-        if ($request->filled('district'))
-            $assignmentsQuery->whereHas('fillingStation', fn($q) => $q->where('district', $request->district));
-        if ($request->filled('thana_upazila'))
-            $assignmentsQuery->whereHas('fillingStation', fn($q) => $q->where('upazila', $request->thana_upazila));
-        if ($request->filled('company_id'))
-            $assignmentsQuery->whereHas('fillingStation', fn($q) => $q->where('company_id', $request->company_id));
-        if ($request->filled('depot_id'))
-            $assignmentsQuery->whereHas('fillingStation', fn($q) => $q->where('depot_id', $request->depot_id));
-        if ($request->filled('station_id'))
-            $assignmentsQuery->where('filling_station_id', $request->station_id);
+        if (!empty($validated['division']))
+            $assignmentsQuery->whereHas('fillingStation', fn($q) => $q->where('division', $validated['division']));
+        if (!empty($validated['district']))
+            $assignmentsQuery->whereHas('fillingStation', fn($q) => $q->where('district', $validated['district']));
+        if (!empty($validated['thana_upazila']))
+            $assignmentsQuery->whereHas('fillingStation', fn($q) => $q->where('upazila', $validated['thana_upazila']));
+        if (!empty($validated['company_id']))
+            $assignmentsQuery->whereHas('fillingStation', fn($q) => $q->where('company_id', $validated['company_id']));
+        if (!empty($validated['depot_id']))
+            $assignmentsQuery->whereHas('fillingStation', fn($q) => $q->where('depot_id', $validated['depot_id']));
+        if (!empty($validated['station_id']))
+            $assignmentsQuery->where('filling_station_id', $validated['station_id']);
 
         $allAssignments = $assignmentsQuery->get();
 
-        if ($request->filled('from_date') && !$request->filled('to_date')) {
-            $fromDate = \Carbon\Carbon::parse($request->from_date)->startOfDay();
-            $toDate   = \Carbon\Carbon::parse($request->from_date)->endOfDay();
-        } elseif ($request->filled('from_date') && $request->filled('to_date')) {
-            $fromDate = \Carbon\Carbon::parse($request->from_date)->startOfDay();
-            $toDate   = \Carbon\Carbon::parse($request->to_date)->endOfDay();
-        } else {
-            $fromDate = now()->startOfDay();
-            $toDate   = now()->endOfDay();
-        }
-
-        $reportedStationIds = Fuelreport::whereBetween('report_date', [$fromDate, $toDate])
+        // ✅ প্রতিদিনের জন্য কোন station report দিয়েছে সেটা একবারে আনো
+        // format: ['2025-01-01' => [station_id1, station_id2, ...], ...]
+        $reportedMap = Fuelreport::whereBetween('report_date', [$fromDate, $toDate])
             ->whereNotNull('station_id')
-            ->pluck('station_id')
-            ->unique()
-            ->toArray();
+            ->get(['report_date', 'station_id'])
+            ->groupBy(fn($r) => \Carbon\Carbon::parse($r->report_date)->format('Y-m-d'))
+            ->map(fn($group) => $group->pluck('station_id')->unique()->toArray());
 
-        $missingRows = $allAssignments
-            ->filter(fn($assignment) => !in_array($assignment->filling_station_id, $reportedStationIds))
-            ->map(function ($assignment) use ($fromDate) {
-                $officer = $assignment->officer;
-                $profile = $officer?->profile;
-                $station = $assignment->fillingStation;
-                return [
-                    'id'           => $assignment->id,
-                    'missingDate'  => $fromDate->format('Y-m-d'),
-                    'officerName'  => $profile?->name ?? $officer?->name ?? '—',
-                    'officerPhone' => $profile?->phone ?? $officer?->phone ?? '—',
-                    'division'     => $station?->division ?? '—',
-                    'district'     => $station?->district ?? '—',
-                    'thanaUpazila' => $station?->upazila ?? '—',
-                    'stationName'  => $station?->station_name ?? '—',
-                    'companyName'  => $station?->company?->code ?? '—',
-                    'depotName'    => $station?->depot?->depot_name ?? '—',
-                    'status'       => 'Pending',
-                ];
-            })->values();
+        // ✅ Date range-এর প্রতিটা দিন loop করো
+        $missingRows = collect();
+        $currentDate = $fromDate->copy();
+
+        while ($currentDate->lte($toDate)) {
+            $dateKey            = $currentDate->format('Y-m-d');
+            $reportedTodayIds   = $reportedMap->get($dateKey, []);
+
+            foreach ($allAssignments as $assignment) {
+                // এই দিনে report দেয়নি → missing
+                if (!in_array($assignment->filling_station_id, $reportedTodayIds)) {
+                    $officer = $assignment->officer;
+                    $profile = $officer?->profile;
+                    $station = $assignment->fillingStation;
+
+                    $missingRows->push([
+                        'id'           => $assignment->id,
+                        'missingDate'  => $dateKey,
+                        'officerName'  => $profile?->name ?? $officer?->name ?? '—',
+                        'officerPhone' => $profile?->phone ?? $officer?->phone ?? '—',
+                        'division'     => $station?->division ?? '—',
+                        'district'     => $station?->district ?? '—',
+                        'thanaUpazila' => $station?->upazila ?? '—',
+                        'stationName'  => $station?->station_name ?? '—',
+                        'companyName'  => $station?->company?->code ?? '—',
+                        'depotName'    => $station?->depot?->depot_name ?? '—',
+                        'status'       => 'Pending',
+                    ]);
+                }
+            }
+
+            $currentDate->addDay(); // পরের দিনে যাও
+        }
 
         $total      = $missingRows->count();
         $totalPages = $perPage >= PHP_INT_MAX ? 1 : ((int) ceil($total / $perPage) ?: 1);
@@ -1049,9 +1073,10 @@ class ReportsController extends Controller
 
         $allAssignments = $assignmentsQuery->get();
 
+        // ✅ Date range
         if (!empty($filters['from_date']) && empty($filters['to_date'])) {
             $fromDate = \Carbon\Carbon::parse($filters['from_date'])->startOfDay();
-            $toDate   = \Carbon\Carbon::parse($filters['from_date'])->endOfDay();
+            $toDate   = $fromDate->copy()->endOfDay();
         } elseif (!empty($filters['from_date']) && !empty($filters['to_date'])) {
             $fromDate = \Carbon\Carbon::parse($filters['from_date'])->startOfDay();
             $toDate   = \Carbon\Carbon::parse($filters['to_date'])->endOfDay();
@@ -1060,28 +1085,43 @@ class ReportsController extends Controller
             $toDate   = now()->endOfDay();
         }
 
-        $reportedStationIds = Fuelreport::whereBetween('report_date', [$fromDate, $toDate])
+        // ✅ প্রতিদিনের report map
+        $reportedMap = Fuelreport::whereBetween('report_date', [$fromDate, $toDate])
             ->whereNotNull('station_id')
-            ->pluck('station_id')->unique()->toArray();
+            ->get(['report_date', 'station_id'])
+            ->groupBy(fn($r) => \Carbon\Carbon::parse($r->report_date)->format('Y-m-d'))
+            ->map(fn($group) => $group->pluck('station_id')->unique()->toArray());
 
-        $rows = $allAssignments
-            ->filter(fn($a) => !in_array($a->filling_station_id, $reportedStationIds))
-            ->map(function ($assignment) use ($fromDate) {
-                $officer = $assignment->officer;
-                $profile = $officer?->profile;
-                $station = $assignment->fillingStation;
-                return [
-                    'missingDate'  => $fromDate->format('d M Y'),
-                    'officerName'  => $profile?->name ?? $officer?->name ?? '—',
-                    'officerPhone' => $profile?->phone ?? $officer?->phone ?? '—',
-                    'division'     => $station?->division ?? '—',
-                    'district'     => $station?->district ?? '—',
-                    'thanaUpazila' => $station?->upazila ?? '—',
-                    'stationName'  => $station?->station_name ?? '—',
-                    'companyName'  => $station?->company?->code ?? '—',
-                    'depotName'    => $station?->depot?->depot_name ?? '—',
-                ];
-            })->values();
+        // ✅ প্রতিদিন loop করে missing বের করো
+        $rows    = collect();
+        $current = $fromDate->copy();
+
+        while ($current->lte($toDate)) {
+            $dateKey          = $current->format('Y-m-d');
+            $reportedTodayIds = $reportedMap->get($dateKey, []);
+
+            foreach ($allAssignments as $assignment) {
+                if (!in_array($assignment->filling_station_id, $reportedTodayIds)) {
+                    $officer = $assignment->officer;
+                    $profile = $officer?->profile;
+                    $station = $assignment->fillingStation;
+
+                    $rows->push([
+                        'missingDate'  => $current->format('d M Y'),
+                        'officerName'  => $profile?->name ?? $officer?->name ?? '—',
+                        'officerPhone' => $profile?->phone ?? $officer?->phone ?? '—',
+                        'division'     => $station?->division ?? '—',
+                        'district'     => $station?->district ?? '—',
+                        'thanaUpazila' => $station?->upazila ?? '—',
+                        'stationName'  => $station?->station_name ?? '—',
+                        'companyName'  => $station?->company?->code ?? '—',
+                        'depotName'    => $station?->depot?->depot_name ?? '—',
+                    ]);
+                }
+            }
+
+            $current->addDay();
+        }
 
         $html = view('backend.admin.pages.reports.pdf_missing', [
             'rows'     => $rows,
@@ -1467,14 +1507,12 @@ class ReportsController extends Controller
             'station_id',
         ]);
 
-        // 1. Get Assignments with all necessary relations
         $assignmentsQuery = AssignTagOfficer::with([
             'officer.profile',
             'fillingStation.company',
             'fillingStation.depot',
         ])->where('status', 'active');
 
-        // Apply Filters
         if (!empty($filters['division']))
             $assignmentsQuery->whereHas('fillingStation', fn($q) => $q->where('division', $filters['division']));
         if (!empty($filters['district']))
@@ -1490,49 +1528,58 @@ class ReportsController extends Controller
 
         $allAssignments = $assignmentsQuery->get();
 
-        // 2. Determine Date Range for "Missing" check
+        // ✅ Date range
         if (!empty($filters['from_date']) && empty($filters['to_date'])) {
             $fromDate = \Carbon\Carbon::parse($filters['from_date'])->startOfDay();
-            $toDate   = \Carbon\Carbon::parse($filters['from_date'])->endOfDay();
+            $toDate   = $fromDate->copy()->endOfDay();
         } elseif (!empty($filters['from_date']) && !empty($filters['to_date'])) {
             $fromDate = \Carbon\Carbon::parse($filters['from_date'])->startOfDay();
             $toDate   = \Carbon\Carbon::parse($filters['to_date'])->endOfDay();
         } else {
-            // Default to current date if no filter provided
             $fromDate = now()->startOfDay();
             $toDate   = now()->endOfDay();
         }
 
-        // 3. Find IDs of stations that HAVE reported
-        $reportedStationIds = Fuelreport::whereBetween('report_date', [$fromDate, $toDate])
+        // ✅ প্রতিদিনের জন্য কে report দিয়েছে
+        $reportedMap = Fuelreport::whereBetween('report_date', [$fromDate, $toDate])
             ->whereNotNull('station_id')
-            ->pluck('station_id')
-            ->unique()
-            ->toArray();
+            ->get(['report_date', 'station_id'])
+            ->groupBy(fn($r) => \Carbon\Carbon::parse($r->report_date)->format('Y-m-d'))
+            ->map(fn($group) => $group->pluck('station_id')->unique()->toArray());
 
-        // 4. Filter out those that reported, keeping only the MISSING ones
-        $rows = $allAssignments
-            ->filter(fn($assignment) => !in_array($assignment->filling_station_id, $reportedStationIds))
-            ->values() // Reset keys
-            ->map(function ($assignment, $index) use ($fromDate) {
-                $officer = $assignment->officer;
-                $profile = $officer?->profile;
-                $station = $assignment->fillingStation;
+        // ✅ প্রতিদিন loop করে missing বের করো
+        $rows    = collect();
+        $serial  = 1;
+        $current = $fromDate->copy();
 
-                return [
-                    '#'              => $index + 1, // Serial number
-                    'Missing Date'   => $fromDate->format('d M Y'), // Match PDF date format
-                    'Officer Name'   => $profile?->name ?? $officer?->name ?? '—',
-                    'Phone'          => $profile?->phone ?? $officer?->phone ?? '—',
-                    'Division'       => $station?->division ?? '—',
-                    'District'       => $station?->district ?? '—',
-                    'Upazila'        => $station?->upazila ?? '—',
-                    'Filling Station' => $station?->station_name ?? '—',
-                    'Company'        => $station?->company?->code ?? '—',
-                    'Depot'          => $station?->depot?->depot_name ?? '—',
-                    'Status'         => 'Pending', // As shown in PDF
-                ];
-            });
+        while ($current->lte($toDate)) {
+            $dateKey          = $current->format('Y-m-d');
+            $reportedTodayIds = $reportedMap->get($dateKey, []);
+
+            foreach ($allAssignments as $assignment) {
+                if (!in_array($assignment->filling_station_id, $reportedTodayIds)) {
+                    $officer = $assignment->officer;
+                    $profile = $officer?->profile;
+                    $station = $assignment->fillingStation;
+
+                    $rows->push([
+                        '#'               => $serial++,
+                        'Missing Date'    => $current->format('d M Y'),
+                        'Officer Name'    => $profile?->name ?? $officer?->name ?? '—',
+                        'Phone'           => $profile?->phone ?? $officer?->phone ?? '—',
+                        'Division'        => $station?->division ?? '—',
+                        'District'        => $station?->district ?? '—',
+                        'Upazila'         => $station?->upazila ?? '—',
+                        'Filling Station' => $station?->station_name ?? '—',
+                        'Company'         => $station?->company?->code ?? '—',
+                        'Depot'           => $station?->depot?->depot_name ?? '—',
+                        'Status'          => 'Pending',
+                    ]);
+                }
+            }
+
+            $current->addDay();
+        }
 
         $headers = [
             '#',
@@ -1545,7 +1592,7 @@ class ReportsController extends Controller
             'Filling Station',
             'Company',
             'Depot',
-            'Status'
+            'Status',
         ];
 
         return $this->streamCsv(
