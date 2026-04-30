@@ -432,14 +432,15 @@ class ReportsController extends Controller
             );
         }
 
-        $fuelTypes  = ['octane', 'petrol', 'diesel', 'others'];
+        $fuelTypes = ['octane', 'petrol', 'diesel', 'others'];
 
         $officerMap = AssignTagOfficer::with(['officer.profile'])
-            ->where('status', 'active')->get()->keyBy('filling_station_id');
+            ->where('status', 'active')
+            ->get()
+            ->keyBy('filling_station_id');
 
         $allRawReports = $query->orderBy('report_date', 'desc')->orderBy('station_id')->get();
 
-        // ✅ FIX 3: perPage map() return-ed array
         $rows = $allRawReports->map(function ($report) use ($fuelTypes, $officerMap) {
             $stationId          = $report->station_id;
             $assignment         = $officerMap->get($stationId);
@@ -486,6 +487,14 @@ class ReportsController extends Controller
             ];
         });
 
+        // ✅ সব fuel-এ difference = 0 হলে বাদ দাও
+        $rows = $rows->filter(
+            fn($row) => collect($row['fuelBreakdown'])->contains(
+                fn($f) => abs((float) str_replace(',', '', $f['differenceL'])) > 0
+            )
+        )->values();
+
+        // ✅ Minimum difference (Litre) filter
         if (!empty($validated['min_diff_l'])) {
             $minL = (float) $validated['min_diff_l'];
             $rows = $rows->filter(
@@ -495,6 +504,7 @@ class ReportsController extends Controller
             )->values();
         }
 
+        // ✅ Minimum difference (%) filter
         if (!empty($validated['min_diff_pct'])) {
             $minPct = (float) $validated['min_diff_pct'];
             $rows   = $rows->filter(
@@ -504,6 +514,7 @@ class ReportsController extends Controller
             )->values();
         }
 
+        // ✅ Diff status filter (High / Low / Normal)
         if (!empty($validated['diff_status'])) {
             $targetStatus = ucfirst($validated['diff_status']);
             $rows         = $rows->filter(
@@ -522,7 +533,7 @@ class ReportsController extends Controller
             'total'       => $totalRecords,
             'currentPage' => $currentPage,
             'lastPage'    => $totalPages,
-            'perPage'     => $perPage >= PHP_INT_MAX ? 'all' : $perPage,  // 
+            'perPage'     => $perPage >= PHP_INT_MAX ? 'all' : $perPage,
         ]);
     }
 
