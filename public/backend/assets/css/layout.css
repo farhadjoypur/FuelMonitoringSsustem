@@ -259,7 +259,7 @@ body.dark-theme .theme-toggle-indicator {
 
 .container-custom .main-content {
     flex: 1;
-    padding: 30px !important;
+    /* padding: 30px !important; */
     max-width: 100%;
     overflow-x: auto;
     color: var(--color-text-primary);
@@ -323,7 +323,9 @@ body.dark-theme .theme-toggle-indicator {
     }
 
     .container-custom .main-content {
-        padding: 30px 20px;
+        /* padding: 30px 20px; */
+        padding-top: 30px;
+        padding-bottom: 30px;
     }
 }
 
