@@ -1655,7 +1655,7 @@ async deleteReport(reportId, stationName = '') {
     if (result.isConfirmed) {
         try {
             const csrf = document.querySelector('meta[name="csrf-token"]').content;
-            const deleteUrl = `{{ route('admin.reports.destroy', ':id') }}`.replace(':id', reportId);
+            const deleteUrl = `{{ route('uno.reports.destroy', ':id') }}`.replace(':id', reportId);
 
             const response = await fetch(deleteUrl, {
                 method: 'DELETE',
