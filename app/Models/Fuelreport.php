@@ -94,20 +94,21 @@ class Fuelreport extends Model
      * পরের দিনের prev_stock হিসেবে ব্যবহার হবে
      */
     public static function getPreviousStocks(int $tagOfficerId, int $stationId): array
-    {
-        $lastReport = self::where('tag_officer_id', $tagOfficerId)
-            ->where('station_id', $stationId)
-            ->orderBy('report_date', 'desc')
-            ->first();
+        {
+            $lastReport = self::where('tag_officer_id', $tagOfficerId)
+                ->where('station_id', $stationId)
+                ->orderBy('report_date', 'desc')
+                ->first();
 
-        if (! $lastReport) {
-            return ['petrol' => 0, 'diesel' => 0, 'octane' => 0];
+            if (! $lastReport) {
+                return ['octane' => 0, 'petrol' => 0, 'diesel' => 0, 'others' => 0];
+            }
+
+            return [
+                'octane' => (float) $lastReport->octane_closing_stock,
+                'petrol' => (float) $lastReport->petrol_closing_stock,
+                'diesel' => (float) $lastReport->diesel_closing_stock,
+                'others' => (float) $lastReport->others_closing_stock,  // ← এটা ছিল না
+            ];
         }
-
-        return [
-            'petrol' => $lastReport->petrol_closing_stock,
-            'diesel' => $lastReport->diesel_closing_stock,
-            'octane' => $lastReport->octane_closing_stock,
-        ];
-    }
 }

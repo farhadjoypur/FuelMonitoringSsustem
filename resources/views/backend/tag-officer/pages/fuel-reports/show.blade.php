@@ -247,6 +247,28 @@
             </div>
         </div>
 
+         {{-- Octane --}}
+        <div class="custom-card">
+            <div class="category-bar">
+                <i class="fa-solid fa-droplet"></i> Octane
+                <span class="bar-line"></span>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-head"><i class="fa-solid fa-clock-rotate-left fa-xs"></i> Prev. Stock (L)</div>
+                <div class="stat-head"><i class="fa-solid fa-truck fa-xs"></i> Supply (L)</div>
+                <div class="stat-head"><i class="fa-solid fa-arrow-down fa-xs"></i> Received At Station (L)</div>
+                <div class="stat-head"><i class="fa-solid fa-calculator fa-xs"></i> Difference (L)</div>
+                <div class="stat-head"><i class="fa-solid fa-chart-line fa-xs"></i> Sales (L)</div>
+                <div class="stat-head"><i class="fa-solid fa-warehouse fa-xs"></i> Closing Stock (L)</div>
+                <div class="stat-cell"><span class="val">{{ number_format($fuelReport->octane_prev_stock, 2) }}</span><span class="lbl">Previous</span></div>
+                <div class="stat-cell"><span class="val">{{ number_format($fuelReport->octane_supply, 2) }}</span><span class="lbl">Supply</span></div>
+                <div class="stat-cell"><span class="val">{{ number_format($fuelReport->octane_received, 2) }}</span><span class="lbl">Received</span></div>
+                <div class="stat-cell"><span class="val {{ $fuelReport->octane_difference < 0 ? 'diff-neg' : 'diff-pos' }}">{{ $fuelReport->octane_difference >= 0 ? '+' : '' }}{{ number_format($fuelReport->octane_difference, 2) }}</span><span class="lbl">Diff</span></div>
+                <div class="stat-cell"><span class="val">{{ number_format($fuelReport->octane_sales, 2) }}</span><span class="lbl">Sales</span></div>
+                <div class="stat-cell closing"><span class="val">{{ number_format($fuelReport->octane_closing_stock, 2) }}</span><span class="lbl">Closing</span></div>
+            </div>
+        </div>
+
         {{-- Petrol --}}
         <div class="custom-card">
             <div class="category-bar">
@@ -291,27 +313,7 @@
             </div>
         </div>
 
-        {{-- Octane --}}
-        <div class="custom-card">
-            <div class="category-bar">
-                <i class="fa-solid fa-droplet"></i> Octane
-                <span class="bar-line"></span>
-            </div>
-            <div class="stats-grid">
-                <div class="stat-head"><i class="fa-solid fa-clock-rotate-left fa-xs"></i> Prev. Stock (L)</div>
-                <div class="stat-head"><i class="fa-solid fa-truck fa-xs"></i> Supply (L)</div>
-                <div class="stat-head"><i class="fa-solid fa-arrow-down fa-xs"></i> Received At Station (L)</div>
-                <div class="stat-head"><i class="fa-solid fa-calculator fa-xs"></i> Difference (L)</div>
-                <div class="stat-head"><i class="fa-solid fa-chart-line fa-xs"></i> Sales (L)</div>
-                <div class="stat-head"><i class="fa-solid fa-warehouse fa-xs"></i> Closing Stock (L)</div>
-                <div class="stat-cell"><span class="val">{{ number_format($fuelReport->octane_prev_stock, 2) }}</span><span class="lbl">Previous</span></div>
-                <div class="stat-cell"><span class="val">{{ number_format($fuelReport->octane_supply, 2) }}</span><span class="lbl">Supply</span></div>
-                <div class="stat-cell"><span class="val">{{ number_format($fuelReport->octane_received, 2) }}</span><span class="lbl">Received</span></div>
-                <div class="stat-cell"><span class="val {{ $fuelReport->octane_difference < 0 ? 'diff-neg' : 'diff-pos' }}">{{ $fuelReport->octane_difference >= 0 ? '+' : '' }}{{ number_format($fuelReport->octane_difference, 2) }}</span><span class="lbl">Diff</span></div>
-                <div class="stat-cell"><span class="val">{{ number_format($fuelReport->octane_sales, 2) }}</span><span class="lbl">Sales</span></div>
-                <div class="stat-cell closing"><span class="val">{{ number_format($fuelReport->octane_closing_stock, 2) }}</span><span class="lbl">Closing</span></div>
-            </div>
-        </div>
+       
 
         {{-- Others --}}
         <div class="custom-card">

@@ -107,7 +107,10 @@ class FuelReportController extends Controller
         }
 
         $reports        = $query->paginate(15)->withQueryString();
-        $previousStocks = Fuelreport::getPreviousStocks($ctx['officerId'], $ctx['stationId']);
+        $previousStocks = array_merge(
+            ['octane' => 0, 'petrol' => 0, 'diesel' => 0, 'others' => 0],
+            Fuelreport::getPreviousStocks($ctx['officerId'], $ctx['stationId'])
+        );
 
         return view('backend.tag-officer.pages.fuel-reports.index', [
             'reports'         => $reports,
@@ -393,28 +396,32 @@ class FuelReportController extends Controller
     public function getStationData(Request $request)
     {
         $ctx = $this->getOfficerAssignment($this->resolveStationId($request));
-
+    
         if (! $ctx['stationId']) {
             return response()->json(['success' => false, 'message' => 'No station found.'], 422);
         }
-
-        $previousStocks = Fuelreport::getPreviousStocks($ctx['officerId'], $ctx['stationId']);
+    
+        $previousStocks = array_merge(
+            ['octane' => 0, 'petrol' => 0, 'diesel' => 0, 'others' => 0],  // ← Fix: others এর default নিশ্চিত
+            Fuelreport::getPreviousStocks($ctx['officerId'], $ctx['stationId'])
+        );
+    
         $reports = Fuelreport::where('tag_officer_id', $ctx['officerId'])
             ->where('station_id', $ctx['stationId'])
             ->orderBy('report_date', 'desc')
             ->paginate(15);
-
+    
         $today = Carbon::today()->toDateString();
-
+    
         $reportData = $reports->map(fn($r) => [
             'id'            => $r->id,
-            'report_date'   => $r->report_date,
+            'report_date'   => Carbon::parse($r->report_date)->format('Y-m-d'),  // ← Fix: date format
             'station_name'  => $r->station_name,
             'thana_upazila' => $r->thana_upazila,
             'district'      => $r->district,
             'comment'       => $r->comment,
             'is_today'      => Carbon::parse($r->report_date)->toDateString() === $today,
-
+    
             'octane_prev_stock'    => (float) $r->octane_prev_stock,
             'octane_supply'        => (float) $r->octane_supply,
             'octane_received'      => (float) $r->octane_received,
@@ -422,7 +429,7 @@ class FuelReportController extends Controller
             'octane_sales'         => (float) $r->octane_sales,
             'octane_closing_stock' => (float) $r->octane_closing_stock,
             'octane_status'        => $r->octane_status,
-
+    
             'petrol_prev_stock'    => (float) $r->petrol_prev_stock,
             'petrol_supply'        => (float) $r->petrol_supply,
             'petrol_received'      => (float) $r->petrol_received,
@@ -430,7 +437,7 @@ class FuelReportController extends Controller
             'petrol_sales'         => (float) $r->petrol_sales,
             'petrol_closing_stock' => (float) $r->petrol_closing_stock,
             'petrol_status'        => $r->petrol_status,
-
+    
             'diesel_prev_stock'    => (float) $r->diesel_prev_stock,
             'diesel_supply'        => (float) $r->diesel_supply,
             'diesel_received'      => (float) $r->diesel_received,
@@ -438,7 +445,7 @@ class FuelReportController extends Controller
             'diesel_sales'         => (float) $r->diesel_sales,
             'diesel_closing_stock' => (float) $r->diesel_closing_stock,
             'diesel_status'        => $r->diesel_status,
-
+    
             'others_prev_stock'    => (float) $r->others_prev_stock,
             'others_supply'        => (float) $r->others_supply,
             'others_received'      => (float) $r->others_received,
@@ -447,18 +454,18 @@ class FuelReportController extends Controller
             'others_closing_stock' => (float) $r->others_closing_stock,
             'others_status'        => $r->others_status,
         ]);
-
+    
         return response()->json([
-            'success'         => true,
-            'stationId'       => $ctx['stationId'],
-            'stationName'     => $ctx['stationName'],
-            'division'        => $ctx['stationInfo']?->division ?? '',
-            'district'        => $ctx['stationInfo']?->district ?? '',
-            'upazila'         => $ctx['stationInfo']?->upazila  ?? '',
-            'previousStocks'  => $previousStocks,
-            'reports'         => $reportData,
-            'hasMorePages'    => $reports->hasMorePages(),
-            'total'           => $reports->total(),
+            'success'        => true,
+            'stationId'      => $ctx['stationId'],
+            'stationName'    => $ctx['stationName'],
+            'division'       => $ctx['stationInfo']?->division ?? '',
+            'district'       => $ctx['stationInfo']?->district ?? '',
+            'upazila'        => $ctx['stationInfo']?->upazila  ?? '',
+            'previousStocks' => $previousStocks,
+            'reports'        => $reportData,
+            'hasMorePages'   => $reports->hasMorePages(),
+            'total'          => $reports->total(),
         ]);
     }
 

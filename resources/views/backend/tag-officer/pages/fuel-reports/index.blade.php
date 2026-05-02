@@ -768,175 +768,7 @@
 @endpush
 
 @section('content')
-<div class="report-container" x-data="{
-
-    /* ══ Form state ══ */
-    editMode:    false,
-    editId:      '',
-    storeUrl:    '{{ route('fuel-reports.store') }}',
-    updateBase:  '{{ url('tag-officer/fuel-reports/') }}',
-    defaultDate: '{{ $defaultDate }}',
-    reportDate:  '{{ old('report_date', $defaultDate) }}',
-    comment:     '{{ old('comment') }}',
-
-    /* ══ Station state ══ */
-    selectedStation: {{ $selectedStation ?? 'null' }},
-    stationName:     '{{ addslashes($stationName ?? '') }}',
-    division:        '{{ addslashes($stationInfo?->division ?? '') }}',
-    district:        '{{ addslashes($stationInfo?->district ?? '') }}',
-    upazila:         '{{ addslashes($stationInfo?->upazila ?? '') }}',
-    stationDataUrl:  '{{ route('fuel-reports.fuel-reports.station-data') }}',
-    tableLoading:    false,
-    reports:         [],
-
-    /* ══ Fuel state ══ */
-    fuels: {
-        octane: { prev: {{ old('octane_prev_stock', $previousStocks['octane'] ?? 0) }}, supply: {{ old('octane_supply', 0) }}, received: {{ old('octane_received', 0) }}, sales: {{ old('octane_sales', 0) }}, receivedWarn: '', salesWarn: '' },
-        petrol: { prev: {{ old('petrol_prev_stock', $previousStocks['petrol'] ?? 0) }}, supply: {{ old('petrol_supply', 0) }}, received: {{ old('petrol_received', 0) }}, sales: {{ old('petrol_sales', 0) }}, receivedWarn: '', salesWarn: '' },
-        diesel: { prev: {{ old('diesel_prev_stock', $previousStocks['diesel'] ?? 0) }}, supply: {{ old('diesel_supply', 0) }}, received: {{ old('diesel_received', 0) }}, sales: {{ old('diesel_sales', 0) }}, receivedWarn: '', salesWarn: '' },
-        others: { prev: {{ old('others_prev_stock', $previousStocks['others'] ?? 0) }}, supply: {{ old('others_supply', 0) }}, received: {{ old('others_received', 0) }}, sales: {{ old('others_sales', 0) }}, receivedWarn: '', salesWarn: '' },
-    },
-
-    /* ══ Init: page load এ reports fetch ══ */
-    async init() {
-        if (! this.selectedStation) return;
-        await this.fetchStationData(this.selectedStation);
-    },
-
-    /* ══ Station switcher ══ */
-    async switchStation(stationId) {
-        stationId = parseInt(stationId);
-        if (! stationId || stationId === this.selectedStation) return;
-        this.cancelEdit();
-        await this.fetchStationData(stationId);
-    },
-
-    /* ══ Core fetch function ══ */
-    async fetchStationData(stationId) {
-        this.tableLoading = true;
-        try {
-            const res  = await fetch(this.stationDataUrl + '?station_id=' + stationId, {
-                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
-            });
-            const data = await res.json();
-            if (! data.success) return;
-
-            /* Station info update */
-            this.selectedStation = data.stationId;
-            this.stationName     = data.stationName;
-            this.division        = data.division;
-            this.district        = data.district;
-            this.upazila         = data.upazila;
-
-            /* Form prev stocks update */
-            ['octane','petrol','diesel','others'].forEach(f => {
-                this.fuels[f].prev         = data.previousStocks[f] ?? 0;
-                this.fuels[f].supply       = 0;
-                this.fuels[f].received     = 0;
-                this.fuels[f].sales        = 0;
-                this.fuels[f].receivedWarn = '';
-                this.fuels[f].salesWarn    = '';
-            });
-
-            /* Table update */
-            this.reports = data.reports;
-
-        } catch(e) {
-            console.error('Station fetch error:', e);
-        } finally {
-            this.tableLoading = false;
-        }
-    },
-
-    /* ══ Helpers ══ */
-    fmtNum(n)  { return Number(n || 0).toLocaleString('en-BD'); },
-    fmtDate(d) {
-        if (!d) return '';
-        const dt = new Date(d);
-        return dt.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
-    },
-    fmtDay(d) {
-        if (!d) return '';
-        return new Date(d).toLocaleDateString('en-GB', { weekday: 'long' });
-    },
-    statusClass(s) {
-        const map = { 'low stock': 'status-low', 'high difference': 'status-highdiff', 'zero stock': 'status-zero' };
-        return map[(s||'').toLowerCase().trim()] || 'status-ok';
-    },
-    statusIcon(s) {
-        const map = { 'low stock': 'fa-arrow-down', 'high difference': 'fa-exclamation-triangle', 'zero stock': 'fa-ban' };
-        return map[(s||'').toLowerCase().trim()] || 'fa-check-circle';
-    },
-
-    /* ══ Computed ══ */
-    diff(f)            { return (parseFloat(this.fuels[f].supply)||0) - this.clampedReceived(f); },
-    clampedReceived(f) { const s=parseFloat(this.fuels[f].supply)||0, r=parseFloat(this.fuels[f].received)||0; return Math.min(r,s); },
-    closing(f)         { return (parseFloat(this.fuels[f].prev)||0) + this.clampedReceived(f) - this.clampedSales(f); },
-    clampedSales(f)    { const p=parseFloat(this.fuels[f].prev)||0, r=this.clampedReceived(f), s=parseFloat(this.fuels[f].sales)||0; return Math.min(s, p+r); },
-
-    validate(f) {
-        const supply=parseFloat(this.fuels[f].supply)||0, received=parseFloat(this.fuels[f].received)||0;
-        const prev=parseFloat(this.fuels[f].prev)||0, sales=parseFloat(this.fuels[f].sales)||0;
-        if (received > supply) {
-            this.fuels[f].receivedWarn = `⚠ Received cannot exceed supply (${supply.toFixed(2)} L).`;
-            this.fuels[f].received = supply;
-        } else { this.fuels[f].receivedWarn = ''; }
-        const maxSell = prev + (parseFloat(this.fuels[f].received)||0);
-        if (sales > maxSell) {
-            this.fuels[f].salesWarn = `⚠ Sales cannot exceed available stock (${maxSell.toFixed(2)} L).`;
-            this.fuels[f].sales = maxSell;
-        } else { this.fuels[f].salesWarn = ''; }
-    },
-
-    formAction() { return this.editMode ? this.updateBase + '/' + this.editId : this.storeUrl; },
-
-    loadEdit(data) {
-        this.editMode = true; this.editId = data.id;
-        this.reportDate = data.report_date; this.comment = data.comment || '';
-        ['octane','petrol','diesel','others'].forEach(f => {
-            this.fuels[f].prev     = data[f+'_prev_stock']  ?? 0;
-            this.fuels[f].supply   = data[f+'_supply']      ?? 0;
-            this.fuels[f].received = data[f+'_received']    ?? 0;
-            this.fuels[f].sales    = data[f+'_sales']       ?? 0;
-            this.fuels[f].receivedWarn = ''; this.fuels[f].salesWarn = '';
-        });
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    },
-
-    cancelEdit() {
-        this.editMode = false; this.editId = ''; this.reportDate = this.defaultDate; this.comment = '';
-        ['octane','petrol','diesel','others'].forEach(f => {
-            this.fuels[f].supply = 0; this.fuels[f].received = 0; this.fuels[f].sales = 0;
-            this.fuels[f].receivedWarn = ''; this.fuels[f].salesWarn = '';
-        });
-    },
-
-    submitGuard(e) {
-        const blocked = ['octane','petrol','diesel','others'].some(f => {
-            const p=parseFloat(this.fuels[f].prev)||0, r=parseFloat(this.fuels[f].received)||0, s=parseFloat(this.fuels[f].sales)||0;
-            return s > p + r;
-        });
-        if (blocked) { e.preventDefault(); alert('Sales cannot exceed available stock!'); }
-    },
-
-    async deleteReport(id) {
-        if (! confirm('Are you sure you want to delete this report? This cannot be undone.')) return;
-        try {
-            const res = await fetch('{{ url('tag-officer/fuel-reports') }}/' + id, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
-                    'X-HTTP-Method-Override': 'DELETE',
-                    'Accept': 'application/json',
-                }
-            });
-            if (res.ok) {
-                this.reports = this.reports.filter(r => r.id !== id);
-            }
-        } catch(e) { console.error('Delete error:', e); }
-    }
-
-}" x-init="init()">
+<div class="report-container" x-data="fuelReport()" x-init="init()">
 
     @if (session('error'))
         <div class="alert-error"><i class="fa-solid fa-circle-exclamation"></i> {{ session('error') }}</div>
@@ -1303,5 +1135,211 @@
         </div>
     </div>
 
-</div>{{-- /report-container --}}
+</div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('alpine:init', () => {
+    Alpine.data('fuelReport', () => ({
+
+        editMode:    false,
+        editId:      '',
+        storeUrl:    '{{ route("fuel-reports.store") }}',
+        updateBase:  '{{ url("tag-officer/fuel-reports/") }}',
+        defaultDate: '{{ $defaultDate }}',
+        reportDate:  '{{ old("report_date", $defaultDate) }}',
+        comment:     '{{ old("comment") }}',
+
+        selectedStation: {{ $selectedStation ?? 'null' }},
+        stationName:     '{{ addslashes($stationName ?? "") }}',
+        division:        '{{ addslashes($stationInfo?->division ?? "") }}',
+        district:        '{{ addslashes($stationInfo?->district ?? "") }}',
+        upazila:         '{{ addslashes($stationInfo?->upazila ?? "") }}',
+        stationDataUrl:  '{{ route("fuel-reports.fuel-reports.station-data") }}',
+        tableLoading:    false,
+        reports:         [],
+
+        fuels: {
+            octane: { prev: {{ old('octane_prev_stock', $previousStocks['octane'] ?? 0) }}, supply: 0, received: 0, sales: 0, receivedWarn: '', salesWarn: '' },
+            petrol: { prev: {{ old('petrol_prev_stock', $previousStocks['petrol'] ?? 0) }}, supply: 0, received: 0, sales: 0, receivedWarn: '', salesWarn: '' },
+            diesel: { prev: {{ old('diesel_prev_stock', $previousStocks['diesel'] ?? 0) }}, supply: 0, received: 0, sales: 0, receivedWarn: '', salesWarn: '' },
+            others: { prev: {{ old('others_prev_stock', $previousStocks['others'] ?? 0) }}, supply: 0, received: 0, sales: 0, receivedWarn: '', salesWarn: '' },
+        },
+
+        async init() {
+            if (!this.selectedStation) return;
+            await this.fetchStationData(this.selectedStation);
+        },
+
+        async switchStation(stationId) {
+            stationId = parseInt(stationId);
+            if (!stationId || stationId === this.selectedStation) return;
+            this.cancelEdit();
+            await this.fetchStationData(stationId);
+        },
+
+        async fetchStationData(stationId) {
+            this.tableLoading = true;
+            try {
+                const res  = await fetch(this.stationDataUrl + '?station_id=' + stationId, {
+                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const data = await res.json();
+                if (!data.success) return;
+
+                this.selectedStation = data.stationId;
+                this.stationName     = data.stationName;
+                this.division        = data.division;
+                this.district        = data.district;
+                this.upazila         = data.upazila;
+
+                ['octane','petrol','diesel','others'].forEach(f => {
+                    this.fuels[f].prev         = data.previousStocks[f] ?? 0;
+                    this.fuels[f].supply       = 0;
+                    this.fuels[f].received     = 0;
+                    this.fuels[f].sales        = 0;
+                    this.fuels[f].receivedWarn = '';
+                    this.fuels[f].salesWarn    = '';
+                });
+
+                this.reports = data.reports;
+
+            } catch(e) {
+                console.error('Station fetch error:', e);
+            } finally {
+                this.tableLoading = false;
+            }
+        },
+
+        fmtNum(n)  { return Number(n || 0).toLocaleString('en-BD'); },
+        fmtDate(d) {
+            if (!d) return '';
+            const dt = new Date(d);
+            return dt.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+        },
+        fmtDay(d) {
+            if (!d) return '';
+            return new Date(d).toLocaleDateString('en-GB', { weekday: 'long' });
+        },
+        statusClass(s) {
+            const map = { 'low stock': 'status-low', 'high difference': 'status-highdiff', 'zero stock': 'status-zero' };
+            return map[(s||'').toLowerCase().trim()] || 'status-ok';
+        },
+        statusIcon(s) {
+            const map = { 'low stock': 'fa-arrow-down', 'high difference': 'fa-exclamation-triangle', 'zero stock': 'fa-ban' };
+            return map[(s||'').toLowerCase().trim()] || 'fa-check-circle';
+        },
+
+        diff(f)            { return (parseFloat(this.fuels[f].supply)||0) - this.clampedReceived(f); },
+        clampedReceived(f) { const s=parseFloat(this.fuels[f].supply)||0, r=parseFloat(this.fuels[f].received)||0; return Math.min(r,s); },
+        closing(f)         { return (parseFloat(this.fuels[f].prev)||0) + this.clampedReceived(f) - this.clampedSales(f); },
+        clampedSales(f)    { const p=parseFloat(this.fuels[f].prev)||0, r=this.clampedReceived(f), s=parseFloat(this.fuels[f].sales)||0; return Math.min(s, p+r); },
+
+        validate(f) {
+            const supply   = parseFloat(this.fuels[f].supply)   || 0;
+            const received = parseFloat(this.fuels[f].received) || 0;
+            const prev     = parseFloat(this.fuels[f].prev)     || 0;
+            const sales    = parseFloat(this.fuels[f].sales)    || 0;
+
+            if (received > supply) {
+                this.fuels[f].receivedWarn = `⚠ Received cannot exceed supply (${supply.toFixed(2)} L).`;
+                this.fuels[f].received = supply;
+            } else {
+                this.fuels[f].receivedWarn = '';
+            }
+
+            const maxSell = prev + (parseFloat(this.fuels[f].received) || 0);
+            if (sales > maxSell) {
+                this.fuels[f].salesWarn = `⚠ Sales cannot exceed available stock (${maxSell.toFixed(2)} L).`;
+                this.fuels[f].sales = maxSell;
+            } else {
+                this.fuels[f].salesWarn = '';
+            }
+        },
+
+        formAction() {
+            return this.editMode
+                ? this.updateBase + '/' + this.editId
+                : this.storeUrl;
+        },
+
+        loadEdit(data) {
+            this.editMode   = true;
+            this.editId     = data.id;
+            this.reportDate = data.report_date;
+            this.comment    = data.comment || '';
+
+            ['octane','petrol','diesel','others'].forEach(f => {
+                this.fuels[f].prev         = parseFloat(data[f + '_prev_stock'])  || 0;
+                this.fuels[f].supply       = parseFloat(data[f + '_supply'])      || 0;
+                this.fuels[f].received     = parseFloat(data[f + '_received'])    || 0;
+                this.fuels[f].sales        = parseFloat(data[f + '_sales'])       || 0;
+                this.fuels[f].receivedWarn = '';
+                this.fuels[f].salesWarn    = '';
+            });
+
+            this.$nextTick(() => {
+                const dateInput = document.querySelector('input[name="report_date"]');
+                if (dateInput) {
+                    dateInput.value = data.report_date;
+                }
+            });
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        },
+
+        cancelEdit() {
+            this.editMode   = false;
+            this.editId     = '';
+            this.reportDate = this.defaultDate;
+            this.comment    = '';
+
+            ['octane','petrol','diesel','others'].forEach(f => {
+                this.fuels[f].supply       = 0;
+                this.fuels[f].received     = 0;
+                this.fuels[f].sales        = 0;
+                this.fuels[f].receivedWarn = '';
+                this.fuels[f].salesWarn    = '';
+            });
+        },
+
+        submitGuard(e) {
+            const blocked = ['octane','petrol','diesel','others'].some(f => {
+                const p = parseFloat(this.fuels[f].prev)     || 0;
+                const r = parseFloat(this.fuels[f].received) || 0;
+                const s = parseFloat(this.fuels[f].sales)    || 0;
+                return s > p + r;
+            });
+            if (blocked) {
+                e.preventDefault();
+                alert('Sales cannot exceed available stock!');
+            }
+        },
+
+        async deleteReport(id) {
+            if (!confirm('Are you sure you want to delete this report? This cannot be undone.')) return;
+            try {
+                const res = await fetch('{{ url("tag-officer/fuel-reports") }}/' + id, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: '_method=DELETE&_token={{ csrf_token() }}'
+                });
+                if (res.ok) {
+                    this.reports = this.reports.filter(r => r.id !== id);
+                } else {
+                    console.error('Delete failed with status:', res.status);
+                }
+            } catch(e) {
+                console.error('Delete error:', e);
+            }
+        }
+
+    }));
+});
+</script>
+@endpush
