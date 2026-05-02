@@ -321,7 +321,7 @@
                                     <i class="fa-solid fa-pen-to-square fa-xs"></i> Edit
                                 </a>
                                 <button class="action-btn btn-delete"
-                                    @click="openDeleteModal(row.reportId, row.stationName)">
+                                    @click="deleteReport(row.reportId, row.stationName)">
                                     <i class="fa-solid fa-trash fa-xs"></i> Delete
                                 </button>
                             </div>
