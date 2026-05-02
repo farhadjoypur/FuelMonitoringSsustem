@@ -3,7 +3,7 @@
 
         <div class="d-flex align-items-center">
             <img src="{{ asset('backend/assets/images/logo.png') }}" alt="loog" style="width: 40px">
-            <h2 class="navbar-brand text-white fw-bold mb-0 mx-2" style="font-size: 24px; padding: 10px 0">
+            <h2 class="navbar-brand text-white fw-bold mb-0 mx-2 fdms-panel-title">
                 Admin Panel
             </h2>
             <p class="text-stat text-white mb-0 d-none d-md-block" style=" padding-left: 16px;">
@@ -11,8 +11,9 @@
             </p>
         </div>
 
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
-            aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler navbar-dark" type="button" data-bs-toggle="collapse"
+            data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false"
+            aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
 
