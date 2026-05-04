@@ -208,12 +208,16 @@ class UnoReportsController extends Controller
             })
             ->get()
             ->keyBy('filling_station_id')
-            ->map(
-                fn($assignment) =>
-                $assignment->officer?->profile?->name
-                    ?? $assignment->officer?->name
-                    ?? '—'
-            );
+            ->map(function ($assignment) {
+                return [
+                    'name'  => $assignment->officer?->profile?->name
+                            ?? $assignment->officer?->name
+                            ?? '—',
+                    'phone' => $assignment->officer?->profile?->phone
+                            ?? $assignment->officer?->phone
+                            ?? '—',
+                ];
+            });
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -222,8 +226,10 @@ class UnoReportsController extends Controller
 
     private function formatSingleReport($report, Collection $officerMap): array
     {
-        $fuelKeys   = ['diesel', 'petrol', 'octane', 'others'];
-        $tagOfficer = $officerMap->get($report->station_id, '—');
+        $fuelKeys    = ['diesel', 'petrol', 'octane', 'others'];
+        $officerData = $officerMap->get($report->station_id, ['name' => '—', 'phone' => '—']);
+        $tagOfficer  = is_array($officerData) ? $officerData['name']  : $officerData;
+        $tagPhone    = is_array($officerData) ? $officerData['phone'] : '—';
 
         $fuelStatuses = [];
         foreach ($fuelKeys as $fuel) {
@@ -251,6 +257,7 @@ class UnoReportsController extends Controller
             'company_name'     => $report->fillingStation?->company?->name ?? '—',
             'depot_name'       => $report->depot_name ?? $report->fillingStation?->depot?->depot_name ?? '',
             'tag_officer'      => $tagOfficer,
+            'tag_officer_phone' => $tagPhone,
             'comment'          => $report->comment ?? '',
             'fuel_statuses'    => $fuelStatuses,
             'overall_status'   => $overallStatus,
