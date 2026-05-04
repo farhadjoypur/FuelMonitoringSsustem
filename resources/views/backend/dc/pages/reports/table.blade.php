@@ -417,6 +417,7 @@
                     <th>FILLING STATION</th>
                     <th>COMPANY</th>
                     <th>TAG OFFICER</th>
+                    <th>PHONE</th>
                     <th>FUEL</th>
                     <th>
                         PREV. STOCK (L)
@@ -511,6 +512,9 @@
 
                                 <td class="cell-officer" rowspan="{{ $fuelCount }}">
                                     {{ $report['tag_officer'] }}
+                                </td>
+                                <td class="cell-phone" rowspan="{{ $fuelCount }}">
+                                    {{ $report['tag_officer_phone'] ?? '—' }}
                                 </td>
                             @endif
 
