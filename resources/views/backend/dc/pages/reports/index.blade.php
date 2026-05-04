@@ -980,7 +980,7 @@
                 // ─────────────────────────────────────────────────────────
 
                 activeTab: 'stock',
-                dcDistrict: '{{ $dc_district }}',
+                dcDistrict: @json($dc_district),
                 allDivisions: @json($divisions),
 
                 messageModal: {

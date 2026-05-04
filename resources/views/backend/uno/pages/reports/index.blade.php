@@ -1003,8 +1003,8 @@
                 // ─────────────────────────────────────────────────────────
 
                 activeTab: 'stock',
-                unoDistrict: '{{ $uno_district }}',
-                unoUpazila: '{{ $uno_upazila }}',
+                unoDistrict: @json($uno_district),
+                unoUpazila: @json($uno_upazila),
                 allDivisions: @json($divisions),
 
                 messageModal: {
