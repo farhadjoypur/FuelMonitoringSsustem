@@ -65,32 +65,31 @@
             </select>
         </div>
 
-        <div class="form-group" style="position: relative;">
+       <div class="form-group" style="position: relative;">
     <label>Filling Station</label>
     <div style="position: relative;">
         <input
             type="text"
-            x-model="stationSearch"
-            @input="stationOpen = true"
-            @focus="stationOpen = true"
-            @keydown.escape="stationOpen = false"
+            x-model="diffStationSearch"
+            @input="diffStationOpen = true"
+            @focus="diffStationOpen = true"
+            @keydown.escape="diffStationOpen = false"
             placeholder="Search station..."
             autocomplete="off"
             style="width:100%; padding-right:30px; box-sizing:border-box;"
         />
-        <span x-show="stationSelected" @click="clearStation()" 
+        <span x-show="diffStationSelected" @click="clearDiffStation()"
             style="position:absolute; right:8px; top:50%; transform:translateY(-50%);
                    cursor:pointer; color:#94a3b8; font-size:13px; user-select:none;">✕</span>
     </div>
 
-    <div x-show="stationOpen"
+    <div x-show="diffStationOpen"
         style="position:absolute; top:100%; left:0; right:0; background:#fff;
                border:1px solid #e2e8f0; border-radius:6px; z-index:9999;
                max-height:220px; overflow-y:auto; box-shadow:0 4px 12px rgba(0,0,0,.12);">
 
-        {{-- All Stations --}}
         <div
-            @mousedown.prevent="clearStation(); stationOpen = false;"
+            @mousedown.prevent="clearDiffStation(); diffStationOpen = false;"
             style="padding:9px 12px; font-size:13px; cursor:pointer;
                    color:#64748b; border-bottom:1px solid #f1f5f9;"
             @mouseover="$el.style.background='#f8fafc'"
@@ -98,10 +97,9 @@
             All Stations
         </div>
 
-        {{-- Filtered list --}}
         <template x-for="s in filteredStations" :key="s.id">
             <div
-                @mousedown.prevent="selectStation(s)"
+                @mousedown.prevent="selectDiffStation(s)"
                 x-text="s.name"
                 style="padding:9px 12px; font-size:13px; cursor:pointer;"
                 @mouseover="$el.style.background='#f8fafc'"
@@ -109,7 +107,6 @@
             </div>
         </template>
 
-        {{-- No result --}}
         <div x-show="filteredStations.length === 0"
             style="padding:9px 12px; font-size:13px; color:#94a3b8; text-align:center;">
             No result found

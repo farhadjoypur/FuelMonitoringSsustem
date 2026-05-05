@@ -1071,6 +1071,10 @@
 
                 diffAvailableUpazilas: [], // init এ load হবে
 
+                diffStationSearch: '',
+                diffStationOpen: false,
+                diffStationSelected: null,
+
                 // ─────────────────────────────────────────────────────────
                 // TAB 3 — MISSING STATE
                 // ─────────────────────────────────────────────────────────
@@ -1201,6 +1205,28 @@
                     this.filters.station_id = '';
                     this.stationOpen = true;
                 },
+
+                get filteredDiffStations() {
+                    if (!this.diffStationSearch) return this.allStations;
+                    return this.allStations.filter(s =>
+                        s.name.toLowerCase().includes(this.diffStationSearch.toLowerCase())
+                    );
+                },
+
+                selectDiffStation(s) {
+                    this.diffStationSelected = s;
+                    this.diffStationSearch = s.name;
+                    this.diffFilter.station_id = s.id;
+                    this.diffStationOpen = false;
+                },
+
+                clearDiffStation() {
+                    this.diffStationSelected = null;
+                    this.diffStationSearch = '';
+                    this.diffFilter.station_id = '';
+                    this.diffStationOpen = true;
+                },
+
 
                 // ─────────────────────────────────────────────────────────
                 // TAB SWITCH
@@ -1343,6 +1369,9 @@
                     this.diffTotalRecords = 0;
                     this.diffCurrentPage = 1;
                     this.diffTotalPages = 1;
+                    this.diffStationSearch = '';       
+                    this.diffStationSelected = null;   
+                    this.diffStationOpen = false; 
                 },
 
                 changeDiffPage(newPage) {
