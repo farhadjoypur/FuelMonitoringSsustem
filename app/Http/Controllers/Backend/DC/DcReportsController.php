@@ -429,6 +429,7 @@ class DcReportsController extends Controller
                 $totalSupply       = (float) ($report->{"{$fuel}_supply"} ?? 0);
                 $totalReceived     = (float) ($report->{"{$fuel}_received"} ?? 0);
                 $differenceL       = $totalSupply - $totalReceived;
+                if (abs($differenceL) > 0) $hasAnyDifference = true;
                 $differencePercent = $totalSupply > 0 ? round(($differenceL / $totalSupply) * 100, 2) : 0;
                 $diffStatus        = match (true) {
                     abs($differencePercent) >= 5 => 'High',
@@ -446,6 +447,7 @@ class DcReportsController extends Controller
             return [
                 'reportId'           => $report->id,
                 'stationId'          => $stationId,
+                'hasAnyDifference'   => $hasAnyDifference,
                 'reportDate'         => $report->report_date,
                 'stationName'        => $report->station_name ?? $report->fillingStation?->station_name ?? '—',
                 'companyName'        => $report->fillingStation?->company?->code ?? '—',
@@ -459,6 +461,8 @@ class DcReportsController extends Controller
                 'fuelBreakdown'      => $fuelBreakdown,
             ];
         });
+
+        $rows = $rows->filter(fn($row) => $row['hasAnyDifference'])->values();
 
         if (!empty($validated['min_diff_l'])) {
             $minL = (float) $validated['min_diff_l'];

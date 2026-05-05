@@ -471,10 +471,12 @@ class UnoReportsController extends Controller
             $officerPhone       = $officerProfile?->phone ?? $assignment?->officer?->phone ?? '—';
 
             $fuelBreakdown = [];
+            $hasAnyDifference = false;
             foreach ($fuelTypes as $fuel) {
                 $totalSupply       = (float) ($report->{"{$fuel}_supply"} ?? 0);
                 $totalReceived     = (float) ($report->{"{$fuel}_received"} ?? 0);
                 $differenceL       = $totalSupply - $totalReceived;
+                if (abs($differenceL) > 0) $hasAnyDifference = true;
                 $differencePercent = $totalSupply > 0 ? round(($differenceL / $totalSupply) * 100, 2) : 0;
                 $diffStatus        = match (true) {
                     abs($differencePercent) >= 5 => 'High',
@@ -486,12 +488,14 @@ class UnoReportsController extends Controller
                     'differenceL'       => number_format($differenceL, 0),
                     'differencePercent' => $differencePercent,
                     'diffStatus'        => $diffStatus,
+                    '_rawDiff'          => $differenceL, 
                 ];
             }
 
             return [
                 'reportId'           => $report->id,
                 'stationId'          => $stationId,
+                'hasAnyDifference'   => $hasAnyDifference,
                 'reportDate'         => $report->report_date,
                 'stationName'        => $report->station_name ?? $report->fillingStation?->station_name ?? '—',
                 'companyName'        => $report->fillingStation?->company?->code ?? '—',
@@ -505,6 +509,9 @@ class UnoReportsController extends Controller
                 'fuelBreakdown'      => $fuelBreakdown,
             ];
         });
+
+        // fuel difference = 0 
+        $rows = $rows->filter(fn($row) => $row['hasAnyDifference'])->values();
 
         if (!empty($validated['min_diff_l'])) {
             $minL = (float) $validated['min_diff_l'];
