@@ -1049,6 +1049,10 @@
                 diffAvailableDistricts: [],
                 diffAvailableUpazilas: [], // init e load hobe
 
+                diffStationSearch: '',
+                diffStationOpen: false,
+                diffStationSelected: null,
+
                 // ─────────────────────────────────────────────────────────
                 // TAB 3 — MISSING STATE
                 // ─────────────────────────────────────────────────────────
@@ -1123,6 +1127,27 @@
                     this.stationSearch = '';
                     this.filters.station_id = '';
                     this.stationOpen = true;
+                },
+
+                get filteredDiffStations() {
+                    if (!this.diffStationSearch) return this.allStations;
+                    return this.allStations.filter(s =>
+                        s.name.toLowerCase().includes(this.diffStationSearch.toLowerCase())
+                    );
+                },
+
+                selectDiffStation(s) {
+                    this.diffStationSelected = s;
+                    this.diffStationSearch = s.name;
+                    this.diffFilter.station_id = s.id;  // ← sets diffFilter, not filters
+                    this.diffStationOpen = false;
+                },
+
+                clearDiffStation() {
+                    this.diffStationSelected = null;
+                    this.diffStationSearch = '';
+                    this.diffFilter.station_id = '';
+                    this.diffStationOpen = true;
                 },
 
                 // ═════════════════════════════════════════════════════════
@@ -1363,6 +1388,9 @@
                     this.diffCurrentPage = 1;
                     this.diffTotalPages = 1;
                     // this.applyDiffFilter();
+                    this.diffStationSearch = '';       
+                    this.diffStationSelected = null;   
+                    this.diffStationOpen = false;  
                 },
 
                 changeDiffPage(newPage) {

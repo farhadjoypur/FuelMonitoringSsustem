@@ -903,6 +903,7 @@ class DcReportsController extends Controller
             $officerPhone       = $officerProfile?->phone ?? $assignment?->officer?->phone ?? '—';
 
             $fuelBreakdown = [];
+            $hasAnyDifference = false;
             foreach ($fuelTypes as $fuel) {
                 $totalSupply       = (float) ($report->{"{$fuel}_supply"} ?? 0);
                 $totalReceived     = (float) ($report->{"{$fuel}_received"} ?? 0);
