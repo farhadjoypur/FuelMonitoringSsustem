@@ -97,7 +97,7 @@
             All Stations
         </div>
 
-        <template x-for="s in filteredStations" :key="s.id">
+        <template x-for="s in filteredDiffStations" :key="s.id">
             <div
                 @mousedown.prevent="selectDiffStation(s)"
                 x-text="s.name"
@@ -107,7 +107,7 @@
             </div>
         </template>
 
-        <div x-show="filteredStations.length === 0"
+        <div x-show="filteredDiffStations.length === 0"
             style="padding:9px 12px; font-size:13px; color:#94a3b8; text-align:center;">
             No result found
         </div>
