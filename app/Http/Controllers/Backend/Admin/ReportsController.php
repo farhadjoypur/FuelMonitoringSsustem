@@ -624,7 +624,7 @@ class ReportsController extends Controller
 
                     $missingRows->push([
                         'id'           => $assignment->id,
-                        'missingDate'  => $dateKey,
+                        'missingDate'  => $currentDate->format('d M Y'),
                         'officerName'  => $profile?->name ?? $officer?->name ?? '—',
                         'officerPhone' => $profile?->phone ?? $officer?->phone ?? '—',
                         'division'     => $station?->division ?? '—',
