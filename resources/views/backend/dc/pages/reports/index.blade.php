@@ -1053,6 +1053,17 @@
                 diffStationOpen: false,
                 diffStationSelected: null,
 
+
+                // Missing tab station
+                missingStationSearch: '',
+                missingStationOpen: false,
+                missingStationSelected: null,
+
+                // Submit tab station
+                submitStationSearch: '',
+                submitStationOpen: false,
+                submitStationSelected: null,
+
                 // ─────────────────────────────────────────────────────────
                 // TAB 3 — MISSING STATE
                 // ─────────────────────────────────────────────────────────
@@ -1148,6 +1159,48 @@
                     this.diffStationSearch = '';
                     this.diffFilter.station_id = '';
                     this.diffStationOpen = true;
+                },
+
+                get filteredMissingStations() {
+                    if (!this.missingStationSearch) return this.allStations;
+                    return this.allStations.filter(s =>
+                        s.name.toLowerCase().includes(this.missingStationSearch.toLowerCase())
+                    );
+                },
+
+                selectMissingStation(s) {
+                    this.missingStationSelected = s;
+                    this.missingStationSearch = s.name;
+                    this.missingFilter.station_id = s.id;  // ← sets missingFilter
+                    this.missingStationOpen = false;
+                },
+
+                clearMissingStation() {
+                    this.missingStationSelected = null;
+                    this.missingStationSearch = '';
+                    this.missingFilter.station_id = '';
+                    this.missingStationOpen = true;
+                },
+
+                get filteredSubmitStations() {
+                    if (!this.submitStationSearch) return this.allStations;
+                    return this.allStations.filter(s =>
+                        s.name.toLowerCase().includes(this.submitStationSearch.toLowerCase())
+                    );
+                },
+
+                selectSubmitStation(s) {
+                    this.submitStationSelected = s;
+                    this.submitStationSearch = s.name;
+                    this.submitFilter.station_id = s.id;  // ← sets submitFilter
+                    this.submitStationOpen = false;
+                },
+
+                clearSubmitStation() {
+                    this.submitStationSelected = null;
+                    this.submitStationSearch = '';
+                    this.submitFilter.station_id = '';
+                    this.submitStationOpen = true;
                 },
 
                 // ═════════════════════════════════════════════════════════
@@ -1516,7 +1569,9 @@
                     this.missingTotalRecords = 0;
                     this.missingCurrentPage = 1;
                     this.missingTotalPages = 1;
-                    // this.applyMissingFilter();
+                    this.missingStationSearch = '';      
+                    this.missingStationSelected = null;  
+                    this.missingStationOpen = false;     
                 },
 
                 changeMissingPage(newPage) {
@@ -1584,7 +1639,9 @@
                     this.submitTotalRecords = 0;
                     this.submitCurrentPage = 1;
                     this.submitTotalPages = 1;
-                    // this.applySubmitFilter();
+                    this.submitStationSearch = '';      
+                    this.submitStationSelected = null;  
+                    this.submitStationOpen = false;     
                 },
 
                 changeSubmitPage(newPage) {
