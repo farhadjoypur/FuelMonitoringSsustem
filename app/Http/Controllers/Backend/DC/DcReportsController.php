@@ -563,7 +563,7 @@ class DcReportsController extends Controller
                 $station = $assignment->fillingStation;
                 return [
                     'id'           => $assignment->id,
-                    'missingDate'  => $fromDate->format('Y-m-d'),
+                    'missingDate'  => $fromDate->format('d M Y'),
                     'officerName'  => $profile?->name ?? $officer?->name ?? '—',
                     'officerPhone' => $profile?->phone ?? $officer?->phone ?? '—',
                     'division'     => $station?->division ?? '—',
