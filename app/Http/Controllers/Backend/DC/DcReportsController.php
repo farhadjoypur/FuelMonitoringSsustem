@@ -512,8 +512,30 @@ class DcReportsController extends Controller
 
     public function missingReport(Request $request)
     {
-        $perPage     = 10;
+        $validated = $request->validate([
+            'from_date'     => 'nullable|date',
+            'to_date'       => 'nullable|date|after_or_equal:from_date',
+            'division'      => 'nullable|string|max:100',
+            'district'      => 'nullable|string|max:100',
+            'thana_upazila' => 'nullable|string|max:100',
+            'company_id'    => 'nullable|integer|exists:companies,id',
+            'depot_id'      => 'nullable|integer',
+            'station_id'    => 'nullable|integer|exists:filling_stations,id',
+            'page'          => 'nullable|integer|min:1',
+            'per_page'      => 'nullable|string',
+        ]);
+
+        $rawPerPage  = $request->get('per_page', 10);
+        $perPage     = ($rawPerPage === 'all' || (int) $rawPerPage <= 0) ? PHP_INT_MAX : (int) $rawPerPage;
         $currentPage = (int) $request->get('page', 1);
+
+        $fromDate = !empty($validated['from_date'])
+            ? \Carbon\Carbon::parse($validated['from_date'])->startOfDay()
+            : \Carbon\Carbon::today()->startOfDay();
+
+        $toDate = !empty($validated['to_date'])
+            ? \Carbon\Carbon::parse($validated['to_date'])->endOfDay()
+            : $fromDate->copy()->endOfDay();
 
         $assignmentsQuery = AssignTagOfficer::with([
             'officer.profile',
@@ -522,62 +544,64 @@ class DcReportsController extends Controller
         ])->where('status', 'active')
             ->whereHas('fillingStation', fn($q) => $q->where('district', $this->dcDistrict));
 
-        if ($request->filled('division'))
-            $assignmentsQuery->whereHas('fillingStation', fn($q) => $q->where('division', $request->division));
-        if ($request->filled('district'))
-            $assignmentsQuery->whereHas('fillingStation', fn($q) => $q->where('district', $request->district));
-        if ($request->filled('thana_upazila'))
-            $assignmentsQuery->whereHas('fillingStation', fn($q) => $q->where('upazila', $request->thana_upazila));
-        if ($request->filled('company_id'))
-            $assignmentsQuery->whereHas('fillingStation', fn($q) => $q->where('company_id', $request->company_id));
-        if ($request->filled('depot_id'))
-            $assignmentsQuery->whereHas('fillingStation', fn($q) => $q->where('depot_id', $request->depot_id));
-        if ($request->filled('station_id'))
-            $assignmentsQuery->where('filling_station_id', $request->station_id);
+        if (!empty($validated['division']))
+            $assignmentsQuery->whereHas('fillingStation', fn($q) => $q->where('division', $validated['division']));
+        if (!empty($validated['district']))
+            $assignmentsQuery->whereHas('fillingStation', fn($q) => $q->where('district', $validated['district']));
+        if (!empty($validated['thana_upazila']))
+            $assignmentsQuery->whereHas('fillingStation', fn($q) => $q->where('upazila', $validated['thana_upazila']));
+        if (!empty($validated['company_id']))
+            $assignmentsQuery->whereHas('fillingStation', fn($q) => $q->where('company_id', $validated['company_id']));
+        if (!empty($validated['depot_id']))
+            $assignmentsQuery->whereHas('fillingStation', fn($q) => $q->where('depot_id', $validated['depot_id']));
+        if (!empty($validated['station_id']))
+            $assignmentsQuery->where('filling_station_id', $validated['station_id']);
 
         $allAssignments = $assignmentsQuery->get();
 
-        if ($request->filled('from_date') && !$request->filled('to_date')) {
-            $fromDate = \Carbon\Carbon::parse($request->from_date)->startOfDay();
-            $toDate   = \Carbon\Carbon::parse($request->from_date)->endOfDay();
-        } elseif ($request->filled('from_date') && $request->filled('to_date')) {
-            $fromDate = \Carbon\Carbon::parse($request->from_date)->startOfDay();
-            $toDate   = \Carbon\Carbon::parse($request->to_date)->endOfDay();
-        } else {
-            $fromDate = now()->startOfDay();
-            $toDate   = now()->endOfDay();
-        }
-
-        $reportedStationIds = Fuelreport::whereBetween('report_date', [$fromDate, $toDate])
+        // Build per-day reported map (same as admin)
+        $reportedMap = Fuelreport::whereBetween('report_date', [$fromDate, $toDate])
             ->where('district', $this->dcDistrict)
             ->whereNotNull('station_id')
-            ->pluck('station_id')
-            ->unique()
-            ->toArray();
+            ->get(['report_date', 'station_id'])
+            ->groupBy(fn($r) => \Carbon\Carbon::parse($r->report_date)->format('Y-m-d'))
+            ->map(fn($group) => $group->pluck('station_id')->unique()->toArray());
 
-        $missingRows = $allAssignments
-            ->filter(fn($assignment) => !in_array($assignment->filling_station_id, $reportedStationIds))
-            ->map(function ($assignment) use ($fromDate) {
-                $officer = $assignment->officer;
-                $profile = $officer?->profile;
-                $station = $assignment->fillingStation;
-                return [
-                    'id'           => $assignment->id,
-                    'missingDate'  => $fromDate->format('d M Y'),
-                    'officerName'  => $profile?->name ?? $officer?->name ?? '—',
-                    'officerPhone' => $profile?->phone ?? $officer?->phone ?? '—',
-                    'division'     => $station?->division ?? '—',
-                    'district'     => $station?->district ?? '—',
-                    'thanaUpazila' => $station?->upazila ?? '—',
-                    'stationName'  => $station?->station_name ?? '—',
-                    'companyName'  => $station?->company?->code ?? '—',
-                    'depotName'    => $station?->depot?->depot_name ?? '—',
-                    'status'       => 'Pending',
-                ];
-            })->values();
+        // Loop each day — same logic as admin
+        $missingRows = collect();
+        $currentDate = $fromDate->copy();
+
+        while ($currentDate->lte($toDate)) {
+            $dateKey          = $currentDate->format('Y-m-d');
+            $reportedTodayIds = $reportedMap->get($dateKey, []);
+
+            foreach ($allAssignments as $assignment) {
+                if (!in_array($assignment->filling_station_id, $reportedTodayIds)) {
+                    $officer = $assignment->officer;
+                    $profile = $officer?->profile;
+                    $station = $assignment->fillingStation;
+
+                    $missingRows->push([
+                        'id'           => $assignment->id,
+                        'missingDate'  => $currentDate->format('d M Y'),
+                        'officerName'  => $profile?->name ?? $officer?->name ?? '—',
+                        'officerPhone' => $profile?->phone ?? $officer?->phone ?? '—',
+                        'division'     => $station?->division ?? '—',
+                        'district'     => $station?->district ?? '—',
+                        'thanaUpazila' => $station?->upazila ?? '—',
+                        'stationName'  => $station?->station_name ?? '—',
+                        'companyName'  => $station?->company?->code ?? '—',
+                        'depotName'    => $station?->depot?->depot_name ?? '—',
+                        'status'       => 'Pending',
+                    ]);
+                }
+            }
+
+            $currentDate->addDay();
+        }
 
         $total      = $missingRows->count();
-        $totalPages = (int) ceil($total / $perPage) ?: 1;
+        $totalPages = $perPage >= PHP_INT_MAX ? 1 : ((int) ceil($total / $perPage) ?: 1);
         $rows       = $missingRows->forPage($currentPage, $perPage)->values();
 
         return response()->json([
@@ -586,6 +610,7 @@ class DcReportsController extends Controller
             'total'       => $total,
             'currentPage' => $currentPage,
             'lastPage'    => $totalPages,
+            'perPage'     => $perPage >= PHP_INT_MAX ? 'all' : $perPage,
         ]);
     }
 
@@ -990,21 +1015,16 @@ class DcReportsController extends Controller
     public function exportMissingPdf(Request $request)
     {
         $filters = $request->only([
-            'from_date',
-            'to_date',
-            'division',
-            'district',
-            'thana_upazila',
-            'company_id',
-            'depot_id',
-            'station_id',
+            'from_date', 'to_date', 'division', 'district',
+            'thana_upazila', 'company_id', 'depot_id', 'station_id',
         ]);
 
         $assignmentsQuery = AssignTagOfficer::with([
             'officer.profile',
             'fillingStation.company',
             'fillingStation.depot',
-        ])->where('status', 'active');
+        ])->where('status', 'active')
+            ->whereHas('fillingStation', fn($q) => $q->where('district', $this->dcDistrict));
 
         if (!empty($filters['division']))
             $assignmentsQuery->whereHas('fillingStation', fn($q) => $q->where('division', $filters['division']));
@@ -1023,7 +1043,7 @@ class DcReportsController extends Controller
 
         if (!empty($filters['from_date']) && empty($filters['to_date'])) {
             $fromDate = \Carbon\Carbon::parse($filters['from_date'])->startOfDay();
-            $toDate   = \Carbon\Carbon::parse($filters['from_date'])->endOfDay();
+            $toDate   = $fromDate->copy()->endOfDay();
         } elseif (!empty($filters['from_date']) && !empty($filters['to_date'])) {
             $fromDate = \Carbon\Carbon::parse($filters['from_date'])->startOfDay();
             $toDate   = \Carbon\Carbon::parse($filters['to_date'])->endOfDay();
@@ -1032,29 +1052,44 @@ class DcReportsController extends Controller
             $toDate   = now()->endOfDay();
         }
 
-        $reportedStationIds = Fuelreport::whereBetween('report_date', [$fromDate, $toDate])
-            ->whereNotNull('station_id')
+        // Per-day reported map — scoped to DC district
+        $reportedMap = Fuelreport::whereBetween('report_date', [$fromDate, $toDate])
             ->where('district', $this->dcDistrict)
-            ->pluck('station_id')->unique()->toArray();
+            ->whereNotNull('station_id')
+            ->get(['report_date', 'station_id'])
+            ->groupBy(fn($r) => \Carbon\Carbon::parse($r->report_date)->format('Y-m-d'))
+            ->map(fn($group) => $group->pluck('station_id')->unique()->toArray());
 
-        $rows = $allAssignments
-            ->filter(fn($a) => !in_array($a->filling_station_id, $reportedStationIds))
-            ->map(function ($assignment) use ($fromDate) {
-                $officer = $assignment->officer;
-                $profile = $officer?->profile;
-                $station = $assignment->fillingStation;
-                return [
-                    'missingDate'  => $fromDate->format('d M Y'),
-                    'officerName'  => $profile?->name ?? $officer?->name ?? '—',
-                    'officerPhone' => $profile?->phone ?? $officer?->phone ?? '—',
-                    'division'     => $station?->division ?? '—',
-                    'district'     => $station?->district ?? '—',
-                    'thanaUpazila' => $station?->upazila ?? '—',
-                    'stationName'  => $station?->station_name ?? '—',
-                    'companyName'  => $station?->company?->code ?? '—',
-                    'depotName'    => $station?->depot?->depot_name ?? '—',
-                ];
-            })->values();
+        // Loop each day
+        $rows    = collect();
+        $current = $fromDate->copy();
+
+        while ($current->lte($toDate)) {
+            $dateKey          = $current->format('Y-m-d');
+            $reportedTodayIds = $reportedMap->get($dateKey, []);
+
+            foreach ($allAssignments as $assignment) {
+                if (!in_array($assignment->filling_station_id, $reportedTodayIds)) {
+                    $officer = $assignment->officer;
+                    $profile = $officer?->profile;
+                    $station = $assignment->fillingStation;
+
+                    $rows->push([
+                        'missingDate'  => $current->format('d M Y'),
+                        'officerName'  => $profile?->name ?? $officer?->name ?? '—',
+                        'officerPhone' => $profile?->phone ?? $officer?->phone ?? '—',
+                        'division'     => $station?->division ?? '—',
+                        'district'     => $station?->district ?? '—',
+                        'thanaUpazila' => $station?->upazila ?? '—',
+                        'stationName'  => $station?->station_name ?? '—',
+                        'companyName'  => $station?->company?->code ?? '—',
+                        'depotName'    => $station?->depot?->depot_name ?? '—',
+                    ]);
+                }
+            }
+
+            $current->addDay();
+        }
 
         $html = view('backend.dc.pages.reports.pdf_missing', [
             'rows'     => $rows,
