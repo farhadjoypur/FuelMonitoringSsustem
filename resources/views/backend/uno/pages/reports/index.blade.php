@@ -1693,14 +1693,13 @@
 
                 exportMissingPdf() {
                     const params = new URLSearchParams();
-                    if (this.missingFilter.fromDate) params.append('from_date', this.missingFilter.fromDate);
-                    if (this.missingFilter.toDate) params.append('to_date', this.missingFilter.toDate);
-                    if (this.missingFilter.division) params.append('division', this.missingFilter.division);
+                    if (this.missingFilter.from_date) params.append('from_date', this.missingFilter.from_date);
+                    if (this.missingFilter.to_date) params.append('to_date', this.missingFilter.to_date);
                     if (this.missingFilter.district) params.append('district', this.missingFilter.district);
-                    if (this.missingFilter.thanaUpazila) params.append('thana_upazila', this.missingFilter.thanaUpazila);
-                    if (this.missingFilter.companyId) params.append('company_id', this.missingFilter.companyId);
-                    if (this.missingFilter.depotId) params.append('depot_id', this.missingFilter.depotId);
-                    if (this.missingFilter.stationId) params.append('station_id', this.missingFilter.stationId);
+                    if (this.missingFilter.thana_upazila) params.append('thana_upazila', this.missingFilter.thana_upazila);
+                    if (this.missingFilter.company_id) params.append('company_id', this.missingFilter.company_id);
+                    if (this.missingFilter.depot_id) params.append('depot_id', this.missingFilter.depot_id);
+                    if (this.missingFilter.station_id) params.append('station_id', this.missingFilter.station_id);
                     window.open('{{ route('uno.reports.export.missing.pdf') }}?' + params.toString(), '_blank');
                 },
 
