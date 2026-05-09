@@ -928,7 +928,14 @@ class ReportsController extends Controller
         ])->render();
 
         $mpdf = $this->makeMpdf('A4-L');
-        $mpdf->WriteHTML($html);
+        foreach (str_split($html, 500000) as $i => $chunk) {
+            $mpdf->WriteHTML(
+                $chunk,
+                $i === 0
+                    ? \Mpdf\HTMLParserMode::DEFAULT_MODE
+                    : \Mpdf\HTMLParserMode::HTML_BODY
+            );
+        }
 
         return response()->streamDownload(
             fn() => print($mpdf->Output('', 'S')),
