@@ -760,7 +760,7 @@ class ReportsController extends Controller
         return view('backend.admin.pages.reports.edit', compact('fuelReport', 'tagOfficerName'));
     }
 
-   public function update(Request $request, Fuelreport $fuelReport)
+    public function update(Request $request, Fuelreport $fuelReport)
     {
         $request->validate([
             'report_date'       => 'required|date',
@@ -899,10 +899,14 @@ class ReportsController extends Controller
             'stock_status',
         ]);
 
-        $rawReports = $this->buildFilteredQuery($request)
+        $rawReports = collect();
+
+        $this->buildFilteredQuery($request)
             ->orderBy('report_date', 'desc')
             ->orderBy('station_id')
-            ->get();
+            ->chunk(200, function ($chunk) use (&$rawReports) {
+                $rawReports = $rawReports->concat($chunk);
+            });
 
         $officerMap       = $this->loadOfficerMap();
         $formattedReports = $rawReports->map(fn($r) => $this->formatSingleReport($r, $officerMap));
@@ -966,7 +970,12 @@ class ReportsController extends Controller
 
         $officerMap    = AssignTagOfficer::with(['officer.profile'])
             ->where('status', 'active')->get()->keyBy('filling_station_id');
-        $allRawReports = $query->orderBy('report_date', 'desc')->orderBy('station_id')->get();
+        $allRawReports = collect();
+        $query->orderBy('report_date', 'desc')
+            ->orderBy('station_id')
+            ->chunk(200, function ($chunk) use (&$allRawReports) {
+                $allRawReports = $allRawReports->concat($chunk);
+            });
 
         $rows = $allRawReports->map(function ($report) use ($fuelTypes, $officerMap) {
             $stationId          = $report->station_id;
@@ -1082,7 +1091,10 @@ class ReportsController extends Controller
         if (!empty($filters['station_id']))
             $assignmentsQuery->where('filling_station_id', $filters['station_id']);
 
-        $allAssignments = $assignmentsQuery->get();
+        $allAssignments = collect();
+        $assignmentsQuery->chunk(200, function ($chunk) use (&$allAssignments) {
+            $allAssignments = $allAssignments->concat($chunk);
+        });
 
         // ✅ Date range
         if (!empty($filters['from_date']) && empty($filters['to_date'])) {
@@ -1193,7 +1205,10 @@ class ReportsController extends Controller
         if (!empty($filters['station_id']))
             $query->where('station_id', $filters['station_id']);
 
-        $allReports = $query->orderBy('report_date', 'desc')->get();
+        $allReports = collect();
+        $query->orderBy('report_date', 'desc')->chunk(200, function ($chunk) use (&$allReports) {
+            $allReports = $allReports->concat($chunk);
+        });
 
         $officerMap = AssignTagOfficer::with(['officer.profile'])
             ->where('status', 'active')->get()->keyBy('filling_station_id');
