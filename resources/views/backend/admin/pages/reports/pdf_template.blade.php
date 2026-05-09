@@ -427,7 +427,15 @@
         Total records: {{ $reports->count() }} &nbsp;|&nbsp;
         Printed: {{ now()->format('d/m/Y h:i A') }}
     </div>
-
+    <script>
+        window.onload = function() {
+            window.print();
+            // print শেষে tab বন্ধ করো
+            window.onfocus = function() {
+                window.close();
+            };
+        };
+    </script>
 </body>
 
 </html>
