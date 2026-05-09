@@ -1003,8 +1003,8 @@
                 // ─────────────────────────────────────────────────────────
 
                 activeTab: 'stock',
-                unoDistrict: '{{ $uno_district }}',
-                unoUpazila: '{{ $uno_upazila }}',
+                unoDistrict: @json($uno_district),
+                unoUpazila: @json($uno_upazila),
                 allDivisions: @json($divisions),
 
                 messageModal: {
@@ -1070,6 +1070,10 @@
                 allStations: @json($stations->map(fn($s) => ['id' => $s->id, 'name' => $s->station_name])),
 
                 diffAvailableUpazilas: [], // init এ load হবে
+
+                diffStationSearch: '',
+                diffStationOpen: false,
+                diffStationSelected: null,
 
                 // ─────────────────────────────────────────────────────────
                 // TAB 3 — MISSING STATE
@@ -1200,6 +1204,69 @@
                     this.stationSearch = '';
                     this.filters.station_id = '';
                     this.stationOpen = true;
+                },
+
+                get filteredDiffStations() {
+                    if (!this.diffStationSearch) return this.allStations;
+                    return this.allStations.filter(s =>
+                        s.name.toLowerCase().includes(this.diffStationSearch.toLowerCase())
+                    );
+                },
+
+                selectDiffStation(s) {
+                    this.diffStationSelected = s;
+                    this.diffStationSearch = s.name;
+                    this.diffFilter.station_id = s.id;
+                    this.diffStationOpen = false;
+                },
+
+                clearDiffStation() {
+                    this.diffStationSelected = null;
+                    this.diffStationSearch = '';
+                    this.diffFilter.station_id = '';
+                    this.diffStationOpen = true;
+                },
+
+                get filteredMissingStations() {
+                    if (!this.missingStationSearch) return this.allStations;
+                    return this.allStations.filter(s =>
+                        s.name.toLowerCase().includes(this.missingStationSearch.toLowerCase())
+                    );
+                },
+
+                selectMissingStation(s) {
+                    this.missingStationSelected = s;
+                    this.missingStationSearch = s.name;
+                    this.missingFilter.station_id = s.id;  // ← sets missingFilter
+                    this.missingStationOpen = false;
+                },
+
+                clearMissingStation() {
+                    this.missingStationSelected = null;
+                    this.missingStationSearch = '';
+                    this.missingFilter.station_id = '';
+                    this.missingStationOpen = true;
+                },
+
+                get filteredSubmitStations() {
+                    if (!this.submitStationSearch) return this.allStations;
+                    return this.allStations.filter(s =>
+                        s.name.toLowerCase().includes(this.submitStationSearch.toLowerCase())
+                    );
+                },
+
+                selectSubmitStation(s) {
+                    this.submitStationSelected = s;
+                    this.submitStationSearch = s.name;
+                    this.submitFilter.station_id = s.id;  // ← sets submitFilter
+                    this.submitStationOpen = false;
+                },
+
+                clearSubmitStation() {
+                    this.submitStationSelected = null;
+                    this.submitStationSearch = '';
+                    this.submitFilter.station_id = '';
+                    this.submitStationOpen = true;
                 },
 
                 // ─────────────────────────────────────────────────────────
@@ -1343,6 +1410,9 @@
                     this.diffTotalRecords = 0;
                     this.diffCurrentPage = 1;
                     this.diffTotalPages = 1;
+                    this.diffStationSearch = '';       
+                    this.diffStationSelected = null;   
+                    this.diffStationOpen = false; 
                 },
 
                 changeDiffPage(newPage) {
@@ -1350,7 +1420,15 @@
                     this.applyDiffFilter(newPage);
                 },
 
+                // Missing tab station
+                missingStationSearch: '',
+                missingStationOpen: false,
+                missingStationSelected: null,
 
+                // Submit tab station
+                submitStationSearch: '',
+                submitStationOpen: false,
+                submitStationSelected: null,
 
                 // ═════════════════════════════════════════════════════════
                 // TAB 3 — MISSING METHODS
@@ -1408,6 +1486,9 @@
                     this.missingTotalRecords = 0;
                     this.missingCurrentPage = 1;
                     this.missingTotalPages = 1;
+                    this.missingStationSearch = '';      
+                    this.missingStationSelected = null;  
+                    this.missingStationOpen = false;    
                 },
 
                 changeMissingPage(newPage) {
@@ -1474,6 +1555,9 @@
                     this.submitTotalRecords = 0;
                     this.submitCurrentPage = 1;
                     this.submitTotalPages = 1;
+                    this.submitStationSearch = '';      
+                    this.submitStationSelected = null;  
+                    this.submitStationOpen = false;     
                 },
 
                 changeSubmitPage(newPage) {
@@ -1609,14 +1693,13 @@
 
                 exportMissingPdf() {
                     const params = new URLSearchParams();
-                    if (this.missingFilter.fromDate) params.append('from_date', this.missingFilter.fromDate);
-                    if (this.missingFilter.toDate) params.append('to_date', this.missingFilter.toDate);
-                    if (this.missingFilter.division) params.append('division', this.missingFilter.division);
+                    if (this.missingFilter.from_date) params.append('from_date', this.missingFilter.from_date);
+                    if (this.missingFilter.to_date) params.append('to_date', this.missingFilter.to_date);
                     if (this.missingFilter.district) params.append('district', this.missingFilter.district);
-                    if (this.missingFilter.thanaUpazila) params.append('thana_upazila', this.missingFilter.thanaUpazila);
-                    if (this.missingFilter.companyId) params.append('company_id', this.missingFilter.companyId);
-                    if (this.missingFilter.depotId) params.append('depot_id', this.missingFilter.depotId);
-                    if (this.missingFilter.stationId) params.append('station_id', this.missingFilter.stationId);
+                    if (this.missingFilter.thana_upazila) params.append('thana_upazila', this.missingFilter.thana_upazila);
+                    if (this.missingFilter.company_id) params.append('company_id', this.missingFilter.company_id);
+                    if (this.missingFilter.depot_id) params.append('depot_id', this.missingFilter.depot_id);
+                    if (this.missingFilter.station_id) params.append('station_id', this.missingFilter.station_id);
                     window.open('{{ route('uno.reports.export.missing.pdf') }}?' + params.toString(), '_blank');
                 },
 
