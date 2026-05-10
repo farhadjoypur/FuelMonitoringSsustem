@@ -74,7 +74,8 @@ class DashboardController extends Controller
         $todayOctaneStock = $lastOctaneClosing - $todayOctaneSold;
         $todayPetrolStock = $lastPetrolClosing - $todayPetrolSold;
         $todayDieselStock = $lastDieselClosing - $todayDieselSold;
-        $todayOthersStock = $lastOthersClosing - $todayOthersSold;
+        // $todayOthersStock = $lastOthersClosing - $todayOthersSold;
+        $todayOthersStock = $todayReports->sum('others_closing_stock');
 
         // =============================================
         // TODAY'S RECEIVED

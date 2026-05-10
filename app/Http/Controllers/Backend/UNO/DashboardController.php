@@ -70,6 +70,7 @@ class DashboardController extends Controller
         $todayPetrolStock = $todayReports->sum('petrol_closing_stock');
         $todayDieselStock = $todayReports->sum('diesel_closing_stock');
         $todayOctaneStock = $todayReports->sum('octane_closing_stock');
+        $todayOthersStock = $todayReports->sum('others_closing_stock');
 
         // =============================================
         // TODAY'S RECEIVED
@@ -77,6 +78,8 @@ class DashboardController extends Controller
         $todayPetrolReceived = $todayReports->sum('petrol_received');
         $todayDieselReceived = $todayReports->sum('diesel_received');
         $todayOctaneReceived = $todayReports->sum('octane_received');
+        $todayOthersReceived = $todayReports->sum('others_received');
+
 
         // =============================================
         // TODAY'S DIFFERENCE
@@ -84,6 +87,7 @@ class DashboardController extends Controller
         $todayPetrolDiff = $todayReports->sum('petrol_difference');
         $todayDieselDiff = $todayReports->sum('diesel_difference');
         $todayOctaneDiff = $todayReports->sum('octane_difference');
+        $todayOthersDiff = $todayReports->sum('others_difference');
 
         // =============================================
         // TODAY'S SALES (per fuel type)
@@ -91,6 +95,7 @@ class DashboardController extends Controller
         $todayPetrolSold = $todayReports->sum('petrol_sales');
         $todayDieselSold = $todayReports->sum('diesel_sales');
         $todayOctaneSold = $todayReports->sum('octane_sales');
+        $todayOthersSold = $todayReports->sum('others_sales');
 
         // =============================================
         // TODAY'S DIFFERENCE PERCENTAGE (%)
@@ -106,6 +111,7 @@ class DashboardController extends Controller
         $todayPetrolSupply = $todayReports->sum('petrol_supply');
         $todayDieselSupply = $todayReports->sum('diesel_supply');
         $todayOctaneSupply = $todayReports->sum('octane_supply');
+        $todayOthersSupply = $todayReports->sum('others_supply');
 
         $todayPetrolDiffPct = $todayPetrolSupply > 0
             ? round((abs($todayPetrolDiff) / $todayPetrolSupply) * 100, 1) : 0;
@@ -113,6 +119,8 @@ class DashboardController extends Controller
             ? round((abs($todayDieselDiff) / $todayDieselSupply) * 100, 1) : 0;
         $todayOctaneDiffPct = $todayOctaneSupply > 0
             ? round((abs($todayOctaneDiff) / $todayOctaneSupply) * 100, 1) : 0;
+        $todayOthersDiffPct = $todayOthersSupply > 0  
+            ? round((abs($todayOthersDiff) / $todayOthersSupply) * 100, 1) : 0;    
 
         // =============================================
         // SUMMARY CARDS — শুধু UNO এর jurisdiction এর data
@@ -259,26 +267,31 @@ class DashboardController extends Controller
             'todayPetrolStock',
             'todayDieselStock',
             'todayOctaneStock',
+            'todayOthersStock',
 
             // today received
             'todayPetrolReceived',
             'todayDieselReceived',
             'todayOctaneReceived',
+            'todayOthersReceived',
 
             // today difference L
             'todayPetrolDiff',
             'todayDieselDiff',
             'todayOctaneDiff',
+            'todayOthersDiff',
 
             // today difference %
             'todayPetrolDiffPct',
             'todayDieselDiffPct',
             'todayOctaneDiffPct',
+            'todayOthersDiffPct',
 
             // today sold
             'todayPetrolSold',
             'todayDieselSold',
             'todayOctaneSold',
+            'todayOthersSold',
 
             // summary
             'totalDepots',
