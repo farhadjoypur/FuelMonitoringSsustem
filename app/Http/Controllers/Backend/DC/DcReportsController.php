@@ -1236,7 +1236,7 @@ class DcReportsController extends Controller
         $formattedReports = $rawReports->map(fn($r) => $this->formatSingleReport($r, $officerMap));
 
         $headers = [
-            '#', 'Date', 'Filling Station', 'Company', 'Tag Officer',
+            '#', 'Date', 'Filling Station', 'Company', 'Tag Officer', 'Phone',
             'Fuel', 'Prev. Stock (L)', 'Supply From Depot (L)',
             'Received At Station (L)', 'Difference (L)', 'Sales (L)',
             'Closing Stock (L)', 'Status', 'Comment'
@@ -1251,21 +1251,22 @@ class DcReportsController extends Controller
 
             foreach ($fuelTypes as $fuel) {
                 $rows[] = [
-                    $firstRow ? $serial : '',
-                    $firstRow ? $report['report_date_from'] : '',
-                    $firstRow ? $report['station_name'] : '',
-                    $firstRow ? $report['company_name'] : '',
-                    $firstRow ? $report['tag_officer'] : '',
-                    ucfirst($fuel),
-                    $report["{$fuel}_prev_stock"],
-                    $report["{$fuel}_supply"],
-                    $report["{$fuel}_received"],
-                    $report["{$fuel}_difference"],
-                    $report["{$fuel}_sales"],
-                    $report["{$fuel}_closing_stock"],
-                    $report['fuel_statuses'][$fuel]['label'],
-                    $firstRow ? $report['comment'] : '',
-                ];
+                $firstRow ? $serial : '',
+                $firstRow ? $report['report_date_from'] : '',
+                $firstRow ? $report['station_name'] : '',
+                $firstRow ? $report['company_name'] : '',
+                $firstRow ? $report['tag_officer'] : '',
+                $firstRow ? ("\t" . ($report['tag_officer_phone'] ?? '—')) : '',
+                ucfirst($fuel),
+                $report["{$fuel}_prev_stock"],
+                $report["{$fuel}_supply"],
+                $report["{$fuel}_received"],
+                $report["{$fuel}_difference"],
+                $report["{$fuel}_sales"],
+                $report["{$fuel}_closing_stock"],
+                $report['fuel_statuses'][$fuel]['label'],
+                $firstRow ? $report['comment'] : '',
+            ];
 
                 if ($firstRow) { $serial++; $firstRow = false; }
             }
