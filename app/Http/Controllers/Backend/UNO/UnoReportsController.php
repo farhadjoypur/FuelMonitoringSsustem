@@ -1314,7 +1314,7 @@ class UnoReportsController extends Controller
         $formattedReports = $rawReports->map(fn($r) => $this->formatSingleReport($r, $officerMap));
 
         $headers = [
-            '#', 'Date', 'Filling Station', 'Company', 'Tag Officer',
+            '#', 'Date', 'Filling Station', 'Company', 'Tag Officer', 'Phone',
             'Fuel', 'Prev. Stock (L)', 'Supply From Depot (L)',
             'Received At Station (L)', 'Difference (L)', 'Sales (L)',
             'Closing Stock (L)', 'Status', 'Comment'
@@ -1334,6 +1334,7 @@ class UnoReportsController extends Controller
                     $firstRow ? $report['station_name'] : '',
                     $firstRow ? $report['company_name'] : '',
                     $firstRow ? $report['tag_officer'] : '',
+                    $firstRow ? ("\t" . ($report['tag_officer_phone'] ?? '—')) : '',
                     ucfirst($fuel),
                     $report["{$fuel}_prev_stock"],
                     $report["{$fuel}_supply"],
