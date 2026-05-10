@@ -43,4 +43,10 @@ Route::prefix('uno')->middleware(['role:' . UserRole::UNO])->as('uno.')->group(f
     Route::get('reports/export-difference-pdf', [UnoReportsController::class, 'exportDifferencePdf'])->name('reports.export.difference.pdf');
     Route::get('reports/export-missing-pdf',    [UnoReportsController::class, 'exportMissingPdf'])->name('reports.export.missing.pdf');
     Route::get('reports/export-submitted-pdf',  [UnoReportsController::class, 'exportSubmittedPdf'])->name('reports.export.submitted.pdf');
+
+    // export csv routes
+    Route::get('/reports/export/csv',           [UnoReportsController::class, 'exportCsv'])->name('reports.export.csv');
+    Route::get('/reports/difference/export/csv',[UnoReportsController::class, 'exportDifferenceCsv'])->name('reports.difference.export.csv');
+    Route::get('/reports/missing/export/csv',   [UnoReportsController::class, 'exportMissingCsv'])->name('reports.missing.export.csv');
+    Route::get('/reports/submitted/export/csv', [UnoReportsController::class, 'exportSubmittedCsv'])->name('reports.submitted.export.csv');
 });

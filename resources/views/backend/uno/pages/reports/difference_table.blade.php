@@ -169,6 +169,9 @@
             <button class="btn-export btn-export-pdf" @click="exportDiffPdf()">
                 <i class="fa-regular fa-file-pdf"></i> Export PDF
             </button>
+            <button class="btn-export btn-export-pdf" @click="exportDiffCsv()">
+                <i class="fa-solid fa-file-csv"></i> Export CSV
+            </button>
         </div>
 
     </div>

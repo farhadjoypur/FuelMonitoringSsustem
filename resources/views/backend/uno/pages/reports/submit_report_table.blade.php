@@ -142,6 +142,9 @@
             <button class="btn-export btn-export-pdf" @click="exportSubmitPdf()">
                 <i class="fa-regular fa-file-pdf"></i> Export PDF
             </button>
+            <button class="btn-export btn-export-pdf" @click="exportSubmitCsv()">
+                <i class="fa-solid fa-file-csv"></i> Export CSV
+            </button>
         </div>
 
     </div>

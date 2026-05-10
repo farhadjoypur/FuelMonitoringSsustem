@@ -875,6 +875,9 @@
             <button class="btn-export btn-export-pdf" @click="exportPdf()">
                 <i class="fa-regular fa-file-pdf"></i> Export PDF
             </button>
+            <button class="btn-export btn-export-pdf" @click="exportExcel()">
+                <i class="fa-solid fa-file-csv"></i> Export CSV
+            </button>
 
         </div>
 
@@ -1715,71 +1718,123 @@
                     if (this.submitFilter.stationId) params.append('station_id', this.submitFilter.stationId);
                     window.open('{{ route('uno.reports.export.submitted.pdf') }}?' + params.toString(), '_blank');
                 },
-                // ═══════════════════════════════════════════════════════════
-// DELETE REPORT WITH SWEETALERT2 (নতুন)
-// ═══════════════════════════════════════════════════════════
 
-async deleteReport(reportId, stationName = '') {
-    const result = await Swal.fire({
-        title: 'Are you sure?',
-        html: stationName 
-            ? `Do you want to delete the report for <strong>${stationName}</strong>?` 
-            : 'Do you want to delete this report?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Yes, Delete it!',
-        cancelButtonText: 'Cancel',
-        reverseButtons: true,
-        focusCancel: true
-    });
-
-    if (result.isConfirmed) {
-        try {
-            const csrf = document.querySelector('meta[name="csrf-token"]').content;
-            const deleteUrl = `{{ route('uno.reports.destroy', ':id') }}`.replace(':id', reportId);
-
-            const response = await fetch(deleteUrl, {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': csrf,
-                    'Accept': 'application/json',
+                exportExcel() {
+                    const params = new URLSearchParams();
+                    if (this.filters.from_date)     params.append('from_date',     this.filters.from_date);
+                    if (this.filters.to_date)       params.append('to_date',       this.filters.to_date);
+                    if (this.filters.district)      params.append('district',      this.filters.district);
+                    if (this.filters.thana_upazila) params.append('thana_upazila', this.filters.thana_upazila);
+                    if (this.filters.company_id)    params.append('company_id',    this.filters.company_id);
+                    if (this.filters.depot_id)      params.append('depot_id',      this.filters.depot_id);
+                    if (this.filters.station_id)    params.append('station_id',    this.filters.station_id);
+                    if (this.filters.stock_status)  params.append('stock_status',  this.filters.stock_status);
+                    window.open(`{{ route('uno.reports.export.csv') }}?${params}`, '_blank');
                 },
-            });
 
-            const data = await response.json();
+                exportDiffCsv() {
+                    const params = new URLSearchParams();
+                    if (this.diffFilter.from_date)     params.append('from_date',     this.diffFilter.from_date);
+                    if (this.diffFilter.to_date)       params.append('to_date',       this.diffFilter.to_date);
+                    if (this.diffFilter.district)      params.append('district',      this.diffFilter.district);
+                    if (this.diffFilter.thana_upazila) params.append('thana_upazila', this.diffFilter.thana_upazila);
+                    if (this.diffFilter.company_id)    params.append('company_id',    this.diffFilter.company_id);
+                    if (this.diffFilter.station_id)    params.append('station_id',    this.diffFilter.station_id);
+                    if (this.diffFilter.tag_officer)   params.append('tag_officer',   this.diffFilter.tag_officer);
+                    if (this.diffFilter.diff_status)   params.append('diff_status',   this.diffFilter.diff_status);
+                    if (this.diffFilter.min_diff_l)    params.append('min_diff_l',    this.diffFilter.min_diff_l);
+                    if (this.diffFilter.min_diff_pct)  params.append('min_diff_pct',  this.diffFilter.min_diff_pct);
+                    window.open(`{{ route('uno.reports.difference.export.csv') }}?${params}`, '_blank');
+                },
 
-            if (data.success) {
-                Swal.fire({
-                    title: 'Deleted!',
-                    text: 'The report has been successfully deleted.',
-                    icon: 'success',
-                    timer: 1800,
-                    showConfirmButton: false
-                });
+                exportMissingCsv() {
+                    const params = new URLSearchParams();
+                    if (this.missingFilter.from_date)     params.append('from_date',     this.missingFilter.from_date);
+                    if (this.missingFilter.to_date)       params.append('to_date',       this.missingFilter.to_date);
+                    if (this.missingFilter.district)      params.append('district',      this.missingFilter.district);
+                    if (this.missingFilter.thana_upazila) params.append('thana_upazila', this.missingFilter.thana_upazila);
+                    if (this.missingFilter.company_id)    params.append('company_id',    this.missingFilter.company_id);
+                    if (this.missingFilter.depot_id)      params.append('depot_id',      this.missingFilter.depot_id);
+                    if (this.missingFilter.station_id)    params.append('station_id',    this.missingFilter.station_id);
+                    window.open(`{{ route('uno.reports.missing.export.csv') }}?${params}`, '_blank');
+                },
 
-                // Refresh the current active tab automatically
-                await this.$nextTick(async () => {
-                    if (this.activeTab === 'stock') {
-                        await this.applyFilter(this.currentPage);
-                    } else if (this.activeTab === 'difference') {
-                        await this.applyDiffFilter(this.diffCurrentPage);
-                    } else if (this.activeTab === 'missing') {
-                        await this.applyMissingFilter(this.missingCurrentPage);
-                    } else if (this.activeTab === 'submitted') {
-                        await this.applySubmitFilter(this.submitCurrentPage);
+                exportSubmitCsv() {
+                    const params = new URLSearchParams();
+                    if (this.submitFilter.from_date)     params.append('from_date',     this.submitFilter.from_date);
+                    if (this.submitFilter.to_date)       params.append('to_date',       this.submitFilter.to_date);
+                    if (this.submitFilter.district)      params.append('district',      this.submitFilter.district);
+                    if (this.submitFilter.thana_upazila) params.append('thana_upazila', this.submitFilter.thana_upazila);
+                    if (this.submitFilter.company_id)    params.append('company_id',    this.submitFilter.company_id);
+                    if (this.submitFilter.depot_id)      params.append('depot_id',      this.submitFilter.depot_id);
+                    if (this.submitFilter.station_id)    params.append('station_id',    this.submitFilter.station_id);
+                    window.open(`{{ route('uno.reports.submitted.export.csv') }}?${params}`, '_blank');
+                },
+                // ═══════════════════════════════════════════════════════════
+                // DELETE REPORT WITH SWEETALERT2 (নতুন)
+                // ═══════════════════════════════════════════════════════════
+
+                async deleteReport(reportId, stationName = '') {
+                    const result = await Swal.fire({
+                        title: 'Are you sure?',
+                        html: stationName 
+                            ? `Do you want to delete the report for <strong>${stationName}</strong>?` 
+                            : 'Do you want to delete this report?',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Yes, Delete it!',
+                        cancelButtonText: 'Cancel',
+                        reverseButtons: true,
+                        focusCancel: true
+                    });
+
+                    if (result.isConfirmed) {
+                        try {
+                            const csrf = document.querySelector('meta[name="csrf-token"]').content;
+                            const deleteUrl = `{{ route('uno.reports.destroy', ':id') }}`.replace(':id', reportId);
+
+                            const response = await fetch(deleteUrl, {
+                                method: 'DELETE',
+                                headers: {
+                                    'X-CSRF-TOKEN': csrf,
+                                    'Accept': 'application/json',
+                                },
+                            });
+
+                            const data = await response.json();
+
+                            if (data.success) {
+                                Swal.fire({
+                                    title: 'Deleted!',
+                                    text: 'The report has been successfully deleted.',
+                                    icon: 'success',
+                                    timer: 1800,
+                                    showConfirmButton: false
+                                });
+
+                                // Refresh the current active tab automatically
+                                await this.$nextTick(async () => {
+                                    if (this.activeTab === 'stock') {
+                                        await this.applyFilter(this.currentPage);
+                                    } else if (this.activeTab === 'difference') {
+                                        await this.applyDiffFilter(this.diffCurrentPage);
+                                    } else if (this.activeTab === 'missing') {
+                                        await this.applyMissingFilter(this.missingCurrentPage);
+                                    } else if (this.activeTab === 'submitted') {
+                                        await this.applySubmitFilter(this.submitCurrentPage);
+                                    }
+                                });
+                            } else {
+                                Swal.fire('Failed!', data.message || 'Could not delete the report.', 'error');
+                            }
+                        } catch (error) {
+                            console.error(error);
+                            Swal.fire('Error!', 'Something went wrong. Please try again later.', 'error');
+                        }
                     }
-                });
-            } else {
-                Swal.fire('Failed!', data.message || 'Could not delete the report.', 'error');
-            }
-        } catch (error) {
-            console.error(error);
-            Swal.fire('Error!', 'Something went wrong. Please try again later.', 'error');
-        }
-    }
-},
+                },
 
             }; // end return
         } // end reportApp
