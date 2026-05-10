@@ -77,5 +77,11 @@ tbody tr:nth-child(even) td { background-color: #f8fafc; }
 </table>
 
 <div class="footer">Total records: {{ $rows->count() }} &nbsp;|&nbsp; Printed: {{ now()->format('d/m/Y h:i A') }}</div>
+ <script>
+    window.onload = function () {
+        window.print();
+        window.onfocus = function () { window.close(); };
+    };
+</script>
 </body>
 </html>

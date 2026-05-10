@@ -925,34 +925,24 @@ class UnoReportsController extends Controller
         $unoUpazila   = $jurisdiction['upazila'];
         $unoDistrict  = $jurisdiction['district'];
 
-        $rawReports = $this->buildFilteredQuery($request)
+        $rawReports = collect();
+        $this->buildFilteredQuery($request)
             ->orderBy('report_date', 'desc')
             ->orderBy('station_id')
-            ->get();
+            ->chunk(200, function ($chunk) use (&$rawReports) {
+                $rawReports = $rawReports->concat($chunk);
+            });
 
-        $officerMap       = $this->loadOfficerMap( $unoUpazila, $unoDistrict);
+        $officerMap       = $this->loadOfficerMap($unoUpazila, $unoDistrict);
         $formattedReports = $rawReports->map(fn($r) => $this->formatSingleReport($r, $officerMap));
         $totalRow         = $this->buildTotalRow($formattedReports);
 
-        $html = view('backend.uno.pages.reports.pdf_template', [
+        return view('backend.uno.pages.reports.pdf_template', [
             'reports'  => $formattedReports,
             'totalRow' => $totalRow,
             'filters'  => $filters,
-        ])->render();
-
-        $mpdf = $this->makeMpdf('A4-L');
-        $mpdf->WriteHTML($html);
-
-        return response()->streamDownload(
-            fn() => print($mpdf->Output('', 'S')),
-            'stock-report-' . now()->format('Y-m-d') . '.pdf',
-            ['Content-Type' => 'application/pdf']
-        );
+        ]);
     }
-
-    // ─────────────────────────────────────────────────────────────
-    // EXPORT PDF — DIFFERENCE
-    // ─────────────────────────────────────────────────────────────
 
     public function exportDifferencePdf(Request $request)
     {
@@ -975,10 +965,10 @@ class UnoReportsController extends Controller
         $unoDistrict  = $jurisdiction['district'];
 
         $fuelTypes = ['octane', 'petrol', 'diesel', 'others'];
-        // DC level report should only query reports from their district
+
         $query = Fuelreport::query()->with(['fillingStation.company']);
 
-        if ($unoUpazila) $query->where('thana_upazila', $unoUpazila);
+        if ($unoUpazila)  $query->where('thana_upazila', $unoUpazila);
         if ($unoDistrict) $query->where('district', $unoDistrict);
 
         if (!empty($filters['from_date']) && empty($filters['to_date']))
@@ -999,17 +989,19 @@ class UnoReportsController extends Controller
 
         $officerMap    = AssignTagOfficer::with(['officer.profile'])
             ->where('status', 'active')->get()->keyBy('filling_station_id');
-        $allRawReports = $query->orderBy('report_date', 'desc')->orderBy('station_id')->get();
+
+        $allRawReports = collect();
+        $query->orderBy('report_date', 'desc')
+            ->orderBy('station_id')
+            ->chunk(200, function ($chunk) use (&$allRawReports) {
+                $allRawReports = $allRawReports->concat($chunk);
+            });
 
         $rows = $allRawReports->map(function ($report) use ($fuelTypes, $officerMap) {
-            $stationId          = $report->station_id;
-            $assignment         = $officerMap->get($stationId);
+            $assignment         = $officerMap->get($report->station_id);
             $officerProfile     = $assignment?->officer?->profile;
-            $tagOfficerName     = $officerProfile?->name ?? $assignment?->officer?->name ?? '—';
-            $officerDesignation = $officerProfile?->designation ?? '—';
-            $officerPhone       = $officerProfile?->phone ?? $assignment?->officer?->phone ?? '—';
+            $fuelBreakdown      = [];
 
-            $fuelBreakdown = [];
             foreach ($fuelTypes as $fuel) {
                 $totalSupply       = (float) ($report->{"{$fuel}_supply"} ?? 0);
                 $totalReceived     = (float) ($report->{"{$fuel}_received"} ?? 0);
@@ -1031,9 +1023,9 @@ class UnoReportsController extends Controller
             return [
                 'stationName'        => $report->station_name ?? $report->fillingStation?->station_name ?? '—',
                 'companyName'        => $report->fillingStation?->company?->code ?? '—',
-                'tagOfficerName'     => $tagOfficerName,
-                'officerDesignation' => $officerDesignation,
-                'officerPhone'       => $officerPhone,
+                'tagOfficerName'     => $officerProfile?->name ?? $assignment?->officer?->name ?? '—',
+                'officerDesignation' => $officerProfile?->designation ?? '—',
+                'officerPhone'       => $officerProfile?->phone ?? $assignment?->officer?->phone ?? '—',
                 'district'           => $report->district ?? '—',
                 'thanaUpazila'       => $report->thana_upazila ?? '—',
                 'dateFormatted'      => \Carbon\Carbon::parse($report->report_date)->format('d M Y'),
@@ -1043,51 +1035,40 @@ class UnoReportsController extends Controller
 
         if (!empty($filters['min_diff_l'])) {
             $minL = (float) $filters['min_diff_l'];
-            $rows = $rows->filter(
-                fn($row) => collect($row['fuelBreakdown'])->contains(
-                    fn($f) => abs((float) str_replace(',', '', $f['differenceL'])) >= $minL
-                )
-            )->values();
+            $rows = $rows->filter(fn($row) => collect($row['fuelBreakdown'])->contains(
+                fn($f) => abs((float) str_replace(',', '', $f['differenceL'])) >= $minL
+            ))->values();
         }
         if (!empty($filters['min_diff_pct'])) {
             $minPct = (float) $filters['min_diff_pct'];
-            $rows   = $rows->filter(
-                fn($row) => collect($row['fuelBreakdown'])->contains(
-                    fn($f) => abs($f['differencePercent']) >= $minPct
-                )
-            )->values();
+            $rows   = $rows->filter(fn($row) => collect($row['fuelBreakdown'])->contains(
+                fn($f) => abs($f['differencePercent']) >= $minPct
+            ))->values();
         }
         if (!empty($filters['diff_status'])) {
             $target = ucfirst($filters['diff_status']);
-            $rows   = $rows->filter(
-                fn($row) => collect($row['fuelBreakdown'])->contains(fn($f) => $f['diffStatus'] === $target)
-            )->values();
+            $rows   = $rows->filter(fn($row) => collect($row['fuelBreakdown'])->contains(
+                fn($f) => $f['diffStatus'] === $target
+            ))->values();
         }
 
-        $html = view('backend.uno.pages.reports.pdf_difference', [
+        return view('backend.uno.pages.reports.pdf_difference', [
             'rows'    => $rows,
             'filters' => $filters,
-        ])->render();
-
-        $mpdf = $this->makeMpdf('A4-L');
-        $mpdf->WriteHTML($html);
-
-        return response()->streamDownload(
-            fn() => print($mpdf->Output('', 'S')),
-            'difference-report-' . now()->format('Y-m-d') . '.pdf',
-            ['Content-Type' => 'application/pdf']
-        );
+        ]);
     }
-
-    // ─────────────────────────────────────────────────────────────
-    // EXPORT PDF — MISSING
-    // ─────────────────────────────────────────────────────────────
 
     public function exportMissingPdf(Request $request)
     {
         $filters = $request->only([
-            'from_date', 'to_date', 'division', 'district',
-            'thana_upazila', 'company_id', 'depot_id', 'station_id',
+            'from_date',
+            'to_date',
+            'division',
+            'district',
+            'thana_upazila',
+            'company_id',
+            'depot_id',
+            'station_id',
         ]);
 
         $jurisdiction = $this->getUnoJurisdiction();
@@ -1100,7 +1081,7 @@ class UnoReportsController extends Controller
             'fillingStation.depot',
         ])->where('status', 'active')
             ->whereHas('fillingStation', function ($q) use ($unoUpazila, $unoDistrict) {
-                if ($unoUpazila) $q->where('upazila', $unoUpazila);
+                if ($unoUpazila)  $q->where('upazila', $unoUpazila);
                 if ($unoDistrict) $q->where('district', $unoDistrict);
             });
 
@@ -1111,7 +1092,10 @@ class UnoReportsController extends Controller
         if (!empty($filters['station_id']))
             $assignmentsQuery->where('filling_station_id', $filters['station_id']);
 
-        $allAssignments = $assignmentsQuery->get();
+        $allAssignments = collect();
+        $assignmentsQuery->chunk(200, function ($chunk) use (&$allAssignments) {
+            $allAssignments = $allAssignments->concat($chunk);
+        });
 
         if (!empty($filters['from_date']) && empty($filters['to_date'])) {
             $fromDate = \Carbon\Carbon::parse($filters['from_date'])->startOfDay();
@@ -1124,7 +1108,6 @@ class UnoReportsController extends Controller
             $toDate   = now()->endOfDay();
         }
 
-        // Per-day reported map scoped to UNO jurisdiction
         $reportedMap = Fuelreport::whereBetween('report_date', [$fromDate, $toDate])
             ->when($unoUpazila,  fn($q) => $q->where('thana_upazila', $unoUpazila))
             ->when($unoDistrict, fn($q) => $q->where('district', $unoDistrict))
@@ -1133,7 +1116,6 @@ class UnoReportsController extends Controller
             ->groupBy(fn($r) => \Carbon\Carbon::parse($r->report_date)->format('Y-m-d'))
             ->map(fn($group) => $group->pluck('station_id')->unique()->toArray());
 
-        // Loop each day
         $rows    = collect();
         $current = $fromDate->copy();
 
@@ -1164,25 +1146,13 @@ class UnoReportsController extends Controller
             $current->addDay();
         }
 
-        $html = view('backend.uno.pages.reports.pdf_missing', [
+        return view('backend.uno.pages.reports.pdf_missing', [
             'rows'     => $rows,
             'filters'  => $filters,
             'fromDate' => $fromDate->format('d M Y'),
             'toDate'   => $toDate->format('d M Y'),
-        ])->render();
-
-        $mpdf = $this->makeMpdf('A4-L');
-        $mpdf->WriteHTML($html);
-
-        return response()->streamDownload(
-            fn() => print($mpdf->Output('', 'S')),
-            'missing-report-' . now()->format('Y-m-d') . '.pdf',
-            ['Content-Type' => 'application/pdf']
-        );
+        ]);
     }
-    // ─────────────────────────────────────────────────────────────
-    // EXPORT PDF — SUBMITTED
-    // ─────────────────────────────────────────────────────────────
 
     public function exportSubmittedPdf(Request $request)
     {
@@ -1206,7 +1176,8 @@ class UnoReportsController extends Controller
         $query = Fuelreport::query()->with([
             'fillingStation.company',
             'fillingStation.depot',
-        ])->where('district', $unoDistrict)->when($unoUpazila, fn($q) => $q->where('thana_upazila', $unoUpazila));
+        ])->where('district', $unoDistrict)
+            ->when($unoUpazila, fn($q) => $q->where('thana_upazila', $unoUpazila));
 
         if (!empty($filters['from_date']) && empty($filters['to_date']))
             $query->whereDate('report_date', $filters['from_date']);
@@ -1226,7 +1197,11 @@ class UnoReportsController extends Controller
         if (!empty($filters['station_id']))
             $query->where('station_id', $filters['station_id']);
 
-        $allReports = $query->orderBy('report_date', 'desc')->get();
+        $allReports = collect();
+        $query->orderBy('report_date', 'desc')
+            ->chunk(200, function ($chunk) use (&$allReports) {
+                $allReports = $allReports->concat($chunk);
+            });
 
         $officerMap = AssignTagOfficer::with(['officer.profile'])
             ->where('status', 'active')->get()->keyBy('filling_station_id');
@@ -1254,19 +1229,10 @@ class UnoReportsController extends Controller
             ];
         });
 
-        $html = view('backend.uno.pages.reports.pdf_submitted', [
+        return view('backend.uno.pages.reports.pdf_submitted', [
             'rows'    => $rows,
             'filters' => $filters,
-        ])->render();
-
-        $mpdf = $this->makeMpdf('A4-L');
-        $mpdf->WriteHTML($html);
-
-        return response()->streamDownload(
-            fn() => print($mpdf->Output('', 'S')),
-            'submitted-report-' . now()->format('Y-m-d') . '.pdf',
-            ['Content-Type' => 'application/pdf']
-        );
+        ]);
     }
 
     private function makeMpdf(string $format = 'A4-L'): Mpdf
