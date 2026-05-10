@@ -159,9 +159,12 @@
                 x-show="missingTotalRecords > 0"
                 x-text="missingTotalRecords + ' records found'">
             </span>
-           <button class="btn-missing-export-pdf" @click="exportMissingPdf()">
-    <i class="fa-solid fa-file-pdf"></i> Export to PDF
-</button>
+           <button class="btn-export btn-export-pdf" @click="exportMissingPdf()">
+                <i class="fa-solid fa-file-pdf"></i> Export to PDF
+            </button>
+            <button class="btn-export btn-export-pdf" @click="exportMissingCsv()">
+                <i class="fa-solid fa-file-csv"></i> Export to CSV
+            </button>
         </div>
     </div>
     {{-- <div class="table-header-row">

@@ -47,4 +47,10 @@ Route::prefix('dc')->middleware(['role:' . UserRole::DC])->as('dc.')->group(func
     Route::get('reports/export-difference-pdf', [DcReportsController::class, 'exportDifferencePdf'])->name('reports.export.difference.pdf');
     Route::get('reports/export-missing-pdf',    [DcReportsController::class, 'exportMissingPdf'])->name('reports.export.missing.pdf');
     Route::get('reports/export-submitted-pdf',  [DcReportsController::class, 'exportSubmittedPdf'])->name('reports.export.submitted.pdf');
+
+    // export csv routes
+    Route::get('/reports/export/csv',           [DcReportsController::class, 'exportCsv'])->name('reports.export.csv');
+    Route::get('/reports/difference/export/csv',[DcReportsController::class, 'exportDifferenceCsv'])->name('reports.difference.export.csv');
+    Route::get('/reports/missing/export/csv',   [DcReportsController::class, 'exportMissingCsv'])->name('reports.missing.export.csv');
+    Route::get('/reports/submitted/export/csv', [DcReportsController::class, 'exportSubmittedCsv'])->name('reports.submitted.export.csv');
 });

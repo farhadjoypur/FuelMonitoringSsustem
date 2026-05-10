@@ -860,6 +860,9 @@
                             <button class="btn-export btn-export-pdf" @click="exportPdf()">
                                 <i class="fa-regular fa-file-pdf"></i> Export PDF
                             </button>
+                            <button class="btn-export btn-export-pdf" @click="exportExcel()">
+                                <i class="fa-solid fa-file-csv"></i> Export CSV
+                            </button>
                         </div>
 
                     </div>
@@ -1510,6 +1513,57 @@
                     window.open('{{ route('dc.reports.export.submitted.pdf') }}?' + params.toString(), '_blank');
                 },
 
+                exportExcel() {
+                    const params = new URLSearchParams();
+                    if (this.filters.from_date)     params.append('from_date',    this.filters.from_date);
+                    if (this.filters.to_date)       params.append('to_date',      this.filters.to_date);
+                    if (this.filters.district)      params.append('district',     this.filters.district);
+                    if (this.filters.thana_upazila) params.append('thana_upazila', this.filters.thana_upazila);
+                    if (this.filters.company_id)    params.append('company_id',   this.filters.company_id);
+                    if (this.filters.depot_id)      params.append('depot_id',     this.filters.depot_id);
+                    if (this.filters.station_id)    params.append('station_id',   this.filters.station_id);
+                    if (this.filters.stock_status)  params.append('stock_status', this.filters.stock_status);
+                    window.open(`{{ route('dc.reports.export.csv') }}?${params}`, '_blank');
+                },
+
+                exportDiffCsv() {
+                    const params = new URLSearchParams();
+                    if (this.diffFilter.from_date)     params.append('from_date',     this.diffFilter.from_date);
+                    if (this.diffFilter.to_date)       params.append('to_date',       this.diffFilter.to_date);
+                    if (this.diffFilter.district)      params.append('district',      this.diffFilter.district);
+                    if (this.diffFilter.thana_upazila) params.append('thana_upazila', this.diffFilter.thana_upazila);
+                    if (this.diffFilter.company_id)    params.append('company_id',    this.diffFilter.company_id);
+                    if (this.diffFilter.station_id)    params.append('station_id',    this.diffFilter.station_id);
+                    if (this.diffFilter.tag_officer)   params.append('tag_officer',   this.diffFilter.tag_officer);
+                    if (this.diffFilter.diff_status)   params.append('diff_status',   this.diffFilter.diff_status);
+                    if (this.diffFilter.min_diff_l)    params.append('min_diff_l',    this.diffFilter.min_diff_l);
+                    if (this.diffFilter.min_diff_pct)  params.append('min_diff_pct',  this.diffFilter.min_diff_pct);
+                    window.open(`{{ route('dc.reports.difference.export.csv') }}?${params}`, '_blank');
+                },
+
+                exportMissingCsv() {
+                    const params = new URLSearchParams();
+                    if (this.missingFilter.from_date)     params.append('from_date',     this.missingFilter.from_date);
+                    if (this.missingFilter.to_date)       params.append('to_date',       this.missingFilter.to_date);
+                    if (this.missingFilter.district)      params.append('district',      this.missingFilter.district);
+                    if (this.missingFilter.thana_upazila) params.append('thana_upazila', this.missingFilter.thana_upazila);
+                    if (this.missingFilter.company_id)    params.append('company_id',    this.missingFilter.company_id);
+                    if (this.missingFilter.depot_id)      params.append('depot_id',      this.missingFilter.depot_id);
+                    if (this.missingFilter.station_id)    params.append('station_id',    this.missingFilter.station_id);
+                    window.open(`{{ route('dc.reports.missing.export.csv') }}?${params}`, '_blank');
+                },
+
+                exportSubmitCsv() {
+                    const params = new URLSearchParams();
+                    if (this.submitFilter.from_date)     params.append('from_date',     this.submitFilter.from_date);
+                    if (this.submitFilter.to_date)       params.append('to_date',       this.submitFilter.to_date);
+                    if (this.submitFilter.district)      params.append('district',      this.submitFilter.district);
+                    if (this.submitFilter.thana_upazila) params.append('thana_upazila', this.submitFilter.thana_upazila);
+                    if (this.submitFilter.company_id)    params.append('company_id',    this.submitFilter.company_id);
+                    if (this.submitFilter.depot_id)      params.append('depot_id',      this.submitFilter.depot_id);
+                    if (this.submitFilter.station_id)    params.append('station_id',    this.submitFilter.station_id);
+                    window.open(`{{ route('dc.reports.submitted.export.csv') }}?${params}`, '_blank');
+                },
 
                 // ═════════════════════════════════════════════════════════
                 // TAB 3 — MISSING METHODS
