@@ -2767,8 +2767,8 @@
                     "police_stations": [
                         {
                             "id": 108,
-                            "name_en": "Airport (Sylhet)",
-                            "name_bn": "বিমানবন্দর (সিলেট)"
+                            "name_en": "Osmani Nagar",
+                            "name_bn": "ওসমানী নগর"
                         },
                         {
                             "id": 109,
@@ -2816,24 +2816,9 @@
                             "name_bn": "জৈন্তাপুর"
                         },
                         {
-                            "id": 118,
-                            "name_en": "Jalalabad",
-                            "name_bn": "জালালাবাদ"
-                        },
-                        {
                             "id": 119,
                             "name_en": "Kanaighat",
                             "name_bn": "কানাইঘাট"
-                        },
-                        {
-                            "id": 120,
-                            "name_en": "Moglabazar",
-                            "name_bn": "মোগলাবাজার"
-                        },
-                        {
-                            "id": 121,
-                            "name_en": "Shah Paran",
-                            "name_bn": "শাহ পরাণ"
                         },
                         {
                             "id": 122,
